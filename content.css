@@ -62,6 +62,80 @@
   background: #065fd4;
 }
 
+.youtube-groups__subscription-control {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.youtube-groups__subscription-add-button,
+.youtube-groups__subscription-save-button,
+.youtube-groups__subscription-cancel-button {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.youtube-groups__subscription-add-button,
+.youtube-groups__subscription-save-button {
+  padding: 4px 8px;
+  color: #065fd4;
+  background: #e5f0ff;
+  font-size: 12px;
+}
+
+.youtube-groups__subscription-groups-form {
+  display: grid;
+  gap: 6px;
+  width: 220px;
+  margin-top: 6px;
+  padding: 8px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 16%);
+}
+
+.youtube-groups__subscription-groups-form[hidden] {
+  display: none;
+}
+
+.youtube-groups__subscription-groups {
+  display: grid;
+  gap: 5px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.youtube-groups__subscription-group-choice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.youtube-groups__subscription-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.youtube-groups__subscription-cancel-button {
+  padding: 4px 8px;
+  color: #0f0f0f;
+  background: #f2f2f2;
+  font-size: 12px;
+}
+
+.youtube-groups__subscription-error {
+  min-height: 14px;
+  margin: 0;
+  color: #c00;
+  font-size: 11px;
+}
+
 .youtube-groups__create-button,
 .youtube-groups__confirm-button {
   padding: 8px 12px;
@@ -201,7 +275,8 @@ html[dark] #youtube-groups-panel {
 
 html[dark] .youtube-groups__option,
 html[dark] .youtube-groups__cancel-button,
-html[dark] .youtube-groups__cancel-channel-button {
+html[dark] .youtube-groups__cancel-channel-button,
+html[dark] .youtube-groups__subscription-cancel-button {
   color: #f1f1f1;
   background: #3f3f3f;
 }
@@ -217,5 +292,17 @@ html[dark] .youtube-groups__form {
 }
 
 html[dark] .youtube-groups__current-channel {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__subscription-add-button,
+html[dark] .youtube-groups__subscription-save-button {
+  color: #8ab4f8;
+  background: #263850;
+}
+
+html[dark] .youtube-groups__subscription-groups-form {
+  color: #f1f1f1;
+  background: #212121;
   border-color: #555;
 }
