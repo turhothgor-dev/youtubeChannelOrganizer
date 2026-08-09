@@ -1,0 +1,574 @@
+(() => {
+  "use strict";
+
+  console.log("[YouTube Groups] content.js cargado");
+
+  const VIDEO_CARD_SELECTOR = [
+    "ytd-rich-item-renderer",
+    "ytd-video-renderer",
+    "ytd-grid-video-renderer",
+    "ytd-compact-video-renderer",
+    "ytd-playlist-video-renderer"
+  ].join(", ");
+
+  const STORAGE_KEY = "youtubeGroups";
+  let groupsInitializationPromise = null;
+
+  // browser.storage.local guarda: { version: 1, groups: [{ id, name, channels: [{ name, url }] }] }.
+  // La versión permite ampliar la estructura sin cambiar la clave de almacenamiento.
+  async function getGroups() {
+    const stored = await browser.storage.local.get(STORAGE_KEY);
+    const data = stored[STORAGE_KEY];
+
+    if (!data || !Array.isArray(data.groups)) {
+      if (!groupsInitializationPromise) {
+        const emptyGroups = [];
+        groupsInitializationPromise = saveGroups(emptyGroups)
+          .then(() => emptyGroups)
+          .finally(() => {
+            groupsInitializationPromise = null;
+          });
+      }
+
+      return groupsInitializationPromise;
+    }
+
+    return data.groups;
+  }
+
+  async function saveGroups(groups) {
+    if (!Array.isArray(groups)) {
+      throw new TypeError("Los grupos deben ser un array.");
+    }
+
+    await browser.storage.local.set({
+      [STORAGE_KEY]: {
+        version: 1,
+        groups
+      }
+    });
+  }
+
+  async function createGroup(name) {
+    const groupName = name.trim();
+    if (!groupName) {
+      throw new Error("El nombre del grupo no puede estar vacío.");
+    }
+
+    const groups = await getGroups();
+    const group = {
+      id: crypto.randomUUID(),
+      name: groupName,
+      channels: []
+    };
+
+    groups.push(group);
+    await saveGroups(groups);
+    return group;
+  }
+
+  async function addChannelToGroup(groupId, channel) {
+    const channelName = channel?.name?.trim();
+    const channelUrl = channel?.url?.trim();
+    if (!channelName || !channelUrl) {
+      throw new Error("El canal debe incluir nombre y URL.");
+    }
+
+    const groups = await getGroups();
+    const group = groups.find((item) => item.id === groupId);
+    if (!group) {
+      throw new Error("No existe el grupo indicado.");
+    }
+
+    if (!group.channels.some((item) => item.url === channelUrl)) {
+      group.channels.push({ name: channelName, url: channelUrl });
+      await saveGroups(groups);
+    }
+
+    return group;
+  }
+
+  async function removeChannelFromGroup(groupId, channelUrl) {
+    const normalizedChannelUrl = channelUrl?.trim();
+    if (!normalizedChannelUrl) {
+      throw new Error("La URL del canal es obligatoria.");
+    }
+
+    const groups = await getGroups();
+    const group = groups.find((item) => item.id === groupId);
+    if (!group) {
+      throw new Error("No existe el grupo indicado.");
+    }
+
+    const remainingChannels = group.channels.filter((item) => item.url !== normalizedChannelUrl);
+    if (remainingChannels.length !== group.channels.length) {
+      group.channels = remainingChannels;
+      await saveGroups(groups);
+    }
+
+    return group;
+  }
+
+  getGroups().catch((error) => {
+    console.error("[YouTube Groups] No se pudo inicializar el almacenamiento", error);
+  });
+
+  const GROUPS_PANEL_ID = "youtube-groups-panel";
+  let activeGroupId = null;
+  let activeGroupChannelUrls = null;
+  let filterUpdateVersion = 0;
+
+  function getActiveGroupId() {
+    return activeGroupId;
+  }
+
+  function setActiveGroup(group) {
+    const nextGroupId = group?.id ?? null;
+    if (activeGroupId === nextGroupId) {
+      return;
+    }
+
+    activeGroupId = nextGroupId;
+    console.log("[YouTube Groups][FILTER] grupo activo cambiado", group?.name ?? "Todos");
+    refreshActiveGroupFilter();
+    renderGroupsPanel().catch((error) => {
+      console.error("[YouTube Groups] No se pudo actualizar el grupo activo", error);
+    });
+  }
+
+  function createGroupsPanel() {
+    const existingPanel = document.getElementById(GROUPS_PANEL_ID);
+    if (existingPanel) {
+      return existingPanel;
+    }
+
+    if (!document.body) {
+      return null;
+    }
+
+    const panel = document.createElement("aside");
+    panel.id = GROUPS_PANEL_ID;
+    panel.setAttribute("aria-label", "YouTube Groups");
+    panel.innerHTML = `
+      <div class="youtube-groups__header">
+        <h2 class="youtube-groups__title">YouTube Groups</h2>
+        <button class="youtube-groups__create-button" type="button">Crear grupo</button>
+      </div>
+      <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
+      <section class="youtube-groups__current-channel" hidden>
+        <h3 class="youtube-groups__section-title">Canal actual</h3>
+        <p class="youtube-groups__channel-name"></p>
+        <button class="youtube-groups__add-channel-button" type="button">Añadir a un grupo</button>
+        <form class="youtube-groups__channel-groups-form" hidden>
+          <div class="youtube-groups__channel-groups" aria-label="Seleccionar grupos"></div>
+          <div class="youtube-groups__form-actions">
+            <button class="youtube-groups__cancel-channel-button" type="button">Cancelar</button>
+            <button class="youtube-groups__confirm-channel-button" type="submit">Guardar</button>
+          </div>
+          <p class="youtube-groups__channel-error" aria-live="polite"></p>
+        </form>
+      </section>
+      <form class="youtube-groups__form" hidden>
+        <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
+        <div class="youtube-groups__form-actions">
+          <button class="youtube-groups__cancel-button" type="button">Cancelar</button>
+          <button class="youtube-groups__confirm-button" type="submit">Guardar</button>
+        </div>
+        <p class="youtube-groups__error" aria-live="polite"></p>
+      </form>
+    `;
+
+    const form = panel.querySelector(".youtube-groups__form");
+    const input = panel.querySelector(".youtube-groups__input");
+    const error = panel.querySelector(".youtube-groups__error");
+    const currentChannelForm = panel.querySelector(".youtube-groups__channel-groups-form");
+    const currentChannelError = panel.querySelector(".youtube-groups__channel-error");
+
+    panel.querySelector(".youtube-groups__create-button").addEventListener("click", () => {
+      form.hidden = false;
+      error.textContent = "";
+      input.focus();
+    });
+
+    panel.querySelector(".youtube-groups__cancel-button").addEventListener("click", () => {
+      form.reset();
+      form.hidden = true;
+      error.textContent = "";
+    });
+
+    panel.querySelector(".youtube-groups__add-channel-button").addEventListener("click", () => {
+      currentChannelForm.hidden = false;
+      currentChannelError.textContent = "";
+    });
+
+    panel.querySelector(".youtube-groups__cancel-channel-button").addEventListener("click", () => {
+      currentChannelForm.hidden = true;
+      currentChannelError.textContent = "";
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      error.textContent = "";
+
+      try {
+        await createGroup(input.value);
+        form.reset();
+        form.hidden = true;
+        await renderGroupsPanel();
+      } catch (exception) {
+        error.textContent = exception.message;
+      }
+    });
+
+    currentChannelForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      currentChannelError.textContent = "";
+
+      const channel = getCurrentVideoChannel();
+      const selectedGroupIds = new Set(
+        Array.from(currentChannelForm.querySelectorAll("input:checked"), (input) => input.value)
+      );
+
+      if (!channel) {
+        currentChannelError.textContent = "No se ha podido identificar el canal actual.";
+        return;
+      }
+
+      try {
+        const groups = await getGroups();
+        const groupsToAdd = groups.filter((group) => (
+          selectedGroupIds.has(group.id) && !group.channels.some((item) => item.url === channel.url)
+        ));
+        const groupsToRemove = groups.filter((group) => (
+          !selectedGroupIds.has(group.id) && group.channels.some((item) => item.url === channel.url)
+        ));
+
+        for (const group of groupsToAdd) {
+          await addChannelToGroup(group.id, channel);
+        }
+
+        for (const group of groupsToRemove) {
+          await removeChannelFromGroup(group.id, channel.url);
+        }
+
+        await renderGroupsPanel();
+        await refreshActiveGroupFilter();
+      } catch (exception) {
+        currentChannelError.textContent = exception.message;
+      }
+    });
+
+    document.body.append(panel);
+    return panel;
+  }
+
+  async function renderGroupsPanel() {
+    const panel = createGroupsPanel();
+    if (!panel) {
+      return;
+    }
+
+    const options = panel.querySelector(".youtube-groups__options");
+    const currentChannelSection = panel.querySelector(".youtube-groups__current-channel");
+    const currentChannelName = panel.querySelector(".youtube-groups__channel-name");
+    const currentChannelGroups = panel.querySelector(".youtube-groups__channel-groups");
+    const currentChannelForm = panel.querySelector(".youtube-groups__channel-groups-form");
+    const groups = await getGroups();
+    options.replaceChildren();
+
+    const allOption = document.createElement("button");
+    allOption.type = "button";
+    allOption.className = "youtube-groups__option";
+    allOption.textContent = "Todos";
+    allOption.setAttribute("aria-pressed", String(getActiveGroupId() === null));
+    allOption.addEventListener("click", () => setActiveGroup(null));
+    options.append(allOption);
+
+    for (const group of groups) {
+      const groupOption = document.createElement("button");
+      groupOption.type = "button";
+      groupOption.className = "youtube-groups__option";
+      groupOption.textContent = group.name;
+      groupOption.setAttribute("aria-pressed", String(getActiveGroupId() === group.id));
+      groupOption.addEventListener("click", () => setActiveGroup(group));
+      options.append(groupOption);
+    }
+
+    const channel = getCurrentVideoChannel();
+    currentChannelSection.hidden = !channel;
+    currentChannelForm.hidden = true;
+    currentChannelGroups.replaceChildren();
+
+    if (!channel) {
+      return;
+    }
+
+    currentChannelName.textContent = channel.name;
+
+    for (const group of groups) {
+      const label = document.createElement("label");
+      label.className = "youtube-groups__group-choice";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = group.id;
+      checkbox.checked = group.channels.some((item) => item.url === channel.url);
+
+      const groupName = document.createElement("span");
+      groupName.textContent = group.name;
+
+      label.append(checkbox, groupName);
+      currentChannelGroups.append(label);
+    }
+  }
+
+  let detectedCards = new WeakSet();
+  let loggedChannelUrls = new Set();
+  const pendingCards = new Set();
+  let processingScheduled = false;
+
+  function normalizeChannelUrl(href) {
+    const url = new URL(href, window.location.origin);
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    const match = url.pathname.match(/^(\/@[^/]+|\/channel\/[^/]+|\/c\/[^/]+|\/user\/[^/]+)\/?$/);
+
+    if (!match) {
+      return null;
+    }
+
+    const cleanUrl = new URL(match[1], url.origin);
+    cleanUrl.search = "";
+    cleanUrl.hash = "";
+    return cleanUrl.href;
+  }
+
+  function getChannelName(link) {
+    return link.textContent.trim() || link.getAttribute("aria-label")?.trim() || link.getAttribute("title")?.trim() || "";
+  }
+
+  function getChannelFromCard(card) {
+    const links = card.querySelectorAll("a[href]");
+
+    for (const link of links) {
+      const name = getChannelName(link);
+      const url = normalizeChannelUrl(link.href);
+
+      if (name && url) {
+        return { name, url };
+      }
+    }
+
+    return null;
+  }
+
+  const CURRENT_VIDEO_OWNER_SELECTOR = "ytd-watch-metadata #owner, ytd-video-owner-renderer";
+
+  function getCurrentVideoChannel() {
+    if (window.location.pathname !== "/watch") {
+      return null;
+    }
+
+    const owner = document.querySelector(CURRENT_VIDEO_OWNER_SELECTOR);
+    return owner ? getChannelFromCard(owner) : null;
+  }
+
+  function detectCard(card) {
+    if (detectedCards.has(card) || !card.isConnected) {
+      return;
+    }
+
+    const channel = getChannelFromCard(card);
+    if (!channel) {
+      return;
+    }
+
+    detectedCards.add(card);
+    card.dataset.youtubeGroupsChannelName = channel.name;
+    card.dataset.youtubeGroupsChannelUrl = channel.url;
+
+    applyFilterToCard(card, channel);
+
+    if (!loggedChannelUrls.has(channel.url)) {
+      loggedChannelUrls.add(channel.url);
+      console.debug("[YouTube Groups] Canal detectado correctamente", {
+        channelName: channel.name,
+        channelUrl: channel.url
+      });
+    }
+  }
+
+  function setCardVisibility(card, isVisible) {
+    card.classList.toggle("youtube-groups--filtered-out", !isVisible);
+  }
+
+  function applyFilterToCard(card, detectedChannel = null) {
+    const channelUrl = detectedChannel?.url ?? card.dataset.youtubeGroupsChannelUrl;
+
+    if (getActiveGroupId() === null || activeGroupChannelUrls === null || !channelUrl) {
+      setCardVisibility(card, true);
+      return;
+    }
+
+    const isVisible = activeGroupChannelUrls.has(channelUrl);
+    setCardVisibility(card, isVisible);
+  }
+
+  function showAllVideoCards() {
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      setCardVisibility(card, true);
+    }
+  }
+
+  function filterAllDetectedCards() {
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      applyFilterToCard(card);
+    }
+  }
+
+  async function refreshActiveGroupFilter() {
+    const updateVersion = ++filterUpdateVersion;
+    const activeId = getActiveGroupId();
+    activeGroupChannelUrls = null;
+    showAllVideoCards();
+
+    if (activeId === null) {
+      return;
+    }
+
+    try {
+      const groups = await getGroups();
+      if (updateVersion !== filterUpdateVersion || activeId !== getActiveGroupId()) {
+        return;
+      }
+
+      const activeGroup = groups.find((group) => group.id === activeId);
+      activeGroupChannelUrls = new Set(activeGroup?.channels.map((channel) => channel.url) ?? []);
+      filterAllDetectedCards();
+    } catch (error) {
+      console.error("[YouTube Groups][FILTER] No se pudo aplicar el filtro", error);
+    }
+  }
+
+  function scheduleCard(card) {
+    if (card instanceof Element) {
+      pendingCards.add(card);
+    }
+
+    if (!processingScheduled) {
+      processingScheduled = true;
+      requestAnimationFrame(processPendingCards);
+    }
+  }
+
+  function processPendingCards() {
+    processingScheduled = false;
+
+    for (const card of pendingCards) {
+      detectCard(card);
+    }
+
+    pendingCards.clear();
+  }
+
+  function scheduleCardsIn(node) {
+    if (!(node instanceof Element)) {
+      return;
+    }
+
+    scheduleContainingCard(node);
+
+    if (node.matches(VIDEO_CARD_SELECTOR)) {
+      scheduleCard(node);
+    }
+
+    for (const card of node.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      scheduleCard(card);
+    }
+  }
+
+  function scheduleContainingCard(element) {
+    const containingCard = element.closest(VIDEO_CARD_SELECTOR);
+    if (containingCard) {
+      scheduleCard(containingCard);
+    }
+  }
+
+  function scanDocument() {
+    scheduleCardsIn(document.documentElement);
+  }
+
+  function clearDetectedChannelData() {
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      delete card.dataset.youtubeGroupsChannelName;
+      delete card.dataset.youtubeGroupsChannelUrl;
+    }
+  }
+
+  let currentChannelUpdateScheduled = false;
+
+  function nodeBelongsToCurrentVideoOwner(node) {
+    return node instanceof Element && (
+      node.matches(CURRENT_VIDEO_OWNER_SELECTOR) ||
+      node.closest(CURRENT_VIDEO_OWNER_SELECTOR) ||
+      node.querySelector(CURRENT_VIDEO_OWNER_SELECTOR)
+    );
+  }
+
+  function scheduleCurrentChannelPanelUpdate() {
+    if (currentChannelUpdateScheduled || window.location.pathname !== "/watch") {
+      return;
+    }
+
+    currentChannelUpdateScheduled = true;
+    requestAnimationFrame(() => {
+      currentChannelUpdateScheduled = false;
+      renderGroupsPanel().catch((error) => {
+        console.error("[YouTube Groups] No se pudo actualizar el canal actual", error);
+      });
+    });
+  }
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.target instanceof Element) {
+        scheduleContainingCard(mutation.target);
+        if (nodeBelongsToCurrentVideoOwner(mutation.target)) {
+          scheduleCurrentChannelPanelUpdate();
+        }
+      }
+
+      for (const node of mutation.addedNodes) {
+        scheduleCardsIn(node);
+        if (nodeBelongsToCurrentVideoOwner(node)) {
+          scheduleCurrentChannelPanelUpdate();
+        }
+      }
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
+  document.addEventListener("yt-navigate-finish", () => {
+    detectedCards = new WeakSet();
+    loggedChannelUrls = new Set();
+    clearDetectedChannelData();
+    scanDocument();
+    refreshActiveGroupFilter();
+    renderGroupsPanel().catch((error) => {
+      console.error("[YouTube Groups] No se pudo actualizar el panel de grupos", error);
+    });
+  });
+
+  scanDocument();
+  refreshActiveGroupFilter();
+  renderGroupsPanel().catch((error) => {
+    console.error("[YouTube Groups] No se pudo cargar el panel de grupos", error);
+  });
+})();

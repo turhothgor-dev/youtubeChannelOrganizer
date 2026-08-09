@@ -1,0 +1,221 @@
+#youtube-groups-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  width: min(300px, calc(100vw - 32px));
+  padding: 16px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.youtube-groups--filtered-out {
+  display: none !important;
+}
+
+.youtube-groups__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.youtube-groups__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.youtube-groups__options {
+  display: grid;
+  gap: 6px;
+  max-height: 240px;
+  margin-bottom: 12px;
+  overflow-y: auto;
+}
+
+.youtube-groups__option,
+.youtube-groups__create-button,
+.youtube-groups__confirm-button,
+.youtube-groups__cancel-button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.youtube-groups__option {
+  width: 100%;
+  padding: 8px 10px;
+  color: inherit;
+  text-align: left;
+  background: #f2f2f2;
+}
+
+.youtube-groups__option[aria-pressed="true"] {
+  color: #ffffff;
+  background: #065fd4;
+}
+
+.youtube-groups__create-button,
+.youtube-groups__confirm-button {
+  padding: 8px 12px;
+  color: #ffffff;
+  background: #065fd4;
+}
+
+.youtube-groups__create-button:hover,
+.youtube-groups__confirm-button:hover {
+  background: #0356bd;
+}
+
+.youtube-groups__form {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #d8d8d8;
+}
+
+.youtube-groups__current-channel {
+  margin-bottom: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d8d8d8;
+}
+
+.youtube-groups__section-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.youtube-groups__channel-name {
+  margin: 0 0 8px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.youtube-groups__add-channel-button,
+.youtube-groups__confirm-channel-button {
+  padding: 8px 12px;
+  color: #ffffff;
+  background: #065fd4;
+}
+
+.youtube-groups__add-channel-button,
+.youtube-groups__confirm-channel-button,
+.youtube-groups__cancel-channel-button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.youtube-groups__add-channel-button:hover,
+.youtube-groups__confirm-channel-button:hover {
+  background: #0356bd;
+}
+
+.youtube-groups__channel-groups-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.youtube-groups__channel-groups-form[hidden] {
+  display: none;
+}
+
+.youtube-groups__channel-groups {
+  display: grid;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.youtube-groups__group-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.youtube-groups__cancel-channel-button {
+  padding: 8px 12px;
+  color: inherit;
+  background: #f2f2f2;
+}
+
+.youtube-groups__channel-error {
+  min-height: 18px;
+  margin: 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+.youtube-groups__form[hidden] {
+  display: none;
+}
+
+.youtube-groups__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  color: inherit;
+  background: #ffffff;
+  border: 1px solid #8f8f8f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.youtube-groups__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.youtube-groups__cancel-button {
+  padding: 8px 12px;
+  color: inherit;
+  background: #f2f2f2;
+}
+
+.youtube-groups__error {
+  min-height: 18px;
+  margin: 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+html[dark] #youtube-groups-panel {
+  color: #f1f1f1;
+  background: #212121;
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__option,
+html[dark] .youtube-groups__cancel-button,
+html[dark] .youtube-groups__cancel-channel-button {
+  color: #f1f1f1;
+  background: #3f3f3f;
+}
+
+html[dark] .youtube-groups__input {
+  color: #f1f1f1;
+  background: #121212;
+  border-color: #777;
+}
+
+html[dark] .youtube-groups__form {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__current-channel {
+  border-color: #555;
+}

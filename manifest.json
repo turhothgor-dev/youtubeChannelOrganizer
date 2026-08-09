@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Groups",
+  "version": "0.1.0",
+  "description": "Organiza canales de YouTube en grupos personalizados.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "css": ["content.css"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
