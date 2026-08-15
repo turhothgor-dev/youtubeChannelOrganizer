@@ -67,6 +67,26 @@
     return group;
   }
 
+  async function deleteGroup(groupId) {
+    const groups = await getGroups();
+    const groupIndex = groups.findIndex((item) => item.id === groupId);
+    
+    if (groupIndex === -1) {
+      throw new Error("No existe el grupo indicado.");
+    }
+
+    // Remove the group
+    groups.splice(groupIndex, 1);
+    await saveGroups(groups);
+    
+    // If this was the active group, clear the active group filter
+    if (getActiveGroupId() === groupId) {
+      setActiveGroup(null);
+    }
+    
+    return true;
+  }
+
   async function addChannelToGroup(groupId, channel) {
     const channelName = channel?.name?.trim();
     const channelUrl = channel?.url?.trim();
@@ -129,6 +149,11 @@
     }
 
     activeGroupId = nextGroupId;
+    // Reset activeGroupChannelUrls when switching to "Todos" (null group)
+    if (nextGroupId === null) {
+      activeGroupChannelUrls = null;
+    }
+
     console.log("[YouTube Groups][FILTER] grupo activo cambiado", group?.name ?? "Todos");
     refreshActiveGroupFilter();
     renderGroupsPanel().catch((error) => {
@@ -273,6 +298,8 @@
     const currentChannelName = panel.querySelector(".youtube-groups__channel-name");
     const currentChannelGroups = panel.querySelector(".youtube-groups__channel-groups");
     const currentChannelForm = panel.querySelector(".youtube-groups__channel-groups-form");
+    
+    // Get groups FIRST, before any early returns
     const groups = await getGroups();
     options.replaceChildren();
 
@@ -290,10 +317,103 @@
       groupOption.className = "youtube-groups__option";
       groupOption.textContent = group.name;
       groupOption.setAttribute("aria-pressed", String(getActiveGroupId() === group.id));
+      
+      // Add edit button
+      const editButton = document.createElement("button");
+      editButton.className = "youtube-groups__edit-button";
+      editButton.textContent = "Editar";
+      editButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const newName = prompt("Nuevo nombre del grupo:", group.name);
+        if (newName !== null) {
+          try {
+            await renameGroup(group.id, newName);
+            await renderGroupsPanel();
+          } catch (exception) {
+            alert(exception.message);
+          }
+        }
+      });
+      
+      // Add delete button - only for user-created groups (not "Todos")
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "youtube-groups__delete-button";
+      deleteButton.textContent = "Eliminar";
+      deleteButton.setAttribute("aria-label", `Eliminar grupo ${group.name}`);
+      deleteButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${group.name}"?`)) {
+          try {
+            await deleteGroup(group.id);
+            await renderGroupsPanel();
+          } catch (exception) {
+            alert(exception.message);
+          }
+        }
+      });
+      
+      // Add view channels button - only for user-created groups (not "Todos")
+      const viewChannelsButton = document.createElement("button");
+      viewChannelsButton.className = "youtube-groups__view-channels-button";
+      viewChannelsButton.textContent = "Ver canales";
+      viewChannelsButton.setAttribute("aria-label", `Ver canales del grupo ${group.name}`);
+      viewChannelsButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        try {
+          const groupsData = await getGroups();
+          const targetGroup = groupsData.find(g => g.id === group.id);
+          if (targetGroup && targetGroup.channels && targetGroup.channels.length > 0) {
+            console.log("[YouTube Groups][VIEW CHANNELS] Grupo:", targetGroup.name, "Canales:", targetGroup.channels.length);
+            let channelListHtml = `<h4>Canales en "${targetGroup.name}" (${targetGroup.channels.length})</h4><ul>`;
+            for (const channel of targetGroup.channels) {
+              channelListHtml += `<li><strong>${channel.name}</strong><br>${channel.url}</li>`;
+            }
+            channelListHtml += "</ul>";
+            
+            // Create a simple modal-like display
+            const modal = document.createElement("div");
+            modal.className = "youtube-groups__channel-list-modal";
+            modal.innerHTML = `
+              <div class="youtube-groups__channel-list-content">
+                <div class="youtube-groups__channel-list-header">
+                  <h3>Lista de Canales</h3>
+                  <button class="youtube-groups__close-channels-button" type="button">×</button>
+                </div>
+                ${channelListHtml}
+              </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add close functionality
+            modal.querySelector(".youtube-groups__close-channels-button").addEventListener("click", () => {
+              document.body.removeChild(modal);
+            });
+            
+            // Close when clicking outside
+            modal.addEventListener("click", (event) => {
+              if (event.target === modal) {
+                document.body.removeChild(modal);
+              }
+            });
+          } else {
+            console.log("[YouTube Groups][VIEW CHANNELS] Grupo:", targetGroup.name, "Sin canales");
+            alert(`El grupo "${targetGroup.name}" no tiene canales.`);
+          }
+        } catch (exception) {
+          console.error("[YouTube Groups][VIEW CHANNELS] Error mostrando canales:", exception);
+          alert("Error al mostrar los canales del grupo.");
+        }
+      });
+      
+      groupOption.appendChild(editButton);
+      groupOption.appendChild(deleteButton);
+      groupOption.appendChild(viewChannelsButton);
       groupOption.addEventListener("click", () => setActiveGroup(group));
       options.append(groupOption);
     }
 
+    // Now handle current channel section AFTER groups are rendered
     const channel = getCurrentVideoChannel();
     currentChannelSection.hidden = !channel;
     currentChannelForm.hidden = true;
