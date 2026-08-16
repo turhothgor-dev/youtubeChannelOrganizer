@@ -450,6 +450,23 @@
     }
   }
 
+  async function renameGroup(groupId, newName) {
+    const groups = await getGroups();
+    const group = groups.find((item) => item.id === groupId);
+    if (!group) {
+      throw new Error("No existe el grupo indicado.");
+    }
+
+    const newGroupName = newName.trim();
+    if (!newGroupName) {
+      throw new Error("El nombre del grupo no puede estar vacío.");
+    }
+
+    group.name = newGroupName;
+    await saveGroups(groups);
+    return group;
+  }
+
   let detectedCards = new WeakSet();
   let loggedChannelUrls = new Set();
   const pendingCards = new Set();
