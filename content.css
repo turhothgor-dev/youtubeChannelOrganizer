@@ -331,6 +331,13 @@ html[dark] .youtube-groups__subscription-groups-form {
   position: relative;
 }
 
+.youtube-groups__channel-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
 .youtube-groups__close-channels-button {
   background: none;
   border: none;
@@ -338,4 +345,7 @@ html[dark] .youtube-groups__subscription-groups-form {
   cursor: pointer;
   padding: 0;
   line-height: 1;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }

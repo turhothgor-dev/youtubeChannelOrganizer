@@ -357,6 +357,7 @@
       viewChannelsButton.className = "youtube-groups__view-channels-button";
       viewChannelsButton.textContent = "Ver canales";
       viewChannelsButton.setAttribute("aria-label", `Ver canales del grupo ${group.name}`);
+      // In the "Ver canales" button click handler:
       viewChannelsButton.addEventListener("click", async (event) => {
         event.stopPropagation();
         try {
@@ -364,6 +365,13 @@
           const targetGroup = groupsData.find(g => g.id === group.id);
           if (targetGroup && targetGroup.channels && targetGroup.channels.length > 0) {
             console.log("[YouTube Groups][VIEW CHANNELS] Grupo:", targetGroup.name, "Canales:", targetGroup.channels.length);
+            
+            // Check if modal already exists
+            const existingModal = document.querySelector(".youtube-groups__channel-list-modal");
+            if (existingModal) {
+              document.body.removeChild(existingModal);
+            }
+            
             let channelListHtml = `<h4>Canales en "${targetGroup.name}" (${targetGroup.channels.length})</h4><ul>`;
             for (const channel of targetGroup.channels) {
               channelListHtml += `<li><strong>${channel.name}</strong><br>${channel.url}</li>`;
