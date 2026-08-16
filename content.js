@@ -3,6 +3,8 @@
 
   console.log("[YouTube Groups] content.js cargado");
 
+  const { getGroups, saveGroups } = YouTubeGroupsStorage;
+
   const VIDEO_CARD_SELECTOR = [
     "ytd-rich-item-renderer",
     "ytd-video-renderer",
@@ -10,44 +12,6 @@
     "ytd-compact-video-renderer",
     "ytd-playlist-video-renderer"
   ].join(", ");
-
-  const STORAGE_KEY = "youtubeGroups";
-  let groupsInitializationPromise = null;
-
-  // browser.storage.local guarda: { version: 1, groups: [{ id, name, channels: [{ name, url }] }] }.
-  // La versión permite ampliar la estructura sin cambiar la clave de almacenamiento.
-  async function getGroups() {
-    const stored = await browser.storage.local.get(STORAGE_KEY);
-    const data = stored[STORAGE_KEY];
-
-    if (!data || !Array.isArray(data.groups)) {
-      if (!groupsInitializationPromise) {
-        const emptyGroups = [];
-        groupsInitializationPromise = saveGroups(emptyGroups)
-          .then(() => emptyGroups)
-          .finally(() => {
-            groupsInitializationPromise = null;
-          });
-      }
-
-      return groupsInitializationPromise;
-    }
-
-    return data.groups;
-  }
-
-  async function saveGroups(groups) {
-    if (!Array.isArray(groups)) {
-      throw new TypeError("Los grupos deben ser un array.");
-    }
-
-    await browser.storage.local.set({
-      [STORAGE_KEY]: {
-        version: 1,
-        groups
-      }
-    });
-  }
 
   async function createGroup(name) {
     const groupName = name.trim();

@@ -8,7 +8,10 @@
     {
       "matches": ["*://www.youtube.com/*"],
       "css": ["content.css"],
-      "js": ["content.js"],
+      "js": [
+        "modules/storage.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]
