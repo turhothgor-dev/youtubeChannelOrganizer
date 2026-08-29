@@ -9,7 +9,9 @@ const YouTubeGroups = (() => {
     const group = {
       id: crypto.randomUUID(),
       name: groupName,
-      channels: []
+      type: "group",
+      channels: [],
+      subgroups: []
     };
 
     groups.push(group);
@@ -107,11 +109,112 @@ const YouTubeGroups = (() => {
     return groups.filter(group => isChannelInGroup(group, channelUrl));
   }
 
+  // Agregar nuevas funciones para manejar subgrupos
+  async function createSubGroup(parentGroupId, name) {
+    const groupName = name.trim();
+    if (!groupName) {
+      throw new Error("El nombre del grupo no puede estar vacío.");
+    }
+
+    const groups = await YouTubeGroupsStorage.getGroups();
+    const parentGroup = groups.find((item) => item.id === parentGroupId);
+    
+    if (!parentGroup) {
+      throw new Error("No existe el grupo padre indicado.");
+    }
+
+    const subGroup = {
+      id: crypto.randomUUID(),
+      name: groupName,
+      type: "subgroup",
+      parentId: parentGroupId,
+      channels: [],
+      subgroups: []
+    };
+
+    // Añadir subgrupo al grupo padre
+    if (!parentGroup.subgroups) {
+      parentGroup.subgroups = [];
+    }
+    parentGroup.subgroups.push(subGroup);
+    
+    await YouTubeGroupsStorage.saveGroups(groups);
+    return subGroup;
+  }
+
+  async function deleteSubGroup(subGroupId) {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    let subGroupDeleted = false;
+    
+    // Buscar y eliminar el subgrupo en cualquier nivel
+    function findAndDeleteSubGroup(groupsArray) {
+      for (let i = 0; i < groupsArray.length; i++) {
+        const group = groupsArray[i];
+        
+        // Verificar si es el subgrupo a eliminar
+        if (group.id === subGroupId) {
+          groupsArray.splice(i, 1);
+          subGroupDeleted = true;
+          return true;
+        }
+        
+        // Buscar en subgrupos anidados
+        if (group.subgroups && group.subgroups.length > 0) {
+          if (findAndDeleteSubGroup(group.subgroups)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    
+    findAndDeleteSubGroup(groups);
+    
+    if (!subGroupDeleted) {
+      throw new Error("No existe el subgrupo indicado.");
+    }
+
+    await YouTubeGroupsStorage.saveGroups(groups);
+    return true;
+  }
+
+  async function getSubGroups(groupId) {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    const group = groups.find((item) => item.id === groupId);
+    
+    if (!group) {
+      throw new Error("No existe el grupo indicado.");
+    }
+    
+    return group.subgroups || [];
+  }
+
+  // Función para obtener todos los grupos y subgrupos de forma plana
+  async function getAllGroupsAndSubGroups() {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    
+    function flattenGroups(groupsArray, result = []) {
+      for (const group of groupsArray) {
+        result.push(group);
+        if (group.subgroups && group.subgroups.length > 0) {
+          flattenGroups(group.subgroups, result);
+        }
+      }
+      return result;
+    }
+    
+    return flattenGroups(groups);
+  }
+
   return {
     createGroup,
     deleteGroup,
     renameGroup,
     addChannelToGroup,
-    removeChannelFromGroup
+    removeChannelFromGroup,
+    createSubGroup,  // Nueva función
+    deleteSubGroup,  // Nueva función
+    getSubGroups,    // Nueva función
+    getAllGroupsAndSubGroups  // Nueva función
   };
 })();

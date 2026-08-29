@@ -349,3 +349,25 @@ html[dark] .youtube-groups__subscription-groups-form {
   top: 10px;
   right: 10px;
 }
+
+/* Añadir estilos para subgrupos */
+.youtube-groups__create-subgroup-button {
+  padding: 2px 6px;
+  margin-left: 8px;
+  color: #065fd4;
+  background: #e5f0ff;
+  border: 0;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.youtube-groups__create-subgroup-button:hover {
+  background: #d0e4ff;
+}
+
+/* Ajustar estilo para subgrupos */
+.youtube-groups__option[style*="font-style: italic"] {
+  color: #666;
+  font-weight: normal;
+}
