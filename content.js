@@ -153,19 +153,22 @@
 
       try {
         const groups = await getGroups();
-        const groupsToAdd = groups.filter((group) => (
-          selectedGroupIds.has(group.id) && !group.channels.some((item) => item.url === channel.url)
-        ));
-        const groupsToRemove = groups.filter((group) => (
-          !selectedGroupIds.has(group.id) && group.channels.some((item) => item.url === channel.url)
-        ));
-
-        for (const group of groupsToAdd) {
-          await addChannelToGroup(group.id, channel);
-        }
-
-        for (const group of groupsToRemove) {
-          await removeChannelFromGroup(group.id, channel.url);
+        
+        // Para cada grupo seleccionado, verificar si el canal ya está asignado
+        for (const group of groups) {
+          if (selectedGroupIds.has(group.id)) {
+            // Verificar si el canal ya está en este grupo
+            const channelExists = group.channels.some(item => item.url === channel.url);
+            if (!channelExists) {
+              await addChannelToGroup(group.id, channel);
+            }
+          } else {
+            // Si el grupo no está seleccionado pero el canal está en él, removerlo
+            const channelExists = group.channels.some(item => item.url === channel.url);
+            if (channelExists) {
+              await removeChannelFromGroup(group.id, channel.url);
+            }
+          }
         }
 
         await renderGroupsPanel();
@@ -336,6 +339,7 @@
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.value = group.id;
+      // Ahora se marca si el canal está en este grupo
       checkbox.checked = group.channels.some((item) => item.url === channel.url);
 
       const groupName = document.createElement("span");
@@ -655,6 +659,7 @@
       return;
     }
 
+    // Ahora se verifica si el canal está en los canales del grupo activo
     const isVisible = activeGroupChannelUrls.has(channelUrl);
     setCardVisibility(card, isVisible);
   }
@@ -687,6 +692,7 @@
         return;
       }
 
+      // Esta lógica sigue siendo válida para múltiples grupos
       const activeGroup = groups.find((group) => group.id === activeId);
       activeGroupChannelUrls = new Set(activeGroup?.channels.map((channel) => channel.url) ?? []);
       filterAllDetectedCards();

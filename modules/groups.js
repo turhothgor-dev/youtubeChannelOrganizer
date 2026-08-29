@@ -63,7 +63,11 @@ const YouTubeGroups = (() => {
       throw new Error("No existe el grupo indicado.");
     }
 
-    if (!group.channels.some((item) => item.url === channelUrl)) {
+    // Verificar si el canal ya está en este grupo
+    const existingChannelIndex = group.channels.findIndex((item) => item.url === channelUrl);
+    
+    if (existingChannelIndex === -1) {
+      // Solo agregar si no existe
       group.channels.push({ name: channelName, url: channelUrl });
       await YouTubeGroupsStorage.saveGroups(groups);
     }
@@ -90,6 +94,17 @@ const YouTubeGroups = (() => {
     }
 
     return group;
+  }
+
+  // Nueva función para verificar si un canal está en un grupo
+  function isChannelInGroup(group, channelUrl) {
+    return group.channels.some((item) => item.url === channelUrl);
+  }
+
+  // Nueva función para obtener todos los grupos donde está un canal
+  async function getGroupsForChannel(channelUrl) {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    return groups.filter(group => isChannelInGroup(group, channelUrl));
   }
 
   return {
