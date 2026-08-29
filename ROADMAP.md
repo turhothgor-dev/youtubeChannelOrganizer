@@ -9,23 +9,23 @@
 ## Fase 2 (Mejoras básicas):
 - ✅ Multi-asignación de canales
 - ✅ Sub-grupos
-- ✅ Iconos personalizados (opcional)
-- ✅ Marca como visto
+- ☐ Iconos personalizados (opcional)
+- ☐ Marca como visto
 
 ## Fase 3 (Funcionalidades Avanzadas):
-- ✅ Modos de visibilidad
-- ✅ Gestor de playlists
-- ✅ Filtros avanzados (duración, fecha, popularidad)
-- ✅ Ocultar videos vistos
-- ✅ Marcar videos vistos
+- ☐ Modos de visibilidad
+- ☐ Gestor de playlists
+- ☐ Filtros avanzados (duración, fecha, popularidad)
+- ☐ Ocultar videos vistos
+- ☐ Marcar videos vistos
 
 ## Fase 4 (Integración y Sincronización):
-- ✅ Sincronización cruzada
-- ✅ Integración en sidebar
+- ☐ Sincronización cruzada
+- ☐ Integración en sidebar
 
 ## Fase 5 (Funcionalidades Opcionales):
-- ✅ Limpieza de canales
-- ✅ Auto-reproducción
-- ✅ Soporte para Shorts
-- ✅ Soporte para resultados de búsqueda
-- ✅ Soporte para recomendaciones
+- ☐ Limpieza de canales
+- ☐ Auto-reproducción
+- ☐ Soporte para Shorts
+- ☐ Soporte para resultados de búsqueda
+- ☐ Soporte para recomendaciones
