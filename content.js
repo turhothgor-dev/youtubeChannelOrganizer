@@ -132,10 +132,30 @@
       error.textContent = "";
 
       try {
+        // Validación adicional
+        const groupName = input.value.trim();
+        if (groupName.length < 2) {
+          error.textContent = "El nombre del grupo debe tener al menos 2 caracteres";
+          return;
+        }
+        
+        if (groupName.length > 80) {
+          error.textContent = "El nombre del grupo no puede exceder 80 caracteres";
+          return;
+        }
+        
         await createGroup(input.value);
         form.reset();
         form.hidden = true;
         await renderGroupsPanel();
+        
+        // Feedback visual
+        const createButton = panel.querySelector(".youtube-groups__create-button");
+        createButton.textContent = "✓ Grupo creado";
+        setTimeout(() => {
+          createButton.textContent = "Crear grupo";
+        }, 2000);
+        
       } catch (exception) {
         error.textContent = exception.message;
       }
@@ -158,6 +178,12 @@
       try {
         const groups = await getGroups();
         
+        // Mostrar loading mientras se procesan cambios
+        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
+        const originalText = submitButton.textContent;
+        submitButton.textContent = "Guardando...";
+        submitButton.disabled = true;
+     
         // Para cada grupo seleccionado, verificar si el canal ya está asignado
         for (const group of groups) {
           if (selectedGroupIds.has(group.id)) {
@@ -177,8 +203,23 @@
 
         await renderGroupsPanel();
         await refreshActiveGroupFilter();
+
+        // Restaurar botón
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        
+        // Mostrar confirmación
+        currentChannelError.textContent = "Canales asignados correctamente";
+        setTimeout(() => {
+          currentChannelError.textContent = "";
+        }, 3000);
+    
       } catch (exception) {
         currentChannelError.textContent = exception.message;
+        // Restaurar botón
+        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
       }
     });
 
@@ -217,6 +258,21 @@
       groupOption.className = "youtube-groups__option";
       groupOption.textContent = group.name;
       groupOption.setAttribute("aria-pressed", String(getActiveGroupId() === group.id));
+      groupOption.setAttribute("data-level", level); // Para estilos jerárquicos
+      
+      // Añadir ícono de grupo/subgrupo
+      if (group.type === "subgroup") {
+        groupOption.style.fontStyle = "italic";
+        groupOption.style.color = "#666";
+      }
+      
+      // Añadir contador de canales
+      if (group.channels && group.channels.length > 0) {
+        const channelCount = document.createElement("span");
+        channelCount.className = "youtube-groups__channel-count";
+        channelCount.textContent = ` (${group.channels.length})`;
+        groupOption.appendChild(channelCount);
+      }
       
       // Añadir indentación visual para subgrupos
       if (level > 0) {
