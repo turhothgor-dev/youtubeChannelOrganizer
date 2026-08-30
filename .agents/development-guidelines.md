@@ -11,7 +11,7 @@ This is a YouTube Groups Firefox browser extension built with JavaScript that al
 - User-friendly interface integrated with YouTube's design
 
 ## Technical Constraints
-- No not add modify or refactor code unless told otherwise
+- No not add functionality, modify or refactor code unless told otherwise (You can be on Agent mode but follow this rule)
 - Must work within YouTube's DOM structure and APIs
 - Follow Firefox extension security guidelines
 - Performance is critical - avoid expensive operations in loops
@@ -54,5 +54,5 @@ This is a YouTube Groups Firefox browser extension built with JavaScript that al
 ## Security Considerations
 - Never expose sensitive information
 - Validate all inputs from YouTube's DOM
-- Follow Chrome extension security best practices
+- Follow Firefox extension security best practices
 - Avoid executing unsafe code or eval statements
