@@ -3,7 +3,7 @@
   right: 16px;
   bottom: 16px;
   z-index: 2147483647;
-  width: min(300px, calc(100vw - 32px));
+  width: min(360px, calc(100vw - 32px));
   padding: 16px;
   color: #0f0f0f;
   background: #ffffff;
@@ -51,9 +51,17 @@
   padding: 8px 10px;
   color: inherit;
   text-align: left;
-  background: #f2f2f2;
+  background: #c9def8;
   position: relative;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.youtube-groups__option .youtube-groups__channel-count {
+    margin-right: 4px;
 }
 
 .youtube-groups__option:hover {
@@ -77,6 +85,7 @@
 .youtube-groups__option[data-level="3"] {
   padding-left: 56px;
 }
+
 .youtube-groups__subscription-control {
   display: inline-block;
   margin-left: 8px;
@@ -127,7 +136,7 @@
   font-size: 11px;
 }
 
-.youtube-groups__form {
+.youtube-groups__form, .youtube-groups__subgroup-form {
   display: grid;
   gap: 8px;
   padding-top: 12px;
@@ -219,6 +228,25 @@ html[dark] #youtube-groups-panel {
   border-color: #555;
 }
 
+html[dark] .youtube-groups__option {
+  width: 100%;
+  padding: 8px 10px;
+  color: inherit;
+  text-align: left;
+  background: #487dc3;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+html[dark] .youtube-groups__option:hover {
+  background-color: #313030;
+}
+
+html[dark] .youtube-groups__option[aria-pressed="true"] {
+  color: #ffffff;
+  background: #065fd4;
+}
+
 html[dark] .youtube-groups__input {
   color: #f1f1f1;
   background: #121212;
@@ -280,13 +308,6 @@ html[dark] .youtube-groups__subscription-groups-form {
   position: absolute;
   top: 10px;
   right: 10px;
-}
-
-/* Ensure consistent button styling for all forms */
-.youtube-groups__subgroup-form .youtube-groups__form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }
 
 /* Ajustar estilo para subgrupos */
@@ -370,6 +391,11 @@ html[dark] .primary-button {
 html[dark] .secondary-button {
   color: #f1f1f1;
   background: #3f3f3f;
+}
+
+html[dark] .noaction-button {
+  color: #eee;
+  background: #0e0e0e;
 }
 
 .mini-action-button {

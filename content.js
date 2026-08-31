@@ -73,18 +73,18 @@
         panel.innerHTML = `
           <div class="youtube-groups__header">
             <h2 class="youtube-groups__title">YouTube Groups</h2>
-            <button class="youtube-groups__create-button action-button" type="button">Crear grupo</button>
+            <button class="youtube-groups__create-button action-button primary-button" type="button">Crear grupo</button>
           </div>
           <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
           <section class="youtube-groups__current-channel" hidden>
             <h3 class="youtube-groups__section-title">Canal actual</h3>
             <p class="youtube-groups__channel-name"></p>
-            <button class="youtube-groups__add-channel-button action-button" type="button">Añadir a un grupo</button>
+            <button class="youtube-groups__add-channel-button action-button secondary-button" type="button">Añadir a un grupo</button>
             <form class="youtube-groups__channel-groups-form" hidden>
               <div class="youtube-groups__channel-groups" aria-label="Seleccionar grupos"></div>
               <div class="youtube-groups__form-actions">
-                <button class="youtube-groups__cancel-channel-button action-button" type="button">Cancelar</button>
-                <button class="youtube-groups__confirm-channel-button action-button" type="submit">Guardar</button>
+                <button class="youtube-groups__cancel-channel-button action-button noaction-button" type="button">Cancelar</button>
+                <button class="youtube-groups__confirm-channel-button action-button primary-button" type="submit">Guardar</button>
               </div>
               <p class="youtube-groups__channel-error" aria-live="polite"></p>
             </form>
@@ -92,16 +92,16 @@
           <form class="youtube-groups__form" hidden>
             <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
             <div class="youtube-groups__form-actions">
-              <button class="youtube-groups__cancel-button action-button" type="button">Cancelar</button>
-              <button class="youtube-groups__confirm-button action-button" type="submit">Guardar</button>
+              <button class="youtube-groups__cancel-button action-button noaction-button" type="button">Cancelar</button>
+              <button class="youtube-groups__confirm-button action-button primary-button" type="submit">Guardar</button>
             </div>
             <p class="youtube-groups__error" aria-live="polite"></p>
           </form>
           <form class="youtube-groups__subgroup-form" hidden>
             <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
             <div class="youtube-groups__form-actions">
-              <button class="youtube-subgroups__cancel-button action-button" type="button">Cancelar</button>
-              <button class="youtube-subgroups__confirm-button action-button" type="submit">Guardar</button>
+              <button class="youtube-subgroups__cancel-button action-button noaction-button" type="button">Cancelar</button>
+              <button class="youtube-subgroups__confirm-button action-button primary-button" type="submit">Guardar</button>
             </div>
             <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
           </form>
@@ -401,9 +401,9 @@
         groupOption.style.fontStyle = "italic";
       }
       
-            // Añadir botones de edición y eliminación
+      // Añadir botones de edición y eliminación
       const editButton = document.createElement("button");
-      editButton.className = "youtube-groups__edit-button action-button";
+      editButton.className = "youtube-groups__edit-button action-button secondary-button";
       editButton.textContent = "Editar";
       editButton.addEventListener("click", async (event) => {
         event.stopPropagation();
@@ -419,7 +419,7 @@
       });
       
       const deleteButton = document.createElement("button");
-      deleteButton.className = "youtube-groups__delete-button action-button";
+      deleteButton.className = "youtube-groups__delete-button action-button noaction-button";
       deleteButton.textContent = "Eliminar";
       deleteButton.setAttribute("aria-label", `Eliminar grupo ${group.name}`);
       deleteButton.addEventListener("click", async (event) => {
@@ -437,31 +437,31 @@
         }
       });
       
-                        // Botón para crear subgrupo (solo para grupos principales)
-              if (group.type !== "subgroup") {
-                const createSubGroupButton = document.createElement("button");
-                createSubGroupButton.className = "youtube-groups__create-subgroup-button action-button";
-                createSubGroupButton.textContent = "+ Subgrupo";
-                createSubGroupButton.setAttribute("aria-label", `Crear subgrupo en ${group.name}`);
-                createSubGroupButton.addEventListener("click", async (event) => {
-                  event.stopPropagation();
-                  // Show the subgroup form instead of using prompt
-                  const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
-                  const subgroupInput = panel.querySelector(".youtube-groups__input[name='subGroupName']");
-                  const subgroupError = panel.querySelector(".youtube-groups__subgroup-error");
-          
-                  subgroupForm.hidden = false;
-                  subgroupForm.dataset.parentGroupId = group.id;
-                  subgroupError.textContent = "";
-                  subgroupInput.focus();
-                });
-        
-                groupOption.appendChild(createSubGroupButton);
-              }
+      // Botón para crear subgrupo (solo para grupos principales)
+        if (group.type !== "subgroup") {
+          const createSubGroupButton = document.createElement("button");
+          createSubGroupButton.className = "youtube-groups__create-subgroup-button action-button secondary-button";
+          createSubGroupButton.textContent = "+ Subgrupo";
+          createSubGroupButton.setAttribute("aria-label", `Crear subgrupo en ${group.name}`);
+          createSubGroupButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            // Show the subgroup form instead of using prompt
+            const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
+            const subgroupInput = panel.querySelector(".youtube-groups__input[name='subGroupName']");
+            const subgroupError = panel.querySelector(".youtube-groups__subgroup-error");
 
-            // Add view channels button - only for user-created groups (not "Todos")
+            subgroupForm.hidden = false;
+            subgroupForm.dataset.parentGroupId = group.id;
+            subgroupError.textContent = "";
+            subgroupInput.focus();
+          });
+
+          groupOption.appendChild(createSubGroupButton);
+        }
+
+      // Add view channels button - only for user-created groups (not "Todos")
       const viewChannelsButton = document.createElement("button");
-      viewChannelsButton.className = "youtube-groups__view-channels-button action-button";
+      viewChannelsButton.className = "youtube-groups__view-channels-button action-button secondary-button";
       viewChannelsButton.textContent = "Ver canales";
       viewChannelsButton.setAttribute("aria-label", `Ver canales del grupo ${group.name}`);
       // In the "Ver canales" button click handler:
@@ -472,19 +472,19 @@
           const targetGroup = groupsData.find(g => g.id === group.id);
           if (targetGroup && targetGroup.channels && targetGroup.channels.length > 0) {
             console.log("[YouTube Groups][VIEW CHANNELS] Grupo:", targetGroup.name, "Canales:", targetGroup.channels.length);
-            
+      
             // Check if modal already exists
             const existingModal = document.querySelector(".youtube-groups__channel-list-modal");
             if (existingModal) {
               document.body.removeChild(existingModal);
             }
-            
+      
             let channelListHtml = `<h4>Canales en "${targetGroup.name}" (${targetGroup.channels.length})</h4><ul>`;
             for (const channel of targetGroup.channels) {
               channelListHtml += `<li><strong>${channel.name}</strong><br>${channel.url}</li>`;
             }
             channelListHtml += "</ul>";
-            
+      
             // Create a simple modal-like display
             const modal = document.createElement("div");
             modal.className = "youtube-groups__channel-list-modal";
@@ -497,14 +497,14 @@
                 ${channelListHtml}
               </div>
             `;
-            
+      
             document.body.appendChild(modal);
-            
+      
             // Add close functionality
             modal.querySelector(".youtube-groups__close-channels-button").addEventListener("click", () => {
               document.body.removeChild(modal);
             });
-            
+      
             // Close when clicking outside
             modal.addEventListener("click", (event) => {
               if (event.target === modal) {
@@ -520,10 +520,10 @@
           alert("Error al mostrar los canales del grupo.");
         }
       });
-      
+
+      groupOption.appendChild(viewChannelsButton);
       groupOption.appendChild(editButton);
       groupOption.appendChild(deleteButton);
-      groupOption.appendChild(viewChannelsButton);
       groupOption.addEventListener("click", () => setActiveGroup(group));
       options.append(groupOption);
       
@@ -746,12 +746,12 @@
     control.className = "youtube-groups__subscription-control";
     control.dataset.youtubeGroupsSubscriptionChannelUrl = channel.url;
     control.innerHTML = `
-      <button class="youtube-groups__subscription-add-button" type="button">Añadir a grupo</button>
+      <button class="youtube-groups__subscription-add-button action-button primary-button" type="button">Añadir a grupo</button>
       <form class="youtube-groups__subscription-groups-form" hidden>
         <div class="youtube-groups__subscription-groups"></div>
         <div class="youtube-groups__subscription-actions">
-          <button class="youtube-groups__subscription-cancel-button" type="button">Cancelar</button>
-          <button class="youtube-groups__subscription-save-button" type="submit">Guardar</button>
+          <button class="youtube-groups__subscription-cancel-button action-button secondary-button" type="button">Cancelar</button>
+          <button class="youtube-groups__subscription-save-button action-button primary-button" type="submit">Guardar</button>
         </div>
         <p class="youtube-groups__subscription-error" aria-live="polite"></p>
       </form>
