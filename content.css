@@ -325,6 +325,8 @@ html[dark] .youtube-groups__subscription-groups-form {
   opacity: 1;
 }
 
+
+/* Button styles */
 .primary-button {
   color: #ffffff;
   background: #065fd4;
@@ -335,42 +337,9 @@ html[dark] .youtube-groups__subscription-groups-form {
   background: #f2f2f2;
 }
 
-.action-button {
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font: inherit;
-}
-
-.mini-action-button {
-  padding: 2px 3px;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  font: inherit;
-}
-
-.primary-button:hover, .secondary-button:hover {
-  background: #0356bd;
-}
-
-html[dark] .primary-button {
-  color: #8ab4f8;
-  background: #263850;
-}
-
-html[dark] .secondary-button {
-  color: #f1f1f1;
-  background: #3f3f3f;
-}.primary-button {
-  color: #ffffff;
-  background: #065fd4;
-}
-
-.secondary-button {
-  color: #222;
-  background: #f2f2f2;
+.noaction-button {
+  color: #eee;
+  background: #7e7e7e;
 }
 
 .action-button {
@@ -401,4 +370,12 @@ html[dark] .primary-button {
 html[dark] .secondary-button {
   color: #f1f1f1;
   background: #3f3f3f;
+}
+
+.mini-action-button {
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
 }

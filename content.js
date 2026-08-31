@@ -71,41 +71,41 @@
     panel.id = GROUPS_PANEL_ID;
     panel.setAttribute("aria-label", "YouTube Groups");
         panel.innerHTML = `
-      <div class="youtube-groups__header">
-        <h2 class="youtube-groups__title">YouTube Groups</h2>
-        <button class="youtube-groups__create-button" type="button">Crear grupo</button>
-      </div>
-      <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
-      <section class="youtube-groups__current-channel" hidden>
-        <h3 class="youtube-groups__section-title">Canal actual</h3>
-        <p class="youtube-groups__channel-name"></p>
-        <button class="youtube-groups__add-channel-button" type="button">Añadir a un grupo</button>
-        <form class="youtube-groups__channel-groups-form" hidden>
-          <div class="youtube-groups__channel-groups" aria-label="Seleccionar grupos"></div>
-          <div class="youtube-groups__form-actions">
-            <button class="youtube-groups__cancel-channel-button" type="button">Cancelar</button>
-            <button class="youtube-groups__confirm-channel-button" type="submit">Guardar</button>
+          <div class="youtube-groups__header">
+            <h2 class="youtube-groups__title">YouTube Groups</h2>
+            <button class="youtube-groups__create-button action-button" type="button">Crear grupo</button>
           </div>
-          <p class="youtube-groups__channel-error" aria-live="polite"></p>
-        </form>
-      </section>
-      <form class="youtube-groups__form" hidden>
-        <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
-        <div class="youtube-groups__form-actions">
-          <button class="youtube-groups__cancel-button" type="button">Cancelar</button>
-          <button class="youtube-groups__confirm-button" type="submit">Guardar</button>
-        </div>
-        <p class="youtube-groups__error" aria-live="polite"></p>
-      </form>
-      <form class="youtube-groups__subgroup-form" hidden>
-        <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
-        <div class="youtube-groups__form-actions">
-          <button class="youtube-subgroups__cancel-button" type="button">Cancelar</button>
-          <button class="youtube-subgroups__confirm-button" type="submit">Guardar</button>
-        </div>
-        <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
-      </form>
-    `;
+          <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
+          <section class="youtube-groups__current-channel" hidden>
+            <h3 class="youtube-groups__section-title">Canal actual</h3>
+            <p class="youtube-groups__channel-name"></p>
+            <button class="youtube-groups__add-channel-button action-button" type="button">Añadir a un grupo</button>
+            <form class="youtube-groups__channel-groups-form" hidden>
+              <div class="youtube-groups__channel-groups" aria-label="Seleccionar grupos"></div>
+              <div class="youtube-groups__form-actions">
+                <button class="youtube-groups__cancel-channel-button action-button" type="button">Cancelar</button>
+                <button class="youtube-groups__confirm-channel-button action-button" type="submit">Guardar</button>
+              </div>
+              <p class="youtube-groups__channel-error" aria-live="polite"></p>
+            </form>
+          </section>
+          <form class="youtube-groups__form" hidden>
+            <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
+            <div class="youtube-groups__form-actions">
+              <button class="youtube-groups__cancel-button action-button" type="button">Cancelar</button>
+              <button class="youtube-groups__confirm-button action-button" type="submit">Guardar</button>
+            </div>
+            <p class="youtube-groups__error" aria-live="polite"></p>
+          </form>
+          <form class="youtube-groups__subgroup-form" hidden>
+            <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
+            <div class="youtube-groups__form-actions">
+              <button class="youtube-subgroups__cancel-button action-button" type="button">Cancelar</button>
+              <button class="youtube-subgroups__confirm-button action-button" type="submit">Guardar</button>
+            </div>
+            <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
+          </form>
+        `;
 
     const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
@@ -401,9 +401,9 @@
         groupOption.style.fontStyle = "italic";
       }
       
-      // Añadir botones de edición y eliminación
+            // Añadir botones de edición y eliminación
       const editButton = document.createElement("button");
-      editButton.className = "youtube-groups__edit-button";
+      editButton.className = "youtube-groups__edit-button action-button";
       editButton.textContent = "Editar";
       editButton.addEventListener("click", async (event) => {
         event.stopPropagation();
@@ -419,7 +419,7 @@
       });
       
       const deleteButton = document.createElement("button");
-      deleteButton.className = "youtube-groups__delete-button";
+      deleteButton.className = "youtube-groups__delete-button action-button";
       deleteButton.textContent = "Eliminar";
       deleteButton.setAttribute("aria-label", `Eliminar grupo ${group.name}`);
       deleteButton.addEventListener("click", async (event) => {
@@ -437,10 +437,10 @@
         }
       });
       
-            // Botón para crear subgrupo (solo para grupos principales)
+                        // Botón para crear subgrupo (solo para grupos principales)
               if (group.type !== "subgroup") {
                 const createSubGroupButton = document.createElement("button");
-                createSubGroupButton.className = "youtube-groups__create-subgroup-button";
+                createSubGroupButton.className = "youtube-groups__create-subgroup-button action-button";
                 createSubGroupButton.textContent = "+ Subgrupo";
                 createSubGroupButton.setAttribute("aria-label", `Crear subgrupo en ${group.name}`);
                 createSubGroupButton.addEventListener("click", async (event) => {
@@ -459,9 +459,9 @@
                 groupOption.appendChild(createSubGroupButton);
               }
 
-      // Add view channels button - only for user-created groups (not "Todos")
+            // Add view channels button - only for user-created groups (not "Todos")
       const viewChannelsButton = document.createElement("button");
-      viewChannelsButton.className = "youtube-groups__view-channels-button";
+      viewChannelsButton.className = "youtube-groups__view-channels-button action-button";
       viewChannelsButton.textContent = "Ver canales";
       viewChannelsButton.setAttribute("aria-label", `Ver canales del grupo ${group.name}`);
       // In the "Ver canales" button click handler:
