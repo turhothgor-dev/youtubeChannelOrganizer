@@ -21,3 +21,16 @@ The extension consists of:
 - Subscription management pages
 - Video watch pages
 - Channel browsing pages
+
+## Core Functionality
+- Group creation and management
+- Channel assignment to multiple groups
+- Feed filtering based on group membership
+- Nested subgroup support
+- Seamless integration with YouTube's UI
+
+## Development Constraints
+- Must maintain compatibility with YouTube's evolving interface
+- Performance optimization is critical
+- All changes must be tested across different YouTube layouts
+- Follow Firefox extension security guidelines strictly

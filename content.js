@@ -70,7 +70,7 @@
     const panel = document.createElement("aside");
     panel.id = GROUPS_PANEL_ID;
     panel.setAttribute("aria-label", "YouTube Groups");
-    panel.innerHTML = `
+        panel.innerHTML = `
       <div class="youtube-groups__header">
         <h2 class="youtube-groups__title">YouTube Groups</h2>
         <button class="youtube-groups__create-button" type="button">Crear grupo</button>
@@ -97,11 +97,22 @@
         </div>
         <p class="youtube-groups__error" aria-live="polite"></p>
       </form>
+      <form class="youtube-groups__subgroup-form" hidden>
+        <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
+        <div class="youtube-groups__form-actions">
+          <button class="youtube-groups__cancel-subgroup-button" type="button">Cancelar</button>
+          <button class="youtube-groups__confirm-subgroup-button" type="submit">Guardar</button>
+        </div>
+        <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
+      </form>
     `;
 
-    const form = panel.querySelector(".youtube-groups__form");
+        const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
     const error = panel.querySelector(".youtube-groups__error");
+    const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
+    const subgroupInput = panel.querySelector(".youtube-groups__input[name='subGroupName']");
+    const subgroupError = panel.querySelector(".youtube-groups__subgroup-error");
     const currentChannelForm = panel.querySelector(".youtube-groups__channel-groups-form");
     const currentChannelError = panel.querySelector(".youtube-groups__channel-error");
 
@@ -125,6 +136,54 @@
     panel.querySelector(".youtube-groups__cancel-channel-button").addEventListener("click", () => {
       currentChannelForm.hidden = true;
       currentChannelError.textContent = "";
+    });
+
+    // Subgroup form handlers
+    panel.querySelector(".youtube-groups__cancel-subgroup-button").addEventListener("click", () => {
+      subgroupForm.reset();
+      subgroupForm.hidden = true;
+      subgroupError.textContent = "";
+    });
+
+    subgroupForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      subgroupError.textContent = "";
+
+      try {
+        // Validación adicional
+        const subGroupName = subgroupInput.value.trim();
+        if (subGroupName.length < 2) {
+          subgroupError.textContent = "El nombre del subgrupo debe tener al menos 2 caracteres";
+          return;
+        }
+        
+        if (subGroupName.length > 80) {
+          subgroupError.textContent = "El nombre del subgrupo no puede exceder 80 caracteres";
+          return;
+        }
+
+        // We need to get the parent group ID - this will be set when the form is shown
+        const parentGroupId = subgroupForm.dataset.parentGroupId;
+        if (!parentGroupId) {
+          subgroupError.textContent = "No se pudo identificar el grupo padre";
+          return;
+        }
+        
+        await createSubGroup(parentGroupId, subgroupInput.value);
+        subgroupForm.reset();
+        subgroupForm.hidden = true;
+        await renderGroupsPanel();
+        
+        // Feedback visual
+        const createSubGroupButton = panel.querySelector(".youtube-groups__create-subgroup-button");
+        createSubGroupButton.textContent = "✓ Subgrupo creado";
+        setTimeout(() => {
+          createSubGroupButton.textContent = "+ Subgrupo";
+        }, 2000);
+        
+      } catch (exception) {
+        subgroupError.textContent = exception.message;
+      }
     });
 
     form.addEventListener("submit", async (event) => {
@@ -158,6 +217,68 @@
         
       } catch (exception) {
         error.textContent = exception.message;
+      }
+    });
+
+    currentChannelForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      currentChannelError.textContent = "";
+
+      const channel = getCurrentVideoChannel();
+      const selectedGroupIds = new Set(
+        Array.from(currentChannelForm.querySelectorAll("input:checked"), (input) => input.value)
+      );
+
+      if (!channel) {
+        currentChannelError.textContent = "No se ha podido identificar el canal actual.";
+        return;
+      }
+
+      try {
+        const groups = await getGroups();
+        
+        // Mostrar loading mientras se procesan cambios
+        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
+        const originalText = submitButton.textContent;
+        submitButton.textContent = "Guardando...";
+        submitButton.disabled = true;
+     
+        // Para cada grupo seleccionado, verificar si el canal ya está asignado
+        for (const group of groups) {
+          if (selectedGroupIds.has(group.id)) {
+            // Verificar si el canal ya está en este grupo
+            const channelExists = group.channels.some(item => item.url === channel.url);
+            if (!channelExists) {
+              await addChannelToGroup(group.id, channel);
+            }
+          } else {
+            // Si el grupo no está seleccionado pero el canal está en él, removerlo
+            const channelExists = group.channels.some(item => item.url === channel.url);
+            if (channelExists) {
+              await removeChannelFromGroup(group.id, channel.url);
+            }
+          }
+        }
+
+        await renderGroupsPanel();
+        await refreshActiveGroupFilter();
+
+        // Restaurar botón
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        
+        // Mostrar confirmación
+        currentChannelError.textContent = "Canales asignados correctamente";
+        setTimeout(() => {
+          currentChannelError.textContent = "";
+        }, 3000);
+    
+      } catch (exception) {
+        currentChannelError.textContent = exception.message;
+        // Restaurar botón
+        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
       }
     });
 
@@ -316,27 +437,27 @@
         }
       });
       
-      // Botón para crear subgrupo (solo para grupos principales)
-      if (group.type !== "subgroup") {
-        const createSubGroupButton = document.createElement("button");
-        createSubGroupButton.className = "youtube-groups__create-subgroup-button";
-        createSubGroupButton.textContent = "+ Subgrupo";
-        createSubGroupButton.setAttribute("aria-label", `Crear subgrupo en ${group.name}`);
-        createSubGroupButton.addEventListener("click", async (event) => {
-          event.stopPropagation();
-          const subGroupName = prompt("Nombre del nuevo subgrupo:");
-          if (subGroupName !== null) {
-            try {
-              await createSubGroup(group.id, subGroupName);
-              await renderGroupsPanel();
-            } catch (exception) {
-              alert(exception.message);
-            }
-          }
-        });
+            // Botón para crear subgrupo (solo para grupos principales)
+              if (group.type !== "subgroup") {
+                const createSubGroupButton = document.createElement("button");
+                createSubGroupButton.className = "youtube-groups__create-subgroup-button";
+                createSubGroupButton.textContent = "+ Subgrupo";
+                createSubGroupButton.setAttribute("aria-label", `Crear subgrupo en ${group.name}`);
+                createSubGroupButton.addEventListener("click", async (event) => {
+                  event.stopPropagation();
+                  // Show the subgroup form instead of using prompt
+                  const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
+                  const subgroupInput = panel.querySelector(".youtube-groups__input[name='subGroupName']");
+                  const subgroupError = panel.querySelector(".youtube-groups__subgroup-error");
+          
+                  subgroupForm.hidden = false;
+                  subgroupForm.dataset.parentGroupId = group.id;
+                  subgroupError.textContent = "";
+                  subgroupInput.focus();
+                });
         
-        groupOption.appendChild(createSubGroupButton);
-      }
+                groupOption.appendChild(createSubGroupButton);
+              }
 
       // Add view channels button - only for user-created groups (not "Todos")
       const viewChannelsButton = document.createElement("button");
