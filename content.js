@@ -100,14 +100,14 @@
       <form class="youtube-groups__subgroup-form" hidden>
         <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
         <div class="youtube-groups__form-actions">
-          <button class="youtube-groups__cancel-subgroup-button" type="button">Cancelar</button>
-          <button class="youtube-groups__confirm-subgroup-button" type="submit">Guardar</button>
+          <button class="youtube-subgroups__cancel-button" type="button">Cancelar</button>
+          <button class="youtube-subgroups__confirm-button" type="submit">Guardar</button>
         </div>
         <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
       </form>
     `;
 
-        const form = panel.querySelector(".youtube-groups__form");
+    const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
     const error = panel.querySelector(".youtube-groups__error");
     const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
@@ -139,7 +139,7 @@
     });
 
     // Subgroup form handlers
-    panel.querySelector(".youtube-groups__cancel-subgroup-button").addEventListener("click", () => {
+    panel.querySelector(".youtube-subgroups__cancel-button").addEventListener("click", () => {
       subgroupForm.reset();
       subgroupForm.hidden = true;
       subgroupError.textContent = "";

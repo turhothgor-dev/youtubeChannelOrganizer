@@ -39,10 +39,7 @@
   overflow-y: auto;
 }
 
-.youtube-groups__option,
-.youtube-groups__create-button,
-.youtube-groups__confirm-button,
-.youtube-groups__cancel-button {
+.youtube-groups__option {
   border: 0;
   border-radius: 8px;
   cursor: pointer;
@@ -86,23 +83,6 @@
   vertical-align: middle;
 }
 
-.youtube-groups__subscription-add-button,
-.youtube-groups__subscription-save-button,
-.youtube-groups__subscription-cancel-button {
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  font: inherit;
-}
-
-.youtube-groups__subscription-add-button,
-.youtube-groups__subscription-save-button {
-  padding: 4px 8px;
-  color: #065fd4;
-  background: #e5f0ff;
-  font-size: 12px;
-}
-
 .youtube-groups__subscription-groups-form {
   display: grid;
   gap: 6px;
@@ -140,30 +120,11 @@
   gap: 6px;
 }
 
-.youtube-groups__subscription-cancel-button {
-  padding: 4px 8px;
-  color: #0f0f0f;
-  background: #f2f2f2;
-  font-size: 12px;
-}
-
 .youtube-groups__subscription-error {
   min-height: 14px;
   margin: 0;
   color: #c00;
   font-size: 11px;
-}
-
-.youtube-groups__create-button,
-.youtube-groups__confirm-button {
-  padding: 8px 12px;
-  color: #ffffff;
-  background: #065fd4;
-}
-
-.youtube-groups__create-button:hover,
-.youtube-groups__confirm-button:hover {
-  background: #0356bd;
 }
 
 .youtube-groups__form {
@@ -193,27 +154,6 @@
   white-space: nowrap;
 }
 
-.youtube-groups__add-channel-button,
-.youtube-groups__confirm-channel-button {
-  padding: 8px 12px;
-  color: #ffffff;
-  background: #065fd4;
-}
-
-.youtube-groups__add-channel-button,
-.youtube-groups__confirm-channel-button,
-.youtube-groups__cancel-channel-button {
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font: inherit;
-}
-
-.youtube-groups__add-channel-button:hover,
-.youtube-groups__confirm-channel-button:hover {
-  background: #0356bd;
-}
-
 .youtube-groups__channel-groups-form {
   display: grid;
   gap: 8px;
@@ -236,12 +176,6 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-}
-
-.youtube-groups__cancel-channel-button {
-  padding: 8px 12px;
-  color: inherit;
-  background: #f2f2f2;
 }
 
 .youtube-groups__channel-error {
@@ -272,12 +206,6 @@
   gap: 8px;
 }
 
-.youtube-groups__cancel-button {
-  padding: 8px 12px;
-  color: inherit;
-  background: #f2f2f2;
-}
-
 .youtube-groups__error {
   min-height: 18px;
   margin: 0;
@@ -289,14 +217,6 @@ html[dark] #youtube-groups-panel {
   color: #f1f1f1;
   background: #212121;
   border-color: #555;
-}
-
-html[dark] .youtube-groups__option,
-html[dark] .youtube-groups__cancel-button,
-html[dark] .youtube-groups__cancel-channel-button,
-html[dark] .youtube-groups__subscription-cancel-button {
-  color: #f1f1f1;
-  background: #3f3f3f;
 }
 
 html[dark] .youtube-groups__input {
@@ -311,12 +231,6 @@ html[dark] .youtube-groups__form {
 
 html[dark] .youtube-groups__current-channel {
   border-color: #555;
-}
-
-html[dark] .youtube-groups__subscription-add-button,
-html[dark] .youtube-groups__subscription-save-button {
-  color: #8ab4f8;
-  background: #263850;
 }
 
 html[dark] .youtube-groups__subscription-groups-form {
@@ -368,29 +282,16 @@ html[dark] .youtube-groups__subscription-groups-form {
   right: 10px;
 }
 
-/* Añadir estilos para subgrupos */
-.youtube-groups__create-subgroup-button {
-  padding: 2px 6px;
-  margin-left: 8px;
-  color: #065fd4;
-  background: #e5f0ff;
-  border: 0;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.youtube-groups__create-subgroup-button:hover {
-  background: #d0e4ff;
-  padding: 2px 8px;
-  margin-left: 8px;
-  font-size: 10px;
-  border-radius: 3px;
+/* Ensure consistent button styling for all forms */
+.youtube-groups__subgroup-form .youtube-groups__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /* Ajustar estilo para subgrupos */
 .youtube-groups__option[style*="font-style: italic"] {
-  color: #666;
+  color: #ccc;
   font-weight: normal;
 }
 
@@ -422,4 +323,82 @@ html[dark] .youtube-groups__subscription-groups-form {
 .youtube-groups__tooltip:hover .youtube-groups__tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: #065fd4;
+}
+
+.secondary-button {
+  color: #222;
+  background: #f2f2f2;
+}
+
+.action-button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.mini-action-button {
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.primary-button:hover, .secondary-button:hover {
+  background: #0356bd;
+}
+
+html[dark] .primary-button {
+  color: #8ab4f8;
+  background: #263850;
+}
+
+html[dark] .secondary-button {
+  color: #f1f1f1;
+  background: #3f3f3f;
+}.primary-button {
+  color: #ffffff;
+  background: #065fd4;
+}
+
+.secondary-button {
+  color: #222;
+  background: #f2f2f2;
+}
+
+.action-button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.mini-action-button {
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.primary-button:hover, .secondary-button:hover {
+  background: #0356bd;
+}
+
+html[dark] .primary-button {
+  color: #8ab4f8;
+  background: #263850;
+}
+
+html[dark] .secondary-button {
+  color: #f1f1f1;
+  background: #3f3f3f;
 }
