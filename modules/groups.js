@@ -1,4 +1,27 @@
 const YouTubeGroups = (() => {
+  /**
+   * Busca de forma recursiva un grupo o subgrupo por su id.
+   * Recorre cada grupo y, si existe, recursa dentro de sus subgrupos.
+   *
+   * @param {Array<Object>} groupsArray - Lista de grupos (puede contener subgrupos anidados).
+   * @param {string} id - Id del grupo o subgrupo a buscar.
+   * @returns {Object|null} El grupo/susgrupo encontrado, o null si no existe.
+   */
+  function findGroupById(groupsArray, id) {
+      for (const group of groupsArray) {
+      if (group.id === id) {
+        return group;
+        }
+      if (group.subgroups && group.subgroups.length > 0) {
+        const found = findGroupById(group.subgroups, id);
+        if (found) {
+          return found;
+    }
+  }
+    }
+    return null;
+  }
+
   async function createGroup(name) {
     const groupName = name.trim();
     if (!groupName) {
@@ -12,7 +35,7 @@ const YouTubeGroups = (() => {
       type: "group",
       channels: [],
       subgroups: []
-    };
+  };
 
     groups.push(group);
     await YouTubeGroupsStorage.saveGroups(groups);
@@ -22,7 +45,7 @@ const YouTubeGroups = (() => {
   async function deleteGroup(groupId) {
     const groups = await YouTubeGroupsStorage.getGroups();
     const groupIndex = groups.findIndex((item) => item.id === groupId);
-    
+
     if (groupIndex === -1) {
       throw new Error("No existe el grupo indicado.");
     }
@@ -30,14 +53,15 @@ const YouTubeGroups = (() => {
     // Remove the group
     groups.splice(groupIndex, 1);
     await YouTubeGroupsStorage.saveGroups(groups);
-    
+
     // Note: Active group logic is handled in content.js
     return true;
   }
 
   async function renameGroup(groupId, newName) {
     const groups = await YouTubeGroupsStorage.getGroups();
-    const group = groups.find((item) => item.id === groupId);
+    // Usar búsqueda recursiva para permitir renombrar también subgrupos
+    const group = findGroupById(groups, groupId);
     if (!group) {
       throw new Error("No existe el grupo indicado.");
     }
@@ -60,14 +84,15 @@ const YouTubeGroups = (() => {
     }
 
     const groups = await YouTubeGroupsStorage.getGroups();
-    const group = groups.find((item) => item.id === groupId);
+    // Usar búsqueda recursiva para permitir añadir canales también a subgrupos
+    const group = findGroupById(groups, groupId);
     if (!group) {
       throw new Error("No existe el grupo indicado.");
     }
 
     // Verificar si el canal ya está en este grupo
     const existingChannelIndex = group.channels.findIndex((item) => item.url === channelUrl);
-    
+
     if (existingChannelIndex === -1) {
       // Solo agregar si no existe
       group.channels.push({ name: channelName, url: channelUrl });
@@ -84,7 +109,8 @@ const YouTubeGroups = (() => {
     }
 
     const groups = await YouTubeGroupsStorage.getGroups();
-    const group = groups.find((item) => item.id === groupId);
+    // Usar búsqueda recursiva para permitir eliminar canales también de subgrupos
+    const group = findGroupById(groups, groupId);
     if (!group) {
       throw new Error("No existe el grupo indicado.");
     }
@@ -117,8 +143,8 @@ const YouTubeGroups = (() => {
     }
 
     const groups = await YouTubeGroupsStorage.getGroups();
-    const parentGroup = groups.find((item) => item.id === parentGroupId);
-    
+    const parentGroup = findGroupById(groups, parentGroupId);
+
     if (!parentGroup) {
       throw new Error("No existe el grupo padre indicado.");
     }
@@ -137,7 +163,7 @@ const YouTubeGroups = (() => {
       parentGroup.subgroups = [];
     }
     parentGroup.subgroups.push(subGroup);
-    
+
     await YouTubeGroupsStorage.saveGroups(groups);
     return subGroup;
   }
@@ -145,19 +171,19 @@ const YouTubeGroups = (() => {
   async function deleteSubGroup(subGroupId) {
     const groups = await YouTubeGroupsStorage.getGroups();
     let subGroupDeleted = false;
-    
+
     // Buscar y eliminar el subgrupo en cualquier nivel
     function findAndDeleteSubGroup(groupsArray) {
       for (let i = 0; i < groupsArray.length; i++) {
         const group = groupsArray[i];
-        
+
         // Verificar si es el subgrupo a eliminar
         if (group.id === subGroupId) {
           groupsArray.splice(i, 1);
           subGroupDeleted = true;
           return true;
         }
-        
+
         // Buscar en subgrupos anidados
         if (group.subgroups && group.subgroups.length > 0) {
           if (findAndDeleteSubGroup(group.subgroups)) {
@@ -167,9 +193,9 @@ const YouTubeGroups = (() => {
       }
       return false;
     }
-    
+
     findAndDeleteSubGroup(groups);
-    
+
     if (!subGroupDeleted) {
       throw new Error("No existe el subgrupo indicado.");
     }
@@ -180,19 +206,19 @@ const YouTubeGroups = (() => {
 
   async function getSubGroups(groupId) {
     const groups = await YouTubeGroupsStorage.getGroups();
-    const group = groups.find((item) => item.id === groupId);
-    
+    const group = findGroupById(groups, groupId);
+
     if (!group) {
       throw new Error("No existe el grupo indicado.");
     }
-    
+
     return group.subgroups || [];
   }
 
   // Función para obtener todos los grupos y subgrupos de forma plana
   async function getAllGroupsAndSubGroups() {
     const groups = await YouTubeGroupsStorage.getGroups();
-    
+
     function flattenGroups(groupsArray, result = []) {
       for (const group of groupsArray) {
         result.push(group);
@@ -202,7 +228,7 @@ const YouTubeGroups = (() => {
       }
       return result;
     }
-    
+
     return flattenGroups(groups);
   }
 

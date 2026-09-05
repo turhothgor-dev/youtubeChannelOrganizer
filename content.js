@@ -23,7 +23,7 @@
     "ytd-grid-video-renderer",
     "ytd-compact-video-renderer",
     "ytd-playlist-video-renderer"
-  ].join(", ");
+  ].join(",");
 
   getGroups().catch((error) => {
     console.error("[YouTube Groups] No se pudo inicializar el almacenamiento", error);
@@ -234,8 +234,9 @@
         return;
       }
 
-      try {
-        const groups = await getGroups();
+            try {
+        // Obtener todos los grupos y subgrupos (de forma plana y recursiva)
+        const groups = await getAllGroupsAndSubGroups();
         
         // Mostrar loading mientras se procesan cambios
         const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
@@ -243,7 +244,7 @@
         submitButton.textContent = "Guardando...";
         submitButton.disabled = true;
      
-        // Para cada grupo seleccionado, verificar si el canal ya está asignado
+        // Para cada grupo/susgrupo seleccionado, verificar si el canal ya está asignado
         for (const group of groups) {
           if (selectedGroupIds.has(group.id)) {
             // Verificar si el canal ya está en este grupo
@@ -296,8 +297,9 @@
         return;
       }
 
-      try {
-        const groups = await getGroups();
+            try {
+        // Obtener todos los grupos y subgrupos (de forma plana y recursiva)
+        const groups = await getAllGroupsAndSubGroups();
         
         // Mostrar loading mientras se procesan cambios
         const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
@@ -305,7 +307,7 @@
         submitButton.textContent = "Guardando...";
         submitButton.disabled = true;
      
-        // Para cada grupo seleccionado, verificar si el canal ya está asignado
+        // Para cada grupo/susgrupo seleccionado, verificar si el canal ya está asignado
         for (const group of groups) {
           if (selectedGroupIds.has(group.id)) {
             // Verificar si el canal ya está en este grupo
@@ -468,7 +470,8 @@
       viewChannelsButton.addEventListener("click", async (event) => {
         event.stopPropagation();
         try {
-          const groupsData = await getGroups();
+          // Obtener todos los grupos y subgrupos para localizar también subgrupos
+          const groupsData = await getAllGroupsAndSubGroups();
           const targetGroup = groupsData.find(g => g.id === group.id);
           if (targetGroup && targetGroup.channels && targetGroup.channels.length > 0) {
             console.log("[YouTube Groups][VIEW CHANNELS] Grupo:", targetGroup.name, "Canales:", targetGroup.channels.length);
@@ -556,8 +559,6 @@
 
     function renderAllGroupsForChannel(groupsArray, level = 0) {
       for (const group of groupsArray) {
-        // Solo renderizar grupos principales (no subgrupos) en el formulario de asignación
-        if (group.type !== "subgroup") {
           const label = document.createElement("label");
           label.className = "youtube-groups__group-choice";
 
@@ -577,40 +578,39 @@
 
           label.append(checkbox, groupName);
           currentChannelGroups.append(label);
-        }
-        
+      
         // Procesar subgrupos si existen
-        if (group.subgroups && group.subgroups.length > 0) {
+      if (group.subgroups && group.subgroups.length > 0) {
           renderAllGroupsForChannel(group.subgroups, level + 1);
-        }
       }
     }
+  }
 
-    renderAllGroupsForChannel(groups);
+    renderAllGroupsForChannel(groups, 0);
   }
 
   // Añadir nueva función para obtener todos los canales de un grupo y sus subgrupos
   async function getAllChannelsFromGroup(groupId) {
-    const groups = await getGroups();
+        const groups = await getGroups();
     const group = groups.find((item) => item.id === groupId);
-    
+
     if (!group) {
       return [];
     }
-    
+
     // Función recursiva para obtener todos los canales
     function collectChannels(group) {
-      let channels = [...group.channels];
-      
-      if (group.subgroups && group.subgroups.length > 0) {
-        group.subgroups.forEach(subgroup => {
+        let channels = [...group.channels];
+        
+        if (group.subgroups && group.subgroups.length > 0) {
+          group.subgroups.forEach(subgroup => {
           channels = channels.concat(collectChannels(subgroup));
-        });
+          });
+        }
+        
+        return channels;
       }
-      
-      return channels;
-    }
-    
+
     return collectChannels(group);
   }
 
@@ -646,7 +646,7 @@
 
     for (const link of links) {
       const name = getChannelName(link);
-      const url = normalizeChannelUrl(link.href);
+      const url = normalzeChannelUrl(link.href);
 
       if (name && url) {
         return { name, url };
@@ -702,7 +702,7 @@
       const channel = getChannelFromCard(candidate);
       if (!channel) {
         continue;
-      }
+  }
 
       if (!subscriptionChannelUrls.has(channel.url)) {
         subscriptionChannelUrls.add(channel.url);
@@ -711,11 +711,11 @@
             channelName: channel.name,
             channelUrl: channel.url
           });
-        }
-      }
+    }
+  }
 
       addSubscriptionChannelControl(candidate, channel);
-    }
+  }
 
     if (subscriptionChannelUrls.size === 0 && !subscriptionNoChannelLogged) {
       subscriptionNoChannelLogged = true;
@@ -777,7 +777,10 @@
 
       try {
         const groups = await getGroups();
-        for (const group of groups) {
+
+        // Función recursiva para renderizar grupos y subgrupos en el selector
+        function renderGroupChoices(groupsArray, level = 0) {
+          for (const group of groupsArray) {
           const label = document.createElement("label");
           label.className = "youtube-groups__subscription-group-choice";
 
@@ -789,9 +792,22 @@
           const groupName = document.createElement("span");
           groupName.textContent = group.name;
 
-          label.append(checkbox, groupName);
-          groupsContainer.append(label);
+            // Añadir indentación para subgrupos
+            if (level > 0) {
+              groupName.style.marginLeft = `${level * 12}px`;
         }
+
+            label.append(checkbox, groupName);
+            groupsContainer.append(label);
+
+            // Procesar subgrupos si existen
+        if (group.subgroups && group.subgroups.length > 0) {
+              renderGroupChoices(group.subgroups, level + 1);
+        }
+      }
+        }
+
+        renderGroupChoices(groups);
 
         form.hidden = false;
         console.log("[YouTube Groups][SUBSCRIPTIONS-UI] Selector de grupos abierto", {
@@ -817,10 +833,10 @@
 
       const selectedGroupIds = new Set(
         Array.from(form.querySelectorAll("input:checked"), (input) => input.value)
-      );
+    );
 
-      try {
-        const groups = await getGroups();
+            try {
+        const groups = await getAllGroupsAndSubGroups();
         const groupsToAdd = groups.filter((group) => (
           selectedGroupIds.has(group.id) && !group.channels.some((item) => item.url === channel.url)
         ));
@@ -830,11 +846,11 @@
 
         for (const group of groupsToAdd) {
           await addChannelToGroup(group.id, channel);
-        }
+  }
 
         for (const group of groupsToRemove) {
           await removeChannelFromGroup(group.id, channel.url);
-        }
+    }
 
         await refreshActiveGroupFilter();
         form.hidden = true;
@@ -965,13 +981,13 @@
       // Función recursiva para colectar todos los canales
       function collectAllChannels(group) {
         let channels = [...group.channels];
-        
+
         if (group.subgroups && group.subgroups.length > 0) {
           group.subgroups.forEach(subgroup => {
             channels = channels.concat(collectAllChannels(subgroup));
           });
         }
-        
+
         return channels;
       }
 
@@ -986,39 +1002,38 @@
   function scheduleCard(card) {
     if (card instanceof Element) {
       pendingCards.add(card);
-    }
+        }
 
     if (!processingScheduled) {
       processingScheduled = true;
       requestAnimationFrame(processPendingCards);
-    }
+      }
   }
 
   function processPendingCards() {
     processingScheduled = false;
-
     for (const card of pendingCards) {
       detectCard(card);
-    }
+  }
 
     pendingCards.clear();
-  }
+      }
 
   function scheduleCardsIn(node) {
     if (!(node instanceof Element)) {
       return;
-    }
+        }
 
     scheduleContainingCard(node);
 
     if (node.matches(VIDEO_CARD_SELECTOR)) {
       scheduleCard(node);
-    }
+        }
 
     for (const card of node.querySelectorAll(VIDEO_CARD_SELECTOR)) {
       scheduleCard(card);
+      }
     }
-  }
 
   function scheduleContainingCard(element) {
     const containingCard = element.closest(VIDEO_CARD_SELECTOR);
@@ -1056,10 +1071,10 @@
     currentChannelUpdateScheduled = true;
     requestAnimationFrame(() => {
       currentChannelUpdateScheduled = false;
-      renderGroupsPanel().catch((error) => {
+    renderGroupsPanel().catch((error) => {
         console.error("[YouTube Groups] No se pudo actualizar el canal actual", error);
-      });
     });
+  });
   }
 
   const observer = new MutationObserver((mutations) => {
@@ -1078,8 +1093,7 @@
         }
       }
     }
-
-    scheduleSubscriptionsScan();
+  scheduleSubscriptionsScan();
   });
 
   observer.observe(document.documentElement, {
@@ -1108,3 +1122,4 @@
     console.error("[YouTube Groups] No se pudo cargar el panel de grupos", error);
   });
 })();
+
