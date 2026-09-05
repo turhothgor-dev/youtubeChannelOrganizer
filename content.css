@@ -92,6 +92,14 @@
   vertical-align: middle;
 }
 
+/* Dropdown flotante de suscripciones.
+   Se añade directamente a document.body para evitar que YouTube recorte
+   el selector dentro del flujo de la tarjeta (overflow). */
+.youtube-groups__subscription-dropdown {
+  position: fixed;
+  z-index: 2147483647;
+}
+
 .youtube-groups__subscription-groups-form {
   display: grid;
   gap: 6px;

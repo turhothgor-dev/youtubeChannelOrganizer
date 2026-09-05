@@ -285,67 +285,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     document.body.append(panel);
     return panel;
   }
@@ -745,18 +684,14 @@
     const control = document.createElement("span");
     control.className = "youtube-groups__subscription-control";
     control.dataset.youtubeGroupsSubscriptionChannelUrl = channel.url;
-    control.innerHTML = `
-      <button class="youtube-groups__subscription-add-button action-button primary-button" type="button">Añadir a grupo</button>
-      <form class="youtube-groups__subscription-groups-form" hidden>
-        <div class="youtube-groups__subscription-groups"></div>
-        <div class="youtube-groups__subscription-actions">
-          <button class="youtube-groups__subscription-cancel-button action-button secondary-button" type="button">Cancelar</button>
-          <button class="youtube-groups__subscription-save-button action-button primary-button" type="submit">Guardar</button>
-        </div>
-        <p class="youtube-groups__subscription-error" aria-live="polite"></p>
-      </form>
-    `;
 
+    const button = document.createElement("button");
+    button.className = "youtube-groups__subscription-add-button action-button primary-button";
+    button.type = "button";
+    button.textContent = "Añadir a grupo";
+    control.appendChild(button);
+
+    // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
     control.addEventListener("mousedown", (event) => {
       event.stopPropagation();
     });
@@ -765,22 +700,64 @@
       event.stopPropagation();
     });
 
-    const form = control.querySelector(".youtube-groups__subscription-groups-form");
-    const groupsContainer = control.querySelector(".youtube-groups__subscription-groups");
-    const error = control.querySelector(".youtube-groups__subscription-error");
-
-    control.querySelector(".youtube-groups__subscription-add-button").addEventListener("click", async (event) => {
+    button.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      error.textContent = "";
-      groupsContainer.replaceChildren();
+      await openSubscriptionGroupsForm(channel, button);
+    });
+    return control;
+  }
 
-      try {
-        const groups = await getGroups();
+  // Dropdown flotante único, anclado a document.body para evitar que YouTube
+  // recorte el selector dentro del flujo de la tarjeta (overflow).
+  let subscriptionDropdown = null;
 
-        // Función recursiva para renderizar grupos y subgrupos en el selector
-        function renderGroupChoices(groupsArray, level = 0) {
-          for (const group of groupsArray) {
+  function getOrCreateSubscriptionDropdown() {
+    if (!subscriptionDropdown || !subscriptionDropdown.isConnected) {
+      subscriptionDropdown = createSubscriptionDropdown();
+      document.body.appendChild(subscriptionDropdown);
+
+      // Cerrar dropdown al hacer clic fuera de él
+      document.addEventListener("mousedown", (event) => {
+        if (subscriptionDropdown && !subscriptionDropdown.contains(event.target)) {
+          const form = subscriptionDropdown.querySelector(".youtube-groups__subscription-groups-form");
+          if (form) {
+            form.hidden = true;
+          }
+        }
+      });
+
+            // Cerrar dropdown al hacer scroll para evitar posiciones obsoletas
+      window.addEventListener("scroll", () => {
+        if (subscriptionDropdown) {
+          const form = subscriptionDropdown.querySelector(".youtube-groups__subscription-groups-form");
+          if (form) {
+            form.hidden = true;
+          }
+        }
+      }, { passive: true });
+    }
+    return subscriptionDropdown;
+  }
+
+  function openSubscriptionGroupsForm(channel, anchorButton) {
+    const dropdown = getOrCreateSubscriptionDropdown();
+    const form = dropdown.querySelector(".youtube-groups__subscription-groups-form");
+    const groupsContainer = dropdown.querySelector(".youtube-groups__subscription-groups");
+    const error = dropdown.querySelector(".youtube-groups__subscription-error");
+
+        // Posicionar el dropdown junto al botón pulsado
+    const rect = anchorButton.getBoundingClientRect();
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.top = `${rect.bottom + 6}px`;
+
+    error.textContent = "";
+    groupsContainer.replaceChildren();
+
+    getGroups().then((groups) => {
+      // Función recursiva para renderizar grupos y subgrupos en el selector
+      function renderGroupChoices(groupsArray, level = 0) {
+        for (const group of groupsArray) {
           const label = document.createElement("label");
           label.className = "youtube-groups__subscription-group-choice";
 
@@ -792,34 +769,55 @@
           const groupName = document.createElement("span");
           groupName.textContent = group.name;
 
-            // Añadir indentación para subgrupos
-            if (level > 0) {
-              groupName.style.marginLeft = `${level * 12}px`;
-        }
+          // Añadir indentación para subgrupos
+          if (level > 0) {
+            groupName.style.marginLeft = `${level * 12}px`;
+          }
 
-            label.append(checkbox, groupName);
-            groupsContainer.append(label);
+          label.append(checkbox, groupName);
+          groupsContainer.append(label);
 
-            // Procesar subgrupos si existen
+          // Procesar subgrupos si existen
         if (group.subgroups && group.subgroups.length > 0) {
-              renderGroupChoices(group.subgroups, level + 1);
+            renderGroupChoices(group.subgroups, level + 1);
         }
       }
-        }
-
-        renderGroupChoices(groups);
-
-        form.hidden = false;
-        console.log("[YouTube Groups][SUBSCRIPTIONS-UI] Selector de grupos abierto", {
-          channelName: channel.name,
-          channelUrl: channel.url
-        });
-      } catch (exception) {
-        error.textContent = exception.message;
       }
+
+      renderGroupChoices(groups);
+
+      // Guardar el canal en el formulario para la operación de guardado
+      form.dataset.channelName = channel.name;
+      form.dataset.channelUrl = channel.url;
+
+      form.hidden = false;
+      console.log("[YouTube Groups][SUBSCRIPTIONS-UI] Selector de grupos abierto", {
+        channelName: channel.name,
+        channelUrl: channel.url
+      });
+    }).catch((exception) => {
+      error.textContent = exception.message;
     });
+  }
 
-    control.querySelector(".youtube-groups__subscription-cancel-button").addEventListener("click", (event) => {
+  function createSubscriptionDropdown() {
+    const container = document.createElement("div");
+    container.className = "youtube-groups__subscription-dropdown";
+    container.innerHTML = `
+      <form class="youtube-groups__subscription-groups-form" hidden>
+        <div class="youtube-groups__subscription-groups"></div>
+        <div class="youtube-groups__subscription-actions">
+          <button class="youtube-groups__subscription-cancel-button action-button secondary-button" type="button">Cancelar</button>
+          <button class="youtube-groups__subscription-save-button action-button primary-button" type="submit">Guardar</button>
+        </div>
+        <p class="youtube-groups__subscription-error" aria-live="polite"></p>
+      </form>
+    `;
+
+    const form = container.querySelector(".youtube-groups__subscription-groups-form");
+    const error = container.querySelector(".youtube-groups__subscription-error");
+
+    container.querySelector(".youtube-groups__subscription-cancel-button").addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       form.hidden = true;
@@ -831,11 +829,16 @@
       event.stopPropagation();
       error.textContent = "";
 
+      const channel = {
+        name: form.dataset.channelName,
+        url: form.dataset.channelUrl
+      };
+
       const selectedGroupIds = new Set(
         Array.from(form.querySelectorAll("input:checked"), (input) => input.value)
     );
 
-            try {
+      try {
         const groups = await getAllGroupsAndSubGroups();
         const groupsToAdd = groups.filter((group) => (
           selectedGroupIds.has(group.id) && !group.channels.some((item) => item.url === channel.url)
@@ -865,7 +868,7 @@
       }
     });
 
-    return control;
+    return container;
   }
 
   function addSubscriptionChannelControl(card, channel) {
