@@ -283,68 +283,68 @@
       }
     });
 
-    currentChannelForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      currentChannelError.textContent = "";
 
-      const channel = getCurrentVideoChannel();
-      const selectedGroupIds = new Set(
-        Array.from(currentChannelForm.querySelectorAll("input:checked"), (input) => input.value)
-      );
 
-      if (!channel) {
-        currentChannelError.textContent = "No se ha podido identificar el canal actual.";
-        return;
-      }
 
-            try {
-        // Obtener todos los grupos y subgrupos (de forma plana y recursiva)
-        const groups = await getAllGroupsAndSubGroups();
-        
-        // Mostrar loading mientras se procesan cambios
-        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
-        const originalText = submitButton.textContent;
-        submitButton.textContent = "Guardando...";
-        submitButton.disabled = true;
-     
-        // Para cada grupo/susgrupo seleccionado, verificar si el canal ya está asignado
-        for (const group of groups) {
-          if (selectedGroupIds.has(group.id)) {
-            // Verificar si el canal ya está en este grupo
-            const channelExists = group.channels.some(item => item.url === channel.url);
-            if (!channelExists) {
-              await addChannelToGroup(group.id, channel);
-            }
-          } else {
-            // Si el grupo no está seleccionado pero el canal está en él, removerlo
-            const channelExists = group.channels.some(item => item.url === channel.url);
-            if (channelExists) {
-              await removeChannelFromGroup(group.id, channel.url);
-            }
-          }
-        }
 
-        await renderGroupsPanel();
-        await refreshActiveGroupFilter();
 
-        // Restaurar botón
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-        
-        // Mostrar confirmación
-        currentChannelError.textContent = "Canales asignados correctamente";
-        setTimeout(() => {
-          currentChannelError.textContent = "";
-        }, 3000);
-    
-      } catch (exception) {
-        currentChannelError.textContent = exception.message;
-        // Restaurar botón
-        const submitButton = currentChannelForm.querySelector(".youtube-groups__confirm-channel-button");
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-      }
-    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     document.body.append(panel);
     return panel;
@@ -646,7 +646,7 @@
 
     for (const link of links) {
       const name = getChannelName(link);
-      const url = normalzeChannelUrl(link.href);
+      const url = normalizeChannelUrl(link.href);
 
       if (name && url) {
         return { name, url };
