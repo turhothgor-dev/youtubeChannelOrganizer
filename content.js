@@ -980,10 +980,11 @@
         return;
       }
 
-    // Simple and consistent URL matching
+    // Check if the channel is in the active group using exact match
     const isVisible = activeGroupChannelUrls.has(channelUrl);
+
     setCardVisibility(card, isVisible);
-  }
+    }
   function showAllVideoCards() {
     for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
       setCardVisibility(card, true);
@@ -1023,20 +1024,27 @@
             return;
           }
 
-      // Collect channels properly for the selected group
+      // Debug logging
+      console.log("[YouTube Groups][FILTER] Refreshing filter for group:", activeGroup.name, "type:", activeGroup.type);
+
+      // COLLECT CHANNELS FOR THE ACTIVE GROUP
+      // This is the key fix: ensure we collect the right channels regardless of group type
           let allChannels = [];
 
           if (activeGroup.type === "subgroup") {
             // For subgroups, only use channels directly in this subgroup
+        console.log("[YouTube Groups][FILTER] Processing subgroup:", activeGroup.name);
             allChannels = [...activeGroup.channels];
           } else {
             // For regular groups, collect channels from this group and all its subgroups
+        console.log("[YouTube Groups][FILTER] Processing regular group:", activeGroup.name);
             allChannels = [...activeGroup.channels];
 
             // Add channels from all subgroups recursively
             function addAllSubgroupChannels(group) {
               if (group.subgroups && group.subgroups.length > 0) {
                 group.subgroups.forEach(subgroup => {
+              console.log("[YouTube Groups][FILTER] Adding channels from subgroup:", subgroup.name);
                   allChannels.push(...subgroup.channels);
                   addAllSubgroupChannels(subgroup);
                 });
@@ -1046,16 +1054,23 @@
             addAllSubgroupChannels(activeGroup);
           }
 
-      // Store URLs exactly as they are (they should already be normalized in the groups)
+      console.log("[YouTube Groups][FILTER] Total channels collected:", allChannels.length);
+      console.log("[YouTube Groups][FILTER] Channel URLs to filter:", allChannels.map(c => c.url));
+
+      // Store URLs exactly as they are (they should be normalized in the groups)
       activeGroupChannelUrls = new Set(allChannels.map(channel => channel.url));
-          console.log("[YouTube Groups][FILTER] Active group channels:", allChannels.length, "channels");
+
       console.log("[YouTube Groups][FILTER] Channel URLs in set:", Array.from(activeGroupChannelUrls));
 
+      // Force re-filtering of all detected cards
+  setTimeout(() => {
     filterAllDetectedCards();
-        } catch (error) {
-          console.error("[YouTube Groups][FILTER] No se pudo aplicar el filtro", error);
-        }
-      }
+      }, 0);
+
+    } catch (error) {
+      console.error("[YouTube Groups][FILTER] No se pudo aplicar el filtro", error);
+    }
+  }
 
   function scheduleCard(card) {
     if (card instanceof Element) {
