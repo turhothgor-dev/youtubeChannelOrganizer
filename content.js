@@ -38,7 +38,7 @@
     return activeGroupId;
   }
 
-  function setActiveGroup(group) {
+    function setActiveGroup(group) {
     const nextGroupId = group?.id ?? null;
     if (activeGroupId === nextGroupId) {
       return;
@@ -52,6 +52,12 @@
 
     console.log("[YouTube Groups][FILTER] grupo activo cambiado", group?.name ?? "Todos");
     refreshActiveGroupFilter();
+    
+    // Re-apply filter to all detected cards after refresh
+    setTimeout(() => {
+      filterAllDetectedCards();
+    }, 0);
+    
     renderGroupsPanel().catch((error) => {
       console.error("[YouTube Groups] No se pudo actualizar el grupo activo", error);
     });
@@ -282,7 +288,6 @@
         submitButton.disabled = false;
       }
     });
-
 
 
     document.body.append(panel);
@@ -751,6 +756,7 @@
     dropdown.style.left = `${rect.left}px`;
     dropdown.style.top = `${rect.bottom + 6}px`;
 
+
     error.textContent = "";
     groupsContainer.replaceChildren();
 
@@ -916,9 +922,20 @@
     }
 
     detectedCards.add(card);
-    card.dataset.youtubeGroupsChannelName = channel.name;
-    card.dataset.youtubeGroupsChannelUrl = channel.url;
 
+    // Normalize the channel URL for consistent storage
+    const normalizedUrl = normalizeChannelUrl(channel.url);
+    if (normalizedUrl) {
+    card.dataset.youtubeGroupsChannelName = channel.name;
+      card.dataset.youtubeGroupsChannelUrl = normalizedUrl;
+    } else {
+      // If we can't normalize, use the original URL but log an error
+      card.dataset.youtubeGroupsChannelName = channel.name;
+      card.dataset.youtubeGroupsChannelUrl = channel.url;
+      console.warn("[YouTube Groups] Could not normalize channel URL:", channel.url);
+    }
+
+    // Apply filter immediately when detecting card
     applyFilterToCard(card, channel);
 
     if (!loggedChannelUrls.has(channel.url)) {
@@ -927,26 +944,46 @@
         channelName: channel.name,
         channelUrl: channel.url
       });
-    }
+  }
   }
 
   function setCardVisibility(card, isVisible) {
+    // Always apply the CSS class for filtering
     card.classList.toggle("youtube-groups--filtered-out", !isVisible);
+
+    // Also manage display property for better compatibility
+    if (isVisible) {
+      card.style.display = '';
+      } else {
+      card.style.display = 'none';
+    }
   }
 
-  function applyFilterToCard(card, detectedChannel = null) {
-    const channelUrl = detectedChannel?.url ?? card.dataset.youtubeGroupsChannelUrl;
+    function applyFilterToCard(card, detectedChannel = null) {
+      const channelUrl = detectedChannel?.url ?? card.dataset.youtubeGroupsChannelUrl;
 
-    if (getActiveGroupId() === null || activeGroupChannelUrls === null || !channelUrl) {
-      setCardVisibility(card, true);
-      return;
-    }
+      // If no active group is selected (null), show all cards
+      if (getActiveGroupId() === null) {
+        setCardVisibility(card, true);
+        return;
+      }
 
-    // Ahora se verifica si el canal está en los canales del grupo activo
+      // If we don't have channel info, show card
+      if (!channelUrl) {
+        setCardVisibility(card, true);
+        return;
+      }
+
+      // If we don't have active group channels yet, show card (will be filtered later)
+      if (activeGroupChannelUrls === null) {
+        setCardVisibility(card, true);
+        return;
+      }
+
+    // Simple and consistent URL matching
     const isVisible = activeGroupChannelUrls.has(channelUrl);
     setCardVisibility(card, isVisible);
   }
-
   function showAllVideoCards() {
     for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
       setCardVisibility(card, true);
@@ -959,48 +996,66 @@
     }
   }
 
-  async function refreshActiveGroupFilter() {
-    const updateVersion = ++filterUpdateVersion;
-    const activeId = getActiveGroupId();
-    activeGroupChannelUrls = null;
-    showAllVideoCards();
+      async function refreshActiveGroupFilter() {
+        const updateVersion = ++filterUpdateVersion;
+        const activeId = getActiveGroupId();
 
-    if (activeId === null) {
+        // Reset activeGroupChannelUrls when no group is active
+        if (activeId === null) {
+          activeGroupChannelUrls = null;
+          showAllVideoCards();
       return;
     }
 
-    try {
-      const groups = await getGroups();
-      if (updateVersion !== filterUpdateVersion || activeId !== getActiveGroupId()) {
-        return;
-      }
+        activeGroupChannelUrls = null;
+        showAllVideoCards();
 
-      // Obtener todos los canales del grupo activo y sus subgrupos
-      const activeGroup = groups.find((group) => group.id === activeId);
-      if (!activeGroup) {
-        return;
-      }
+        try {
+          const groups = await getGroups();
+          if (updateVersion !== filterUpdateVersion || activeId !== getActiveGroupId()) {
+            return;
+          }
 
-      // Función recursiva para colectar todos los canales
-      function collectAllChannels(group) {
-        let channels = [...group.channels];
+          // Find the active group
+          const activeGroup = groups.find((group) => group.id === activeId);
+          if (!activeGroup) {
+            console.warn("[YouTube Groups][FILTER] Grupo activo no encontrado", activeId);
+            return;
+          }
 
-        if (group.subgroups && group.subgroups.length > 0) {
-          group.subgroups.forEach(subgroup => {
-            channels = channels.concat(collectAllChannels(subgroup));
-          });
-        }
+      // Collect channels properly for the selected group
+          let allChannels = [];
 
-        return channels;
-      }
+          if (activeGroup.type === "subgroup") {
+            // For subgroups, only use channels directly in this subgroup
+            allChannels = [...activeGroup.channels];
+          } else {
+            // For regular groups, collect channels from this group and all its subgroups
+            allChannels = [...activeGroup.channels];
 
-      const allChannels = collectAllChannels(activeGroup);
+            // Add channels from all subgroups recursively
+            function addAllSubgroupChannels(group) {
+              if (group.subgroups && group.subgroups.length > 0) {
+                group.subgroups.forEach(subgroup => {
+                  allChannels.push(...subgroup.channels);
+                  addAllSubgroupChannels(subgroup);
+                });
+              }
+            }
+
+            addAllSubgroupChannels(activeGroup);
+          }
+
+      // Store URLs exactly as they are (they should already be normalized in the groups)
       activeGroupChannelUrls = new Set(allChannels.map(channel => channel.url));
-      filterAllDetectedCards();
-    } catch (error) {
-      console.error("[YouTube Groups][FILTER] No se pudo aplicar el filtro", error);
-    }
-  }
+          console.log("[YouTube Groups][FILTER] Active group channels:", allChannels.length, "channels");
+      console.log("[YouTube Groups][FILTER] Channel URLs in set:", Array.from(activeGroupChannelUrls));
+
+    filterAllDetectedCards();
+        } catch (error) {
+          console.error("[YouTube Groups][FILTER] No se pudo aplicar el filtro", error);
+        }
+      }
 
   function scheduleCard(card) {
     if (card instanceof Element) {
@@ -1104,7 +1159,7 @@
     subtree: true
   });
 
-  // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
+    // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
   document.addEventListener("yt-navigate-finish", () => {
     detectedCards = new WeakSet();
     loggedChannelUrls = new Set();
@@ -1124,5 +1179,10 @@
   renderGroupsPanel().catch((error) => {
     console.error("[YouTube Groups] No se pudo cargar el panel de grupos", error);
   });
+
+  // Ensure all cards are filtered properly after initialization
+  setTimeout(() => {
+    filterAllDetectedCards();
+  }, 100);
 })();
 

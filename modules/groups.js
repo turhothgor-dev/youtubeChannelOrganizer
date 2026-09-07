@@ -1,5 +1,28 @@
 const YouTubeGroups = (() => {
   /**
+   * Normaliza una URL de canal de YouTube.
+   * @param {string} href - La URL a normalizar
+   * @returns {string|null} La URL normalizada o null si inválida
+   */
+  function normalizeChannelUrl(href) {
+    const url = new URL(href, window.location.origin);
+    if (url.origin !== window.location.origin) {
+    return null;
+  }
+
+    const match = url.pathname.match(/^(\/@[^/]+|\/channel\/[^/]+|\/c\/[^/]+|\/user\/[^/]+)\/?$/);
+
+    if (!match) {
+      return null;
+    }
+
+    const cleanUrl = new URL(match[1], url.origin);
+    cleanUrl.search = "";
+    cleanUrl.hash = "";
+    return cleanUrl.href;
+  }
+
+  /**
    * Busca de forma recursiva un grupo o subgrupo por su id.
    * Recorre cada grupo y, si existe, recursa dentro de sus subgrupos.
    *
@@ -90,12 +113,18 @@ const YouTubeGroups = (() => {
       throw new Error("No existe el grupo indicado.");
     }
 
+    // Normalize the channel URL before storing to ensure consistency
+    const normalizedUrl = normalizeChannelUrl(channelUrl);
+    if (!normalizedUrl) {
+      throw new Error("URL de canal inválida.");
+    }
+
     // Verificar si el canal ya está en este grupo
-    const existingChannelIndex = group.channels.findIndex((item) => item.url === channelUrl);
+    const existingChannelIndex = group.channels.findIndex((item) => item.url === normalizedUrl);
 
     if (existingChannelIndex === -1) {
       // Solo agregar si no existe
-      group.channels.push({ name: channelName, url: channelUrl });
+      group.channels.push({ name: channelName, url: normalizedUrl });
       await YouTubeGroupsStorage.saveGroups(groups);
     }
 
@@ -115,11 +144,17 @@ const YouTubeGroups = (() => {
       throw new Error("No existe el grupo indicado.");
     }
 
-    const remainingChannels = group.channels.filter((item) => item.url !== normalizedChannelUrl);
+    // Normalize the URL for comparison
+    const normalizedUrl = normalizeChannelUrl(normalizedChannelUrl);
+    if (!normalizedUrl) {
+      throw new Error("URL de canal inválida.");
+    }
+
+    const remainingChannels = group.channels.filter((item) => item.url !== normalizedUrl);
     if (remainingChannels.length !== group.channels.length) {
       group.channels = remainingChannels;
-      await YouTubeGroupsStorage.saveGroups(groups);
-    }
+    await YouTubeGroupsStorage.saveGroups(groups);
+  }
 
     return group;
   }
@@ -141,7 +176,6 @@ const YouTubeGroups = (() => {
     if (!groupName) {
       throw new Error("El nombre del grupo no puede estar vacío.");
     }
-
     const groups = await YouTubeGroupsStorage.getGroups();
     const parentGroup = findGroupById(groups, parentGroupId);
 
@@ -156,7 +190,7 @@ const YouTubeGroups = (() => {
       parentId: parentGroupId,
       channels: [],
       subgroups: []
-    };
+  };
 
     // Añadir subgrupo al grupo padre
     if (!parentGroup.subgroups) {
