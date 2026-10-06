@@ -488,6 +488,16 @@
           });
 
           groupOption.appendChild(viewChannelsButton);
+          // --- Icon Picker (singleton lazy) ---
+          const iconButton = document.createElement("button");
+          iconButton.className = "youtube-groups__icon-button action-button secondary-button";
+          iconButton.textContent = "Icono";
+          iconButton.setAttribute("aria-label", "Cambiar icono de " + group.name);
+          iconButton.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            openIconPicker(group, iconButton);
+          });
+          groupOption.appendChild(iconButton);
           groupOption.appendChild(editButton);
           groupOption.appendChild(deleteButton);
           groupOption.addEventListener("click", () => setActiveGroup(group));
@@ -1232,9 +1242,223 @@
     console.error("[YouTube Groups] No se pudo cargar el panel de grupos", error);
   });
 
-  // Ensure all cards are filtered properly after initialization
+    // Ensure all cards are filtered properly after initialization
   setTimeout(() => {
     filterAllDetectedCards();
   }, 100);
+
+  // --- Icon Picker (singleton lazy) ---
+  let iconPicker = null;
+
+  function getOrCreateIconPicker() {
+    if (!iconPicker || !iconPicker.isConnected) {
+      iconPicker = createIconPicker();
+      document.body.appendChild(iconPicker);
+      document.addEventListener("mousedown", (event) => {
+        if (iconPicker && !iconPicker.contains(event.target)) {
+          const form = iconPicker.querySelector(".youtube-groups__icon-picker-form");
+          if (form) {
+            form.hidden = true;
+          }
+        }
+      });
+      window.addEventListener("scroll", () => {
+        if (iconPicker) {
+          const form = iconPicker.querySelector(".youtube-groups__icon-picker-form");
+          if (form) {
+            form.hidden = true;
+          }
+        }
+      }, { passive: true });
+    }
+    return iconPicker;
+  }
+
+  function createIconPicker() {
+    const container = document.createElement("div");
+    container.className = "youtube-groups__icon-picker";
+    container.innerHTML = '<form class="youtube-groups__icon-picker-form" hidden>' +
+      '<div class="youtube-groups__icon-picker-preview"></div>' +
+      '<div class="youtube-groups__icon-picker-section">' +
+      '<p class="youtube-groups__icon-picker-label">Icono</p>' +
+      '<div class="youtube-groups__icon-picker-grid"></div>' +
+      '</div>' +
+      '<div class="youtube-groups__icon-picker-section">' +
+      '<p class="youtube-groups__icon-picker-label">Color</p>' +
+      '<div class="youtube-groups__icon-picker-colors"></div>' +
+      '</div>' +
+      '<div class="youtube-groups__icon-picker-actions">' +
+      '<button class="youtube-groups__icon-picker-cancel action-button secondary-button" type="button">Cancelar</button>' +
+      '<button class="youtube-groups__icon-picker-save action-button primary-button" type="submit">Guardar</button>' +
+      '</div>' +
+      '<p class="youtube-groups__icon-picker-error" aria-live="polite"></p>' +
+      '</form>';
+    
+    const form = container.querySelector(".youtube-groups__icon-picker-form");
+    const error = container.querySelector(".youtube-groups__icon-picker-error");
+    const preview = container.querySelector(".youtube-groups__icon-picker-preview");
+    const iconGrid = container.querySelector(".youtube-groups__icon-picker-grid");
+    const colorGrid = container.querySelector(".youtube-groups__icon-picker-colors");
+    let selectedIconId = "";
+    let selectedColorHex = "";
+    
+    function renderIconGrid(currentIconId) {
+      iconGrid.replaceChildren();
+      selectedIconId = currentIconId || "";
+      const noIconBtn = document.createElement("button");
+      noIconBtn.type = "button";
+      noIconBtn.className = "youtube-groups__icon-picker-option" + (selectedIconId === "" ? " selected" : "");
+      noIconBtn.textContent = "Sin icono";
+      noIconBtn.addEventListener("click", () => {
+        selectedIconId = "";
+        updateIconGridSelection();
+        updatePreview();
+      });
+      iconGrid.appendChild(noIconBtn);
+      for (const icon of YouTubeGroupsIcons.ICON_SET) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "youtube-groups__icon-picker-option" + (selectedIconId === icon.id ? " selected" : "");
+                btn.title = icon.label;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="' + icon.path + '"/></svg>';
+        btn.addEventListener("click", () => {
+          selectedIconId = icon.id;
+          updateIconGridSelection();
+          updatePreview();
+        });
+        iconGrid.appendChild(btn);
+      }
+    }
+    function updateIconGridSelection() {
+      const buttons = iconGrid.querySelectorAll(".youtube-groups__icon-picker-option");
+      buttons.forEach((btn, index) => {
+        if (index === 0) {
+          btn.classList.toggle("selected", selectedIconId === "");
+        } else {
+          const iconId = YouTubeGroupsIcons.ICON_SET[index - 1].id;
+          btn.classList.toggle("selected", selectedIconId === iconId);
+        }
+      });
+    }
+    function renderColorGrid(currentColorHex) {
+      colorGrid.replaceChildren();
+      selectedColorHex = currentColorHex || "";
+      const noColorBtn = document.createElement("button");
+      noColorBtn.type = "button";
+      noColorBtn.className = "youtube-groups__icon-picker-color-option" + (selectedColorHex === "" ? " selected" : "");
+      noColorBtn.textContent = "Heredar";
+      noColorBtn.addEventListener("click", () => {
+        selectedColorHex = "";
+        updateColorGridSelection();
+        updatePreview();
+      });
+      colorGrid.appendChild(noColorBtn);
+      for (const color of YouTubeGroupsIcons.COLOR_SET) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "youtube-groups__icon-picker-color-option" + (selectedColorHex === color.hex ? " selected" : "");
+        btn.style.backgroundColor = color.hex;
+        btn.title = color.id;
+        btn.addEventListener("click", () => {
+          selectedColorHex = color.hex;
+          updateColorGridSelection();
+          updatePreview();
+        });
+        colorGrid.appendChild(btn);
+      }
+    }
+    function updateColorGridSelection() {
+      const buttons = colorGrid.querySelectorAll(".youtube-groups__icon-picker-color-option");
+      buttons.forEach((btn, index) => {
+        if (index === 0) {
+          btn.classList.toggle("selected", selectedColorHex === "");
+        } else {
+          const hex = YouTubeGroupsIcons.COLOR_SET[index - 1].hex;
+          btn.classList.toggle("selected", selectedColorHex === hex);
+        }
+      });
+    }
+    function updatePreview() {
+      preview.replaceChildren();
+      if (!selectedIconId) {
+        const span = document.createElement("span");
+        span.className = "youtube-groups__icon-picker-preview-empty";
+        span.textContent = "Sin icono";
+        preview.appendChild(span);
+        return;
+      }
+      const path = YouTubeGroupsIcons.getIconPath(selectedIconId);
+      if (!path) return;
+      const chip = document.createElement("span");
+      chip.className = "youtube-groups__icon";
+            if (selectedColorHex) {
+        chip.style.color = selectedColorHex;
+      }
+      chip.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="' + path + '"/></svg>';
+      preview.appendChild(chip);
+    }
+    container.querySelector(".youtube-groups__icon-picker-cancel").addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      form.hidden = true;
+      error.textContent = "";
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      error.textContent = "";
+      const groupId = form.dataset.groupId;
+      if (!groupId) {
+        error.textContent = "No se pudo identificar el grupo.";
+        return;
+      }
+      try {
+        await YouTubeGroups.setGroupAppearance(groupId, selectedIconId, selectedColorHex);
+        form.hidden = true;
+        renderGroupsPanel().catch((err) => {
+          console.error("[YouTube Groups] Error re-renderizando panel", err);
+        });
+      } catch (exception) {
+        error.textContent = exception.message;
+      }
+    });
+    container._renderIconGrid = renderIconGrid;
+    container._renderColorGrid = renderColorGrid;
+    container._updatePreview = updatePreview;
+    
+    return container;
+  }
+  function openIconPicker(group, anchorButton) {
+      const picker = getOrCreateIconPicker();
+      const form = picker.querySelector(".youtube-groups__icon-picker-form");
+      const error = picker.querySelector(".youtube-groups__icon-picker-error");
+      const rect = anchorButton.getBoundingClientRect();
+      const pickerWidth = 280;
+      const pickerHeight = 350;
+      let left = rect.left;
+      let top = rect.bottom + 6;
+    
+      // Adjust position to keep picker within viewport
+      if (top + pickerHeight > window.innerHeight) {
+        top = rect.top - pickerHeight - 6;
+      }
+    
+      if (left + pickerWidth > window.innerWidth) {
+        left = window.innerWidth - pickerWidth - 6;
+      }
+    
+      if (left < 6) {
+        left = 6;
+      }
+    
+      picker.style.left = left + "px";
+      picker.style.top = top + "px";
+      form.dataset.groupId = group.id;
+      error.textContent = "";
+      picker._renderIconGrid(group.icon || "");
+      picker._renderColorGrid(group.color || "");
+      picker._updatePreview();
+      form.hidden = false;
+    }
 })();
 
