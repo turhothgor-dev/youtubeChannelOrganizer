@@ -57,7 +57,9 @@ const YouTubeGroups = (() => {
       name: groupName,
       type: "group",
       channels: [],
-      subgroups: []
+      subgroups: [],
+      icon: YouTubeGroupsIcons.NO_ICON,
+      color: YouTubeGroupsIcons.NO_COLOR
   };
 
     groups.push(group);
@@ -189,7 +191,9 @@ const YouTubeGroups = (() => {
       type: "subgroup",
       parentId: parentGroupId,
       channels: [],
-      subgroups: []
+      subgroups: [],
+      icon: YouTubeGroupsIcons.NO_ICON,
+      color: YouTubeGroupsIcons.NO_COLOR
   };
 
     // Añadir subgrupo al grupo padre
@@ -266,6 +270,37 @@ const YouTubeGroups = (() => {
     return flattenGroups(groups);
   }
 
+  /**
+   * Actualiza el icono y color de un grupo o subgrupo en una sola operación
+   * @param {string} groupId - ID del grupo o subgrupo
+   * @param {string} iconId - ID del icono o "" para sin icono
+   * @param {string} colorHex - Color hexadecimal o "" para heredar
+   * @returns {Object} El grupo actualizado
+   * @throws {Error} Si el icono o color son inválidos o el grupo no existe
+   */
+  async function setGroupAppearance(groupId, iconId, colorHex) {
+    // Validaciones
+    if (!YouTubeGroupsIcons.isValidIconId(iconId)) {
+      throw new Error("Icono inválido.");
+    }
+    
+    if (!YouTubeGroupsIcons.isValidColor(colorHex)) {
+      throw new Error("Color inválido.");
+    }
+
+    const groups = await YouTubeGroupsStorage.getGroups();
+    const group = findGroupById(groups, groupId);
+    
+    if (!group) {
+      throw new Error("No existe el grupo indicado.");
+    }
+
+    group.icon = iconId;
+    group.color = colorHex;
+    await YouTubeGroupsStorage.saveGroups(groups);
+    return group;
+  }
+
   return {
     createGroup,
     deleteGroup,
@@ -275,6 +310,7 @@ const YouTubeGroups = (() => {
     createSubGroup,  // Nueva función
     deleteSubGroup,  // Nueva función
     getSubGroups,    // Nueva función
-    getAllGroupsAndSubGroups  // Nueva función
+    getAllGroupsAndSubGroups,  // Nueva función
+    setGroupAppearance  // Nueva función añadida
   };
 })();

@@ -413,3 +413,22 @@ html[dark] .noaction-button {
   cursor: pointer;
   font: inherit;
 }
+
+.youtube-groups__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.youtube-groups__icon svg {
+  display: block;
+}
+
+.youtube-groups__option-name {
+  vertical-align: middle;
+}
