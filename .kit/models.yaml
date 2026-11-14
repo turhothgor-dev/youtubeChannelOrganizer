@@ -1,0 +1,22 @@
+# Modelos por rol (generado por ai-kit desde las respuestas; cámbialos con
+# `make kit-update ARGS="--data clave=valor"`). Los adaptadores leen este fichero.
+#
+# Claude Code solo usa modelos de Anthropic. Cline: modo Plan = arquitecto, modo Act =
+# programador (se configura en sus ajustes: `make ai-models`). Continue: modelos en
+# .continue/models/ai-kit.yaml, se eligen en su selector.
+profile: trabajo
+provider: claude
+
+roles:
+  architect:
+    use: "Planes, diseño y ADR (/crear-plan)"
+    claude-code: opus
+  implementer:
+    use: "Una tarea del plan hasta tests en verde (/implementar-tarea)"
+    claude-code: sonnet
+  reviewer:
+    use: "Revisión del diff contra el plan (/revisar-cambios)"
+    claude-code: opus
+  explorer:
+    use: "Búsquedas en el código"
+    claude-code: haiku

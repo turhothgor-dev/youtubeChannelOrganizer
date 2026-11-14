@@ -1,0 +1,6 @@
+Modelos por rol de youtubeChannelOrganizer (perfil trabajo, proveedor claude). Fuente: .kit/models.yaml
+
+CLAUDE CODE (automático, no hay que configurar nada)
+  /crear-plan        -> subagente architect   (opus)
+  /implementar-tarea -> subagente implementer (sonnet)
+  /revisar-cambios   -> subagente reviewer    (opus)

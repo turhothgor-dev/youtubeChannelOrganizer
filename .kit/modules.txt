@@ -1,0 +1,6 @@
+# Módulos activos de ai-kit (los lee doctor). Generado por el kit.
+adapter-claude-code
+subagents
+env-native
+mcp-docs
+mcp-playwright

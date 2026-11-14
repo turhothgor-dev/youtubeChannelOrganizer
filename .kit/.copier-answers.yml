@@ -1,0 +1,23 @@
+# Respuestas de ai-kit. No lo edites a mano: cambia una respuesta con
+#   copier update --trust --data clave=valor
+# o vuelve a responder todas con: copier update --trust --vcs-ref=HEAD -A
+_commit: v0.13.1-9-g77fe440
+_src_path: /home/turhothgor/Desarrollo/ai-kit
+claude_architect_model: opus
+claude_implementer_model: sonnet
+claude_reviewer_model: opus
+environment: native
+frontend:
+- none
+languages:
+- none
+mcp_servers:
+- docs
+- playwright
+model_profile: trabajo
+project_description: Organiza canales de YouTube en grupos personalizados.
+project_name: youtubeChannelOrganizer
+repo_host: github
+services:
+- none
+subagents: basic

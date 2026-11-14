@@ -1,0 +1,29 @@
+# Secretos y entorno local
+.env
+.env.*
+!.env.example
+.env.ai
+
+# Dependencias
+node_modules/
+vendor/
+
+# Configuración personal de Claude Code (la compartida es .claude/settings.json)
+.claude/settings.local.json
+
+# Editores y sistema
+.idea/workspace.xml
+.idea/shelf/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+.DS_Store
+Thumbs.db
+
+# Salidas
+*.log
+/coverage/
+.phpunit.cache/
+.php-cs-fixer.cache
+phpstan.neon

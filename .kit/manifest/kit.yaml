@@ -1,0 +1,297 @@
+# =============================================================================
+# ai-kit · manifiesto
+# Fuente de verdad de lo que el kit genera (init), comprueba (doctor, audit)
+# y actualiza (update). Copier, doctor y audit leen este fichero.
+#
+# Convenciones:
+#   - Los ids de checks deben existir en doctor/doctor.sh (check_<id_con_guiones_bajos>)
+#     y, si aplican a Windows, en doctor/doctor.ps1.
+#   - severity: critica | alta | media | baja   (nada es bloqueante)
+#   - risk (de un fix): bajo | medio | alto     (alto = confirmación explícita)
+# =============================================================================
+
+kit:
+  name: ai-kit
+  version: 0.14.0 # única versión del kit; debe coincidir con el tag de git al publicar
+  min_versions:          # versión mínima soportada por los adaptadores
+    claude-code: "2.0"
+    cline: "3.36"        # hooks
+    continue: "1.0"
+    phpstorm: "2025.3"
+
+# -----------------------------------------------------------------------------
+# Roles de modelo y perfiles de proveedor (sin secretos: solo nombres de variables)
+# -----------------------------------------------------------------------------
+roles:
+  architect:    { use: "planes, diseño, revisión" }
+  implementer:  { use: "implementar tareas del plan" }
+  fast:         { use: "exploración y tareas mecánicas" }
+  autocomplete: { use: "autocompletado en el editor (Continue)" }
+
+providers:
+  anthropic:
+    key_env: ANTHROPIC_API_KEY
+  scaleway:
+    type: openai-compatible
+    base_url_env: SCW_BASE_URL
+    key_env: SCW_SECRET_KEY
+
+model_profiles:
+  trabajo:
+    architect:    { provider: anthropic, model: claude-opus-5-5 }
+    implementer:  { provider: anthropic, model: claude-sonnet-5-5 }
+    fast:         { provider: anthropic, model: claude-haiku-5-5 }
+    autocomplete: { provider: anthropic, model: claude-haiku-5-5 }
+  personal:
+    # Se elige proveedor (pregunta ai_provider). Scaleway: Cline (Plan = arquitecto, Act =
+    # programador) y/o Continue; ambos Qwen razonan (reasoning_effort: none|low|medium|high).
+    # Claude: Claude Code con los modelos de "claude-code". El trabajo es siempre Claude.
+    architect:    { provider: scaleway,  model: qwen3.5-397b-a17b, reasoning: medium }
+    implementer:  { provider: scaleway,  model: qwen3.6-35b-a3b,   reasoning: low }
+    fast:         { provider: scaleway,  model: qwen3.6-35b-a3b,   reasoning: none }
+    autocomplete: { provider: none }   # Continue: autocompletado sin configurar (elige uno pequeño si lo quieres)
+    claude-code:  { architect: opus, implementer: sonnet, reviewer: sonnet, explorer: haiku }
+    # qwen3-coder-30b-a3b-instruct quedó retirado en Scaleway el 2026-10-01; su sustituto es qwen3.6-35b-a3b.
+
+# -----------------------------------------------------------------------------
+# Núcleo: capacidades que todo proyecto cumple. "satisfied_by" permite que lo
+# existente cuente (adoptar, no imponer).
+# -----------------------------------------------------------------------------
+core:
+  requires: [git, make, git-line-endings, copier, python3, markdownlint, pre-commit, disk-space]
+  capabilities:
+    - id: agents-md
+      desc: "Instrucciones del proyecto para agentes"
+      satisfied_by: [AGENTS.md, CLAUDE.md]
+      generate: AGENTS.md
+      severity: alta
+    - id: skills
+      desc: "Skills localizables con frontmatter name/description"
+      satisfied_by: ["ai/skills/*/SKILL.md", ".claude/skills/*/SKILL.md", ".cline/skills/*/SKILL.md", ".agents/skills/*/SKILL.md"]
+      generate: ai/skills/
+      severity: baja
+    - id: standard-commands
+      desc: "Comandos estándar ejecutables (make o mapeo en .kit/commands.yaml)"
+      satisfied_by: [Makefile, .kit/commands.yaml]
+      generate: .kit/kit.mk          # solo objetivos que falten; nunca redefine
+      targets: [doctor, setup, up, down, test, test-affected, lint, format, typecheck]
+      severity: alta
+    - id: architecture-doc
+      satisfied_by: [docs/ARCHITECTURE.md, ARCHITECTURE.md]
+      generate: docs/ARCHITECTURE.md
+      severity: baja
+    - id: adr-template
+      satisfied_by: ["docs/adr/*.md", "docs/decisions/*.md"]
+      generate: docs/adr/0000-plantilla.md
+      severity: baja
+    - id: plan-template
+      satisfied_by: [docs/plans/PLAN-plantilla.md]
+      generate: docs/plans/PLAN-plantilla.md
+      severity: media
+    - id: env-example
+      desc: "Variables documentadas sin valores"
+      satisfied_by: [.env.example, .env.dist]
+      generate: .env.example
+      severity: media
+    - id: repo-hygiene
+      satisfied_by: [.gitignore, .editorconfig, .gitattributes]
+      merge: true                    # se fusionan, no se reemplazan
+      severity: baja
+    - id: pre-commit
+      desc: "Formato, escaneo de secretos, ficheros grandes"
+      satisfied_by: [.pre-commit-config.yaml, .husky/, captainhook.json, grumphp.yml]
+      generate: .pre-commit-config.yaml
+      severity: media
+    - id: kit-state
+      desc: "Versión del kit, respuestas y módulos activos"
+      generate: [.kit/.copier-answers.yml, .kit/modules.txt]
+      severity: baja
+
+# -----------------------------------------------------------------------------
+# Módulos opcionales
+# -----------------------------------------------------------------------------
+modules:
+  kit-dev:
+    notes: "Solo en el repo del kit: doctor lo añade solo. Lo que necesita make test."
+    requires: [pyyaml, markdownlint, pwsh]
+  adapter-claude-code:
+    generates: [CLAUDE.md, .claude/settings.json, .claude/agents/, .claude/skills/, .claude/commands/, .mcp.json]
+    requires: [claude-cli, anthropic-key]
+  adapter-cline:
+    generates: [.clinerules/, .clinerules/workflows/, .clinerules/hooks/, .clineignore]
+    requires: [vscode-cli, ext-cline, cline-mcp-config]
+    notes: "MCP de Cline es configuración de usuario: el kit genera un fragmento y doctor comprueba si está fusionado. Hooks solo macOS/Linux."
+  adapter-continue:
+    generates: [.continue/agents/, .continue/rules/, .continue/models/, .continue/mcpServers/]
+    requires: [vscode-cli, ext-continue, continue-secrets]
+  adapter-phpstorm:
+    generates: [.idea/ (solo ajustes compartibles)]
+    requires: [phpstorm]
+  # -----------------------------------------------------------------------------
+  # Módulos de lenguaje (backend)
+  # -----------------------------------------------------------------------------
+  lang-python:
+    generates: [Dockerfile.python, .python-version]
+    requires: []
+    notes: "Python con ruff (lint+format) y mypy (tipado)"
+  lang-node:
+    generates: [Dockerfile.node, .nvmrc]
+    requires: []
+    notes: "Node con npm, eslint y prettier"
+  lang-php:
+    generates: [Dockerfile.php, backend/composer.json]
+    requires: []
+    notes: "PHP con composer, PHPStan y PHP-CS-Fixer"
+
+  # -----------------------------------------------------------------------------
+  # Módulos de frontend
+  # -----------------------------------------------------------------------------
+  frontend-react:
+    depends_on: [lang-node]
+    generates: [frontend/ (Vite + TypeScript + CSS Modules)]
+    requires: [node, node-version]
+    ports: { vite: 5173 }
+    notes: "Frontend React con Vite, TypeScript y CSS Modules"
+  frontend-qt6:
+    depends_on: [lang-python]
+    generates: []
+    requires: []
+    notes: "PyQt6/PySide6 - solo nativo (sin devcontainer por problemas X11)"
+
+  # -----------------------------------------------------------------------------
+  # Módulos de servicios
+  # -----------------------------------------------------------------------------
+  svc-mysql:
+    generates: [compose.yaml]  # solo si no existe ningún compose
+    adopts: [compose.yaml, compose.yml, docker-compose.yml, docker-compose.yaml]
+    requires: [docker-cli, docker-real, docker-daemon, docker-permissions, compose-v2]
+    ports: { mysql: 3306 }
+    notes: "MySQL con volumen persistente"
+
+  # -----------------------------------------------------------------------------
+  # Módulos de entorno
+  # -----------------------------------------------------------------------------
+  env-devcontainer:
+    depends_on: [compose-base]
+    generates: [.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/compose.devcontainer.yaml, .devcontainer/post-create.sh]
+    requires: [docker-real, docker-permissions, compose-v2, ports-free]
+    notes: "Opción A: todo en el contenedor (PHP, Node, Python, make, herramientas de IA) y MySQL como servicio. El Makefile detecta AI_KIT_DEVCONTAINER=1 y no usa docker compose dentro. Sin socket de Docker ni ~/.ssh dentro."
+  env-docker-only:
+    depends_on: [compose-base]
+    generates: []
+    requires: [docker-cli, docker-real, docker-daemon, docker-permissions, compose-v2]
+    notes: "Solo compose.yaml, sin devcontainer"
+  env-native:
+    generates: []
+    requires: []
+    notes: "Sin Docker (venv/uv para Qt6, etc.)"
+
+  # -----------------------------------------------------------------------------
+  # Legacy: preset php-mysql-react (se mantiene para compatibilidad)
+  # -----------------------------------------------------------------------------
+  compose-base:
+    generates: [compose.yaml]
+    adopts: [compose.yaml, compose.yml, docker-compose.yml, docker-compose.yaml]
+    requires: [docker-cli, docker-real, docker-daemon, docker-permissions, compose-v2]
+  devcontainer:
+    depends_on: [compose-base]
+    generates: [.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/compose.devcontainer.yaml, .devcontainer/post-create.sh]
+    requires: [docker-real, wsl-repo-location, selinux-mounts, ports-free, devcontainer-extension]
+  preset-php-mysql-react:
+    depends_on: [compose-base]
+    requires: [node, node-version, ports-free]
+    ports: { web: 8080, mysql: 3306, vite: 5173 }
+  ci-bitbucket:
+    generates: [bitbucket-pipelines.yml]
+    requires: []
+  ci-github:
+    generates: [.github/workflows/ci.yml]
+    requires: []
+  mcp-atlassian:
+    requires: [atlassian-token]
+    notes: "Rovo MCP. Bitbucket Cloud solo con token API habilitado por un admin."
+  mcp-docs:
+    requires: [node]
+  mcp-db-local:
+    depends_on: [compose-base]
+    requires: []
+    notes: "Usuario MySQL de solo lectura; nunca producción."
+  mcp-playwright:
+    requires: [node]
+  gcloud-fixtures:
+    generates: [make: db-pull, make: db-restore]
+    requires: [gcloud-cli, gcloud-auth]
+  subagents:
+    generates: [architect, implementer, reviewer, explorer, test-writer]
+    requires: []
+  provider-scaleway:
+    requires: [scaleway-key, scaleway-models]
+
+# -----------------------------------------------------------------------------
+# Checks de doctor (prerrequisitos de la máquina)
+# -----------------------------------------------------------------------------
+checks:
+  git:                { desc: "git instalado", os: [linux, wsl, windows, macos] }
+  make:               { desc: "make instalado", os: [linux, wsl, macos] }
+  git-line-endings:   { desc: "git no convierte a CRLF", os: [wsl, windows], fix_risk: bajo }
+  copier:             { desc: "Copier instalado (crear proyectos y make kit-update)", os: [linux, wsl, windows, macos], fix_risk: bajo }
+  python3:            { desc: "Python 3 (hooks de los agentes, línea de estado, instalación del kit)", os: [linux, wsl, windows, macos], fix_risk: medio }
+  markdownlint:       { desc: "markdownlint-cli2 (make lint-md y format-md; obligatorio para make test del kit)", os: [linux, wsl, windows, macos], fix_risk: bajo }
+  pre-commit:         { desc: "pre-commit instalado y activo en el repo (gitleaks en cada commit)", os: [linux, wsl, windows, macos], fix_risk: bajo }
+  pyyaml:             { desc: "PyYAML para los tests del kit", os: [linux, wsl, windows, macos], fix_risk: bajo }
+  pwsh:               { desc: "PowerShell 7 para validar los .ps1 en make test del kit (opcional)", os: [linux, wsl, windows, macos] }
+  disk-space:         { desc: "Al menos 10 GB libres", os: [linux, wsl, macos] }
+  docker-cli:         { desc: "Comando docker disponible", os: [linux, wsl, windows, macos] }
+  docker-real:        { desc: "docker es Docker Engine, no el shim de Podman; sin moby-engine", os: [linux], fix_risk: alto }
+  docker-daemon:      { desc: "Servicio Docker activo", os: [linux, wsl], fix_risk: medio }
+  docker-permissions: { desc: "Usuario en grupo docker o modo rootless", os: [linux], fix_risk: alto }
+  compose-v2:         { desc: "docker compose (v2) disponible", os: [linux, wsl, windows, macos] }
+  ports-free:         { desc: "Puertos del preset libres", os: [linux, wsl, macos] }
+  wsl-repo-location:  { desc: "Repo dentro de WSL, no en /mnt/c", os: [wsl, windows] }
+  wsl2:               { desc: "WSL2 instalado y por defecto", os: [windows] }
+  docker-desktop-wsl: { desc: "Docker Desktop con integración WSL", os: [windows] }
+  selinux-mounts:     { desc: "Aviso: SELinux en enforcing requiere :z en montajes", os: [linux] }
+  claude-cli:         { desc: "Claude Code instalado", os: [linux, wsl, windows, macos] }
+  anthropic-key:      { desc: "ANTHROPIC_API_KEY o sesión de Claude Code", secret: true }
+  scaleway-key:       { desc: "SCW_SECRET_KEY definida", secret: true }
+  atlassian-token:    { desc: "ATLASSIAN_API_TOKEN definido", secret: true }
+  scaleway-models:    { desc: "Los modelos de .kit/models.yaml existen en Scaleway (consulta /models con tu clave)" }
+  continue-secrets:   { desc: "Los secretos que usa .continue/ están en ~/.continue/.env y no en el .env del proyecto", secret: true }
+  vscode-cli:         { desc: "Comando code disponible" }
+  ext-cline:          { desc: "Extensión Cline instalada (saoudrizwan.claude-dev)" }
+  ext-continue:       { desc: "Extensión Continue instalada (continue.continue)" }
+  cline-mcp-config:   { desc: "Configuración MCP de usuario de Cline presente" }
+  phpstorm:           { desc: "PhpStorm instalado (aviso)" }
+  node:               { desc: "Node instalado" }
+  node-version:       { desc: "Node coincide con .nvmrc / .node-version" }
+  gcloud-cli:         { desc: "gcloud instalado" }
+  gcloud-auth:        { desc: "gcloud con una cuenta activa", secret: true }
+  qt6:                { desc: "PyQt6 o PySide6 instalado (solo nativo)" }
+  venv:               { desc: "venv disponible (solo nativo)" }
+  uv:                 { desc: "uv disponible (solo nativo)" }
+
+# -----------------------------------------------------------------------------
+# Revisión previa del proyecto (audit). Nada es bloqueante.
+# -----------------------------------------------------------------------------
+review:
+  - { id: env-tracked,        severity: critica, desc: "Ficheros de secretos versionados (según convención del stack)", fix: "git rm --cached, rotar secretos" }
+  - { id: secrets-in-history, severity: critica, desc: "Secretos en código o historial (gitleaks)", fix: "rotar y mover a entorno" }
+  - { id: prod-credentials,   severity: critica, desc: "Credenciales de producción en config local", fix: "mover fuera del repo" }
+  - { id: db-dumps-in-repo,   severity: alta,    desc: "Volcados de BD o fixtures con datos personales", fix: "eliminar, usar fixtures anonimizados" }
+  - { id: ports-exposed,      severity: alta,    desc: "Servicios publicados en 0.0.0.0", fix: "publicar en 127.0.0.1" }
+  - { id: env-example-drift,  severity: media,   desc: ".env.example ausente o desalineado", fix: "generar/completar con nombres" }
+  - { id: tests-one-command,  severity: media,   desc: "Tests no ejecutables con un comando", fix: "mapear en make y documentar en AGENTS.md" }
+  - { id: ai-rules-conflict,  severity: media,   desc: "Reglas de IA duplicadas o contradictorias", fix: "revisión humana" }
+  - { id: line-endings,       severity: baja,    desc: "Finales de línea mezclados", fix: ".gitattributes + .editorconfig" }
+  # Añadidos con ai-kit adopt (scripts/kit_adopt.py implementa la auditoría)
+  - { id: prod-access,        severity: alta,    desc: "Objetivos de make o documentación que llevan a producción o a la nube", fix: "bloquearlos para agentes; los ejecuta una persona" }
+  - { id: agent-guardrails,   severity: alta,    desc: "Nada impide a un agente leer secretos o lanzar comandos de producción", fix: "hook de secretos y de producción" }
+  - { id: model-split,        severity: media,   desc: "Sin reparto de modelos arquitecto / programador / revisor", fix: "subagentes con su modelo" }
+  - { id: agents-md,          severity: media,   desc: "Carpeta de trabajo sin AGENTS.md ni CLAUDE.md", fix: "escribirlo con el equipo" }
+  - { id: third-party-skills, severity: info,    desc: "Skills de terceros en el repo", fix: "revisar sus scripts antes de actualizar" }
+
+stack_conventions:
+  symfony: { env_committed: true,  secrets_file: .env.local }
+  laravel: { env_committed: false, secrets_file: .env }
+  node:    { env_committed: false, secrets_file: .env }
+  default: { env_committed: false, secrets_file: .env }
