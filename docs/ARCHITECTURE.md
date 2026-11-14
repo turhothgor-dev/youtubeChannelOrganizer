@@ -37,8 +37,10 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
   de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`);
   en búsqueda, los resultados de canal (`ytd-channel-renderer`) reciben solo "Añadir a grupo". Las recomendaciones de
-  `/watch` son `yt-lockup-view-model`; si la tarjeta no enlaza al canal, `detectCard` lo busca por nombre entre los
-  canales guardados (`buildChannelNameIndex` y `matchChannelByTexts` de `YouTubeGroups`, índice `channelNameIndex`
+  `/watch` son `yt-lockup-view-model` (los de listas y mixes quedan excluidos de `VIDEO_CARD_SELECTOR`); si la
+  tarjeta no enlaza al canal, en páginas de canal `detectCard` usa el canal de la propia página
+  (`getChannelUrlFromPath`) y en el resto lo busca por nombre, solo con los textos de la zona de metadatos
+  (`getChannelTexts`), entre los canales guardados (`buildChannelNameIndex` y `matchChannelByTexts` de `YouTubeGroups`, índice `channelNameIndex`
   recalculado en `renderGroupsPanel`; un nombre con dos URL distintas no se usa). En `yt-navigate-finish` (navegación SPA) se reinicia y se vuelve a recorrer el documento.
 - **Añadir un canal a grupos**: desde el botón de una tarjeta (insertado en el mismo recorrido de tarjetas, uno
   por tarjeta) o desde la sección "Canal actual" del panel en `/watch`. Ambos usan el mismo selector de casillas
@@ -92,8 +94,9 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   puede minimizar con el botón de su cabecera; el estado se guarda en el ajuste `panelCollapsed` y se aplica al leer
   los ajustes y en `storage.onChanged`.
 - **Limpieza**: la sección "Limpieza" del panel (`<details>`) analiza el árbol con `YouTubeGroups.analyzeGroups`:
-  canales repetidos en un mismo grupo (misma `getChannelKey`, se conserva el primero), URL no válidas y grupos sin
-  canales en todo su subárbol. Tras elegir qué quitar y confirmar, `cleanupGroups` lee, aplica `applyCleanup` y
+  canales repetidos en un mismo grupo (misma `getChannelKey`, se conserva el primero), URL no válidas (las
+  recuperables, con `normalizeChannelUrl` no nulo, se corrigen y conservan sus campos; solo se quitan las
+  irrecuperables o las que quedarían repetidas) y grupos sin canales en todo su subárbol. Tras elegir qué quitar y confirmar, `cleanupGroups` lee, aplica `applyCleanup` y
   escribe una sola vez bajo `withGroupsLock`, solo si algo cambia. Después se repinta el panel, se revisa el filtro
   activo (si su grupo se borró, vuelve a "Todos") y se vuelve a analizar.
 - **Copia de seguridad**: la sección "Ajustes" tiene "Exportar copia" e "Importar copia". Exportar descarga

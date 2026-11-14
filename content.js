@@ -1296,10 +1296,23 @@
    * Abre (o repinta) el modal con los vídeos de una lista.
    *
    * @param {string} playlistId - ID de la lista a mostrar.
+   * @param {{ onlyIfOpen?: boolean }} [options] - Con `onlyIfOpen`, no hace nada
+   *   si el modal de esa lista ya no está abierto.
    */
-  async function openPlaylistVideosModal(playlistId) {
+  async function openPlaylistVideosModal(
+    playlistId,
+    { onlyIfOpen = false } = {},
+  ) {
     const playlists = await YouTubeGroupsStorage.getPlaylists();
     const playlist = playlists.find((item) => item.id === playlistId);
+    if (onlyIfOpen) {
+      const openModal = document.querySelector(
+        ".youtube-groups__channel-list-modal--playlist",
+      );
+      if (!openModal || openModal.dataset.playlistId !== playlistId) {
+        return;
+      }
+    }
     closePlaylistModal();
     if (!playlist) {
       return;
@@ -3498,7 +3511,9 @@
             const playlists = storage.readPlaylistsValue(newValue);
             const playlistId = modal.dataset.playlistId;
             if (playlists.some((item) => item.id === playlistId)) {
-              openPlaylistVideosModal(playlistId).catch((error) => {
+              openPlaylistVideosModal(playlistId, {
+                onlyIfOpen: true,
+              }).catch((error) => {
                 console.error(
                   "[YouTube Groups] No se pudo repintar el modal",
                   error,
