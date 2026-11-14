@@ -982,6 +982,7 @@
     const modal = document.createElement("div");
     modal.className =
       "youtube-groups__channel-list-modal youtube-groups__channel-list-modal--playlist";
+    modal.dataset.playlistId = playlistId;
     const content = document.createElement("div");
     content.className = "youtube-groups__channel-list-content";
 
@@ -2779,4 +2780,83 @@
     picker._updatePreview();
     form.hidden = false;
   }
+
+  /**
+   * Aplica a la caché y a la interfaz los cambios que otra pestaña (o esta
+   * misma) ha guardado en el almacenamiento (ADR 0006).
+   * @param {Object} changes - Objeto `changes` de `storage.onChanged`.
+   * @param {string} areaName - Área de almacenamiento del evento.
+   */
+  function handleStorageChange(changes, areaName) {
+    const storage = YouTubeGroupsStorage;
+    const keys = storage.getChangedKeys(changes, areaName);
+
+    for (const name of keys) {
+      const newValue = changes[storage.KEYS[name]].newValue;
+      try {
+        if (name === "watched") {
+          watchedVideos = storage.readWatchedValue(newValue);
+          watchedLoadError = null;
+          watchedAppliedSeq = watchedWriteSeq;
+          for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+            applyWatchedToCard(card);
+          }
+          renderCurrentVideoSection();
+        } else if (name === "settings") {
+          settings = YouTubeGroupsSettings.normalizeSettings(
+            storage.readSettingsValue(newValue),
+          );
+          settingsLoaded = true;
+          settingsLoadError = null;
+          settingsAppliedSeq = settingsWriteSeq;
+          syncSettingsControls();
+          applyVisibilityToAllCards();
+        } else if (name === "groups") {
+          refreshActiveGroupFilter().catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo refrescar el filtro",
+              error,
+            );
+          });
+          renderGroupsPanel().catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo repintar los grupos",
+              error,
+            );
+          });
+        } else if (name === "playlists") {
+          renderPlaylistsSection().catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo repintar las listas",
+              error,
+            );
+          });
+          const modal = document.querySelector(
+            ".youtube-groups__channel-list-modal--playlist",
+          );
+          if (modal) {
+            const playlists = storage.readPlaylistsValue(newValue);
+            const playlistId = modal.dataset.playlistId;
+            if (playlists.some((item) => item.id === playlistId)) {
+              openPlaylistVideosModal(playlistId).catch((error) => {
+                console.error(
+                  "[YouTube Groups] No se pudo repintar el modal",
+                  error,
+                );
+              });
+            } else {
+              closePlaylistModal();
+            }
+          }
+        }
+      } catch (error) {
+        console.error(
+          "[YouTube Groups] No se pudo aplicar el cambio de " + name,
+          error,
+        );
+      }
+    }
+  }
+
+  browser.storage.onChanged.addListener(handleStorageChange);
 })();

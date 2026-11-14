@@ -46,7 +46,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc en funciones nuevas; `make test
   `modules/storage.js`, `tests/storage.test.js` · Test: cada `read*Value` con `undefined`, `null`, formato válido y
   campo de tipo incorrecto; `getChangedKeys` con área `sync` (`[]`), con dos claves en desorden (orden de `KEYS`) y
   con una clave ajena; los tests existentes de `get*` siguen pasando.
-- [ ] T2 · `handleStorageChange` en `content.js` (ver **Decisiones**) y `data-playlist-id` en el modal de lista ·
+- [x] T2 · `handleStorageChange` en `content.js` (ver **Decisiones**) y `data-playlist-id` en el modal de lista ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1–V4.
 - [ ] T3 · Cerrar el plan: `docs/ARCHITECTURE.md` (flujo "Sincronización entre pestañas", fila de `storage.js` con
   los lectores) y ADR 0006 a `aceptada`. Este plan no marca puntos de `ROADMAP.md` (lo hace el plan 4-2). Estado a
@@ -88,3 +88,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: lectores puros y getChangedKeys en storage` | `read*Value` y `getChangedKeys` con tests; los `get*` los reutilizan. |
+| 2026-11-14 | T2 | `feat: sincronizar las pestañas con storage.onChanged` | `handleStorageChange` en `content.js` y `data-playlist-id` en el modal; lint y tests en verde, V1-V4 pendientes a mano. |
