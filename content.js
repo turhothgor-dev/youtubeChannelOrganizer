@@ -258,6 +258,13 @@
     if (watchedButton) {
       updateWatchedButton(watchedButton, videoId, isWatched);
     }
+
+    const playlistButton = card.querySelector(
+      ".youtube-groups__playlist-button",
+    );
+    if (playlistButton) {
+      playlistButton.disabled = !videoId;
+    }
   }
 
   /**
@@ -1536,6 +1543,21 @@
       toggleVideoWatched(findVideoId(card), watchedButton, card);
     });
 
+    const playlistButton = document.createElement("button");
+    playlistButton.className =
+      "youtube-groups__playlist-button action-button secondary-button";
+    playlistButton.type = "button";
+    playlistButton.textContent = "Lista";
+    playlistButton.disabled = !initialVideoId;
+    control.appendChild(playlistButton);
+
+    playlistButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      // Los datos se leen de la tarjeta al abrir: YouTube puede reutilizarla
+      openPlaylistForm(getVideoDataFromCard(card), playlistButton);
+    });
+
     // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
     control.addEventListener("mousedown", (event) => {
       event.stopPropagation();
@@ -1753,6 +1775,294 @@
           if (submitOpenId === subscriptionDropdownOpenCount) {
             submitButton.disabled = false;
           }
+        }
+      }
+    });
+
+    return container;
+  }
+
+  /**
+   * Lee del DOM los datos de una tarjeta para guardarla en una lista.
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {{id: string|null, title: string, channelName: string}} Datos del vídeo.
+   */
+  function getVideoDataFromCard(card) {
+    let title = card.querySelector("#video-title")?.textContent.trim() ?? "";
+    if (!title) {
+      for (const link of card.querySelectorAll("a[href]")) {
+        if (YouTubeGroupsWatched.extractVideoId(link.getAttribute("href"))) {
+          title = link.getAttribute("title")?.trim() || link.textContent.trim();
+          break;
+        }
+      }
+    }
+
+    return {
+      id: findVideoId(card),
+      title,
+      channelName: getChannelFromCard(card)?.name ?? "",
+    };
+  }
+
+  // Desplegable flotante único para guardar un vídeo en listas
+  let playlistDropdown = null;
+  let playlistDropdownOpenCount = 0;
+
+  function hidePlaylistDropdown() {
+    const form = playlistDropdown?.querySelector(
+      ".youtube-groups__playlist-dropdown-form",
+    );
+    if (form) {
+      form.hidden = true;
+    }
+  }
+
+  function getOrCreatePlaylistDropdown() {
+    if (!playlistDropdown || !playlistDropdown.isConnected) {
+      playlistDropdown = createPlaylistDropdown();
+      document.body.appendChild(playlistDropdown);
+
+      // Cerrar al hacer clic fuera o al hacer scroll (posiciones obsoletas)
+      document.addEventListener("mousedown", (event) => {
+        if (playlistDropdown && !playlistDropdown.contains(event.target)) {
+          hidePlaylistDropdown();
+        }
+      });
+      window.addEventListener("scroll", hidePlaylistDropdown, {
+        passive: true,
+      });
+    }
+
+    return playlistDropdown;
+  }
+
+  /**
+   * Pinta las casillas de las listas con textContent.
+   * @param {Element} container - Contenedor de las casillas.
+   * @param {Array} playlists - Listas guardadas.
+   * @param {Set<string>} checkedIds - IDs de lista marcados.
+   */
+  function renderPlaylistChoices(container, playlists, checkedIds) {
+    container.replaceChildren();
+    if (playlists.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "youtube-groups__empty-choices";
+      empty.textContent = "Aún no hay listas.";
+      container.appendChild(empty);
+      return;
+    }
+
+    for (const playlist of playlists) {
+      const label = document.createElement("label");
+      label.className = "youtube-groups__playlist-choice";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = playlist.id;
+      input.checked = checkedIds.has(playlist.id);
+      const text = document.createElement("span");
+      text.textContent = playlist.name;
+      label.append(input, text);
+      container.appendChild(label);
+    }
+  }
+
+  /**
+   * Abre el desplegable para guardar un vídeo en listas.
+   * @param {{id: string|null, title: string, channelName: string}} video - Datos del vídeo.
+   * @param {Element} anchorButton - Botón junto al que se muestra.
+   */
+  function openPlaylistForm(video, anchorButton) {
+    const dropdown = getOrCreatePlaylistDropdown();
+    const form = dropdown.querySelector(
+      ".youtube-groups__playlist-dropdown-form",
+    );
+    const choices = dropdown.querySelector(".youtube-groups__playlist-choices");
+    const error = dropdown.querySelector(
+      ".youtube-groups__playlist-dropdown-error",
+    );
+    const submitButton = form.querySelector("button[type='submit']");
+
+    // Cada apertura invalida las respuestas pendientes de aperturas anteriores
+    playlistDropdownOpenCount += 1;
+    const openId = playlistDropdownOpenCount;
+
+    error.textContent = "";
+    choices.replaceChildren();
+    submitButton.disabled = true;
+    form.dataset.videoId = "";
+    form.dataset.videoTitle = "";
+    form.dataset.videoChannel = "";
+    form.querySelector(".youtube-groups__playlist-dropdown-input").value = "";
+
+    if (!video || !video.id) {
+      error.textContent = "No se ha podido identificar el vídeo.";
+      form.hidden = false;
+      positionSubscriptionDropdown(dropdown, form, anchorButton);
+      return;
+    }
+
+    YouTubeGroupsStorage.getPlaylists()
+      .then((playlists) => {
+        if (openId !== playlistDropdownOpenCount) {
+          return;
+        }
+
+        renderPlaylistChoices(
+          choices,
+          playlists,
+          new Set(
+            YouTubeGroupsPlaylists.getVideoPlaylistIds(playlists, video.id),
+          ),
+        );
+        form.dataset.videoId = video.id;
+        form.dataset.videoTitle = video.title;
+        form.dataset.videoChannel = video.channelName;
+        submitButton.disabled = false;
+        form.hidden = false;
+        positionSubscriptionDropdown(dropdown, form, anchorButton);
+      })
+      .catch((exception) => {
+        if (openId === playlistDropdownOpenCount) {
+          error.textContent = exception.message;
+          form.hidden = false;
+          positionSubscriptionDropdown(dropdown, form, anchorButton);
+        }
+      });
+  }
+
+  function createPlaylistDropdown() {
+    const container = document.createElement("div");
+    container.className = "youtube-groups__playlist-dropdown";
+    container.innerHTML = `
+      <form class="youtube-groups__playlist-dropdown-form" hidden>
+        <div class="youtube-groups__playlist-choices"></div>
+        <div class="youtube-groups__playlist-new">
+          <input class="youtube-groups__playlist-dropdown-input" type="text" placeholder="Nueva lista" maxlength="80">
+          <button class="youtube-groups__playlist-dropdown-create action-button secondary-button" type="button">Crear</button>
+        </div>
+        <div class="youtube-groups__subscription-actions">
+          <button class="youtube-groups__playlist-dropdown-cancel action-button secondary-button" type="button">Cancelar</button>
+          <button class="youtube-groups__playlist-dropdown-save action-button primary-button" type="submit">Guardar</button>
+        </div>
+        <p class="youtube-groups__playlist-dropdown-error" aria-live="polite"></p>
+      </form>
+    `;
+
+    const form = container.querySelector(
+      ".youtube-groups__playlist-dropdown-form",
+    );
+    const choices = container.querySelector(
+      ".youtube-groups__playlist-choices",
+    );
+    const input = container.querySelector(
+      ".youtube-groups__playlist-dropdown-input",
+    );
+    const error = container.querySelector(
+      ".youtube-groups__playlist-dropdown-error",
+    );
+    const createButton = container.querySelector(
+      ".youtube-groups__playlist-dropdown-create",
+    );
+
+    // Los clics dentro del desplegable no deben llegar a YouTube
+    container.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
+    container
+      .querySelector(".youtube-groups__playlist-dropdown-cancel")
+      .addEventListener("click", (event) => {
+        event.preventDefault();
+        form.hidden = true;
+        error.textContent = "";
+      });
+
+    async function createFromInput() {
+      error.textContent = "";
+      const currentOpenId = playlistDropdownOpenCount;
+      createButton.disabled = true;
+      try {
+        const checked = new Set(
+          Array.from(
+            form.querySelectorAll("input[type='checkbox']:checked"),
+            (checkbox) => checkbox.value,
+          ),
+        );
+        const created = await YouTubeGroupsPlaylists.createPlaylist(
+          input.value,
+        );
+        checked.add(created.id);
+        await renderPlaylistsSection();
+        if (currentOpenId === playlistDropdownOpenCount) {
+          const playlists = await YouTubeGroupsStorage.getPlaylists();
+          if (currentOpenId === playlistDropdownOpenCount) {
+            renderPlaylistChoices(choices, playlists, checked);
+            input.value = "";
+          }
+        }
+      } catch (exception) {
+        if (currentOpenId === playlistDropdownOpenCount) {
+          error.textContent = exception.message;
+        }
+      } finally {
+        createButton.disabled = false;
+      }
+    }
+
+    createButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      createFromInput();
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        createFromInput();
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      error.textContent = "";
+
+      if (!form.dataset.videoId) {
+        return;
+      }
+
+      const video = {
+        id: form.dataset.videoId,
+        title: form.dataset.videoTitle,
+        channelName: form.dataset.videoChannel,
+      };
+      const submitOpenId = playlistDropdownOpenCount;
+      const selectedIds = new Set(
+        Array.from(
+          form.querySelectorAll("input[type='checkbox']:checked"),
+          (checkbox) => checkbox.value,
+        ),
+      );
+
+      const submitButton = form.querySelector("button[type='submit']");
+      const originalText = submitButton.textContent;
+      submitButton.textContent = "Guardando...";
+      submitButton.disabled = true;
+
+      try {
+        await YouTubeGroupsPlaylists.setVideoPlaylists(video, selectedIds);
+        await renderPlaylistsSection();
+        if (submitOpenId === playlistDropdownOpenCount) {
+          form.hidden = true;
+        }
+      } catch (exception) {
+        if (submitOpenId === playlistDropdownOpenCount) {
+          error.textContent = exception.message;
+        }
+      } finally {
+        submitButton.textContent = originalText;
+        if (submitOpenId === playlistDropdownOpenCount) {
+          submitButton.disabled = false;
         }
       }
     });

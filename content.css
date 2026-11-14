@@ -269,7 +269,22 @@ html[dark] .youtube-groups__playlist-input {
   z-index: 2147483647;
 }
 
-.youtube-groups__subscription-groups-form {
+.youtube-groups__playlist-button {
+  margin-left: 6px;
+}
+
+.youtube-groups__playlist-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.youtube-groups__playlist-dropdown {
+  position: fixed;
+  z-index: 2147483647;
+}
+
+.youtube-groups__subscription-groups-form,
+.youtube-groups__playlist-dropdown-form {
   display: grid;
   gap: 6px;
   width: 220px;
@@ -282,18 +297,37 @@ html[dark] .youtube-groups__playlist-input {
   box-shadow: 0 4px 12px rgb(0 0 0 / 16%);
 }
 
-.youtube-groups__subscription-groups-form[hidden] {
+.youtube-groups__subscription-groups-form[hidden],
+.youtube-groups__playlist-dropdown-form[hidden] {
   display: none;
 }
 
-.youtube-groups__subscription-groups {
+.youtube-groups__subscription-groups,
+.youtube-groups__playlist-choices {
   display: grid;
   gap: 5px;
   max-height: 140px;
   overflow-y: auto;
 }
 
-.youtube-groups__subscription-group-choice {
+.youtube-groups__playlist-new {
+  display: flex;
+  gap: 6px;
+}
+
+.youtube-groups__playlist-dropdown-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #d8d8d8;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.youtube-groups__subscription-group-choice,
+.youtube-groups__playlist-choice {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -312,7 +346,8 @@ html[dark] .youtube-groups__playlist-input {
   gap: 6px;
 }
 
-.youtube-groups__subscription-error {
+.youtube-groups__subscription-error,
+.youtube-groups__playlist-dropdown-error {
   min-height: 14px;
   margin: 0;
   color: #c00;
@@ -445,9 +480,14 @@ html[dark] .youtube-groups__current-channel {
   border-color: #555;
 }
 
-html[dark] .youtube-groups__subscription-groups-form {
+html[dark] .youtube-groups__subscription-groups-form,
+html[dark] .youtube-groups__playlist-dropdown-form {
   color: #f1f1f1;
   background: #212121;
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__playlist-dropdown-input {
   border-color: #555;
 }
 
