@@ -27,5 +27,5 @@
 - ✅ Limpieza de canales
 - ☐ Auto-reproducción
 - ☐ Soporte para Shorts
-- ☐ Soporte para resultados de búsqueda
+- ✅ Soporte para resultados de búsqueda
 - ☐ Soporte para recomendaciones
