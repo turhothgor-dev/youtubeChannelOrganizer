@@ -65,7 +65,7 @@ Cada tarea termina con `make lint` (0 avisos) y `make test` en verde.
   (`tests/pages.test.js`): `"/@foo/videos"`, `"/@foo"` y `"/@foo/"` → `origin + "/@foo"`;
   `"/channel/UCabc/shorts"` → `origin + "/channel/UCabc"`; `"/@%C3%B1u/videos"` conserva la codificación;
   `"/watch"`, `"/"`, `"/shorts/abc"` y `undefined` → `null`. A mano V1.
-- [ ] T2 · Limpieza corrige URL recuperables (sugerencia d) · Ficheros: `modules/groups.js`, `tests/groups.test.js`,
+- [x] T2 · Limpieza corrige URL recuperables (sugerencia d) · Ficheros: `modules/groups.js`, `tests/groups.test.js`,
   `content.js` (textos de la sección Limpieza) · Test (`tests/groups.test.js`): `applyCleanup(..., { invalid: true })`
   cambia `.../@ñu` por `.../@%C3%B1u` y `.../@x/videos` por `.../@x` conservando `name`; quita `42`, `"no-url"` y
   `https://example.com/@x`; quita la recuperable cuya URL corregida ya está en el grupo; `changed` es `true`;
@@ -116,6 +116,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-14 | T2 | Las subrutas (`/@x/videos`) se consideran irrecuperables y se quitan; tests con `/@x?a=1` y `/@y#b` | `normalizeChannelUrl` devuelve `null` con subrutas y cambiarla afectaría al filtro en toda la extensión | Persona (delegó decisiones a la opción recomendada) |
 
 ## Registro
 
@@ -124,3 +125,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | fix: usar el canal de la página en páginas de canal | `getChannelUrlFromPath` y uso en `detectCard`; V1 pendiente a mano |
+| 2026-11-14 | T2 | fix: corregir las URL recuperables en la limpieza | `applyCleanup`/`analyzeGroups` (`fixedUrl`) y textos del panel; `normalizeChannelUrl` devuelve null con subrutas (`/@x/videos`), así que esas son irrecuperables y los tests usan `?a=1`; V2 pendiente a mano |

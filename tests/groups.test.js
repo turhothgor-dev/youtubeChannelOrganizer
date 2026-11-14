@@ -626,6 +626,60 @@ test("applyCleanup quita repetidos e inválidas y después los grupos que quedan
   assert.deepStrictEqual(result.removedGroupIds.sort(), ["b", "b1"]);
 });
 
+test("applyCleanup corrige las URL recuperables y quita las irrecuperables", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    grp("a", [
+      ch("Ñu", `${YT}/@ñu`),
+      ch("X", `${YT}/@x?a=1`),
+      { name: "num", url: 42 },
+      ch("txt", "no-url"),
+      ch("otro", "https://example.com/@x"),
+    ]),
+  ];
+
+  const result = plain(YouTubeGroups.applyCleanup(groups, { invalid: true }));
+
+  assert.strictEqual(result.changed, true);
+  assert.deepStrictEqual(result.groups[0].channels, [
+    ch("Ñu", `${YT}/@%C3%B1u`),
+    ch("X", `${YT}/@x`),
+  ]);
+});
+
+test("applyCleanup quita la recuperable cuya URL corregida ya está en el grupo", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    grp("a", [ch("X1", `${YT}/@x?a=1`), ch("X2", `${YT}/@x`)]),
+    grp("b", [ch("Y1", `${YT}/@y?a=1`), ch("Y2", `${YT}/@y#b`)]),
+  ];
+
+  const result = plain(YouTubeGroups.applyCleanup(groups, { invalid: true }));
+
+  assert.strictEqual(result.changed, true);
+  assert.deepStrictEqual(result.groups[0].channels, [ch("X2", `${YT}/@x`)]);
+  assert.deepStrictEqual(result.groups[1].channels, [ch("Y1", `${YT}/@y`)]);
+});
+
+test("analyzeGroups da fixedUrl en las recuperables y null en las demás", () => {
+  const { YouTubeGroups } = loadModules();
+  const result = plain(
+    YouTubeGroups.analyzeGroups([
+      grp("a", [
+        ch("n", `${YT}/@ñu`),
+        ch("x", `${YT}/@x?a=1`),
+        ch("j", "javascript:x"),
+        { name: "num", url: 42 },
+      ]),
+    ]),
+  );
+
+  assert.deepStrictEqual(
+    result.invalid.map((item) => item.fixedUrl),
+    [`${YT}/@%C3%B1u`, `${YT}/@x`, null, null],
+  );
+});
+
 test("cleanupGroups sin nada que limpiar no escribe", async () => {
   const { YouTubeGroups, calls } = loadModules({
     youtubeGroups: { version: 1, groups: [grp("a", [ch("x", `${YT}/@x`)])] },

@@ -677,7 +677,14 @@
       const describeChannel = (item) =>
         item.groupName + " › " + item.name + " (" + item.url + ")";
       appendSection("Canales repetidos", analysis.duplicates, describeChannel);
-      appendSection("URL no válidas", analysis.invalid, describeChannel);
+      appendSection(
+        "URL no válidas",
+        analysis.invalid,
+        (item) =>
+          describeChannel(item) +
+          " " +
+          (item.fixedUrl ? "→ " + item.fixedUrl : "(se quitará)"),
+      );
       appendSection("Grupos vacíos", analysis.emptyGroups, (item) => item.name);
       result.hidden = false;
       syncApplyButton();
@@ -795,7 +802,7 @@
               </label>
               <label class="youtube-groups__cleanup-option">
                 <input type="checkbox" class="youtube-groups__cleanup-invalid" checked>
-                <span>Quitar URL no válidas</span>
+                <span>Corregir URL no válidas</span>
               </label>
               <label class="youtube-groups__cleanup-option">
                 <input type="checkbox" class="youtube-groups__cleanup-empty">

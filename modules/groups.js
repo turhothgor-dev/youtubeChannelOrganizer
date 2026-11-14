@@ -627,6 +627,22 @@ const YouTubeGroups = (() => {
   }
 
   /**
+   * Devuelve la URL corregida de una URL guardada recuperable.
+   * @param {*} url - Valor guardado.
+   * @returns {string|null} La URL normalizada, o null si no es recuperable.
+   */
+  function getFixedChannelUrl(url) {
+    if (typeof url !== "string") {
+      return null;
+    }
+    try {
+      return normalizeChannelUrl(url) || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Indica si un grupo no tiene canales en todo su subárbol.
    * @param {Object} group - Grupo o subgrupo.
    * @returns {boolean} true si está vacío.
@@ -643,7 +659,7 @@ const YouTubeGroups = (() => {
    * @param {Array<Object>} groups - Árbol de grupos.
    * @returns {{
    *   duplicates: Array<{groupId: string, groupName: string, name: string, url: string, keptUrl: string}>,
-   *   invalid: Array<{groupId: string, groupName: string, name: string, url: *}>,
+   *   invalid: Array<{groupId: string, groupName: string, name: string, url: *, fixedUrl: string|null}>,
    *   emptyGroups: Array<{id: string, name: string}>
    * }} Resultado del análisis.
    */
@@ -668,6 +684,7 @@ const YouTubeGroups = (() => {
               groupName: group.name,
               name: channel.name,
               url: channel.url,
+              fixedUrl: getFixedChannelUrl(channel.url),
             });
             continue;
           }
@@ -718,10 +735,27 @@ const YouTubeGroups = (() => {
         const copy = { ...group };
         if (Array.isArray(group.channels)) {
           const seen = new Set();
+          const validKeys = new Set();
+          const fixedKeys = new Set();
+          for (const channel of group.channels) {
+            if (!isInvalidChannelUrl(channel.url)) {
+              validKeys.add(getChannelKey(channel.url));
+            }
+          }
           copy.channels = [];
           for (const channel of group.channels) {
             if (invalid && isInvalidChannelUrl(channel.url)) {
               changed = true;
+              const fixedUrl = getFixedChannelUrl(channel.url);
+              if (fixedUrl === null) {
+                continue;
+              }
+              const fixedKey = getChannelKey(fixedUrl);
+              if (validKeys.has(fixedKey) || fixedKeys.has(fixedKey)) {
+                continue;
+              }
+              fixedKeys.add(fixedKey);
+              copy.channels.push({ ...channel, url: fixedUrl });
               continue;
             }
             if (duplicates && !isInvalidChannelUrl(channel.url)) {
