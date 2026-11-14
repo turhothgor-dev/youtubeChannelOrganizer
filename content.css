@@ -219,6 +219,21 @@ html[dark] .youtube-groups__setting select {
   font-size: 12px;
 }
 
+.youtube-groups__play-visible {
+  margin-top: 8px;
+}
+
+.youtube-groups__play-visible-message {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #0f0f0f;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__play-visible-message {
+  color: #f1f1f1;
+}
+
 html[dark] .youtube-groups__cleanup {
   border-color: #555;
 }

@@ -755,6 +755,8 @@
             <button class="youtube-groups__create-button action-button primary-button" type="button">Crear grupo</button>
           </div>
           <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
+          <button class="youtube-groups__play-visible action-button secondary-button" type="button">Reproducir lo visible</button>
+          <p class="youtube-groups__play-visible-message" aria-live="polite"></p>
           <section class="youtube-groups__current-channel" hidden>
             <h3 class="youtube-groups__section-title">Canal actual</h3>
             <p class="youtube-groups__channel-name"></p>
@@ -879,6 +881,37 @@
           autoMarkHandledIds.add(videoId);
         }
         toggleVideoWatched(videoId, event.currentTarget);
+      });
+
+    const playVisibleMessage = panel.querySelector(
+      ".youtube-groups__play-visible-message",
+    );
+    panel
+      .querySelector(".youtube-groups__play-visible")
+      .addEventListener("click", () => {
+        playVisibleMessage.textContent = "";
+        const entries = [];
+        for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+          const id = card.getAttribute(VIDEO_ID_ATTRIBUTE);
+          if (!id) {
+            continue;
+          }
+          entries.push({
+            id,
+            visible: card.checkVisibility(),
+            hidden: card.classList.contains("youtube-groups--hidden"),
+            dimmed: card.classList.contains("youtube-groups--dimmed"),
+            watched: card.classList.contains(WATCHED_CLASS),
+          });
+        }
+        const url = YouTubeGroupsPlaylists.buildWatchVideosUrl(
+          YouTubeGroupsPlaylists.selectQueueIds(entries),
+        );
+        if (url) {
+          window.location.assign(url);
+        } else {
+          playVisibleMessage.textContent = "No hay vídeos visibles sin ver.";
+        }
       });
 
     panel

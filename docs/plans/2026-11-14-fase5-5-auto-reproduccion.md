@@ -41,7 +41,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   `modules/playlists.js`, `tests/playlists.test.js` · Test: IDs repetidos e inválidos se quitan conservando el orden;
   60 IDs dan 50; `[]` da `null`; los tests de `buildPlayAllUrl` siguen pasando; `selectQueueIds` excluye ocultas,
   atenuadas, vistas y no visibles y quita repetidos.
-- [ ] T2 · Botón "Reproducir lo visible" y estilos (claro y `html[dark]`) · Ficheros: `content.js`, `content.css` ·
+- [x] T2 · Botón "Reproducir lo visible" y estilos (claro y `html[dark]`) · Ficheros: `content.js`, `content.css` ·
   Test: `make lint`, `make test` y a mano V1–V3.
 - [ ] T3 · Cerrar el plan: `ROADMAP.md` marca ✅ "Auto-reproducción"; `docs/ARCHITECTURE.md` (flujo "Reproducir lo
   visible", funciones nuevas en la fila de `playlists.js`). Estado a `hecho` · Ficheros: `ROADMAP.md`,
@@ -80,3 +80,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: cola de reproducción de lo visible (URL y selección)` | `buildWatchVideosUrl` y `selectQueueIds`; `buildPlayAllUrl` delega en la primera. |
+| 2026-11-14 | T2 | `feat: botón Reproducir lo visible en el panel` | Botón, mensaje aria-live y estilos claro/oscuro; V1–V3 pendientes a mano. |
