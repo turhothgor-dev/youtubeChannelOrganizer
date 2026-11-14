@@ -345,6 +345,24 @@
   }
 
   /**
+   * Lee del DOM los datos del vídeo abierto en /watch para guardarlo en una lista.
+   * @returns {{id: string|null, title: string, channelName: string}} Datos del vídeo.
+   */
+  function getCurrentWatchVideoData() {
+    let title =
+      document.querySelector("ytd-watch-metadata h1")?.textContent.trim() ?? "";
+    if (!title) {
+      title = document.title.replace(/ - YouTube$/, "").trim();
+    }
+
+    return {
+      id: getCurrentWatchVideoId(),
+      title,
+      channelName: getCurrentVideoChannel()?.name ?? "",
+    };
+  }
+
+  /**
    * Muestra u oculta la sección "Vídeo actual" del panel y refleja su estado.
    */
   function renderCurrentVideoSection() {
@@ -531,6 +549,7 @@
           <section class="youtube-groups__current-video" hidden>
             <h3 class="youtube-groups__section-title">Vídeo actual</h3>
             <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
+            <button class="youtube-groups__current-playlist-button action-button secondary-button" type="button">Guardar en lista</button>
           </section>
           <details class="youtube-groups__playlists">
             <summary>Listas</summary>
@@ -611,6 +630,14 @@
           autoMarkHandledIds.add(videoId);
         }
         toggleVideoWatched(videoId, event.currentTarget);
+      });
+
+    panel
+      .querySelector(".youtube-groups__current-playlist-button")
+      .addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openPlaylistForm(getCurrentWatchVideoData(), event.currentTarget);
       });
 
     const settingsError = panel.querySelector(
