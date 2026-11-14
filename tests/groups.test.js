@@ -625,3 +625,60 @@ test("applyCleanup quita repetidos e inválidas y después los grupos que quedan
   assert.deepStrictEqual(result.groups[0].channels, [ch("F", `${YT}/@F`)]);
   assert.deepStrictEqual(result.removedGroupIds.sort(), ["b", "b1"]);
 });
+
+test("cleanupGroups sin nada que limpiar no escribe", async () => {
+  const { YouTubeGroups, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: [grp("a", [ch("x", `${YT}/@x`)])] },
+  });
+
+  const result = await YouTubeGroups.cleanupGroups({
+    duplicates: true,
+    invalid: true,
+    emptyGroups: true,
+  });
+
+  assert.strictEqual(result.changed, false);
+  assert.strictEqual(calls.set, 0);
+});
+
+test("cleanupGroups con duplicados escribe una vez", async () => {
+  const { YouTubeGroups, store, calls } = loadModules({
+    youtubeGroups: {
+      version: 1,
+      groups: [grp("a", [ch("F", `${YT}/@F`), ch("f", `${YT}/@f`)])],
+    },
+  });
+
+  const result = await YouTubeGroups.cleanupGroups({ duplicates: true });
+
+  assert.strictEqual(result.changed, true);
+  assert.strictEqual(calls.set, 1);
+  assert.deepStrictEqual(store.youtubeGroups.groups[0].channels.length, 1);
+});
+
+test("cleanupGroups a la vez que createGroup no pierde el grupo creado", async () => {
+  const { YouTubeGroups, store } = loadModules(
+    {
+      youtubeGroups: {
+        version: 1,
+        groups: [grp("a", [ch("F", `${YT}/@F`), ch("f", `${YT}/@f`)])],
+      },
+    },
+    { latencyMs: 5 },
+  );
+
+  await Promise.all([
+    YouTubeGroups.cleanupGroups({ duplicates: true }),
+    YouTubeGroups.createGroup("Nuevo"),
+  ]);
+
+  const groups = store.youtubeGroups.groups;
+  assert.deepStrictEqual(
+    groups.map((group) => group.name).sort(),
+    ["Nuevo", "a".toUpperCase()].sort(),
+  );
+  assert.strictEqual(
+    groups.find((group) => group.id === "a").channels.length,
+    1,
+  );
+});

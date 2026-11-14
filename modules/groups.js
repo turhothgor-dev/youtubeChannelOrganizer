@@ -708,11 +708,33 @@ const YouTubeGroups = (() => {
     return { groups: result, changed, removedGroupIds };
   }
 
+  /**
+   * Aplica la limpieza elegida sobre los grupos guardados, en una sola
+   * escritura y solo si hay cambios.
+   * @param {{duplicates?: boolean, invalid?: boolean, emptyGroups?: boolean}} options
+   *   Qué limpiezas aplicar.
+   * @returns {Promise<{changed: boolean, removedGroupIds: string[]}>} Resultado.
+   */
+  async function cleanupGroups(options = {}) {
+    return withGroupsLock(async () => {
+      const groups = await YouTubeGroupsStorage.getGroups();
+      const result = applyCleanup(groups, options);
+      if (result.changed) {
+        await YouTubeGroupsStorage.saveGroups(result.groups);
+      }
+      return {
+        changed: result.changed,
+        removedGroupIds: result.removedGroupIds,
+      };
+    });
+  }
+
   return {
     normalizeChannelUrl,
     getChannelKey,
     analyzeGroups,
     applyCleanup,
+    cleanupGroups,
     flattenGroups,
     getGroupAppearance,
     createGroup,
