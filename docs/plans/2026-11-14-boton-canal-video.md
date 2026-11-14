@@ -1,6 +1,6 @@
 # Plan: cerrar el botón "Añadir a grupo" del canal de cada vídeo
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: commit d6b6a8d `feat(videos): added button to add video's channel to groups. WIP`, revisado tras el merge
 de `origin/master` (d3ef534), que reescribió `content.js` y añadió `modules/`, subgrupos y multi-asignación.
@@ -175,7 +175,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   respecto a la última pintada; si es la misma, no se toca nada (el formulario sigue abierto con lo marcado).
   `renderGroupsPanel` (cambios de grupos, guardado, navegación) sigue repintándolo todo · Ficheros: `content.js`
   · Test: `make lint`, `make test` y a mano V6.
-- [ ] T8 · "Ver canales" sin `innerHTML` interpolado. Construir el modal de la lista de canales con
+- [x] T8 · "Ver canales" sin `innerHTML` interpolado. Construir el modal de la lista de canales con
   `createElement` y `textContent` (título con el nombre del grupo y número de canales, un `li` por canal con
   nombre y URL), con las mismas clases y el mismo comportamiento de cierre · Ficheros: `content.js` · Test:
   `make lint` muestra un aviso `UNSAFE_VAR_ASSIGNMENT` menos que antes (3 en lugar de 4); a mano: un grupo con un
@@ -260,3 +260,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T5 | `feat: un botón por tarjeta en suscripciones dentro del recorrido de tarjetas` (propuesto) | Eliminado `scanSubscriptionsPage` y su estado; `findChannelLink` y `ensureChannelControl` desde `processPendingCards`; el control lee el canal de la tarjeta al pulsar y avisa si no hay; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V1, V2 y V3 a mano. |
 | 2026-11-14 | T6 | `feat: mostrar el botón de canal también en la página de inicio` (propuesto) | `shouldShowChannelControls` cierto en `/` y en suscripciones; `max-width: 100%` en el control; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V1, V2 y V8 a mano (el ajuste de CSS no está verificado en la rejilla real). |
 | 2026-11-14 | T7 | `fix: no repintar el formulario del canal actual si el canal no cambia` (propuesto) | `renderCurrentChannelSection` separada; las mutaciones del propietario solo la repintan si cambia la URL del canal; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V6 a mano. |
+| 2026-11-14 | T8 | `fix: construir el modal de Ver canales sin innerHTML interpolado` (propuesto) | Modal con `createElement` y `textContent`; avisos `UNSAFE_VAR_ASSIGNMENT` de 4 a 3; 14 tests en verde. Pendiente a mano la comprobación con un nombre `<b>x</b>`. |

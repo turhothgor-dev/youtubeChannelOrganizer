@@ -488,33 +488,46 @@
               document.body.removeChild(existingModal);
             }
 
-            let channelListHtml = `<h4>Canales en "${targetGroup.name}" (${targetGroup.channels.length})</h4><ul>`;
-            for (const channel of targetGroup.channels) {
-              channelListHtml += `<li><strong>${channel.name}</strong><br>${channel.url}</li>`;
-            }
-            channelListHtml += "</ul>";
-
-            // Create a simple modal-like display
             const modal = document.createElement("div");
             modal.className = "youtube-groups__channel-list-modal";
-            modal.innerHTML = `
-                  <div class="youtube-groups__channel-list-content">
-                    <div class="youtube-groups__channel-list-header">
-                      <h3>Lista de Canales</h3>
-                      <button class="youtube-groups__close-channels-button" type="button">×</button>
-                    </div>
-                    ${channelListHtml}
-                  </div>
-                `;
 
+            const content = document.createElement("div");
+            content.className = "youtube-groups__channel-list-content";
+
+            const header = document.createElement("div");
+            header.className = "youtube-groups__channel-list-header";
+            const headerTitle = document.createElement("h3");
+            headerTitle.textContent = "Lista de Canales";
+            const closeButton = document.createElement("button");
+            closeButton.className = "youtube-groups__close-channels-button";
+            closeButton.type = "button";
+            closeButton.textContent = "×";
+            header.append(headerTitle, closeButton);
+
+            const listTitle = document.createElement("h4");
+            listTitle.textContent = `Canales en "${targetGroup.name}" (${targetGroup.channels.length})`;
+
+            const list = document.createElement("ul");
+            for (const channel of targetGroup.channels) {
+              const item = document.createElement("li");
+              const channelName = document.createElement("strong");
+              channelName.textContent = channel.name;
+              item.append(
+                channelName,
+                document.createElement("br"),
+                channel.url,
+              );
+              list.appendChild(item);
+            }
+
+            content.append(header, listTitle, list);
+            modal.appendChild(content);
             document.body.appendChild(modal);
 
             // Add close functionality
-            modal
-              .querySelector(".youtube-groups__close-channels-button")
-              .addEventListener("click", () => {
-                document.body.removeChild(modal);
-              });
+            closeButton.addEventListener("click", () => {
+              document.body.removeChild(modal);
+            });
 
             // Close when clicking outside
             modal.addEventListener("click", (event) => {
