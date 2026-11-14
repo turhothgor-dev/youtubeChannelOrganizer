@@ -120,7 +120,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
   dos vídeos distintos en la misma lista a la vez deja los dos vídeos; una operación que falla por validación
   (`renamePlaylist` de una lista inexistente) a la vez que un `createPlaylist` no impide que la lista se cree. Los
   tests existentes siguen pasando sin cambios.
-- [ ] T4 · Serializar los grupos. En `modules/groups.js`, `createGroup`, `deleteGroup`, `renameGroup`,
+- [x] T4 · Serializar los grupos. En `modules/groups.js`, `createGroup`, `deleteGroup`, `renameGroup`,
   `addChannelToGroup`, `removeChannelFromGroup`, `setChannelGroups`, `createSubGroup`, `deleteSubGroup` y
   `setGroupAppearance` hacen lectura, cálculo y escritura dentro de `withLock(KEYS.groups, ...)` · Ficheros:
   `modules/groups.js`, `tests/groups.test.js` · Test (con `latencyMs: 5` y `Promise.all`): dos `createGroup` a la
@@ -205,3 +205,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | fix: no marcar automáticamente hasta leer los ajustes | `handleVideoProgress` sale si `!settingsLoaded`. Pendiente V1 a mano. |
 | 2026-11-14 | T2 | feat: cola de escrituras por clave en el almacenamiento | `KEYS` y `withLock` en `modules/storage.js`, `latencyMs` en el simulador y ADR 0005 aceptada. |
 | 2026-11-14 | T3 | fix: serializar las escrituras de vistos, ajustes y listas | `setVideoWatched`, `updateSettings` y `update` de listas dentro de `withLock`. Con `latencyMs: 5` los 3 tests de solapamiento fallaban sin la cola; el de validación + `createPlaylist` pasa también sin ella (operaciones independientes). |
+| 2026-11-14 | T4 | fix: serializar las escrituras de grupos | Las 10 operaciones de `modules/groups.js` dentro de `withLock(KEYS.groups)` mediante el helper `withGroupsLock`. Con `latencyMs: 5` fallaban sin la cola los tests de `setChannelGroups` y de `createSubGroup` + `setGroupAppearance`; los de dos `createGroup` y `renameGroup` inexistente + `createGroup` pasan también sin ella (el simulador devuelve la misma referencia del array y las operaciones no compiten). |

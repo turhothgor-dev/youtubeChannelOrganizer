@@ -399,3 +399,69 @@ test("setChannelGroups no escribe sin cambios ni con error", async () => {
   );
   assert.strictEqual(calls.set, 0);
 });
+
+test("dos createGroup a la vez dejan dos grupos", async () => {
+  const { YouTubeGroups, store } = loadModules({}, { latencyMs: 5 });
+
+  await Promise.all([
+    YouTubeGroups.createGroup("Uno"),
+    YouTubeGroups.createGroup("Dos"),
+  ]);
+
+  assert.deepStrictEqual(
+    store.youtubeGroups.groups.map((group) => group.name).sort(),
+    ["Dos", "Uno"],
+  );
+});
+
+test("setChannelGroups de dos canales a la vez al mismo grupo conserva los dos", async () => {
+  const { YouTubeGroups, store } = loadModules(
+    { youtubeGroups: seedGroups() },
+    { latencyMs: 5 },
+  );
+  const other = { name: "Otro canal", url: `${YT}/@otro` };
+
+  await Promise.all([
+    YouTubeGroups.setChannelGroups(CHANNEL, ["g1", "g2"]),
+    YouTubeGroups.setChannelGroups(other, ["g1"]),
+  ]);
+
+  const g1 = store.youtubeGroups.groups.find((group) => group.id === "g1");
+  assert.deepStrictEqual(g1.channels.map((channel) => channel.url).sort(), [
+    `${YT}/@handle`,
+    `${YT}/@otro`,
+  ]);
+});
+
+test("createSubGroup y setGroupAppearance a la vez conservan ambos cambios", async () => {
+  const { YouTubeGroups, store } = loadModules(
+    { youtubeGroups: seedGroups() },
+    { latencyMs: 5 },
+  );
+
+  await Promise.all([
+    YouTubeGroups.createSubGroup("g2", "Nuevo"),
+    YouTubeGroups.setGroupAppearance("g2", "", "#ff0000"),
+  ]);
+
+  const g2 = store.youtubeGroups.groups.find((group) => group.id === "g2");
+  assert.strictEqual(g2.subgroups.length, 1);
+  assert.strictEqual(g2.subgroups[0].name, "Nuevo");
+  assert.strictEqual(g2.color, "#ff0000");
+});
+
+test("renameGroup inexistente a la vez que createGroup rechaza y guarda el grupo nuevo", async () => {
+  const { YouTubeGroups, store } = loadModules({}, { latencyMs: 5 });
+
+  const [renamed, created] = await Promise.allSettled([
+    YouTubeGroups.renameGroup("no-existe", "X"),
+    YouTubeGroups.createGroup("Nuevo"),
+  ]);
+
+  assert.strictEqual(renamed.status, "rejected");
+  assert.strictEqual(created.status, "fulfilled");
+  assert.deepStrictEqual(
+    store.youtubeGroups.groups.map((group) => group.name),
+    ["Nuevo"],
+  );
+});
