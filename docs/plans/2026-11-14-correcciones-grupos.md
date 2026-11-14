@@ -1,6 +1,6 @@
 # Plan: correcciones de grupos, desplegable, filtro y tarjetas reutilizadas
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: fallos detectados en la revisión del plan `docs/plans/2026-11-14-boton-canal-video.md` (estado `hecho`;
 el borrado de subgrupos figuraba en su **Fuera de alcance** como "para otro plan").
@@ -114,7 +114,7 @@ quitar los `console.log`/`console.debug` de diagnóstico de las funciones que se
   `Set` y llama a `filterAllDetectedCards()` sin `setTimeout`. En `setActiveGroup`, quitar el
   `setTimeout(filterAllDetectedCards)` y el `console.log` de cambio de grupo · Ficheros: `content.js` · Test:
   `make lint`, `make test` y a mano V4 y V5.
-- [ ] T4 · Releer el canal de tarjetas reutilizadas. En `content.js`: `detectedCards` pasa a `WeakMap` (también en
+- [x] T4 · Releer el canal de tarjetas reutilizadas. En `content.js`: `detectedCards` pasa a `WeakMap` (también en
   `yt-navigate-finish`); `detectCard` sigue la regla de **Decisiones** (usar `findChannelLink` una vez para obtener
   enlace, nombre y URL normalizada, sin la rama `console.warn` de URL no normalizable, que no puede darse porque
   `findChannelLink` ya exige URL de canal); quitar `loggedChannelUrls` y su `console.debug`. El observador añade
@@ -189,3 +189,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | `fix: eliminar grupos y subgrupos a cualquier nivel` | `removeGroupById` pura, `deleteGroup` devuelve `removedIds`; V1 pendiente a mano |
 | 2026-11-14 | T2 | `fix: no guardar en el desplegable hasta cargar el canal` | Guardar deshabilitado y `dataset` vacío al abrir; `submit` ignora canal vacío y respeta `subscriptionDropdownOpenCount`; V2 y V3 pendientes a mano |
 | 2026-11-14 | T3 | `fix: aplicar el filtro de grupo sin mostrar todas las tarjetas` | `refreshActiveGroupFilter` no resetea el filtro con grupo activo y filtra de forma síncrona; grupo inexistente llama a `setActiveGroup(null)`; sin `setTimeout` en `setActiveGroup`; V4 y V5 pendientes a mano |
+| 2026-11-14 | T4 | `fix: releer el canal de las tarjetas reutilizadas` | `detectedCards` pasa a `WeakMap` con `{ link, href }`; `detectCard` relee si cambia el enlace; observador con `attributeFilter: ["href"]`; sin `loggedChannelUrls`; V6 y V7 pendientes a mano |

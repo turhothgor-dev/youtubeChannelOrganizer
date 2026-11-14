@@ -706,8 +706,7 @@
     return collectChannels(group);
   }
 
-  let detectedCards = new WeakSet();
-  let loggedChannelUrls = new Set();
+  let detectedCards = new WeakMap();
   const pendingCards = new Set();
   let processingScheduled = false;
 
@@ -1014,42 +1013,36 @@
   }
 
   function detectCard(card) {
-    if (detectedCards.has(card) || !card.isConnected) {
+    if (!card.isConnected) {
       return;
     }
 
-    const channel = getChannelFromCard(card);
-    if (!channel) {
+    // Saltar la tarjeta solo si su enlace de canal sigue siendo el mismo
+    const known = detectedCards.get(card);
+    if (known && card.contains(known.link) && known.link.href === known.href) {
       return;
     }
 
-    detectedCards.add(card);
-
-    // Normalize the channel URL for consistent storage
-    const normalizedUrl = normalizeChannelUrl(channel.url);
-    if (normalizedUrl) {
-      card.dataset.youtubeGroupsChannelName = channel.name;
-      card.dataset.youtubeGroupsChannelUrl = normalizedUrl;
-    } else {
-      // If we can't normalize, use the original URL but log an error
-      card.dataset.youtubeGroupsChannelName = channel.name;
-      card.dataset.youtubeGroupsChannelUrl = channel.url;
-      console.warn(
-        "[YouTube Groups] Could not normalize channel URL:",
-        channel.url,
-      );
+    const link = findChannelLink(card);
+    if (!link) {
+      // La tarjeta ya no tiene canal: borrar los datos del anterior
+      detectedCards.delete(card);
+      delete card.dataset.youtubeGroupsChannelName;
+      delete card.dataset.youtubeGroupsChannelUrl;
+      return;
     }
+
+    const channel = {
+      name: getChannelName(link),
+      url: normalizeChannelUrl(link.href),
+    };
+
+    detectedCards.set(card, { link, href: link.href });
+    card.dataset.youtubeGroupsChannelName = channel.name;
+    card.dataset.youtubeGroupsChannelUrl = channel.url;
 
     // Apply filter immediately when detecting card
     applyFilterToCard(card, channel);
-
-    if (!loggedChannelUrls.has(channel.url)) {
-      loggedChannelUrls.add(channel.url);
-      console.debug("[YouTube Groups] Canal detectado correctamente", {
-        channelName: channel.name,
-        channelUrl: channel.url,
-      });
-    }
   }
 
   function setCardVisibility(card, isVisible) {
@@ -1262,12 +1255,13 @@
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
+    attributes: true,
+    attributeFilter: ["href"],
   });
 
   // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
   document.addEventListener("yt-navigate-finish", () => {
-    detectedCards = new WeakSet();
-    loggedChannelUrls = new Set();
+    detectedCards = new WeakMap();
     clearDetectedChannelData();
     scanDocument();
     refreshActiveGroupFilter();
