@@ -119,7 +119,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   `/@handle/videos` y otro origen dan `null`; `createSubGroup` anida el subgrupo con `type: "subgroup"` y
   `parentId`; `addChannelToGroup` sobre un subgrupo guarda la URL normalizada y no duplica). `make test`,
   `make lint`, y `make build` genera un `.zip` sin `tests/` (comprobar con `unzip -l web-ext-artifacts/*.zip`).
-- [ ] T2 · Guardado único de la pertenencia. En `modules/groups.js`, añadir y exportar
+- [x] T2 · Guardado único de la pertenencia. En `modules/groups.js`, añadir y exportar
   `applyChannelGroupSelection(groups, channel, selectedGroupIds)`, pura: recorre grupos y subgrupos a cualquier
   nivel; devuelve `{ groups, addedGroupIds, removedGroupIds }` sin mutar la entrada; valida nombre y URL (mensaje
   "El canal debe incluir nombre y URL.") y normaliza la URL ("URL de canal inválida." si no es un canal); no
@@ -254,3 +254,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `test: añadir base de tests y exportar normalizeChannelUrl del módulo` (propuesto) | Helper vm, tests de storage y groups, `tests` fuera del paquete; 6 tests en verde, lint sin avisos nuevos. |
+| 2026-11-14 | T2 | `feat: guardar la pertenencia del canal en una sola escritura` (propuesto) | `applyChannelGroupSelection` y `setChannelGroups` en el módulo; los dos formularios los usan, con `finally` y refresco de panel y filtro; 12 tests en verde, lint sin avisos nuevos (4). Pendiente V3 a mano. |

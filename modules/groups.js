@@ -167,6 +167,78 @@ const YouTubeGroups = (() => {
     return group;
   }
 
+  /**
+   * Calcula, sin mutar la entrada, la pertenencia de un canal a los grupos y
+   * subgrupos (a cualquier nivel) para que quede exactamente en los indicados.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {{name: string, url: string}} channel - Canal a asignar.
+   * @param {Iterable<string>} selectedGroupIds - Ids de los grupos marcados.
+   * @returns {{groups: Array<Object>, addedGroupIds: string[], removedGroupIds: string[]}}
+   */
+  function applyChannelGroupSelection(groups, channel, selectedGroupIds) {
+    const channelName = channel?.name?.trim();
+    const channelUrl = channel?.url?.trim();
+    if (!channelName || !channelUrl) {
+      throw new Error("El canal debe incluir nombre y URL.");
+    }
+
+    const normalizedUrl = normalizeChannelUrl(channelUrl);
+    if (!normalizedUrl) {
+      throw new Error("URL de canal inválida.");
+    }
+
+    const selected = new Set(selectedGroupIds);
+    const addedGroupIds = [];
+    const removedGroupIds = [];
+
+    function visit(group) {
+      const copy = { ...group };
+      const channels = Array.isArray(group.channels) ? group.channels : [];
+      const isMember = channels.some((item) => item.url === normalizedUrl);
+
+      if (selected.has(group.id) && !isMember) {
+        copy.channels = [
+          ...channels.map((item) => ({ ...item })),
+          { name: channelName, url: normalizedUrl },
+        ];
+        addedGroupIds.push(group.id);
+      } else if (!selected.has(group.id) && isMember) {
+        copy.channels = channels
+          .filter((item) => item.url !== normalizedUrl)
+          .map((item) => ({ ...item }));
+        removedGroupIds.push(group.id);
+      } else {
+        copy.channels = channels.map((item) => ({ ...item }));
+      }
+
+      if (Array.isArray(group.subgroups)) {
+        copy.subgroups = group.subgroups.map(visit);
+      }
+      return copy;
+    }
+
+    return { groups: groups.map(visit), addedGroupIds, removedGroupIds };
+  }
+
+  /**
+   * Deja el canal exactamente en los grupos indicados: una lectura y, si hay
+   * cambios, una sola escritura.
+   */
+  async function setChannelGroups(channel, selectedGroupIds) {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    const result = applyChannelGroupSelection(
+      groups,
+      channel,
+      selectedGroupIds,
+    );
+
+    if (result.addedGroupIds.length > 0 || result.removedGroupIds.length > 0) {
+      await YouTubeGroupsStorage.saveGroups(result.groups);
+    }
+
+    return result;
+  }
+
   // Nueva función para verificar si un canal está en un grupo
   function isChannelInGroup(group, channelUrl) {
     return group.channels.some((item) => item.url === channelUrl);
@@ -314,6 +386,8 @@ const YouTubeGroups = (() => {
     renameGroup,
     addChannelToGroup,
     removeChannelFromGroup,
+    applyChannelGroupSelection,
+    setChannelGroups,
     createSubGroup, // Nueva función
     deleteSubGroup, // Nueva función
     getSubGroups, // Nueva función

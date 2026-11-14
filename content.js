@@ -9,8 +9,7 @@
     createGroup,
     deleteGroup,
     renameGroup,
-    addChannelToGroup,
-    removeChannelFromGroup,
+    setChannelGroups,
     createSubGroup, // Nueva función
     deleteSubGroup, // Nueva función
     getSubGroups, // Nueva función
@@ -277,57 +276,25 @@
         return;
       }
 
+      const submitButton = currentChannelForm.querySelector(
+        ".youtube-groups__confirm-channel-button",
+      );
+      const originalText = submitButton.textContent;
+      submitButton.textContent = "Guardando...";
+      submitButton.disabled = true;
+
       try {
-        // Obtener todos los grupos y subgrupos (de forma plana y recursiva)
-        const groups = await getAllGroupsAndSubGroups();
-
-        // Mostrar loading mientras se procesan cambios
-        const submitButton = currentChannelForm.querySelector(
-          ".youtube-groups__confirm-channel-button",
-        );
-        const originalText = submitButton.textContent;
-        submitButton.textContent = "Guardando...";
-        submitButton.disabled = true;
-
-        // Para cada grupo/susgrupo seleccionado, verificar si el canal ya está asignado
-        for (const group of groups) {
-          if (selectedGroupIds.has(group.id)) {
-            // Verificar si el canal ya está en este grupo
-            const channelExists = group.channels.some(
-              (item) => item.url === channel.url,
-            );
-            if (!channelExists) {
-              await addChannelToGroup(group.id, channel);
-            }
-          } else {
-            // Si el grupo no está seleccionado pero el canal está en él, removerlo
-            const channelExists = group.channels.some(
-              (item) => item.url === channel.url,
-            );
-            if (channelExists) {
-              await removeChannelFromGroup(group.id, channel.url);
-            }
-          }
-        }
-
+        await setChannelGroups(channel, selectedGroupIds);
         await renderGroupsPanel();
         await refreshActiveGroupFilter();
 
-        // Restaurar botón
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-
-        // Mostrar confirmación
         currentChannelError.textContent = "Canales asignados correctamente";
         setTimeout(() => {
           currentChannelError.textContent = "";
         }, 3000);
       } catch (exception) {
         currentChannelError.textContent = exception.message;
-        // Restaurar botón
-        const submitButton = currentChannelForm.querySelector(
-          ".youtube-groups__confirm-channel-button",
-        );
+      } finally {
         submitButton.textContent = originalText;
         submitButton.disabled = false;
       }
@@ -1009,37 +976,25 @@
         ),
       );
 
+      const submitButton = form.querySelector("button[type='submit']");
+      const originalText = submitButton?.textContent;
+      if (submitButton) {
+        submitButton.textContent = "Guardando...";
+        submitButton.disabled = true;
+      }
+
       try {
-        const groups = await getAllGroupsAndSubGroups();
-        const groupsToAdd = groups.filter(
-          (group) =>
-            selectedGroupIds.has(group.id) &&
-            !group.channels.some((item) => item.url === channel.url),
-        );
-        const groupsToRemove = groups.filter(
-          (group) =>
-            !selectedGroupIds.has(group.id) &&
-            group.channels.some((item) => item.url === channel.url),
-        );
-
-        for (const group of groupsToAdd) {
-          await addChannelToGroup(group.id, channel);
-        }
-
-        for (const group of groupsToRemove) {
-          await removeChannelFromGroup(group.id, channel.url);
-        }
-
+        await setChannelGroups(channel, selectedGroupIds);
+        await renderGroupsPanel();
         await refreshActiveGroupFilter();
         form.hidden = true;
-        console.log("[YouTube Groups][SUBSCRIPTIONS-UI] Cambios guardados", {
-          channelName: channel.name,
-          channelUrl: channel.url,
-          addedGroupIds: groupsToAdd.map((group) => group.id),
-          removedGroupIds: groupsToRemove.map((group) => group.id),
-        });
       } catch (exception) {
         error.textContent = exception.message;
+      } finally {
+        if (submitButton) {
+          submitButton.textContent = originalText;
+          submitButton.disabled = false;
+        }
       }
     });
 
