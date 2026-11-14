@@ -225,6 +225,50 @@ test("buildPlayAllUrl devuelve null si está vacía y limita a 50 IDs", () => {
   assert.strictEqual(ids[49], many[49].id);
 });
 
+test("buildWatchVideosUrl quita repetidos e inválidos y limita a 50", () => {
+  const { YouTubeGroupsPlaylists: P } = loadModules();
+  const idsOf = (url) => new URL(url).searchParams.get("video_ids");
+
+  assert.strictEqual(P.buildWatchVideosUrl([]), null);
+  assert.strictEqual(P.buildWatchVideosUrl(["corto", null, 5]), null);
+
+  const url = P.buildWatchVideosUrl([V2, "mal", V1, V2, V3, V1]);
+  assert.strictEqual(new URL(url).pathname, "/watch_videos");
+  assert.strictEqual(idsOf(url), `${V2},${V1},${V3}`);
+
+  const many = Array.from(
+    { length: 60 },
+    (_, i) => `video${String(i).padStart(6, "0")}`,
+  );
+  const ids = idsOf(P.buildWatchVideosUrl(many)).split(",");
+  assert.strictEqual(ids.length, 50);
+  assert.strictEqual(ids[49], many[49]);
+});
+
+test("selectQueueIds excluye ocultas, atenuadas, vistas y no visibles", () => {
+  const { YouTubeGroupsPlaylists: P } = loadModules();
+  const e = (id, over = {}) => ({
+    id,
+    visible: true,
+    hidden: false,
+    dimmed: false,
+    watched: false,
+    ...over,
+  });
+
+  const result = P.selectQueueIds([
+    e(V1),
+    e(V2, { hidden: true }),
+    e(V3, { dimmed: true }),
+    e("watched0001", { watched: true }),
+    e("invisible01", { visible: false }),
+    e(V1),
+    e("ok000000002"),
+  ]);
+  assert.deepStrictEqual(plain(result), [V1, "ok000000002"]);
+  assert.deepStrictEqual(plain(P.selectQueueIds([])), []);
+});
+
 test("buildVideoUrl construye la URL o devuelve null", () => {
   const { YouTubeGroupsPlaylists: P } = loadModules();
 

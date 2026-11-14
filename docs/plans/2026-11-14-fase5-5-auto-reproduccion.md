@@ -37,7 +37,7 @@ Decisiones (delegadas por la persona):
 Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `plain`; `make test` y `make lint`
 (0 avisos) en verde.
 
-- [ ] T1 · `buildWatchVideosUrl`, `selectQueueIds` y `buildPlayAllUrl` sobre la primera · Ficheros:
+- [x] T1 · `buildWatchVideosUrl`, `selectQueueIds` y `buildPlayAllUrl` sobre la primera · Ficheros:
   `modules/playlists.js`, `tests/playlists.test.js` · Test: IDs repetidos e inválidos se quitan conservando el orden;
   60 IDs dan 50; `[]` da `null`; los tests de `buildPlayAllUrl` siguen pasando; `selectQueueIds` excluye ocultas,
   atenuadas, vistas y no visibles y quita repetidos.
@@ -79,3 +79,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: cola de reproducción de lo visible (URL y selección)` | `buildWatchVideosUrl` y `selectQueueIds`; `buildPlayAllUrl` delega en la primera. |

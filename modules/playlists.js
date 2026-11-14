@@ -195,17 +195,43 @@ const YouTubeGroupsPlaylists = (() => {
    * @returns {string|null} La URL o null si la lista está vacía.
    */
   function buildPlayAllUrl(playlist) {
-    if (
-      !playlist ||
-      !Array.isArray(playlist.videos) ||
-      !playlist.videos.length
-    ) {
+    if (!playlist || !Array.isArray(playlist.videos)) {
       return null;
     }
-    const ids = playlist.videos.slice(0, MAX_PLAY_ALL).map((item) => item.id);
+    return buildWatchVideosUrl(playlist.videos.map((item) => item.id));
+  }
+
+  /**
+   * Construye la URL de `watch_videos` con los 50 primeros IDs válidos y sin repetir.
+   *
+   * @param {Array} videoIds - IDs de vídeo, en orden.
+   * @returns {string|null} La URL o null si no queda ningún ID válido.
+   */
+  function buildWatchVideosUrl(videoIds) {
+    const ids = [
+      ...new Set(
+        videoIds.filter((id) => YouTubeGroupsWatched.isValidVideoId(id)),
+      ),
+    ].slice(0, MAX_PLAY_ALL);
+    if (!ids.length) {
+      return null;
+    }
     const url = new URL("/watch_videos", YOUTUBE_ORIGIN);
     url.searchParams.set("video_ids", ids.join(","));
     return url.href;
+  }
+
+  /**
+   * Selecciona los IDs de las tarjetas visibles, sin ocultar, atenuar ni ver.
+   *
+   * @param {Array<{id: string, visible: boolean, hidden: boolean, dimmed: boolean, watched: boolean}>} entries
+   * @returns {string[]} IDs en orden y sin repetir.
+   */
+  function selectQueueIds(entries) {
+    const ids = entries
+      .filter((e) => e.visible && !e.hidden && !e.dimmed && !e.watched)
+      .map((e) => e.id);
+    return [...new Set(ids)];
   }
 
   /**
@@ -316,6 +342,8 @@ const YouTubeGroupsPlaylists = (() => {
     cleanVideoEntry,
     getVideoPlaylistIds,
     buildPlayAllUrl,
+    buildWatchVideosUrl,
+    selectQueueIds,
     buildVideoUrl,
     createPlaylist,
     renamePlaylist,
