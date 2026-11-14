@@ -104,7 +104,7 @@ mantienen); textos siempre con `textContent`; JSDoc en las funciones nuevas; los
 de `tests/helpers/load-modules.js`. Cada tarea termina con `make test` y `make lint` en verde y **sin avisos** de
 lint.
 
-- [ ] T1 · Correcciones del botón de visto (las tres de **Decisiones**, "Correcciones de la revisión"):
+- [x] T1 · Correcciones del botón de visto (las tres de **Decisiones**, "Correcciones de la revisión"):
   `watchedLoadError`, `savingWatchedIds`, parámetro `card` en `toggleVideoWatched` y `refreshWatchedUi` ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1, V2 y V3.
 - [ ] T2 · Almacenamiento de ajustes. En `modules/storage.js`, `getSettings()` y `saveSettings(settings)` con la
@@ -200,3 +200,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `fix: corregir el estado y el doble clic del botón de visto` | `watchedLoadError`, `savingWatchedIds`, `refreshWatchedUi`; V1-V3 pendientes de comprobar a mano |

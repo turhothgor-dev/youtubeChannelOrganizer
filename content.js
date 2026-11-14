@@ -93,6 +93,12 @@
   /** Vídeos vistos en memoria; null hasta cargarlos (sin datos no se marca nada). */
   let watchedVideos = null;
 
+  /** Mensaje del error al leer los vistos; null si no ha fallado. */
+  let watchedLoadError = null;
+
+  /** IDs de vídeo cuyo cambio de visto se está guardando. */
+  const savingWatchedIds = new Set();
+
   /**
    * Busca el ID del vídeo de una tarjeta en su primer enlace válido.
    * @param {Element} card - Tarjeta de vídeo.
@@ -143,7 +149,11 @@
   function updateWatchedButton(button, videoId, isWatched) {
     button.textContent = isWatched ? "✓ Visto" : "Marcar visto";
     button.setAttribute("aria-pressed", String(isWatched));
-    button.disabled = !videoId;
+    button.disabled =
+      !videoId || watchedVideos === null || savingWatchedIds.has(videoId);
+    if (watchedLoadError !== null) {
+      button.title = "No se pudieron leer los vistos: " + watchedLoadError;
+    }
   }
 
   /**
@@ -153,10 +163,12 @@
    * @param {HTMLButtonElement} button - Botón pulsado.
    * @returns {Promise<void>}
    */
-  async function toggleVideoWatched(videoId, button) {
-    if (!videoId || watchedVideos === null) {
+  async function toggleVideoWatched(videoId, button, card = null) {
+    if (!videoId || watchedVideos === null || savingWatchedIds.has(videoId)) {
       return;
     }
+    savingWatchedIds.add(videoId);
+    refreshWatchedUi(videoId, card);
     try {
       const result = await YouTubeGroupsWatched.setVideoWatched(
         videoId,
@@ -164,16 +176,34 @@
       );
       watchedVideos = result.videos;
       button.removeAttribute("title");
-      for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
-        if (card.getAttribute(VIDEO_ID_ATTRIBUTE) === videoId) {
-          applyWatchedToCard(card);
-        }
-      }
-      renderCurrentVideoSection();
     } catch (error) {
       button.title = "No se pudo guardar: " + error.message;
       console.error("[YouTube Groups] No se pudo guardar el visto", error);
+    } finally {
+      savingWatchedIds.delete(videoId);
+      refreshWatchedUi(videoId, card);
     }
+  }
+
+  /**
+   * Reaplica el estado de visto a la tarjeta pulsada (si la hay), a las demás
+   * tarjetas con ese ID y a la sección "Vídeo actual" del panel.
+   * @param {string} videoId - ID del vídeo.
+   * @param {Element|null} [pressedCard] - Tarjeta cuyo botón se pulsó.
+   */
+  function refreshWatchedUi(videoId, pressedCard = null) {
+    if (pressedCard) {
+      applyWatchedToCard(pressedCard);
+    }
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      if (
+        card !== pressedCard &&
+        card.getAttribute(VIDEO_ID_ATTRIBUTE) === videoId
+      ) {
+        applyWatchedToCard(card);
+      }
+    }
+    renderCurrentVideoSection();
   }
 
   /**
@@ -220,6 +250,11 @@
       renderCurrentVideoSection();
     })
     .catch((error) => {
+      watchedLoadError = error.message;
+      for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+        applyWatchedToCard(card);
+      }
+      renderCurrentVideoSection();
       console.error("[YouTube Groups] No se pudieron leer los vistos", error);
     });
 
@@ -968,7 +1003,7 @@
       event.preventDefault();
       event.stopPropagation();
       // El ID se lee de la tarjeta al pulsar: YouTube puede reutilizarla
-      toggleVideoWatched(findVideoId(card), watchedButton);
+      toggleVideoWatched(findVideoId(card), watchedButton, card);
     });
 
     // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
