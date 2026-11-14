@@ -60,7 +60,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   y texto de 5 000 001 caracteres lanzan; id de grupo repetido lanza; canal `javascript:alert(1)` y `/watch?v=x` se
   descartan y cuentan; `type`/`parentId` se recalculan; icono desconocido → `""`; visto con ID de 10 caracteres
   descartado; ajuste no válido → valor por defecto; vídeo de lista repetido descartado; título de 201 → 200.
-- [ ] T2 · `exportBackup` e `importBackup` · Ficheros: `modules/backup.js`, `tests/backup.test.js` · Test: exportar e
+- [x] T2 · `exportBackup` e `importBackup` · Ficheros: `modules/backup.js`, `tests/backup.test.js` · Test: exportar e
   importar en otro `loadModules` deja las cuatro claves iguales con `version: 1`; importar una copia no válida no
   llama a `set` (`calls.set === 0`); `importBackup` con `latencyMs` y un `setVideoWatched` simultáneo no deja la cola
   bloqueada (ambas promesas se resuelven).
@@ -103,3 +103,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: validar copias de seguridad con parseBackup y buildBackup` | `cleanVideoEntry` en playlists, `modules/backup.js` y tests; 120 tests y lint en verde. |
+| 2026-11-14 | T2 | `feat: exportar e importar copias de seguridad en backup.js` | `exportBackup`/`importBackup` con `withLock` por clave y tests; 123 tests y lint en verde. |

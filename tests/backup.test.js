@@ -199,3 +199,52 @@ test("parseBackup limpia los vídeos de las listas", () => {
   assert.strictEqual(entry.addedAt, 0);
   assert.strictEqual(result.dropped, 2);
 });
+
+function fullStore() {
+  const data = sample();
+  return {
+    youtubeGroups: { version: 1, groups: data.groups },
+    youtubeWatched: { version: 1, videos: data.watched },
+    youtubeSettings: { version: 1, settings: data.settings },
+    youtubePlaylists: { version: 1, playlists: data.playlists },
+  };
+}
+
+test("exportBackup e importBackup copian las cuatro claves a otro contexto", async () => {
+  const source = loadModules(fullStore());
+  const text = await source.YouTubeGroupsBackup.exportBackup();
+  assert.strictEqual(JSON.parse(text).version, 1);
+
+  const target = loadModules();
+  const result = await target.YouTubeGroupsBackup.importBackup(text);
+
+  assert.strictEqual(result.dropped, 0);
+  assert.deepStrictEqual(plain(target.store), fullStore());
+});
+
+test("importBackup con una copia no válida no escribe nada", async () => {
+  const { YouTubeGroupsBackup: B, calls } = loadModules();
+
+  await assert.rejects(() => B.importBackup("no es json"));
+  await assert.rejects(() => B.importBackup(envelope({ version: 2 })));
+
+  assert.strictEqual(calls.set, 0);
+});
+
+test("importBackup con latencia no bloquea la cola de otra escritura", async () => {
+  const {
+    YouTubeGroupsBackup: B,
+    YouTubeGroupsStorage: S,
+    store,
+  } = loadModules({}, { latencyMs: 5 });
+
+  const results = await Promise.all([
+    B.importBackup(envelope()),
+    S.withLock(S.KEYS.watched, () =>
+      S.saveWatchedVideos({ [V2]: { watchedAt: 9 } }),
+    ),
+  ]);
+
+  assert.strictEqual(results[0].dropped, 0);
+  assert.ok(store.youtubeWatched);
+});

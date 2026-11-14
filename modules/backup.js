@@ -261,5 +261,50 @@ const YouTubeGroupsBackup = (() => {
     };
   }
 
-  return { buildBackup, parseBackup };
+  /**
+   * Lee los datos actuales y los serializa como copia de seguridad.
+   *
+   * @returns {Promise<string>} JSON con sangría de 2 espacios.
+   */
+  async function exportBackup() {
+    const [groups, watched, settings, playlists] = await Promise.all([
+      YouTubeGroupsStorage.getGroups(),
+      YouTubeGroupsStorage.getWatchedVideos(),
+      YouTubeGroupsSettings.getSettings(),
+      YouTubeGroupsStorage.getPlaylists(),
+    ]);
+    return JSON.stringify(
+      buildBackup({ groups, watched, settings, playlists }, Date.now()),
+      null,
+      2,
+    );
+  }
+
+  /**
+   * Valida una copia y reemplaza con ella los datos guardados.
+   * Si la copia no es válida, no escribe nada.
+   *
+   * @param {string} text - Contenido del fichero.
+   * @returns {Promise<{dropped: number}>}
+   * @throws {Error} Si el fichero no es una copia válida.
+   */
+  async function importBackup(text) {
+    const { data, dropped } = parseBackup(text);
+    const keys = YouTubeGroupsStorage.KEYS;
+    await YouTubeGroupsStorage.withLock(keys.settings, () =>
+      YouTubeGroupsStorage.saveSettings(data.settings),
+    );
+    await YouTubeGroupsStorage.withLock(keys.groups, () =>
+      YouTubeGroupsStorage.saveGroups(data.groups),
+    );
+    await YouTubeGroupsStorage.withLock(keys.playlists, () =>
+      YouTubeGroupsStorage.savePlaylists(data.playlists),
+    );
+    await YouTubeGroupsStorage.withLock(keys.watched, () =>
+      YouTubeGroupsStorage.saveWatchedVideos(data.watched),
+    );
+    return { dropped };
+  }
+
+  return { buildBackup, parseBackup, exportBackup, importBackup };
 })();
