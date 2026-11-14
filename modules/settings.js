@@ -1,0 +1,94 @@
+const YouTubeGroupsSettings = (() => {
+  const DEFAULT_SETTINGS = Object.freeze({
+    watchedMode: "dim",
+    outsideMode: "hide",
+  });
+  const WATCHED_MODES = Object.freeze(["show", "dim", "hide"]);
+  const OUTSIDE_MODES = Object.freeze(["hide", "dim"]);
+
+  const ALLOWED_VALUES = {
+    watchedMode: WATCHED_MODES,
+    outsideMode: OUTSIDE_MODES,
+  };
+
+  /**
+   * Indica si un valor es un objeto plano (no null ni array).
+   *
+   * @param {*} value - Valor a comprobar.
+   * @returns {boolean}
+   */
+  function isPlainObject(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
+  /**
+   * Devuelve unos ajustes completos y válidos a partir de lo guardado.
+   *
+   * @param {*} raw - Lo leído del almacenamiento (puede ser cualquier cosa).
+   * @returns {{watchedMode: string, outsideMode: string}} Objeto nuevo con solo los campos conocidos.
+   */
+  function normalizeSettings(raw) {
+    const source = isPlainObject(raw) ? raw : {};
+    const result = {};
+
+    for (const key of Object.keys(ALLOWED_VALUES)) {
+      result[key] = ALLOWED_VALUES[key].includes(source[key])
+        ? source[key]
+        : DEFAULT_SETTINGS[key];
+    }
+
+    return result;
+  }
+
+  /**
+   * Lee los ajustes guardados y los normaliza.
+   *
+   * @returns {Promise<{watchedMode: string, outsideMode: string}>}
+   */
+  async function getSettings() {
+    return normalizeSettings(await YouTubeGroupsStorage.getSettings());
+  }
+
+  /**
+   * Aplica un cambio parcial a los ajustes y escribe solo si algo cambia.
+   *
+   * @param {Object} patch - Claves de ajuste con su nuevo valor.
+   * @returns {Promise<{settings: Object, changed: boolean}>}
+   * @throws {Error} Si hay una clave desconocida o un valor no válido.
+   */
+  async function updateSettings(patch) {
+    if (!isPlainObject(patch)) {
+      throw new Error("Ajuste inválido: patch.");
+    }
+
+    for (const [key, value] of Object.entries(patch)) {
+      if (
+        !Object.hasOwn(ALLOWED_VALUES, key) ||
+        !ALLOWED_VALUES[key].includes(value)
+      ) {
+        throw new Error(`Ajuste inválido: ${key}.`);
+      }
+    }
+
+    const current = await getSettings();
+    const settings = { ...current, ...patch };
+    const changed = Object.keys(settings).some(
+      (key) => settings[key] !== current[key],
+    );
+
+    if (changed) {
+      await YouTubeGroupsStorage.saveSettings(settings);
+    }
+
+    return { settings, changed };
+  }
+
+  return {
+    DEFAULT_SETTINGS,
+    WATCHED_MODES,
+    OUTSIDE_MODES,
+    normalizeSettings,
+    getSettings,
+    updateSettings,
+  };
+})();

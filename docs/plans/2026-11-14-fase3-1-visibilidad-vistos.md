@@ -113,7 +113,7 @@ lint.
   sin datos devuelve `{}` con `calls.set === 0`; con `settings: []`, `settings: null` y `settings: 3` devuelve `{}`;
   guardar y leer devuelve el mismo objeto y el almacenamiento queda con `version: 1`; `saveSettings([])` y
   `saveSettings(null)` lanzan `TypeError`; guardar ajustes no cambia `youtubeGroups` ni `youtubeWatched`.
-- [ ] T3 · Lógica de ajustes y visibilidad. Nuevos `modules/settings.js` y `modules/visibility.js` (ver
+- [x] T3 · Lógica de ajustes y visibilidad. Nuevos `modules/settings.js` y `modules/visibility.js` (ver
   **Decisiones**). Añadirlos a `manifest.json` (después de `modules/watched.js`, antes de `content.js`, en ese
   orden) y a `MODULES` de `tests/helpers/load-modules.js`, que también devuelve `YouTubeGroupsSettings` y
   `YouTubeGroupsVisibility` · Ficheros: `modules/settings.js` (nuevo), `modules/visibility.js` (nuevo),
@@ -202,3 +202,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `fix: corregir el estado y el doble clic del botón de visto` | `watchedLoadError`, `savingWatchedIds`, `refreshWatchedUi`; V1-V3 pendientes de comprobar a mano |
 | 2026-11-14 | T2 | `feat: añadir el almacenamiento de ajustes (ADR 0003)` | `getSettings` y `saveSettings` en `modules/storage.js`; ADR 0003 a `aceptada` |
+| 2026-11-14 | T3 | `feat: añadir la lógica de ajustes y de visibilidad de tarjetas` | `modules/settings.js` y `modules/visibility.js` con tests; añadidos al manifiesto y a `load-modules` |

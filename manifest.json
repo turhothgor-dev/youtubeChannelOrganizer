@@ -21,6 +21,8 @@
         "modules/icons.js",
         "modules/groups.js",
         "modules/watched.js",
+        "modules/settings.js",
+        "modules/visibility.js",
         "content.js"
       ],
       "run_at": "document_idle"
