@@ -465,3 +465,49 @@ test("renameGroup inexistente a la vez que createGroup rechaza y guarda el grupo
     ["Nuevo"],
   );
 });
+
+test("flattenGroups devuelve el preorden con el nivel de cada grupo", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    {
+      id: "a",
+      name: "A",
+      subgroups: [
+        { id: "a1", name: "A1", subgroups: [{ id: "a1x", name: "A1X" }] },
+        { id: "a2", name: "A2", subgroups: [] },
+      ],
+    },
+    { id: "b", name: "B", subgroups: [{ id: "b1", name: "B1" }] },
+  ];
+
+  assert.deepStrictEqual(plain(YouTubeGroups.flattenGroups(groups)), [
+    { id: "a", name: "A", level: 0 },
+    { id: "a1", name: "A1", level: 1 },
+    { id: "a1x", name: "A1X", level: 2 },
+    { id: "a2", name: "A2", level: 1 },
+    { id: "b", name: "B", level: 0 },
+    { id: "b1", name: "B1", level: 1 },
+  ]);
+});
+
+test("flattenGroups acepta lista vacía y grupos sin subgroups", () => {
+  const { YouTubeGroups } = loadModules();
+
+  assert.deepStrictEqual(plain(YouTubeGroups.flattenGroups([])), []);
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.flattenGroups([{ id: "a", name: "A" }])),
+    [{ id: "a", name: "A", level: 0 }],
+  );
+});
+
+test("flattenGroups no muta la entrada", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    { id: "a", name: "A", subgroups: [{ id: "a1", name: "A1" }] },
+  ];
+  const before = JSON.stringify(groups);
+
+  YouTubeGroups.flattenGroups(groups);
+
+  assert.strictEqual(JSON.stringify(groups), before);
+});

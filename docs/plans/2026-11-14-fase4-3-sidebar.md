@@ -45,7 +45,7 @@ Decisiones (delegadas por la persona):
 
 Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 avisos) en verde.
 
-- [ ] T1 · `flattenGroups` en `modules/groups.js` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test:
+- [x] T1 · `flattenGroups` en `modules/groups.js` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test:
   árbol con dos grupos y subgrupos a dos niveles da el preorden y niveles esperados; `[]` da `[]`; grupos sin
   `subgroups` funcionan; la entrada no se muta.
 - [ ] T2 · Ajuste `panelCollapsed` y su mención en ADR 0003 · Ficheros: `modules/settings.js`,
@@ -95,3 +95,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: flattenGroups para aplanar el árbol de grupos` | Función pura en `modules/groups.js` con tests (preorden, niveles, vacío, sin mutar). |

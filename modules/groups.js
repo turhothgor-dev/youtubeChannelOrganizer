@@ -508,8 +508,30 @@ const YouTubeGroups = (() => {
     return { icon: icon || "", color };
   }
 
+  /**
+   * Aplana el árbol de grupos en preorden (grupo, sus subgrupos, siguiente
+   * grupo) sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @returns {Array<{id: string, name: string, level: number}>} `level` es 0
+   *   para el primer nivel.
+   */
+  function flattenGroups(groups) {
+    const result = [];
+    const visit = (list, level) => {
+      for (const group of list) {
+        result.push({ id: group.id, name: group.name, level });
+        if (Array.isArray(group.subgroups)) {
+          visit(group.subgroups, level + 1);
+        }
+      }
+    };
+    visit(groups, 0);
+    return result;
+  }
+
   return {
     normalizeChannelUrl,
+    flattenGroups,
     getGroupAppearance,
     createGroup,
     removeGroupById,
