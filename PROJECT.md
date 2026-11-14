@@ -24,14 +24,7 @@ El proyecto debe ser mantenible, modular y resistente a cambios del DOM de YouTu
 
 ## Estado actual
 
-El proyecto acaba de comenzar.
-
-Archivos iniciales:
-
-- manifest.json
-- content.js
-- content.css
-- PROJECT.md
+Ver ROADMAP.md
 
 La extensión se cargará temporalmente en Firefox mediante:
 
@@ -178,11 +171,3 @@ No modificar código innecesariamente.
 Mantener el código sencillo y modular.
 
 ---
-
-## Próximo objetivo
-
-El siguiente objetivo concreto es:
-
-Detectar automáticamente el nombre y la URL del canal asociado a cada vídeo de YouTube.
-
-Antes de implementar funcionalidades avanzadas debemos conseguir que esto funcione correctamente con contenido cargado dinámicamente.
