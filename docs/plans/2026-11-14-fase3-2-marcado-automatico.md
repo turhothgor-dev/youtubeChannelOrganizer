@@ -82,7 +82,7 @@ Reglas comunes: nada de `innerHTML` con valores interpolados; JSDoc en las funci
   `(95, 100, 95)` `true`. `normalizeSettings({})` incluye `autoMarkPercent: 80`; `{ autoMarkPercent: 0 }` se
   conserva; `70` y `"80"` pasan a `80`; `updateSettings({ autoMarkPercent: 0 })` escribe y conserva los otros dos
   campos; `updateSettings({ autoMarkPercent: 70 })` lanza "Ajuste inválido: autoMarkPercent." sin escribir.
-- [ ] T2 · Marcado automático en `/watch`. En `content.js`: `autoMarkHandledIds`, `markVideoWatched`,
+- [x] T2 · Marcado automático en `/watch`. En `content.js`: `autoMarkHandledIds`, `markVideoWatched`,
   `handleVideoProgress` con sus guardas y el escuchador de captura; el botón del vídeo actual del panel añade el ID
   a `autoMarkHandledIds` al pulsar; el tercer `<select>` de "Ajustes" · Ficheros: `content.js` (y `content.css` solo
   si el `<select>` nuevo necesita estilo) · Test: `make lint`, `make test` y a mano V1 a V6.
@@ -136,3 +136,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: añadir la lógica del marcado automático (shouldAutoMark y autoMarkPercent)` | `shouldAutoMark` y ajuste `autoMarkPercent` con sus tests; los tests de ajustes existentes se actualizan al nuevo campo por defecto. |
+| 2026-11-14 | T2 | `feat: marcar vídeos como vistos automáticamente al reproducirlos en /watch` | Escuchador `timeupdate` en captura con guardas, `markVideoWatched`, `autoMarkHandledIds` y tercer selector en Ajustes; `changeSetting` gana un parámetro opcional `parse`. V1 a V6 pendientes a mano. |

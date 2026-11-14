@@ -99,6 +99,9 @@
   /** IDs de vídeo cuyo cambio de visto se está guardando. */
   const savingWatchedIds = new Set();
 
+  /** IDs que el marcado automático ya no debe volver a intentar en esta pestaña. */
+  const autoMarkHandledIds = new Set();
+
   /** Ajustes en memoria; valores por defecto hasta cargar los guardados. */
   let settings = YouTubeGroupsSettings.DEFAULT_SETTINGS;
 
@@ -134,10 +137,15 @@
     const outsideSelect = panel.querySelector(
       ".youtube-groups__outside-mode-select",
     );
+    const autoMarkSelect = panel.querySelector(
+      ".youtube-groups__auto-mark-select",
+    );
     watchedSelect.value = settings.watchedMode;
     outsideSelect.value = settings.outsideMode;
+    autoMarkSelect.value = String(settings.autoMarkPercent);
     watchedSelect.disabled = !settingsLoaded;
     outsideSelect.disabled = !settingsLoaded;
+    autoMarkSelect.disabled = !settingsLoaded;
     if (settingsLoadError !== null) {
       panel.querySelector(".youtube-groups__settings-error").textContent =
         "No se pudieron leer los ajustes: " + settingsLoadError;
@@ -161,21 +169,27 @@
    * Guarda un cambio de ajuste desde su selector y reaplica la visibilidad.
    * Si falla, el selector vuelve al valor anterior y se muestra el error.
    * @param {HTMLSelectElement} select - Selector que ha cambiado.
-   * @param {string} key - Clave del ajuste (`watchedMode` u `outsideMode`).
+   * @param {string} key - Clave del ajuste (`watchedMode`, `outsideMode` o `autoMarkPercent`).
    * @param {HTMLElement} errorElement - Elemento donde mostrar el error.
+   * @param {function(string): *} [parse] - Convierte el valor del selector (cadena) al del ajuste.
    * @returns {Promise<void>}
    */
-  async function changeSetting(select, key, errorElement) {
+  async function changeSetting(
+    select,
+    key,
+    errorElement,
+    parse = (value) => value,
+  ) {
     errorElement.textContent = "";
     select.disabled = true;
     try {
       const result = await YouTubeGroupsSettings.updateSettings({
-        [key]: select.value,
+        [key]: parse(select.value),
       });
       settings = result.settings;
       applyVisibilityToAllCards();
     } catch (error) {
-      select.value = settings[key];
+      select.value = String(settings[key]);
       errorElement.textContent =
         "No se pudo guardar el ajuste: " + error.message;
       console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
@@ -327,6 +341,86 @@
     );
   }
 
+  /**
+   * Marca un vídeo como visto desde el marcado automático.
+   * Un error se registra y se muestra en el botón del panel; no se reintenta.
+   * @param {string} videoId - ID del vídeo.
+   * @returns {Promise<void>}
+   */
+  async function markVideoWatched(videoId) {
+    savingWatchedIds.add(videoId);
+    refreshWatchedUi(videoId, null);
+    const panelButton = document.querySelector(
+      ".youtube-groups__current-video-button",
+    );
+    try {
+      const result = await YouTubeGroupsWatched.setVideoWatched(videoId, true);
+      watchedVideos = result.videos;
+      panelButton?.removeAttribute("title");
+    } catch (error) {
+      if (panelButton) {
+        panelButton.title = "No se pudo guardar: " + error.message;
+      }
+      console.error(
+        "[YouTube Groups] No se pudo guardar el visto automático",
+        error,
+      );
+    } finally {
+      savingWatchedIds.delete(videoId);
+      refreshWatchedUi(videoId, null);
+    }
+  }
+
+  /**
+   * Marca como visto el vídeo principal de /watch al alcanzar el porcentaje
+   * de reproducción configurado. Escucha `timeupdate` en fase de captura.
+   * @param {Event} event - Evento `timeupdate`.
+   */
+  function handleVideoProgress(event) {
+    if (settings.autoMarkPercent === 0) {
+      return;
+    }
+    const video = event.target;
+    if (!(video instanceof HTMLVideoElement)) {
+      return;
+    }
+    const player = video.closest("#movie_player");
+    if (!player || player.classList.contains("ad-showing")) {
+      return;
+    }
+    const videoId = getCurrentWatchVideoId();
+    if (!videoId) {
+      return;
+    }
+    const flexyVideoId = document
+      .querySelector("ytd-watch-flexy")
+      ?.getAttribute("video-id");
+    if (flexyVideoId && flexyVideoId !== videoId) {
+      return;
+    }
+    if (
+      watchedVideos === null ||
+      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId) ||
+      savingWatchedIds.has(videoId) ||
+      autoMarkHandledIds.has(videoId)
+    ) {
+      return;
+    }
+    if (
+      !YouTubeGroupsWatched.shouldAutoMark(
+        video.currentTime,
+        video.duration,
+        settings.autoMarkPercent,
+      )
+    ) {
+      return;
+    }
+    autoMarkHandledIds.add(videoId);
+    markVideoWatched(videoId);
+  }
+
+  document.addEventListener("timeupdate", handleVideoProgress, true);
+
   YouTubeGroupsStorage.getWatchedVideos()
     .then((videos) => {
       watchedVideos = videos;
@@ -428,6 +522,15 @@
                 <option value="dim">Atenuar</option>
               </select>
             </label>
+            <label class="youtube-groups__setting">
+              <span>Marcar visto al reproducir</span>
+              <select class="youtube-groups__auto-mark-select" disabled>
+                <option value="0">Desactivado</option>
+                <option value="50">Al 50 %</option>
+                <option value="80">Al 80 %</option>
+                <option value="95">Al 95 %</option>
+              </select>
+            </label>
             <p class="youtube-groups__settings-error" aria-live="polite"></p>
           </details>
           <form class="youtube-groups__form" hidden>
@@ -451,7 +554,11 @@
     panel
       .querySelector(".youtube-groups__current-video-button")
       .addEventListener("click", (event) => {
-        toggleVideoWatched(getCurrentWatchVideoId(), event.currentTarget);
+        const videoId = getCurrentWatchVideoId();
+        if (videoId) {
+          autoMarkHandledIds.add(videoId);
+        }
+        toggleVideoWatched(videoId, event.currentTarget);
       });
 
     const settingsError = panel.querySelector(
@@ -466,6 +573,16 @@
       .querySelector(".youtube-groups__outside-mode-select")
       .addEventListener("change", (event) => {
         changeSetting(event.currentTarget, "outsideMode", settingsError);
+      });
+    panel
+      .querySelector(".youtube-groups__auto-mark-select")
+      .addEventListener("change", (event) => {
+        changeSetting(
+          event.currentTarget,
+          "autoMarkPercent",
+          settingsError,
+          Number,
+        );
       });
     syncSettingsControls(panel);
 
