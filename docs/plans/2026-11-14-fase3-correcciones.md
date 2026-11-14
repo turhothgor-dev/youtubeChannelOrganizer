@@ -97,7 +97,7 @@ los tests usan `loadModules` y `plain`. En los tests de concurrencia, escribe pr
 sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada tarea termina con `make test` y
 `make lint` en verde y sin avisos.
 
-- [ ] T1 · Marcado automático solo con ajustes leídos. En `handleVideoProgress`, salir al principio si
+- [x] T1 · Marcado automático solo con ajustes leídos. En `handleVideoProgress`, salir al principio si
   `!settingsLoaded` (ver **Importante 1**) · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1.
 - [ ] T2 · Cola por clave en el almacenamiento. En `modules/storage.js`, `KEYS` y `withLock(key, fn)` (ver
   **Importante 2**). En `tests/helpers/load-modules.js`, segundo parámetro opcional
@@ -202,3 +202,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | fix: no marcar automáticamente hasta leer los ajustes | `handleVideoProgress` sale si `!settingsLoaded`. Pendiente V1 a mano. |

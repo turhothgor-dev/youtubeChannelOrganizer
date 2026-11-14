@@ -422,6 +422,9 @@
    * @param {Event} event - Evento `timeupdate`.
    */
   function handleVideoProgress(event) {
+    if (!settingsLoaded) {
+      return;
+    }
     if (settings.autoMarkPercent === 0) {
       return;
     }
