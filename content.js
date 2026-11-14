@@ -16,6 +16,62 @@
     getAllGroupsAndSubGroups, // Nueva función
   } = YouTubeGroups;
 
+  /**
+   * Crea el SVG de un icono sin usar innerHTML.
+   * @param {string} iconId - Id del icono de ICON_SET.
+   * @param {number} size - Lado en píxeles.
+   * @returns {SVGElement|null} null si el icono no existe.
+   */
+  function createIconSvg(iconId, size) {
+    const iconPath = YouTubeGroupsIcons.getIconPath(iconId);
+    if (!iconPath) {
+      return null;
+    }
+    const svgNs = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNs, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", String(size));
+    svg.setAttribute("height", String(size));
+    svg.setAttribute("fill", "currentColor");
+    const path = document.createElementNS(svgNs, "path");
+    path.setAttribute("d", iconPath);
+    svg.append(path);
+    return svg;
+  }
+
+  /**
+   * Crea la marca de un grupo: su icono con el color resultante, o un punto
+   * de color si solo hay color.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} groupId - Id del grupo o subgrupo.
+   * @param {number} size - Lado del icono en píxeles.
+   * @returns {HTMLElement|null} null si no hay icono ni color.
+   */
+  function createGroupMark(groups, groupId, size) {
+    const appearance = YouTubeGroups.getGroupAppearance(groups, groupId);
+    if (!appearance) {
+      return null;
+    }
+    const svg = appearance.icon ? createIconSvg(appearance.icon, size) : null;
+    if (svg) {
+      const chip = document.createElement("span");
+      chip.className = "youtube-groups__icon";
+      if (appearance.color) {
+        chip.style.color = appearance.color;
+      }
+      chip.title = YouTubeGroupsIcons.getIconLabel(appearance.icon);
+      chip.append(svg);
+      return chip;
+    }
+    if (appearance.color) {
+      const dot = document.createElement("span");
+      dot.className = "youtube-groups__color-dot";
+      dot.style.backgroundColor = appearance.color;
+      return dot;
+    }
+    return null;
+  }
+
   const VIDEO_CARD_SELECTOR = [
     "ytd-rich-item-renderer",
     "ytd-video-renderer",
@@ -319,22 +375,9 @@
       const groupOption = document.createElement("button");
       groupOption.type = "button";
       groupOption.className = "youtube-groups__option";
-      var iconId = group.icon || "";
-      var colorHex = group.color || "";
-
-      if (iconId && YouTubeGroupsIcons.getIconPath(iconId)) {
-        var iconChip = document.createElement("span");
-        iconChip.className = "youtube-groups__icon";
-        if (colorHex) {
-          iconChip.style.color = colorHex;
-        }
-        var iconPath = YouTubeGroupsIcons.getIconPath(iconId);
-        iconChip.innerHTML =
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="' +
-          iconPath +
-          '"/></svg>';
-        iconChip.setAttribute("title", YouTubeGroupsIcons.getIconLabel(iconId));
-        groupOption.appendChild(iconChip);
+      const mark = createGroupMark(groups, group.id, 16);
+      if (mark) {
+        groupOption.appendChild(mark);
       }
 
       var nameSpan = document.createElement("span");
@@ -671,7 +714,12 @@
           groupName.style.marginLeft = `${level * 12}px`;
         }
 
-        label.append(checkbox, groupName);
+        const mark = createGroupMark(groups, group.id, 16);
+        if (mark) {
+          label.append(checkbox, mark, groupName);
+        } else {
+          label.append(checkbox, groupName);
+        }
         container.append(label);
 
         if (group.subgroups && group.subgroups.length > 0) {
@@ -1377,10 +1425,10 @@
           "youtube-groups__icon-picker-option" +
           (selectedIconId === icon.id ? " selected" : "");
         btn.title = icon.label;
-        btn.innerHTML =
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="' +
-          icon.path +
-          '"/></svg>';
+        const iconSvg = createIconSvg(icon.id, 20);
+        if (iconSvg) {
+          btn.append(iconSvg);
+        }
         btn.addEventListener("click", () => {
           selectedIconId = icon.id;
           updateIconGridSelection();
@@ -1455,17 +1503,14 @@
         preview.appendChild(span);
         return;
       }
-      const path = YouTubeGroupsIcons.getIconPath(selectedIconId);
-      if (!path) return;
+      const previewSvg = createIconSvg(selectedIconId, 24);
+      if (!previewSvg) return;
       const chip = document.createElement("span");
       chip.className = "youtube-groups__icon";
       if (selectedColorHex) {
         chip.style.color = selectedColorHex;
       }
-      chip.innerHTML =
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="' +
-        path +
-        '"/></svg>';
+      chip.append(previewSvg);
       preview.appendChild(chip);
     }
     container

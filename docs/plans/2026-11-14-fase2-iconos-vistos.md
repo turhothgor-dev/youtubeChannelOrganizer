@@ -117,7 +117,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   subgrupo sin icono con padre con icono devuelve `icon: ""`; icono guardado que no existe en `ICON_SET` devuelve
   `""`; grupo sin campos `icon`/`color` (formato antiguo) devuelve `{ icon: "", color: "" }`; id desconocido
   devuelve `null`; no muta la entrada.
-- [ ] T3 · Pintar iconos sin `innerHTML` y en todos los selectores. En `content.js`: añadir
+- [x] T3 · Pintar iconos sin `innerHTML` y en todos los selectores. En `content.js`: añadir
   `createIconSvg(iconId, size)` (ver **Decisiones**) y usarla en el panel (16 px), la rejilla del selector (20 px)
   y la vista previa (24 px); el panel usa `getGroupAppearance` (icono con el color resultante, o punto de color si
   solo hay color); `renderChannelGroupChoices` añade la misma marca delante del nombre de cada grupo, para lo que
@@ -236,3 +236,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: validar iconos y colores y rellenar el icono de educación` | Ruta rellena de `education`, `isValidColor` solo `#rrggbb`, `tests/icons.test.js`, orden de carga en el manifest. |
 | 2026-11-14 | T2 | `feat: calcular la apariencia heredada de un grupo` | `getGroupAppearance` en `modules/groups.js` (color heredado, icono propio) y sus tests. |
+| 2026-11-14 | T3 | `feat: pintar iconos sin innerHTML y en los selectores de casillas` | `createIconSvg` y `createGroupMark` en `content.js`, punto de color, selector de iconos con tema claro y oscuro. |
