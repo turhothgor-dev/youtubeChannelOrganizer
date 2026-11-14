@@ -1,6 +1,6 @@
 # Plan: Fase 3 (1/4) · Modos de visibilidad y ocultar vídeos vistos
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 3: "Modos de visibilidad" y "Ocultar videos vistos".
 
@@ -137,7 +137,7 @@ lint.
   `applyCardVisibility` a todas las tarjetas. En `content.css`: estilos de la sección (claro y `html[dark]`) y
   `max-height`/`overflow-y` del panel · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a
   mano V5, V6, V7 y V8.
-- [ ] T6 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Modos de visibilidad" y "Ocultar videos vistos". En
+- [x] T6 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Modos de visibilidad" y "Ocultar videos vistos". En
   `docs/ARCHITECTURE.md`: filas de `modules/settings.js` y `modules/visibility.js`, `modules/storage.js` menciona
   los ajustes (ADR 0003), flujo "Visibilidad" (un único `applyCardVisibility` combina filtro, vistos y ajustes) y
   el flujo "Filtro" dice que oculta o atenúa según el ajuste. Estado de este plan a `hecho` · Ficheros:
@@ -205,3 +205,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T3 | `feat: añadir la lógica de ajustes y de visibilidad de tarjetas` | `modules/settings.js` y `modules/visibility.js` con tests; añadidos al manifiesto y a `load-modules` |
 | 2026-11-14 | T4 | `feat: unificar la visibilidad de las tarjetas con applyCardVisibility` | caché `settings`, `applyCardVisibility` y clases `hidden`/`dimmed`; sin `style.display`; V4 pendiente de comprobar a mano |
 | 2026-11-14 | T5 | `feat: añadir la sección de ajustes al panel` | `<details>` con dos selectores, `syncSettingsControls` y `changeSetting`; estilos claro/oscuro y `max-height` del panel; V5-V8 pendientes de comprobar a mano |
+| 2026-11-14 | T6 | `docs: cerrar el plan de visibilidad y vistos (Fase 3, 1/4)` | ROADMAP con ✅, `docs/ARCHITECTURE.md` con settings, visibility y flujo "Visibilidad"; plan a `hecho` |

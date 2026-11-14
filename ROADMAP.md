@@ -13,10 +13,10 @@
 - ✅ Marca como visto
 
 ## Fase 3 (Funcionalidades Avanzadas):
-- ☐ Modos de visibilidad
+- ✅ Modos de visibilidad
 - ☐ Gestor de playlists
 - ☐ Filtros avanzados (duración, fecha, popularidad)
-- ☐ Ocultar videos vistos
+- ✅ Ocultar videos vistos
 - ☐ Marcar videos vistos
 
 ## Fase 4 (Integración y Sincronización):
