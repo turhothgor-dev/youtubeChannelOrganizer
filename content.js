@@ -80,6 +80,10 @@
     "ytd-playlist-video-renderer",
     // Recomendaciones de /watch; en inicio la tarjeta es el rich-item
     "yt-lockup-view-model:not(ytd-rich-item-renderer yt-lockup-view-model)",
+    // Estanterías de Shorts (búsqueda, suscripciones, canal); sin botones
+    "ytd-reel-item-renderer:not(ytd-rich-item-renderer *)",
+    "ytm-shorts-lockup-view-model:not(ytd-rich-item-renderer *)",
+    "ytm-shorts-lockup-view-model-v2:not(ytd-rich-item-renderer *)",
   ].join(",");
 
   /**
