@@ -100,7 +100,7 @@ quitar los `console.log`/`console.debug` de diagnóstico de las funciones que se
   anidado lo quita del almacenamiento con una sola llamada a `set` y devuelve sus ids; con id desconocido lanza y
   no escribe. Regresión del resto de la revisión: `renameGroup` y `setGroupAppearance(id, "", "")` sobre un
   subgrupo anidado lo modifican. `make test`, `make lint` y a mano V1.
-- [ ] T2 · Desplegable sin canal anterior mientras carga. En `content.js`, `openSubscriptionGroupsForm`
+- [x] T2 · Desplegable sin canal anterior mientras carga. En `content.js`, `openSubscriptionGroupsForm`
   deshabilita Guardar y vacía `form.dataset.channelName` y `form.dataset.channelUrl` al principio, antes de
   distinguir si hay canal (la rama sin canal deja de repetirlo); el `then` de la apertura vigente rellena el
   `dataset` antes de mostrar el formulario. En el `submit` del desplegable: si `form.dataset.channelUrl` está vacío,
@@ -187,3 +187,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `fix: eliminar grupos y subgrupos a cualquier nivel` | `removeGroupById` pura, `deleteGroup` devuelve `removedIds`; V1 pendiente a mano |
+| 2026-11-14 | T2 | `fix: no guardar en el desplegable hasta cargar el canal` | Guardar deshabilitado y `dataset` vacío al abrir; `submit` ignora canal vacío y respeta `subscriptionDropdownOpenCount`; V2 y V3 pendientes a mano |

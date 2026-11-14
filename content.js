@@ -861,14 +861,16 @@
     error.textContent = "";
     groupsContainer.replaceChildren();
 
+    // Hasta que carguen los grupos no hay canal asociado ni se puede guardar
+    const openSubmitButton = form.querySelector("button[type='submit']");
+    if (openSubmitButton) {
+      openSubmitButton.disabled = true;
+    }
+    form.dataset.channelName = "";
+    form.dataset.channelUrl = "";
+
     if (!channel) {
-      const submitButton = form.querySelector("button[type='submit']");
-      if (submitButton) {
-        submitButton.disabled = true;
-      }
       error.textContent = "No se ha podido identificar el canal.";
-      form.dataset.channelName = "";
-      form.dataset.channelUrl = "";
       form.hidden = false;
       positionSubscriptionDropdown(dropdown, form, anchorButton);
       return;
@@ -937,10 +939,15 @@
       event.stopPropagation();
       error.textContent = "";
 
+      if (!form.dataset.channelUrl) {
+        return;
+      }
+
       const channel = {
         name: form.dataset.channelName,
         url: form.dataset.channelUrl,
       };
+      const submitOpenId = subscriptionDropdownOpenCount;
 
       const selectedGroupIds = new Set(
         Array.from(
@@ -966,7 +973,9 @@
       } finally {
         if (submitButton) {
           submitButton.textContent = originalText;
-          submitButton.disabled = false;
+          if (submitOpenId === subscriptionDropdownOpenCount) {
+            submitButton.disabled = false;
+          }
         }
       }
     });
