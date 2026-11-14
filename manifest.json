@@ -25,6 +25,7 @@
         "modules/visibility.js",
         "modules/metadata.js",
         "modules/playlists.js",
+        "modules/backup.js",
         "content.js"
       ],
       "run_at": "document_idle"

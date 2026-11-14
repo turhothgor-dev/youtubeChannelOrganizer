@@ -16,6 +16,24 @@ function list(id, videos = [], name = id) {
   return { id, name, videos };
 }
 
+test("cleanVideoEntry limpia título y canal y fija addedAt", () => {
+  const { YouTubeGroupsPlaylists: P } = loadModules();
+
+  const entry = plain(
+    P.cleanVideoEntry(
+      { id: V1, title: ` ${"t".repeat(201)} `, channelName: 5 },
+      7,
+    ),
+  );
+
+  assert.deepStrictEqual(entry, {
+    id: V1,
+    title: "t".repeat(200),
+    channelName: "",
+    addedAt: 7,
+  });
+});
+
 test("applyCreatePlaylist añade al final y recorta el nombre", () => {
   const { YouTubeGroupsPlaylists: P } = loadModules();
   const input = [list("a")];

@@ -36,6 +36,22 @@ const YouTubeGroupsPlaylists = (() => {
   }
 
   /**
+   * Construye la entrada guardada de un vídeo con título y canal limpiados.
+   *
+   * @param {{id: string, title: *, channelName: *}} video - Vídeo de origen.
+   * @param {number} addedAt - Marca de tiempo de cuándo se añadió.
+   * @returns {{id: string, title: string, channelName: string, addedAt: number}}
+   */
+  function cleanVideoEntry(video, addedAt) {
+    return {
+      id: video.id,
+      title: cleanText(video.title, MAX_TITLE_LENGTH),
+      channelName: cleanText(video.channelName, MAX_CHANNEL_LENGTH),
+      addedAt,
+    };
+  }
+
+  /**
    * Busca el índice de una lista o lanza error si no existe.
    *
    * @param {Array} playlists - Listas.
@@ -115,12 +131,7 @@ const YouTubeGroupsPlaylists = (() => {
     }
 
     const selected = new Set(playlistIds);
-    const entry = {
-      id: video.id,
-      title: cleanText(video.title, MAX_TITLE_LENGTH),
-      channelName: cleanText(video.channelName, MAX_CHANNEL_LENGTH),
-      addedAt: now,
-    };
+    const entry = cleanVideoEntry(video, now);
     let changed = false;
 
     const next = playlists.map((list) => {
@@ -302,6 +313,7 @@ const YouTubeGroupsPlaylists = (() => {
     applyDeletePlaylist,
     applyVideoPlaylists,
     applyRemoveVideo,
+    cleanVideoEntry,
     getVideoPlaylistIds,
     buildPlayAllUrl,
     buildVideoUrl,

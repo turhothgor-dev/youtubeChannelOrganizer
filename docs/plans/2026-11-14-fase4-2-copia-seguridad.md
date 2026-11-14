@@ -52,7 +52,7 @@ Decisiones (delegadas por la persona):
 Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `plain`; `make test` y `make lint`
 (0 avisos) en verde.
 
-- [ ] T1 · `cleanVideoEntry` en `modules/playlists.js` y `modules/backup.js` con `buildBackup`/`parseBackup`; añadir
+- [x] T1 · `cleanVideoEntry` en `modules/playlists.js` y `modules/backup.js` con `buildBackup`/`parseBackup`; añadir
   `backup.js` a `manifest.json` (antes de `content.js`) y a `tests/helpers/load-modules.js` (devuelve
   `YouTubeGroupsBackup`) · Ficheros: `modules/playlists.js`, `modules/backup.js` (nuevo), `manifest.json`,
   `tests/helpers/load-modules.js`, `tests/playlists.test.js`, `tests/backup.test.js` (nuevo) · Test: ida y vuelta
@@ -102,3 +102,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: validar copias de seguridad con parseBackup y buildBackup` | `cleanVideoEntry` en playlists, `modules/backup.js` y tests; 120 tests y lint en verde. |
