@@ -1957,6 +1957,25 @@
       : null;
   }
 
+  // Canal que `detectCard` guardó en la tarjeta (por enlace o por nombre)
+  function getDetectedChannel(card) {
+    const name = card.dataset.youtubeGroupsChannelName;
+    const url = card.dataset.youtubeGroupsChannelUrl;
+
+    return name && url ? { name, url } : null;
+  }
+
+  // "Añadir a grupo" queda deshabilitado mientras no se identifique el canal
+  function updateAddButtonAvailability(card, button) {
+    const known = Boolean(getChannelFromCard(card) || getDetectedChannel(card));
+    button.disabled = !known;
+    if (known) {
+      button.removeAttribute("title");
+    } else {
+      button.title = "No se pudo identificar el canal";
+    }
+  }
+
   /**
    * Crea el control de una tarjeta.
    * @param {Element} card Tarjeta sobre la que va el control.
@@ -1966,9 +1985,12 @@
    * @returns {HTMLElement} Control con los botones.
    */
   function createSubscriptionChannelControl(card, options = {}) {
-    const { videoButtons = true, channel = null } = options;
+    const { videoButtons = true, channel = null, compact = false } = options;
     const control = document.createElement("span");
     control.className = "youtube-groups__subscription-control";
+    if (compact) {
+      control.classList.add("youtube-groups__subscription-control--compact");
+    }
 
     const button = document.createElement("button");
     button.className =
@@ -1990,8 +2012,14 @@
       event.preventDefault();
       event.stopPropagation();
       // El canal se lee de la tarjeta al abrir, no al crear el control
-      openSubscriptionGroupsForm(channel || getChannelFromCard(card), button);
+      openSubscriptionGroupsForm(
+        channel || getChannelFromCard(card) || getDetectedChannel(card),
+        button,
+      );
     });
+    if (compact) {
+      updateAddButtonAvailability(card, button);
+    }
 
     if (!videoButtons) {
       return control;
@@ -2540,6 +2568,9 @@
     return container;
   }
 
+  const WATCH_RELATED_SELECTOR =
+    "#related, ytd-watch-next-secondary-results-renderer";
+
   // Un control por tarjeta; es idempotente porque insertarlo provoca una
   // mutación que vuelve a programar la tarjeta.
   function ensureChannelControl(card) {
@@ -2551,11 +2582,40 @@
       return;
     }
 
-    if (card.querySelector(".youtube-groups__subscription-control")) {
+    const isWatch = pageType === "watch";
+    if (isWatch && !card.closest(WATCH_RELATED_SELECTOR)) {
+      return;
+    }
+
+    const existing = card.querySelector(
+      ".youtube-groups__subscription-control",
+    );
+    if (existing) {
+      // El canal puede identificarse después de crear el control
+      const addButton = existing.querySelector(
+        ".youtube-groups__subscription-add-button",
+      );
+      if (isWatch && addButton) {
+        updateAddButtonAvailability(card, addButton);
+      }
       return;
     }
 
     const channelLink = findChannelLink(card);
+    if (isWatch) {
+      const compact = createSubscriptionChannelControl(card, {
+        compact: true,
+      });
+      if (channelLink) {
+        channelLink.insertAdjacentElement("afterend", compact);
+      } else {
+        (
+          card.querySelector("yt-lockup-metadata-view-model") || card
+        ).appendChild(compact);
+      }
+      return;
+    }
+
     if (!channelLink) {
       return;
     }

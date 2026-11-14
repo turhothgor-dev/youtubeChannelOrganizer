@@ -1,7 +1,12 @@
 const YouTubeGroupsPages = (() => {
   const CHANNEL_PREFIX_RE = /^\/(?:@[^/]+|(?:channel|c|user)\/[^/]+)(?:\/.*)?$/;
   const SHORTS_RE = /^\/shorts\/[^/]+/;
-  const CARD_CONTROL_PAGES = new Set(["home", "subscriptions", "search"]);
+  const CARD_CONTROL_PAGES = new Set([
+    "home",
+    "subscriptions",
+    "search",
+    "watch",
+  ]);
 
   /**
    * Clasifica una página de YouTube según su ruta.

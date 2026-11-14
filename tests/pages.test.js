@@ -53,13 +53,13 @@ test("getPageType devuelve other para el resto de rutas", () => {
   }
 });
 
-test("shouldShowCardControls es true solo en inicio, suscripciones y búsqueda", () => {
+test("shouldShowCardControls es true solo en inicio, suscripciones, búsqueda y watch", () => {
   const { YouTubeGroupsPages } = loadModules();
 
-  for (const type of ["home", "subscriptions", "search"]) {
+  for (const type of ["home", "subscriptions", "search", "watch"]) {
     assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), true);
   }
-  for (const type of ["watch", "shorts", "channel", "other", undefined]) {
+  for (const type of ["shorts", "channel", "other", undefined]) {
     assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), false);
   }
 });
