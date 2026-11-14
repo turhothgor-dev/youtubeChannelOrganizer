@@ -23,6 +23,7 @@
         "modules/watched.js",
         "modules/settings.js",
         "modules/visibility.js",
+        "modules/metadata.js",
         "content.js"
       ],
       "run_at": "document_idle"

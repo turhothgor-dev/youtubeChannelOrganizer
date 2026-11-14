@@ -92,7 +92,7 @@ Reglas comunes: nada de `innerHTML` con valores interpolados; textos siempre con
 funciones nuevas; los tests usan `loadModules` y `plain`. Cada tarea termina con `make test` y `make lint` en verde y
 sin avisos.
 
-- [ ] T1 · Intérpretes de metadatos. Nuevo `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`.
+- [x] T1 · Intérpretes de metadatos. Nuevo `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`.
   Añadirlo a `manifest.json` (después de `modules/visibility.js`, antes de `content.js`) y a `MODULES` de
   `tests/helpers/load-modules.js`, que también devuelve `YouTubeGroupsMetadata` · Ficheros: `modules/metadata.js`
   (nuevo), `manifest.json`, `tests/helpers/load-modules.js`, `tests/metadata.test.js` (nuevo) · Test:
@@ -168,3 +168,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | feat: añadir los intérpretes de metadatos de tarjeta (duración, visualizaciones, antigüedad) | `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`; en manifest y helper de tests. |
