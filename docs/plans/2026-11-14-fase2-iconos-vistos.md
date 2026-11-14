@@ -102,7 +102,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
 `textContent`; JSDoc en las funciones nuevas; los tests usan `loadModules` y `plain` de
 `tests/helpers/load-modules.js`, como los existentes. Cada tarea termina con `make test` y `make lint` en verde.
 
-- [ ] T1 · Datos y validación de iconos. En `modules/icons.js`: ruta rellena para `education` (ver
+- [x] T1 · Datos y validación de iconos. En `modules/icons.js`: ruta rellena para `education` (ver
   **Decisiones**) e `isValidColor` solo acepta `""` o `#rrggbb`. En `tests/helpers/load-modules.js`, devolver
   también `YouTubeGroupsIcons`. En `manifest.json`, cargar `modules/icons.js` antes de `modules/groups.js` ·
   Ficheros: `modules/icons.js`, `tests/helpers/load-modules.js`, `manifest.json`, `tests/icons.test.js` (nuevo) ·
@@ -234,3 +234,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: validar iconos y colores y rellenar el icono de educación` | Ruta rellena de `education`, `isValidColor` solo `#rrggbb`, `tests/icons.test.js`, orden de carga en el manifest. |

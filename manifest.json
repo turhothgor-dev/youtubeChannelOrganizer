@@ -18,8 +18,8 @@
       "css": ["content.css"],
       "js": [
         "modules/storage.js",
-        "modules/groups.js",
         "modules/icons.js",
+        "modules/groups.js",
         "content.js"
       ],
       "run_at": "document_idle"

@@ -47,6 +47,7 @@ function loadModules(initialStore = {}) {
     store,
     calls,
     YouTubeGroups: vm.runInContext("YouTubeGroups", context),
+    YouTubeGroupsIcons: vm.runInContext("YouTubeGroupsIcons", context),
     YouTubeGroupsStorage: vm.runInContext("YouTubeGroupsStorage", context),
   };
 }
