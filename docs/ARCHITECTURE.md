@@ -16,10 +16,11 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
 | `manifest.json` | WebExtensions MV3 | Permiso `storage` y content scripts en `*://www.youtube.com/*` |
-| `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (formato en el ADR 0001) |
-| `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, normalizar URL de canal, pertenencia de un canal a grupos y URL de un grupo para el filtro |
+| `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) y los vídeos vistos (ADR 0002) |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos |
-| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botón por vídeo, filtro y selector de iconos |
+| `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos y URL de un grupo para el filtro |
+| `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos |
+| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botones por vídeo (grupo y visto), filtro y selector de iconos |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
 | `tests/` | `node:test` + `node:vm` | Tests de `modules/` con un `browser.storage.local` simulado; excluidos del paquete por `web-ext-config.mjs` |
 
@@ -33,8 +34,10 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez.
 - **Filtro**: al elegir un grupo o subgrupo en el panel, se ocultan las tarjetas cuyo canal no pertenece a él ni
   a sus descendientes.
-
-El botón por tarjeta, `setChannelGroups` y los tests se introducen con el plan `2026-11-14-boton-canal-video`.
+- **Marcar como visto**: `content.js` lee los vistos al arrancar (`watchedVideos`). El botón "Marcar visto" de la
+  tarjeta o el de "Vídeo actual" del panel (en `/watch`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
+  aplica el cambio y escribe una vez solo si cambia algo. Después `content.js` actualiza la caché, la clase
+  `youtube-groups--watched` de todas las tarjetas con ese ID de vídeo y los botones.
 
 ## Decisiones
 

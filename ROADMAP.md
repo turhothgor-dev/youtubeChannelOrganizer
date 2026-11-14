@@ -9,8 +9,8 @@
 ## Fase 2 (Mejoras básicas):
 - ✅ Multi-asignación de canales
 - ✅ Sub-grupos
-- ☐ Iconos personalizados (opcional)
-- ☐ Marca como visto
+- ✅ Iconos personalizados (opcional)
+- ✅ Marca como visto
 
 ## Fase 3 (Funcionalidades Avanzadas):
 - ☐ Modos de visibilidad

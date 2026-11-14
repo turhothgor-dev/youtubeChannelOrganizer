@@ -1,6 +1,6 @@
 # Plan: cerrar la Fase 2 (iconos personalizados y marca como visto)
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 2: "Iconos personalizados (opcional)" y "Marca como visto".
 
@@ -164,7 +164,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   del panel (sin interpolaciones) con el mismo botón; visible solo en `/watch` con ID válido en
   `window.location.href`; se actualiza en `renderGroupsPanel` (también tras `yt-navigate-finish`) y tras cada
   cambio de visto desde cualquier botón · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V7.
-- [ ] T9 · Cerrar la Fase 2. En `ROADMAP.md`, marcar con ✅ "Iconos personalizados (opcional)" y "Marca como
+- [x] T9 · Cerrar la Fase 2. En `ROADMAP.md`, marcar con ✅ "Iconos personalizados (opcional)" y "Marca como
   visto" (la Fase 3 no se toca). En `docs/ARCHITECTURE.md`: fila de `modules/watched.js`, `modules/storage.js`
   menciona los vistos (ADR 0002), orden de carga actualizado, y flujo "Marcar como visto"; quitar la frase "El
   botón por tarjeta, `setChannelGroups` y los tests se introducen con el plan..." si ya no aporta. Estado de este
@@ -242,3 +242,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T6 | `feat: marcar las tarjetas de vídeos vistos` | `findVideoId` y `applyWatchedToCard` en `content.js`, carga de vistos al arrancar y regla `.youtube-groups--watched`. |
 | 2026-11-14 | T7 | `feat: añadir el botón Marcar visto en las tarjetas` | Segundo botón en el control de la tarjeta, `toggleVideoWatched` y `updateWatchedButton` en `content.js`; estilos del botón. |
 | 2026-11-14 | T8 | `feat: añadir el botón de visto del vídeo actual en el panel` | Sección "Vídeo actual" en el panel, `getCurrentWatchVideoId` y `renderCurrentVideoSection` en `content.js`. |
+| 2026-11-14 | T9 | `docs: cerrar la Fase 2 en el roadmap y la arquitectura` | Dos puntos de la Fase 2 con ✅, `docs/ARCHITECTURE.md` con `watched.js`, vistos y flujo; plan a `hecho`. |
