@@ -2,6 +2,16 @@ const YouTubeGroupsWatched = (() => {
   const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
   /**
+   * Indica si un valor es un ID de vídeo válido (11 caracteres de YouTube).
+   *
+   * @param {*} value - Valor a comprobar.
+   * @returns {boolean}
+   */
+  function isValidVideoId(value) {
+    return typeof value === "string" && VIDEO_ID_PATTERN.test(value);
+  }
+
+  /**
    * Extrae el ID de un vídeo de una URL de /watch?v=<id> o /shorts/<id> del mismo origen.
    *
    * @param {string} href - La URL (absoluta o relativa).
@@ -27,7 +37,7 @@ const YouTubeGroupsWatched = (() => {
       candidate = match ? match[1] : null;
     }
 
-    return candidate && VIDEO_ID_PATTERN.test(candidate) ? candidate : null;
+    return isValidVideoId(candidate) ? candidate : null;
   }
 
   /**
@@ -51,7 +61,7 @@ const YouTubeGroupsWatched = (() => {
    * @returns {{videos: Object, changed: boolean}}
    */
   function applyVideoWatched(videos, videoId, isWatched, now) {
-    if (typeof videoId !== "string" || !VIDEO_ID_PATTERN.test(videoId)) {
+    if (!isValidVideoId(videoId)) {
       throw new Error("Vídeo inválido.");
     }
 
@@ -110,6 +120,7 @@ const YouTubeGroupsWatched = (() => {
   }
 
   return {
+    isValidVideoId,
     extractVideoId,
     shouldAutoMark,
     isVideoWatched,

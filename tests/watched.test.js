@@ -7,6 +7,17 @@ const { loadModules, plain } = require("./helpers/load-modules");
 const ID = "dQw4w9WgXcQ";
 const ID2 = "abcdefghijk";
 
+test("isValidVideoId solo acepta cadenas de 11 caracteres válidos", () => {
+  const { YouTubeGroupsWatched: W } = loadModules();
+
+  assert.strictEqual(W.isValidVideoId(ID), true);
+  assert.strictEqual(W.isValidVideoId("dQw4w9WgXc"), false);
+  assert.strictEqual(W.isValidVideoId("dQw4w9WgXcQQ"), false);
+  assert.strictEqual(W.isValidVideoId("dQw4w9WgX!Q"), false);
+  assert.strictEqual(W.isValidVideoId(12345678901), false);
+  assert.strictEqual(W.isValidVideoId(null), false);
+});
+
 test("extractVideoId devuelve el ID de URLs de vídeo válidas", () => {
   const { YouTubeGroupsWatched: W } = loadModules();
 
