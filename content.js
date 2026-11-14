@@ -152,6 +152,22 @@
     const autoMarkSelect = panel.querySelector(
       ".youtube-groups__auto-mark-select",
     );
+    panel.classList.toggle(
+      "youtube-groups--collapsed",
+      settings.panelCollapsed,
+    );
+    const collapseButton = panel.querySelector(
+      ".youtube-groups__collapse-button",
+    );
+    collapseButton.textContent = settings.panelCollapsed ? "+" : "−";
+    collapseButton.title = settings.panelCollapsed
+      ? "Mostrar panel"
+      : "Minimizar panel";
+    collapseButton.setAttribute(
+      "aria-expanded",
+      String(!settings.panelCollapsed),
+    );
+    collapseButton.disabled = !settingsLoaded;
     watchedSelect.value = settings.watchedMode;
     outsideSelect.value = settings.outsideMode;
     autoMarkSelect.value = String(settings.autoMarkPercent);
@@ -575,6 +591,7 @@
     panel.innerHTML = `
           <div class="youtube-groups__header">
             <h2 class="youtube-groups__title">YouTube Groups</h2>
+            <button class="youtube-groups__collapse-button" type="button" aria-expanded="true" title="Minimizar panel" disabled>−</button>
             <button class="youtube-groups__create-button action-button primary-button" type="button">Crear grupo</button>
           </div>
           <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
@@ -713,6 +730,29 @@
           settingsError,
           Number,
         );
+      });
+    panel
+      .querySelector(".youtube-groups__collapse-button")
+      .addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        settingsWriteSeq += 1;
+        const seq = settingsWriteSeq;
+        try {
+          const result = await YouTubeGroupsSettings.updateSettings({
+            panelCollapsed: !settings.panelCollapsed,
+          });
+          if (seq > settingsAppliedSeq) {
+            settingsAppliedSeq = seq;
+            settings = result.settings;
+          }
+        } catch (error) {
+          settingsError.textContent =
+            "No se pudo guardar el ajuste: " + error.message;
+          console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
+        } finally {
+          syncSettingsControls();
+        }
       });
     syncSettingsControls(panel);
 

@@ -208,6 +208,42 @@ html[dark] .youtube-groups__playlist-input {
   font-weight: 700;
 }
 
+.youtube-groups__collapse-button {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.youtube-groups__collapse-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .youtube-groups__collapse-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#youtube-groups-panel.youtube-groups--collapsed
+  > :not(.youtube-groups__header) {
+  display: none;
+}
+
+#youtube-groups-panel.youtube-groups--collapsed .youtube-groups__create-button {
+  display: none;
+}
+
+#youtube-groups-panel.youtube-groups--collapsed .youtube-groups__header {
+  margin-bottom: 0;
+}
+
 .youtube-groups__options {
   display: grid;
   gap: 6px;
