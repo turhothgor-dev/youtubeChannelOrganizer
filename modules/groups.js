@@ -69,20 +69,54 @@ const YouTubeGroups = (() => {
     return group;
   }
 
-  async function deleteGroup(groupId) {
-    const groups = await YouTubeGroupsStorage.getGroups();
-    const groupIndex = groups.findIndex((item) => item.id === groupId);
+  /**
+   * Quita un grupo o subgrupo (a cualquier nivel) sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} groupId - Id del grupo a quitar.
+   * @returns {{groups: Array<Object>, removedIds: string[]}} Árbol resultante y
+   *   ids del grupo quitado y de todos sus descendientes.
+   * @throws {Error} Si el grupo no existe.
+   */
+  function removeGroupById(groups, groupId) {
+    const removedIds = [];
 
-    if (groupIndex === -1) {
+    const collectIds = (group) => {
+      removedIds.push(group.id);
+      for (const child of group.subgroups || []) {
+        collectIds(child);
+      }
+    };
+
+    const prune = (list) => {
+      const result = [];
+      for (const group of list) {
+        if (group.id === groupId) {
+          collectIds(group);
+          continue;
+        }
+        const copy = { ...group };
+        if (Array.isArray(group.subgroups)) {
+          copy.subgroups = prune(group.subgroups);
+        }
+        result.push(copy);
+      }
+      return result;
+    };
+
+    const remaining = prune(groups);
+    if (removedIds.length === 0) {
       throw new Error("No existe el grupo indicado.");
     }
+    return { groups: remaining, removedIds };
+  }
 
-    // Remove the group
-    groups.splice(groupIndex, 1);
-    await YouTubeGroupsStorage.saveGroups(groups);
+  async function deleteGroup(groupId) {
+    const groups = await YouTubeGroupsStorage.getGroups();
+    const result = removeGroupById(groups, groupId);
+    await YouTubeGroupsStorage.saveGroups(result.groups);
 
-    // Note: Active group logic is handled in content.js
-    return true;
+    // La lógica del grupo activo se gestiona en content.js
+    return result.removedIds;
   }
 
   async function renameGroup(groupId, newName) {
@@ -406,6 +440,7 @@ const YouTubeGroups = (() => {
   return {
     normalizeChannelUrl,
     createGroup,
+    removeGroupById,
     deleteGroup,
     renameGroup,
     addChannelToGroup,

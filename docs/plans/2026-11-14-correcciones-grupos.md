@@ -89,7 +89,7 @@ quitar los `console.log`/`console.debug` de diagnóstico de las funciones que se
 `console.error` y `console.warn` de errores reales). Los tests usan `tests/helpers/load-modules.js` (`loadModules`,
 `plain`) como los existentes.
 
-- [ ] T1 · Eliminar grupos y subgrupos a cualquier nivel. En `modules/groups.js`, añadir y exportar
+- [x] T1 · Eliminar grupos y subgrupos a cualquier nivel. En `modules/groups.js`, añadir y exportar
   `removeGroupById(groups, groupId)` (pura, descrita en **Decisiones**) y reescribir `deleteGroup` para que la use y
   devuelva `removedIds`. En `content.js`, el botón "Eliminar" usa `const removedIds = await deleteGroup(group.id)`
   y llama a `setActiveGroup(null)` si `removedIds.includes(getActiveGroupId())`, en lugar de comparar solo con
@@ -186,3 +186,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `fix: eliminar grupos y subgrupos a cualquier nivel` | `removeGroupById` pura, `deleteGroup` devuelve `removedIds`; V1 pendiente a mano |

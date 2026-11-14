@@ -408,8 +408,8 @@
           )
         ) {
           try {
-            await deleteGroup(group.id);
-            if (getActiveGroupId() === group.id) {
+            const removedIds = await deleteGroup(group.id);
+            if (removedIds.includes(getActiveGroupId())) {
               setActiveGroup(null);
             }
             await renderGroupsPanel();

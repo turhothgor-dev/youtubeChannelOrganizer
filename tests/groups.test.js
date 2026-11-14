@@ -186,6 +186,128 @@ test("getGroupChannelUrls devuelve Set vacío sin canales y null si no existe", 
   assert.strictEqual(YouTubeGroups.getGroupChannelUrls(groups, "nope"), null);
 });
 
+function nestedGroups() {
+  const leaf = {
+    id: "s2",
+    name: "Nieto",
+    type: "subgroup",
+    channels: [],
+    subgroups: [],
+  };
+  const sibling = {
+    id: "s3",
+    name: "Hermano",
+    type: "subgroup",
+    channels: [],
+    subgroups: [],
+  };
+  const mid = {
+    id: "s1",
+    name: "Hijo",
+    type: "subgroup",
+    channels: [],
+    subgroups: [leaf],
+  };
+  const g1 = {
+    id: "g1",
+    name: "Padre",
+    type: "group",
+    channels: [],
+    subgroups: [mid, sibling],
+  };
+  const g2 = {
+    id: "g2",
+    name: "Otro",
+    type: "group",
+    channels: [],
+    subgroups: [],
+  };
+  return [g1, g2];
+}
+
+test("removeGroupById borra un grupo de primer nivel con sus descendientes", () => {
+  const { YouTubeGroups } = loadModules();
+
+  const result = YouTubeGroups.removeGroupById(nestedGroups(), "g1");
+
+  assert.deepStrictEqual(plain(result.removedIds).sort(), [
+    "g1",
+    "s1",
+    "s2",
+    "s3",
+  ]);
+  assert.deepStrictEqual(
+    plain(result.groups).map((g) => g.id),
+    ["g2"],
+  );
+});
+
+test("removeGroupById borra un subgrupo de segundo nivel y respeta padre y hermanos", () => {
+  const { YouTubeGroups } = loadModules();
+
+  const result = YouTubeGroups.removeGroupById(nestedGroups(), "s2");
+
+  assert.deepStrictEqual(plain(result.removedIds), ["s2"]);
+  const g1 = plain(result.groups)[0];
+  assert.deepStrictEqual(
+    g1.subgroups.map((g) => g.id),
+    ["s1", "s3"],
+  );
+  assert.deepStrictEqual(g1.subgroups[0].subgroups, []);
+  assert.strictEqual(result.groups.length, 2);
+});
+
+test("removeGroupById lanza si el id no existe y no muta la entrada", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  const before = plain(groups);
+
+  assert.throws(() => YouTubeGroups.removeGroupById(groups, "nope"), {
+    message: "No existe el grupo indicado.",
+  });
+  YouTubeGroups.removeGroupById(groups, "s1");
+  assert.deepStrictEqual(plain(groups), before);
+});
+
+test("deleteGroup quita un subgrupo anidado con una sola escritura y devuelve sus ids", async () => {
+  const { YouTubeGroups, YouTubeGroupsStorage, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: nestedGroups() },
+  });
+
+  const removedIds = await YouTubeGroups.deleteGroup("s1");
+
+  assert.strictEqual(calls.set, 1);
+  assert.deepStrictEqual(plain(removedIds).sort(), ["s1", "s2"]);
+  const saved = plain(await YouTubeGroupsStorage.getGroups());
+  assert.deepStrictEqual(
+    saved[0].subgroups.map((g) => g.id),
+    ["s3"],
+  );
+});
+
+test("deleteGroup con id desconocido lanza y no escribe", async () => {
+  const { YouTubeGroups, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: nestedGroups() },
+  });
+
+  await assert.rejects(YouTubeGroups.deleteGroup("nope"), {
+    message: "No existe el grupo indicado.",
+  });
+  assert.strictEqual(calls.set, 0);
+});
+
+test("renameGroup y setGroupAppearance modifican un subgrupo anidado", async () => {
+  const { YouTubeGroups, YouTubeGroupsStorage } = loadModules({
+    youtubeGroups: { version: 1, groups: nestedGroups() },
+  });
+
+  await YouTubeGroups.renameGroup("s2", "Nuevo");
+  await YouTubeGroups.setGroupAppearance("s2", "", "");
+
+  const saved = plain(await YouTubeGroupsStorage.getGroups());
+  assert.strictEqual(saved[0].subgroups[0].subgroups[0].name, "Nuevo");
+});
+
 test("setChannelGroups no escribe sin cambios ni con error", async () => {
   const { YouTubeGroups, calls } = loadModules({
     youtubeGroups: seedGroups(),
