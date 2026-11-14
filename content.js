@@ -402,6 +402,8 @@
             const removedIds = await deleteGroup(group.id);
             if (removedIds.includes(getActiveGroupId())) {
               setActiveGroup(null);
+            } else if (getActiveGroupId()) {
+              await refreshActiveGroupFilter();
             }
             await renderGroupsPanel();
           } catch (exception) {
@@ -957,9 +959,13 @@
         await setChannelGroups(channel, selectedGroupIds);
         await renderGroupsPanel();
         await refreshActiveGroupFilter();
-        form.hidden = true;
+        if (submitOpenId === subscriptionDropdownOpenCount) {
+          form.hidden = true;
+        }
       } catch (exception) {
-        error.textContent = exception.message;
+        if (submitOpenId === subscriptionDropdownOpenCount) {
+          error.textContent = exception.message;
+        }
       } finally {
         if (submitButton) {
           submitButton.textContent = originalText;
@@ -1188,13 +1194,6 @@
     scheduleCardsIn(document.documentElement);
   }
 
-  function clearDetectedChannelData() {
-    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
-      delete card.dataset.youtubeGroupsChannelName;
-      delete card.dataset.youtubeGroupsChannelUrl;
-    }
-  }
-
   let currentChannelUpdateScheduled = false;
 
   function nodeBelongsToCurrentVideoOwner(node) {
@@ -1262,7 +1261,6 @@
   // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
   document.addEventListener("yt-navigate-finish", () => {
     detectedCards = new WeakMap();
-    clearDetectedChannelData();
     scanDocument();
     refreshActiveGroupFilter();
     renderGroupsPanel().catch((error) => {

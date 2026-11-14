@@ -120,6 +120,14 @@ quitar los `console.log`/`console.debug` de diagnóstico de las funciones que se
   `findChannelLink` ya exige URL de canal); quitar `loggedChannelUrls` y su `console.debug`. El observador añade
   `attributes: true, attributeFilter: ["href"]` a `observer.observe` · Ficheros: `content.js` · Test: `make lint`,
   `make test` y a mano V6 y V7.
+- [x] T5 · Hallazgos de la revisión (ver **Cambios aprobados**): (a) quitar `clearDetectedChannelData()` de
+  `yt-navigate-finish` (el `WeakMap` nuevo ya obliga a releer) para que no haya destello al navegar con filtro
+  activo; (b) en `tests/groups.test.js`, el test de `setGroupAppearance` en subgrupo anidado crea el subgrupo con
+  icono y color no vacíos, los cambia y comprueba los valores nuevos; (c) al eliminar un grupo, si el activo no
+  está entre `removedIds` y hay grupo activo, llamar a `refreshActiveGroupFilter()`; (d) en el `submit` del
+  desplegable, aplicar `form.hidden = true` y el texto de error solo si `submitOpenId ===
+  subscriptionDropdownOpenCount` · Ficheros: `content.js`, `tests/groups.test.js` · Test: `make test` (b), `make
+  lint` y a mano V4.
 
 ### Verificación manual (con `make up`)
 
@@ -179,6 +187,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-14 | T5 (nueva) | Corregir hallazgos de la revisión: destello al navegar, test de apariencia, filtro tras borrar subgrupo descendiente, desplegable tras guardado tardío | Revisión `revisar-cambios` de 6c7568a..HEAD (2 importantes, 2 sugerencias) | Persona (delegó decisiones a la opción recomendada) |
 
 ## Registro
 
@@ -190,3 +199,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | `fix: no guardar en el desplegable hasta cargar el canal` | Guardar deshabilitado y `dataset` vacío al abrir; `submit` ignora canal vacío y respeta `subscriptionDropdownOpenCount`; V2 y V3 pendientes a mano |
 | 2026-11-14 | T3 | `fix: aplicar el filtro de grupo sin mostrar todas las tarjetas` | `refreshActiveGroupFilter` no resetea el filtro con grupo activo y filtra de forma síncrona; grupo inexistente llama a `setActiveGroup(null)`; sin `setTimeout` en `setActiveGroup`; V4 y V5 pendientes a mano |
 | 2026-11-14 | T4 | `fix: releer el canal de las tarjetas reutilizadas` | `detectedCards` pasa a `WeakMap` con `{ link, href }`; `detectCard` relee si cambia el enlace; observador con `attributeFilter: ["href"]`; sin `loggedChannelUrls`; V6 y V7 pendientes a mano |
+| 2026-11-14 | T5 | `fix: corregir hallazgos de la revisión de grupos y filtro` | Sin `clearDetectedChannelData` al navegar (función eliminada); test de apariencia con valores no vacíos; `refreshActiveGroupFilter` tras borrar si el activo sigue; `submit` del desplegable solo oculta/muestra error en la apertura vigente; V4 pendiente a mano |

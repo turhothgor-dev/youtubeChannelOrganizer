@@ -302,10 +302,14 @@ test("renameGroup y setGroupAppearance modifican un subgrupo anidado", async () 
   });
 
   await YouTubeGroups.renameGroup("s2", "Nuevo");
-  await YouTubeGroups.setGroupAppearance("s2", "", "");
+  await YouTubeGroups.setGroupAppearance("s2", "tech", "#2196F3");
+  await YouTubeGroups.setGroupAppearance("s2", "music", "#4CAF50");
 
   const saved = plain(await YouTubeGroupsStorage.getGroups());
-  assert.strictEqual(saved[0].subgroups[0].subgroups[0].name, "Nuevo");
+  const nested = saved[0].subgroups[0].subgroups[0];
+  assert.strictEqual(nested.name, "Nuevo");
+  assert.strictEqual(nested.icon, "music");
+  assert.strictEqual(nested.color, "#4CAF50");
 });
 
 test("setChannelGroups no escribe sin cambios ni con error", async () => {
