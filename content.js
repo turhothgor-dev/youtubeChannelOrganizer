@@ -381,11 +381,12 @@
   }
 
   /**
-   * Devuelve el ID del vídeo abierto, solo en páginas /watch.
+   * Devuelve el ID del vídeo abierto, solo en páginas /watch y /shorts.
    * @returns {string|null} ID de 11 caracteres o null.
    */
-  function getCurrentWatchVideoId() {
-    if (window.location.pathname !== "/watch") {
+  function getCurrentVideoId() {
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    if (pageType !== "watch" && pageType !== "shorts") {
       return null;
     }
     return YouTubeGroupsWatched.extractVideoId(window.location.href);
@@ -398,6 +399,9 @@
    * @returns {boolean} false solo si `ytd-watch-flexy` declara otro vídeo.
    */
   function isWatchPageInSync(videoId) {
+    if (YouTubeGroupsPages.getPageType(window.location.pathname) !== "watch") {
+      return true;
+    }
     const flexyVideoId = document
       .querySelector("ytd-watch-flexy")
       ?.getAttribute("video-id");
@@ -410,12 +414,16 @@
    * @returns {{id: string|null, title: string, channelName: string}} Datos del vídeo.
    */
   function getCurrentWatchVideoData() {
-    const videoId = getCurrentWatchVideoId();
+    const videoId = getCurrentVideoId();
     if (videoId && !isWatchPageInSync(videoId)) {
       return { id: null, title: "", channelName: "" };
     }
-    let title =
-      document.querySelector("ytd-watch-metadata h1")?.textContent.trim() ?? "";
+    const isShorts =
+      YouTubeGroupsPages.getPageType(window.location.pathname) === "shorts";
+    let title = isShorts
+      ? ""
+      : (document.querySelector("ytd-watch-metadata h1")?.textContent.trim() ??
+        "");
     if (!title) {
       title = document.title.replace(/ - YouTube$/, "").trim();
     }
@@ -436,7 +444,7 @@
     if (!section) {
       return;
     }
-    const videoId = getCurrentWatchVideoId();
+    const videoId = getCurrentVideoId();
     section.hidden = !videoId;
     if (!videoId) {
       return;
@@ -506,7 +514,7 @@
     if (!player || player.classList.contains("ad-showing")) {
       return;
     }
-    const videoId = getCurrentWatchVideoId();
+    const videoId = getCurrentVideoId();
     if (!videoId) {
       return;
     }
@@ -848,7 +856,7 @@
     panel
       .querySelector(".youtube-groups__current-video-button")
       .addEventListener("click", (event) => {
-        const videoId = getCurrentWatchVideoId();
+        const videoId = getCurrentVideoId();
         if (videoId) {
           autoMarkHandledIds.add(videoId);
         }
