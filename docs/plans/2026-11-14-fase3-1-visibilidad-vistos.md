@@ -132,7 +132,7 @@ lint.
   `.youtube-groups--hidden` y `.youtube-groups--dimmed` (con `:hover`); quitar las de `youtube-groups--filtered-out`
   y la opacidad de `youtube-groups--watched` · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y a mano V4 (con los valores por defecto el comportamiento es el de antes).
-- [ ] T5 · Sección "Ajustes" del panel. En `content.js`: el `<details>` estático con los dos `<select>` y el
+- [x] T5 · Sección "Ajustes" del panel. En `content.js`: el `<details>` estático con los dos `<select>` y el
   mensaje de error (ver **Decisiones**), su estado al cargar los ajustes y el manejador de cambio, que reaplica
   `applyCardVisibility` a todas las tarjetas. En `content.css`: estilos de la sección (claro y `html[dark]`) y
   `max-height`/`overflow-y` del panel · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a
@@ -204,3 +204,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | `feat: añadir el almacenamiento de ajustes (ADR 0003)` | `getSettings` y `saveSettings` en `modules/storage.js`; ADR 0003 a `aceptada` |
 | 2026-11-14 | T3 | `feat: añadir la lógica de ajustes y de visibilidad de tarjetas` | `modules/settings.js` y `modules/visibility.js` con tests; añadidos al manifiesto y a `load-modules` |
 | 2026-11-14 | T4 | `feat: unificar la visibilidad de las tarjetas con applyCardVisibility` | caché `settings`, `applyCardVisibility` y clases `hidden`/`dimmed`; sin `style.display`; V4 pendiente de comprobar a mano |
+| 2026-11-14 | T5 | `feat: añadir la sección de ajustes al panel` | `<details>` con dos selectores, `syncSettingsControls` y `changeSetting`; estilos claro/oscuro y `max-height` del panel; V5-V8 pendientes de comprobar a mano |

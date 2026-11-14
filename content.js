@@ -111,14 +111,78 @@
     }
   }
 
+  /** Si los ajustes guardados ya se han leído (habilita los selectores). */
+  let settingsLoaded = false;
+
+  /** Mensaje del error al leer los ajustes; null si no ha fallado. */
+  let settingsLoadError = null;
+
+  /**
+   * Refleja los ajustes en los selectores de la sección "Ajustes" del panel.
+   * Los selectores quedan deshabilitados hasta cargar los ajustes.
+   * @param {Element|null} [panel] - Panel; por defecto, el que hay en el documento.
+   */
+  function syncSettingsControls(
+    panel = document.getElementById(GROUPS_PANEL_ID),
+  ) {
+    if (!panel) {
+      return;
+    }
+    const watchedSelect = panel.querySelector(
+      ".youtube-groups__watched-mode-select",
+    );
+    const outsideSelect = panel.querySelector(
+      ".youtube-groups__outside-mode-select",
+    );
+    watchedSelect.value = settings.watchedMode;
+    outsideSelect.value = settings.outsideMode;
+    watchedSelect.disabled = !settingsLoaded;
+    outsideSelect.disabled = !settingsLoaded;
+    if (settingsLoadError !== null) {
+      panel.querySelector(".youtube-groups__settings-error").textContent =
+        "No se pudieron leer los ajustes: " + settingsLoadError;
+    }
+  }
+
   YouTubeGroupsSettings.getSettings()
     .then((loaded) => {
       settings = loaded;
+      settingsLoaded = true;
       applyVisibilityToAllCards();
+      syncSettingsControls();
     })
     .catch((error) => {
+      settingsLoadError = error.message;
+      syncSettingsControls();
       console.error("[YouTube Groups] No se pudieron leer los ajustes", error);
     });
+
+  /**
+   * Guarda un cambio de ajuste desde su selector y reaplica la visibilidad.
+   * Si falla, el selector vuelve al valor anterior y se muestra el error.
+   * @param {HTMLSelectElement} select - Selector que ha cambiado.
+   * @param {string} key - Clave del ajuste (`watchedMode` u `outsideMode`).
+   * @param {HTMLElement} errorElement - Elemento donde mostrar el error.
+   * @returns {Promise<void>}
+   */
+  async function changeSetting(select, key, errorElement) {
+    errorElement.textContent = "";
+    select.disabled = true;
+    try {
+      const result = await YouTubeGroupsSettings.updateSettings({
+        [key]: select.value,
+      });
+      settings = result.settings;
+      applyVisibilityToAllCards();
+    } catch (error) {
+      select.value = settings[key];
+      errorElement.textContent =
+        "No se pudo guardar el ajuste: " + error.message;
+      console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
+    } finally {
+      select.disabled = false;
+    }
+  }
 
   /**
    * Busca el ID del vídeo de una tarjeta en su primer enlace válido.
@@ -347,6 +411,25 @@
             <h3 class="youtube-groups__section-title">Vídeo actual</h3>
             <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
           </section>
+          <details class="youtube-groups__settings">
+            <summary>Ajustes</summary>
+            <label class="youtube-groups__setting">
+              <span>Vídeos vistos</span>
+              <select class="youtube-groups__watched-mode-select" disabled>
+                <option value="show">Mostrar</option>
+                <option value="dim">Atenuar</option>
+                <option value="hide">Ocultar</option>
+              </select>
+            </label>
+            <label class="youtube-groups__setting">
+              <span>Vídeos fuera del filtro</span>
+              <select class="youtube-groups__outside-mode-select" disabled>
+                <option value="hide">Ocultar</option>
+                <option value="dim">Atenuar</option>
+              </select>
+            </label>
+            <p class="youtube-groups__settings-error" aria-live="polite"></p>
+          </details>
           <form class="youtube-groups__form" hidden>
             <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
             <div class="youtube-groups__form-actions">
@@ -370,6 +453,21 @@
       .addEventListener("click", (event) => {
         toggleVideoWatched(getCurrentWatchVideoId(), event.currentTarget);
       });
+
+    const settingsError = panel.querySelector(
+      ".youtube-groups__settings-error",
+    );
+    panel
+      .querySelector(".youtube-groups__watched-mode-select")
+      .addEventListener("change", (event) => {
+        changeSetting(event.currentTarget, "watchedMode", settingsError);
+      });
+    panel
+      .querySelector(".youtube-groups__outside-mode-select")
+      .addEventListener("change", (event) => {
+        changeSetting(event.currentTarget, "outsideMode", settingsError);
+      });
+    syncSettingsControls(panel);
 
     const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
