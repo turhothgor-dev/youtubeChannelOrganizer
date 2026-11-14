@@ -110,7 +110,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   `/^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/` y contiene `z` o `Z`; `isValidColor` acepta `""`, `#2196F3` y `#abcdef`,
   y rechaza `#abc`, `2196F3`, `#12345g` y `red`; todos los `hex` de `COLOR_SET` son válidos; `isValidIconId`
   acepta `""` y `tech` y rechaza `nope`; `getIconPath("nope")` es `null`.
-- [ ] T2 · Apariencia resultante de un grupo. En `modules/groups.js`, añadir y exportar
+- [x] T2 · Apariencia resultante de un grupo. En `modules/groups.js`, añadir y exportar
   `getGroupAppearance(groups, groupId)` (pura, descrita en **Decisiones**) · Ficheros: `modules/groups.js`,
   `tests/groups.test.js` · Test: grupo con icono y color devuelve los suyos; subgrupo de segundo nivel sin color
   toma el del abuelo si el padre tampoco tiene, y el del padre si lo tiene; subgrupo con color propio no hereda;
@@ -235,3 +235,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: validar iconos y colores y rellenar el icono de educación` | Ruta rellena de `education`, `isValidColor` solo `#rrggbb`, `tests/icons.test.js`, orden de carga en el manifest. |
+| 2026-11-14 | T2 | `feat: calcular la apariencia heredada de un grupo` | `getGroupAppearance` en `modules/groups.js` (color heredado, icono propio) y sus tests. |

@@ -312,6 +312,77 @@ test("renameGroup y setGroupAppearance modifican un subgrupo anidado", async () 
   assert.strictEqual(nested.color, "#4CAF50");
 });
 
+test("getGroupAppearance devuelve icono y color propios", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].icon = "music";
+  groups[0].color = "#4CAF50";
+
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.getGroupAppearance(groups, "g1")),
+    { icon: "music", color: "#4CAF50" },
+  );
+});
+
+test("getGroupAppearance hereda el color del antecesor más cercano", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].color = "#4CAF50";
+  groups[0].subgroups[0].subgroups[0].icon = "tech";
+
+  // Sin color en el padre: toma el del abuelo.
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.getGroupAppearance(groups, "s2")),
+    { icon: "tech", color: "#4CAF50" },
+  );
+
+  // Con color en el padre: toma el del padre.
+  groups[0].subgroups[0].color = "#2196F3";
+  assert.strictEqual(
+    YouTubeGroups.getGroupAppearance(groups, "s2").color,
+    "#2196F3",
+  );
+
+  // Con color propio: no hereda.
+  groups[0].subgroups[0].subgroups[0].color = "#F44336";
+  assert.strictEqual(
+    YouTubeGroups.getGroupAppearance(groups, "s2").color,
+    "#F44336",
+  );
+});
+
+test("getGroupAppearance no hereda el icono", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].icon = "music";
+  groups[0].subgroups[0].icon = "";
+
+  assert.strictEqual(YouTubeGroups.getGroupAppearance(groups, "s1").icon, "");
+});
+
+test("getGroupAppearance ignora iconos inexistentes y formato antiguo", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].icon = "nope";
+
+  assert.strictEqual(YouTubeGroups.getGroupAppearance(groups, "g1").icon, "");
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.getGroupAppearance(groups, "g2")),
+    { icon: "", color: "" },
+  );
+});
+
+test("getGroupAppearance devuelve null si el grupo no existe y no muta", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].color = "#4CAF50";
+  const before = JSON.stringify(groups);
+
+  assert.strictEqual(YouTubeGroups.getGroupAppearance(groups, "zzz"), null);
+  YouTubeGroups.getGroupAppearance(groups, "s2");
+  assert.strictEqual(JSON.stringify(groups), before);
+});
+
 test("setChannelGroups no escribe sin cambios ni con error", async () => {
   const { YouTubeGroups, calls } = loadModules({
     youtubeGroups: seedGroups(),

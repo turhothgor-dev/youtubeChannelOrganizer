@@ -437,8 +437,50 @@ const YouTubeGroups = (() => {
     return group;
   }
 
+  /**
+   * Apariencia resultante de un grupo: el icono es el propio (sin herencia) y el
+   * color es el propio o, si está vacío, el del antecesor más cercano con color.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} groupId - Id del grupo o subgrupo.
+   * @returns {{icon: string, color: string}|null} null si el grupo no existe.
+   */
+  function getGroupAppearance(groups, groupId) {
+    const findPath = (list, trail) => {
+      for (const group of list) {
+        const current = [...trail, group];
+        if (group.id === groupId) {
+          return current;
+        }
+        const found = findPath(group.subgroups || [], current);
+        if (found) {
+          return found;
+        }
+      }
+      return null;
+    };
+
+    const path = findPath(groups, []);
+    if (!path) {
+      return null;
+    }
+
+    const group = path[path.length - 1];
+    const icon = YouTubeGroupsIcons.isValidIconId(group.icon) ? group.icon : "";
+
+    let color = "";
+    for (let i = path.length - 1; i >= 0; i--) {
+      if (path[i].color) {
+        color = path[i].color;
+        break;
+      }
+    }
+
+    return { icon: icon || "", color };
+  }
+
   return {
     normalizeChannelUrl,
+    getGroupAppearance,
     createGroup,
     removeGroupById,
     deleteGroup,
