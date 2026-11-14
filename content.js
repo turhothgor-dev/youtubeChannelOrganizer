@@ -99,6 +99,27 @@
   /** IDs de vídeo cuyo cambio de visto se está guardando. */
   const savingWatchedIds = new Set();
 
+  /** Ajustes en memoria; valores por defecto hasta cargar los guardados. */
+  let settings = YouTubeGroupsSettings.DEFAULT_SETTINGS;
+
+  /**
+   * Reaplica la visibilidad a todas las tarjetas de vídeo.
+   */
+  function applyVisibilityToAllCards() {
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      applyCardVisibility(card);
+    }
+  }
+
+  YouTubeGroupsSettings.getSettings()
+    .then((loaded) => {
+      settings = loaded;
+      applyVisibilityToAllCards();
+    })
+    .catch((error) => {
+      console.error("[YouTube Groups] No se pudieron leer los ajustes", error);
+    });
+
   /**
    * Busca el ID del vídeo de una tarjeta en su primer enlace válido.
    * @param {Element} card - Tarjeta de vídeo.
@@ -133,6 +154,7 @@
       watchedVideos !== null &&
       YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
     card.classList.toggle(WATCHED_CLASS, isWatched);
+    applyCardVisibility(card);
 
     const watchedButton = card.querySelector(".youtube-groups__watched-button");
     if (watchedButton) {
@@ -1298,60 +1320,51 @@
     card.dataset.youtubeGroupsChannelName = channel.name;
     card.dataset.youtubeGroupsChannelUrl = channel.url;
 
-    // Apply filter immediately when detecting card
-    applyFilterToCard(card, channel);
+    // La visibilidad se aplica en cuanto se detecta la tarjeta
+    applyCardVisibility(card);
   }
 
-  function setCardVisibility(card, isVisible) {
-    // Always apply the CSS class for filtering
-    card.classList.toggle("youtube-groups--filtered-out", !isVisible);
-
-    // Also manage display property for better compatibility
-    if (isVisible) {
-      card.style.display = "";
-    } else {
-      card.style.display = "none";
+  /**
+   * Indica si una tarjeta pasa el filtro activo. Sin grupo activo, sin canal
+   * o sin canales del grupo todavía, pasa.
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {boolean}
+   */
+  function cardMatchesFilter(card) {
+    const channelUrl = card.dataset.youtubeGroupsChannelUrl;
+    if (
+      getActiveGroupId() === null ||
+      !channelUrl ||
+      activeGroupChannelUrls === null
+    ) {
+      return true;
     }
+    return activeGroupChannelUrls.has(channelUrl);
   }
 
-  function applyFilterToCard(card, detectedChannel = null) {
-    const channelUrl =
-      detectedChannel?.url ?? card.dataset.youtubeGroupsChannelUrl;
-
-    // If no active group is selected (null), show all cards
-    if (getActiveGroupId() === null) {
-      setCardVisibility(card, true);
-      return;
-    }
-
-    // If we don't have channel info, show card
-    if (!channelUrl) {
-      setCardVisibility(card, true);
-      return;
-    }
-
-    // If we don't have active group channels yet, show card (will be filtered later)
-    if (activeGroupChannelUrls === null) {
-      setCardVisibility(card, true);
-      return;
-    }
-
-    // Check if the channel is in the active group using exact match
-    const isVisible = activeGroupChannelUrls.has(channelUrl);
-
-    setCardVisibility(card, isVisible);
+  /**
+   * Único punto que pinta la visibilidad de una tarjeta: combina filtro,
+   * visto y ajustes, y alterna las clases `hidden` y `dimmed`.
+   * @param {Element} card - Tarjeta de vídeo.
+   */
+  function applyCardVisibility(card) {
+    const visibility = YouTubeGroupsVisibility.getCardVisibility(
+      {
+        matchesFilter: cardMatchesFilter(card),
+        isWatched: card.classList.contains(WATCHED_CLASS),
+      },
+      settings,
+    );
+    card.classList.toggle("youtube-groups--hidden", visibility === "hidden");
+    card.classList.toggle("youtube-groups--dimmed", visibility === "dimmed");
   }
 
   function showAllVideoCards() {
-    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
-      setCardVisibility(card, true);
-    }
+    applyVisibilityToAllCards();
   }
 
   function filterAllDetectedCards() {
-    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
-      applyFilterToCard(card);
-    }
+    applyVisibilityToAllCards();
   }
 
   async function refreshActiveGroupFilter() {

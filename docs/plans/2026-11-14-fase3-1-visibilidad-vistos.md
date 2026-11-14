@@ -126,7 +126,7 @@ lint.
   conserva el otro campo. `getCardVisibility`: tabla con las 2 × 2 combinaciones de `matchesFilter`/`isWatched`
   para cada combinación de `watchedMode` (3) y `outsideMode` (2), comparada con la tabla de reglas de **Decisiones**
   (incluye: visto y fuera del filtro con `watchedMode: "hide"` y `outsideMode: "dim"` → `hidden`).
-- [ ] T4 · Visibilidad unificada en las tarjetas. En `content.js`: caché `settings` y su carga al arrancar;
+- [x] T4 · Visibilidad unificada en las tarjetas. En `content.js`: caché `settings` y su carga al arrancar;
   `applyCardVisibility(card)` sustituye a `setCardVisibility`; `applyFilterToCard`, `showAllVideoCards`,
   `filterAllDetectedCards` y `applyWatchedToCard` la usan; nada de `style.display`. En `content.css`: reglas
   `.youtube-groups--hidden` y `.youtube-groups--dimmed` (con `:hover`); quitar las de `youtube-groups--filtered-out`
@@ -203,3 +203,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | `fix: corregir el estado y el doble clic del botón de visto` | `watchedLoadError`, `savingWatchedIds`, `refreshWatchedUi`; V1-V3 pendientes de comprobar a mano |
 | 2026-11-14 | T2 | `feat: añadir el almacenamiento de ajustes (ADR 0003)` | `getSettings` y `saveSettings` en `modules/storage.js`; ADR 0003 a `aceptada` |
 | 2026-11-14 | T3 | `feat: añadir la lógica de ajustes y de visibilidad de tarjetas` | `modules/settings.js` y `modules/visibility.js` con tests; añadidos al manifiesto y a `load-modules` |
+| 2026-11-14 | T4 | `feat: unificar la visibilidad de las tarjetas con applyCardVisibility` | caché `settings`, `applyCardVisibility` y clases `hidden`/`dimmed`; sin `style.display`; V4 pendiente de comprobar a mano |
