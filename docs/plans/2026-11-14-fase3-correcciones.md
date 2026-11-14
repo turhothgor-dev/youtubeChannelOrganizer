@@ -1,6 +1,6 @@
 # Plan: Fase 3 · Correcciones de la revisión (marcado automático, escrituras perdidas y DOM)
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: revisión de la Fase 3 (planes `docs/plans/2026-11-14-fase3-*.md`, ADR 0002, 0003 y 0004).
 
@@ -143,7 +143,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
 - [x] T9 · Datos del vídeo actual sincronizados. Helper `isWatchPageInSync(videoId)`, usado por
   `handleVideoProgress` y `getCurrentWatchVideoData` (sugerencia d) · Ficheros: `content.js` · Test: `make lint`,
   `make test` y a mano V7 y repetir V1.
-- [ ] T10 · Cerrar el plan. En `docs/ARCHITECTURE.md`: la fila de `modules/storage.js` menciona `withLock` y
+- [x] T10 · Cerrar el plan. En `docs/ARCHITECTURE.md`: la fila de `modules/storage.js` menciona `withLock` y
   `KEYS` (ADR 0005); los flujos "Añadir un canal a grupos", "Marcar como visto" y "Listas" dicen que la operación
   se encola por clave; "Marcado automático" dice que solo actúa con los ajustes leídos. Estado de este plan a
   `hecho` · Ficheros: `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
@@ -211,3 +211,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T7 | fix: registrar los escuchadores de los desplegables una sola vez | Booleanos `subscriptionDropdownListenersAdded`, `playlistDropdownListenersAdded` e `iconPickerListenersAdded`; la creación del elemento queda separada del registro. Pendiente V5 a mano. |
 | 2026-11-14 | T8 | fix: cerrar solo el modal de listas al repintarlo | Clase `youtube-groups__channel-list-modal--playlist` en el modal de `openPlaylistVideosModal`; `closePlaylistModal` solo busca esa clase. Pendiente V6 a mano. |
 | 2026-11-14 | T9 | fix: no leer datos del vídeo anterior al navegar por la SPA | Helper `isWatchPageInSync` usado por `handleVideoProgress` y `getCurrentWatchVideoData` (devuelve `{ id: null, title: "", channelName: "" }` si no está sincronizado). Pendientes V7 y repetir V1 a mano. |
+| 2026-11-14 | T10 | docs: actualizar la arquitectura con la cola por clave y el marcado automático | `docs/ARCHITECTURE.md` menciona `KEYS`, `withLock` (ADR 0005) y `settingsLoaded`; plan a `hecho`. |
