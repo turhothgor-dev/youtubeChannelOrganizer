@@ -2225,14 +2225,18 @@
 
   /**
    * Lee los textos visibles de una tarjeta: los `span` y `div` sin hijos
-   * elemento, con 1 a 60 caracteres y fuera del título.
+   * elemento, con 1 a 60 caracteres, fuera del título y fuera de los nodos
+   * añadidos por la extensión.
    * @param {Element} card - Tarjeta de vídeo.
    * @returns {string[]} Textos recortados.
    */
   function getCardTexts(card) {
     const texts = [];
     for (const element of card.querySelectorAll("span, div")) {
-      if (element.children.length > 0 || element.closest("h3, #video-title")) {
+      if (
+        element.children.length > 0 ||
+        element.closest('h3, #video-title, [class*="youtube-groups__"]')
+      ) {
         continue;
       }
       const text = (element.textContent ?? "").trim();
