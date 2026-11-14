@@ -1947,7 +1947,16 @@
       : null;
   }
 
-  function createSubscriptionChannelControl(card) {
+  /**
+   * Crea el control de una tarjeta.
+   * @param {Element} card Tarjeta sobre la que va el control.
+   * @param {{videoButtons?: boolean, channel?: {name: string, url: string}}} [options]
+   *   `videoButtons: false` deja solo "Añadir a grupo"; `channel` fija el canal
+   *   en lugar de leerlo de la tarjeta al pulsar.
+   * @returns {HTMLElement} Control con los botones.
+   */
+  function createSubscriptionChannelControl(card, options = {}) {
+    const { videoButtons = true, channel = null } = options;
     const control = document.createElement("span");
     control.className = "youtube-groups__subscription-control";
 
@@ -1957,6 +1966,26 @@
     button.type = "button";
     button.textContent = "Añadir a grupo";
     control.appendChild(button);
+
+    // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
+    control.addEventListener("mousedown", (event) => {
+      event.stopPropagation();
+    });
+
+    control.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      // El canal se lee de la tarjeta al abrir, no al crear el control
+      openSubscriptionGroupsForm(channel || getChannelFromCard(card), button);
+    });
+
+    if (!videoButtons) {
+      return control;
+    }
 
     const watchedButton = document.createElement("button");
     watchedButton.className =
@@ -1992,22 +2021,6 @@
       event.stopPropagation();
       // Los datos se leen de la tarjeta al abrir: YouTube puede reutilizarla
       openPlaylistForm(getVideoDataFromCard(card), playlistButton);
-    });
-
-    // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
-    control.addEventListener("mousedown", (event) => {
-      event.stopPropagation();
-    });
-
-    control.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      // El canal se lee de la tarjeta al abrir, no al crear el control
-      openSubscriptionGroupsForm(getChannelFromCard(card), button);
     });
 
     return control;
@@ -2548,6 +2561,45 @@
     );
   }
 
+  const CHANNEL_RESULT_SELECTOR = "ytd-channel-renderer";
+
+  // Control "Añadir a grupo" en un resultado de canal de la búsqueda;
+  // idempotente por el mismo motivo que ensureChannelControl.
+  function ensureChannelResultControl(card) {
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    if (
+      !card.isConnected ||
+      pageType !== "search" ||
+      card.querySelector(".youtube-groups__subscription-control")
+    ) {
+      return;
+    }
+
+    let url = null;
+    for (const link of card.querySelectorAll("a[href]")) {
+      url = normalizeChannelUrl(link.href);
+      if (url) {
+        break;
+      }
+    }
+
+    const nameElement =
+      card.querySelector("ytd-channel-name #text") ||
+      card.querySelector("#channel-title");
+    const name = nameElement?.textContent.trim();
+    if (!url || !name) {
+      return;
+    }
+
+    const container = card.querySelector("#info") || card;
+    container.appendChild(
+      createSubscriptionChannelControl(card, {
+        videoButtons: false,
+        channel: { name, url },
+      }),
+    );
+  }
+
   const CURRENT_VIDEO_OWNER_SELECTOR =
     "ytd-watch-metadata #owner, ytd-video-owner-renderer";
 
@@ -2763,6 +2815,11 @@
   function processPendingCards() {
     processingScheduled = false;
     for (const card of pendingCards) {
+      if (card.matches(CHANNEL_RESULT_SELECTOR)) {
+        ensureChannelResultControl(card);
+        continue;
+      }
+
       detectCard(card);
       applyWatchedToCard(card);
       ensureChannelControl(card);
@@ -2778,17 +2835,21 @@
 
     scheduleContainingCard(node);
 
-    if (node.matches(VIDEO_CARD_SELECTOR)) {
+    const cardSelector = `${VIDEO_CARD_SELECTOR}, ${CHANNEL_RESULT_SELECTOR}`;
+
+    if (node.matches(cardSelector)) {
       scheduleCard(node);
     }
 
-    for (const card of node.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+    for (const card of node.querySelectorAll(cardSelector)) {
       scheduleCard(card);
     }
   }
 
   function scheduleContainingCard(element) {
-    const containingCard = element.closest(VIDEO_CARD_SELECTOR);
+    const containingCard = element.closest(
+      `${VIDEO_CARD_SELECTOR}, ${CHANNEL_RESULT_SELECTOR}`,
+    );
     if (containingCard) {
       scheduleCard(containingCard);
     }

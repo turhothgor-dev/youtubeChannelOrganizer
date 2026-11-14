@@ -362,7 +362,8 @@ html[dark] .youtube-groups__collapse-button:hover {
 }
 
 /* En resultados de búsqueda el control va en línea propia bajo el canal. */
-ytd-video-renderer .youtube-groups__subscription-control {
+ytd-video-renderer .youtube-groups__subscription-control,
+ytd-channel-renderer .youtube-groups__subscription-control {
   display: flex;
   flex-wrap: wrap;
   margin-left: 0;

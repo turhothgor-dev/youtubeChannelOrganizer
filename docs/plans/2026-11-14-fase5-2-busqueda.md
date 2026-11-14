@@ -43,7 +43,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 a
   `/playlist` dan `other`; `/@x/videos` da `channel`; `shouldShowCardControls` es `true` solo en los tres tipos.
 - [x] T2 · Usar `YouTubeGroupsPages` en `content.js` y botones en tarjetas de búsqueda con su ancla y estilo ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1, V2 y V4.
-- [ ] T3 · "Añadir a grupo" en resultados de canal · Ficheros: `content.js`, `content.css` · Test: `make lint`,
+- [x] T3 · "Añadir a grupo" en resultados de canal · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y a mano V3.
 - [ ] T4 · Cerrar el plan: `ROADMAP.md` marca ✅ "Soporte para resultados de búsqueda"; `docs/ARCHITECTURE.md` (fila
   de `pages.js`, orden de carga y superficies con botones en el flujo "Detección"). Estado a `hecho` · Ficheros:
@@ -86,3 +86,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: módulo pages para clasificar el tipo de página` | `modules/pages.js` con `getPageType` y `shouldShowCardControls`; en manifest y helper de tests. |
 | 2026-11-14 | T2 | `feat: botones de canal en las tarjetas de búsqueda` | `content.js` usa `YouTubeGroupsPages`; ancla `ytd-channel-name` en búsqueda y control en línea propia (CSS). Verificación manual V1, V2 y V4 pendiente. |
+| 2026-11-14 | T3 | `feat: añadir a grupo desde los resultados de canal` | `ensureChannelResultControl` y `CHANNEL_RESULT_SELECTOR` en `content.js`; `createSubscriptionChannelControl` admite `{ videoButtons, channel }`; CSS compartido. Verificación manual V3 pendiente. |
