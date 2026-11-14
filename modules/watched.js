@@ -1,0 +1,100 @@
+const YouTubeGroupsWatched = (() => {
+  const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+
+  /**
+   * Extrae el ID de un vídeo de una URL de /watch?v=<id> o /shorts/<id> del mismo origen.
+   *
+   * @param {string} href - La URL (absoluta o relativa).
+   * @returns {string|null} El ID de 11 caracteres o null si no es un vídeo válido.
+   */
+  function extractVideoId(href) {
+    let url;
+    try {
+      url = new URL(href, window.location.origin);
+    } catch {
+      return null;
+    }
+
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    let candidate = null;
+    if (url.pathname === "/watch") {
+      candidate = url.searchParams.get("v");
+    } else {
+      const match = url.pathname.match(/^\/shorts\/([^/]+)\/?$/);
+      candidate = match ? match[1] : null;
+    }
+
+    return candidate && VIDEO_ID_PATTERN.test(candidate) ? candidate : null;
+  }
+
+  /**
+   * Indica si un vídeo está en el mapa de vistos.
+   *
+   * @param {Object} videos - Mapa ID de vídeo -> entrada.
+   * @param {string} videoId - ID del vídeo.
+   * @returns {boolean}
+   */
+  function isVideoWatched(videos, videoId) {
+    return Boolean(videos) && Object.hasOwn(videos, videoId);
+  }
+
+  /**
+   * Marca o desmarca un vídeo sin mutar el mapa recibido.
+   *
+   * @param {Object} videos - Mapa ID de vídeo -> entrada.
+   * @param {string} videoId - ID del vídeo.
+   * @param {boolean} isWatched - Estado deseado.
+   * @param {number} now - Marca de tiempo para `watchedAt`.
+   * @returns {{videos: Object, changed: boolean}}
+   */
+  function applyVideoWatched(videos, videoId, isWatched, now) {
+    if (typeof videoId !== "string" || !VIDEO_ID_PATTERN.test(videoId)) {
+      throw new Error("Vídeo inválido.");
+    }
+
+    const alreadyWatched = isVideoWatched(videos, videoId);
+    const next = { ...videos };
+
+    if (isWatched) {
+      if (alreadyWatched) {
+        return { videos: next, changed: false };
+      }
+      next[videoId] = { watchedAt: now };
+      return { videos: next, changed: true };
+    }
+
+    if (!alreadyWatched) {
+      return { videos: next, changed: false };
+    }
+    delete next[videoId];
+    return { videos: next, changed: true };
+  }
+
+  /**
+   * Lee los vistos, aplica el cambio y escribe solo si hubo cambio.
+   *
+   * @param {string} videoId - ID del vídeo.
+   * @param {boolean} isWatched - Estado deseado.
+   * @returns {Promise<{videos: Object, changed: boolean}>}
+   */
+  async function setVideoWatched(videoId, isWatched) {
+    const videos = await YouTubeGroupsStorage.getWatchedVideos();
+    const result = applyVideoWatched(videos, videoId, isWatched, Date.now());
+
+    if (result.changed) {
+      await YouTubeGroupsStorage.saveWatchedVideos(result.videos);
+    }
+
+    return result;
+  }
+
+  return {
+    extractVideoId,
+    isVideoWatched,
+    applyVideoWatched,
+    setVideoWatched,
+  };
+})();

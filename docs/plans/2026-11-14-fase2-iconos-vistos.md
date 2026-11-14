@@ -134,7 +134,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   y `videos: null`) devuelve `{}`; guardar y leer devuelve el mismo mapa y el almacenamiento queda con
   `version: 1`; `saveWatchedVideos([])` y `saveWatchedVideos(null)` lanzan `TypeError`; guardar vistos no cambia
   `youtubeGroups`.
-- [ ] T5 · Lógica de vistos. Nuevo `modules/watched.js` con `YouTubeGroupsWatched` (`extractVideoId`,
+- [x] T5 · Lógica de vistos. Nuevo `modules/watched.js` con `YouTubeGroupsWatched` (`extractVideoId`,
   `isVideoWatched`, `applyVideoWatched`, `setVideoWatched`; ver **Decisiones**). Añadirlo a `manifest.json` antes
   de `content.js` y a `MODULES` de `tests/helpers/load-modules.js`, que también devuelve `YouTubeGroupsWatched` ·
   Ficheros: `modules/watched.js` (nuevo), `manifest.json`, `tests/helpers/load-modules.js`,
@@ -238,3 +238,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | `feat: calcular la apariencia heredada de un grupo` | `getGroupAppearance` en `modules/groups.js` (color heredado, icono propio) y sus tests. |
 | 2026-11-14 | T3 | `feat: pintar iconos sin innerHTML y en los selectores de casillas` | `createIconSvg` y `createGroupMark` en `content.js`, punto de color, selector de iconos con tema claro y oscuro. |
 | 2026-11-14 | T4 | `feat: guardar los vídeos vistos en el almacenamiento` | `getWatchedVideos` y `saveWatchedVideos` en `modules/storage.js`, tests y ADR 0002 a `aceptada`. |
+| 2026-11-14 | T5 | `feat: añadir la lógica de vídeos vistos` | `modules/watched.js` (`extractVideoId`, `isVideoWatched`, `applyVideoWatched`, `setVideoWatched`), manifest, helper de tests y `tests/watched.test.js`. |

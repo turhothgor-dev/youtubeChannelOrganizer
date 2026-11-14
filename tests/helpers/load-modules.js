@@ -5,7 +5,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "..", "..");
-const MODULES = ["storage.js", "icons.js", "groups.js"];
+const MODULES = ["storage.js", "icons.js", "groups.js", "watched.js"];
 
 /**
  * Carga los scripts clásicos de modules/ en un contexto vm con un
@@ -49,6 +49,7 @@ function loadModules(initialStore = {}) {
     YouTubeGroups: vm.runInContext("YouTubeGroups", context),
     YouTubeGroupsIcons: vm.runInContext("YouTubeGroupsIcons", context),
     YouTubeGroupsStorage: vm.runInContext("YouTubeGroupsStorage", context),
+    YouTubeGroupsWatched: vm.runInContext("YouTubeGroupsWatched", context),
   };
 }
 
