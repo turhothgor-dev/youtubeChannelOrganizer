@@ -152,7 +152,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   tarjeta; al cargar los vistos, aplicarla a todas las tarjetas de `VIDEO_CARD_SELECTOR`. En `content.css`, la
   regla de `.youtube-groups--watched` (ver **Decisiones**) · Ficheros: `content.js`, `content.css` · Test:
   `make lint`, `make test` y a mano V4 (con vistos creados desde la consola de la extensión o tras T7).
-- [ ] T7 · Botón "Marcar visto" por tarjeta. En `content.js`: el control de `createSubscriptionChannelControl`
+- [x] T7 · Botón "Marcar visto" por tarjeta. En `content.js`: el control de `createSubscriptionChannelControl`
   añade un segundo botón (`youtube-groups__watched-button action-button secondary-button`) que al pulsar lee el ID
   de la tarjeta, llama a `setVideoWatched(id, !isVideoWatched(watchedVideos, id))`, actualiza `watchedVideos` y
   reaplica `applyWatchedToCard` a todas las tarjetas con ese ID; `applyWatchedToCard` también pone el texto y
@@ -240,3 +240,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T4 | `feat: guardar los vídeos vistos en el almacenamiento` | `getWatchedVideos` y `saveWatchedVideos` en `modules/storage.js`, tests y ADR 0002 a `aceptada`. |
 | 2026-11-14 | T5 | `feat: añadir la lógica de vídeos vistos` | `modules/watched.js` (`extractVideoId`, `isVideoWatched`, `applyVideoWatched`, `setVideoWatched`), manifest, helper de tests y `tests/watched.test.js`. |
 | 2026-11-14 | T6 | `feat: marcar las tarjetas de vídeos vistos` | `findVideoId` y `applyWatchedToCard` en `content.js`, carga de vistos al arrancar y regla `.youtube-groups--watched`. |
+| 2026-11-14 | T7 | `feat: añadir el botón Marcar visto en las tarjetas` | Segundo botón en el control de la tarjeta, `toggleVideoWatched` y `updateWatchedButton` en `content.js`; estilos del botón. |

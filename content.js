@@ -127,6 +127,52 @@
       watchedVideos !== null &&
       YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
     card.classList.toggle(WATCHED_CLASS, isWatched);
+
+    const watchedButton = card.querySelector(".youtube-groups__watched-button");
+    if (watchedButton) {
+      updateWatchedButton(watchedButton, videoId, isWatched);
+    }
+  }
+
+  /**
+   * Pone el texto, el estado y la disponibilidad de un botón de visto.
+   * @param {HTMLButtonElement} button - Botón "Marcar visto".
+   * @param {string|null} videoId - ID del vídeo, o null si no se conoce.
+   * @param {boolean} isWatched - Si el vídeo está visto.
+   */
+  function updateWatchedButton(button, videoId, isWatched) {
+    button.textContent = isWatched ? "✓ Visto" : "Marcar visto";
+    button.setAttribute("aria-pressed", String(isWatched));
+    button.disabled = !videoId;
+  }
+
+  /**
+   * Alterna el estado de visto de un vídeo y reaplica la marca a sus tarjetas.
+   * Si falla el guardado, el estado no cambia y el botón recibe el error en `title`.
+   * @param {string|null} videoId - ID del vídeo.
+   * @param {HTMLButtonElement} button - Botón pulsado.
+   * @returns {Promise<void>}
+   */
+  async function toggleVideoWatched(videoId, button) {
+    if (!videoId || watchedVideos === null) {
+      return;
+    }
+    try {
+      const result = await YouTubeGroupsWatched.setVideoWatched(
+        videoId,
+        !YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId),
+      );
+      watchedVideos = result.videos;
+      button.removeAttribute("title");
+      for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+        if (card.getAttribute(VIDEO_ID_ATTRIBUTE) === videoId) {
+          applyWatchedToCard(card);
+        }
+      }
+    } catch (error) {
+      button.title = "No se pudo guardar: " + error.message;
+      console.error("[YouTube Groups] No se pudo guardar el visto", error);
+    }
   }
 
   YouTubeGroupsStorage.getWatchedVideos()
@@ -855,6 +901,27 @@
     button.type = "button";
     button.textContent = "Añadir a grupo";
     control.appendChild(button);
+
+    const watchedButton = document.createElement("button");
+    watchedButton.className =
+      "youtube-groups__watched-button action-button secondary-button";
+    watchedButton.type = "button";
+    const initialVideoId = findVideoId(card);
+    updateWatchedButton(
+      watchedButton,
+      initialVideoId,
+      Boolean(initialVideoId) &&
+        watchedVideos !== null &&
+        YouTubeGroupsWatched.isVideoWatched(watchedVideos, initialVideoId),
+    );
+    control.appendChild(watchedButton);
+
+    watchedButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      // El ID se lee de la tarjeta al pulsar: YouTube puede reutilizarla
+      toggleVideoWatched(findVideoId(card), watchedButton);
+    });
 
     // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
     control.addEventListener("mousedown", (event) => {
