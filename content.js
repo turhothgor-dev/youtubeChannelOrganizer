@@ -311,19 +311,6 @@
     }
 
     const options = panel.querySelector(".youtube-groups__options");
-    const currentChannelSection = panel.querySelector(
-      ".youtube-groups__current-channel",
-    );
-    const currentChannelName = panel.querySelector(
-      ".youtube-groups__channel-name",
-    );
-    const currentChannelGroups = panel.querySelector(
-      ".youtube-groups__channel-groups",
-    );
-    const currentChannelForm = panel.querySelector(
-      ".youtube-groups__channel-groups-form",
-    );
-
     // Get groups FIRST, before any early returns
     const groups = await getGroups();
     options.replaceChildren();
@@ -585,8 +572,33 @@
       }
     });
 
-    // Now handle current channel section AFTER groups are rendered
+    renderCurrentChannelSection(groups);
+  }
+
+  // URL del canal pintado por última vez en la sección "Canal actual".
+  let renderedCurrentChannelUrl = null;
+
+  function renderCurrentChannelSection(groups) {
+    const panel = document.getElementById(GROUPS_PANEL_ID);
+    if (!panel) {
+      return;
+    }
+
+    const currentChannelSection = panel.querySelector(
+      ".youtube-groups__current-channel",
+    );
+    const currentChannelName = panel.querySelector(
+      ".youtube-groups__channel-name",
+    );
+    const currentChannelGroups = panel.querySelector(
+      ".youtube-groups__channel-groups",
+    );
+    const currentChannelForm = panel.querySelector(
+      ".youtube-groups__channel-groups-form",
+    );
+
     const channel = getCurrentVideoChannel();
+    renderedCurrentChannelUrl = channel ? channel.url : null;
     currentChannelSection.hidden = !channel;
     currentChannelForm.hidden = true;
     currentChannelGroups.replaceChildren();
@@ -1203,12 +1215,20 @@
     currentChannelUpdateScheduled = true;
     requestAnimationFrame(() => {
       currentChannelUpdateScheduled = false;
-      renderGroupsPanel().catch((error) => {
-        console.error(
-          "[YouTube Groups] No se pudo actualizar el canal actual",
-          error,
-        );
-      });
+      const channel = getCurrentVideoChannel();
+      const channelUrl = channel ? channel.url : null;
+      if (channelUrl === renderedCurrentChannelUrl) {
+        return;
+      }
+
+      getGroups()
+        .then((groups) => renderCurrentChannelSection(groups))
+        .catch((error) => {
+          console.error(
+            "[YouTube Groups] No se pudo actualizar el canal actual",
+            error,
+          );
+        });
     });
   }
 
