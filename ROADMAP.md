@@ -14,7 +14,7 @@
 
 ## Fase 3 (Funcionalidades Avanzadas):
 - ✅ Modos de visibilidad
-- ☐ Gestor de playlists
+- ✅ Gestor de playlists
 - ✅ Filtros avanzados (duración, fecha, popularidad)
 - ✅ Ocultar videos vistos
 - ✅ Marcar videos vistos
