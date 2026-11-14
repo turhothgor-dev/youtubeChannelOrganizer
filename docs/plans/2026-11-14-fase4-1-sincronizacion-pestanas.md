@@ -1,6 +1,6 @@
 # Plan: Fase 4 (1/3) · Sincronización entre pestañas
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 4: "Sincronización cruzada" (primera mitad; la cierra el plan
 `2026-11-14-fase4-2-copia-seguridad.md`).
@@ -48,7 +48,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc en funciones nuevas; `make test
   con una clave ajena; los tests existentes de `get*` siguen pasando.
 - [x] T2 · `handleStorageChange` en `content.js` (ver **Decisiones**) y `data-playlist-id` en el modal de lista ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1–V4.
-- [ ] T3 · Cerrar el plan: `docs/ARCHITECTURE.md` (flujo "Sincronización entre pestañas", fila de `storage.js` con
+- [x] T3 · Cerrar el plan: `docs/ARCHITECTURE.md` (flujo "Sincronización entre pestañas", fila de `storage.js` con
   los lectores) y ADR 0006 a `aceptada`. Este plan no marca puntos de `ROADMAP.md` (lo hace el plan 4-2). Estado a
   `hecho` · Ficheros: `docs/ARCHITECTURE.md`, `docs/adr/0006-sincronizacion-pestanas-y-copia.md`, este plan · Test:
   `make lint` y `make test`.
@@ -89,3 +89,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: lectores puros y getChangedKeys en storage` | `read*Value` y `getChangedKeys` con tests; los `get*` los reutilizan. |
 | 2026-11-14 | T2 | `feat: sincronizar las pestañas con storage.onChanged` | `handleStorageChange` en `content.js` y `data-playlist-id` en el modal; lint y tests en verde, V1-V4 pendientes a mano. |
+| 2026-11-14 | T3 | `docs: cerrar la sincronización entre pestañas` | ARCHITECTURE (flujo y fila de `storage.js`), ADR 0006 a aceptada y plan a hecho. |

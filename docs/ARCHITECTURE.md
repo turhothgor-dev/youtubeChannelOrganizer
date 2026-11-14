@@ -16,7 +16,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
 | `manifest.json` | WebExtensions MV3 | Permiso `storage` y content scripts en `*://www.youtube.com/*` |
-| `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005) |
+| `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005), los lectores puros `readGroupsValue`, `readWatchedValue`, `readSettingsValue` y `readPlaylistsValue`, y `getChangedKeys(changes, areaName)` para `storage.onChanged` (ADR 0006) |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos |
 | `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos y URL de un grupo para el filtro |
 | `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) |
@@ -62,6 +62,12 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `YouTubeGroupsPlaylists.setVideoPlaylists` (una lectura y, solo si cambia algo, una escritura, encoladas por clave con `withLock`, ADR 0005). Las listas se
   gestionan en la sección "Listas" del panel: crear, renombrar, eliminar, ver (modal con "Quitar") y reproducir.
   "Reproducir" es un enlace a `https://www.youtube.com/watch_videos?video_ids=...` con los 50 primeros vídeos.
+- **Sincronización entre pestañas**: `content.js` registra `handleStorageChange` en `browser.storage.onChanged`
+  (ADR 0006). `getChangedKeys` indica qué claves lógicas (`groups`, `watched`, `settings`, `playlists`) han cambiado
+  en el área `local` y los lectores puros (`read*Value`) interpretan el nuevo valor. Cada clave actualiza su caché y
+  repinta su parte: vistos (tarjetas y "Vídeo actual"), ajustes (controles y visibilidad), grupos (filtro activo y
+  panel) y listas (sección "Listas" y modal "Ver", que se cierra si la lista ya no existe). El evento llega también
+  a la pestaña que escribe; repintar dos veces es inocuo.
 
 ## Decisiones
 

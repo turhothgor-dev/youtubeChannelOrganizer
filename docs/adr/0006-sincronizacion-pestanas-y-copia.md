@@ -1,6 +1,6 @@
 # 0006 · Sincronización entre pestañas con storage.onChanged y entre dispositivos con copia de seguridad
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-14
 
 ## Contexto
