@@ -137,7 +137,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
 - [x] T7 · Escuchadores de los desplegables una sola vez. Un booleano por desplegable en
   `getOrCreateSubscriptionDropdown`, `getOrCreatePlaylistDropdown` y `getOrCreateIconPicker` (sugerencia b) ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V5.
-- [ ] T8 · Cerrar solo el modal de listas. Clase `youtube-groups__channel-list-modal--playlist` en el modal de
+- [x] T8 · Cerrar solo el modal de listas. Clase `youtube-groups__channel-list-modal--playlist` en el modal de
   `openPlaylistVideosModal` y `closePlaylistModal` busca solo esa clase (sugerencia c) · Ficheros: `content.js` ·
   Test: `make lint`, `make test` y a mano V6.
 - [ ] T9 · Datos del vídeo actual sincronizados. Helper `isWatchPageInSync(videoId)`, usado por
@@ -209,3 +209,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T5 | fix: no aplicar resultados viejos al estado en memoria | Contadores `watchedWriteSeq`/`watchedAppliedSeq` en `toggleVideoWatched` y `markVideoWatched`, y `settingsWriteSeq`/`settingsAppliedSeq` en `changeSetting` (sin reaplicar visibilidad si el resultado es viejo). Pendientes V2 y V3 a mano. |
 | 2026-11-14 | T6 | fix: ignorar textos de la extensión en los metadatos de tarjeta | `getCardTexts` salta los elementos dentro de `[class*="youtube-groups__"]`. Pendiente V4 a mano. |
 | 2026-11-14 | T7 | fix: registrar los escuchadores de los desplegables una sola vez | Booleanos `subscriptionDropdownListenersAdded`, `playlistDropdownListenersAdded` e `iconPickerListenersAdded`; la creación del elemento queda separada del registro. Pendiente V5 a mano. |
+| 2026-11-14 | T8 | fix: cerrar solo el modal de listas al repintarlo | Clase `youtube-groups__channel-list-modal--playlist` en el modal de `openPlaylistVideosModal`; `closePlaylistModal` solo busca esa clase. Pendiente V6 a mano. |

@@ -946,7 +946,9 @@
    * Cierra el modal de vídeos de una lista, si está abierto.
    */
   function closePlaylistModal() {
-    document.querySelector(".youtube-groups__channel-list-modal")?.remove();
+    document
+      .querySelector(".youtube-groups__channel-list-modal--playlist")
+      ?.remove();
   }
 
   /**
@@ -963,7 +965,8 @@
     }
 
     const modal = document.createElement("div");
-    modal.className = "youtube-groups__channel-list-modal";
+    modal.className =
+      "youtube-groups__channel-list-modal youtube-groups__channel-list-modal--playlist";
     const content = document.createElement("div");
     content.className = "youtube-groups__channel-list-content";
 
