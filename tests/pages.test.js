@@ -1,0 +1,65 @@
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert");
+const { loadModules } = require("./helpers/load-modules");
+
+test("getPageType clasifica las rutas conocidas", () => {
+  const { YouTubeGroupsPages } = loadModules();
+  const cases = {
+    "/": "home",
+    "/feed/subscriptions": "subscriptions",
+    "/results": "search",
+    "/watch": "watch",
+    "/shorts/abc123": "shorts",
+    "/@canal": "channel",
+    "/@canal/videos": "channel",
+    "/channel/UC123": "channel",
+    "/channel/UC123/videos": "channel",
+    "/c/canal": "channel",
+    "/c/canal/featured": "channel",
+    "/user/canal": "channel",
+    "/user/canal/videos": "channel",
+  };
+
+  for (const [pathname, type] of Object.entries(cases)) {
+    assert.strictEqual(
+      YouTubeGroupsPages.getPageType(pathname),
+      type,
+      pathname,
+    );
+  }
+});
+
+test("getPageType devuelve other para el resto de rutas", () => {
+  const { YouTubeGroupsPages } = loadModules();
+
+  for (const pathname of [
+    "/shorts/",
+    "/shorts",
+    "/feed/history",
+    "/playlist",
+    "/@",
+    "/channel",
+    "",
+    undefined,
+    null,
+  ]) {
+    assert.strictEqual(
+      YouTubeGroupsPages.getPageType(pathname),
+      "other",
+      String(pathname),
+    );
+  }
+});
+
+test("shouldShowCardControls es true solo en inicio, suscripciones y búsqueda", () => {
+  const { YouTubeGroupsPages } = loadModules();
+
+  for (const type of ["home", "subscriptions", "search"]) {
+    assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), true);
+  }
+  for (const type of ["watch", "shorts", "channel", "other", undefined]) {
+    assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), false);
+  }
+});

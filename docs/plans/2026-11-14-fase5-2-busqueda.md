@@ -37,7 +37,7 @@ Decisiones (delegadas por la persona):
 
 Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 avisos) en verde.
 
-- [ ] T1 · `modules/pages.js`; añadirlo a `manifest.json` y a `tests/helpers/load-modules.js` (devuelve
+- [x] T1 · `modules/pages.js`; añadirlo a `manifest.json` y a `tests/helpers/load-modules.js` (devuelve
   `YouTubeGroupsPages`) · Ficheros: `modules/pages.js` (nuevo), `manifest.json`, `tests/helpers/load-modules.js`,
   `tests/pages.test.js` (nuevo) · Test: cada ruta de **Decisiones** da su tipo; `/shorts/` sin id, `/feed/history` y
   `/playlist` dan `other`; `/@x/videos` da `channel`; `shouldShowCardControls` es `true` solo en los tres tipos.
@@ -84,3 +84,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: módulo pages para clasificar el tipo de página` | `modules/pages.js` con `getPageType` y `shouldShowCardControls`; en manifest y helper de tests. |

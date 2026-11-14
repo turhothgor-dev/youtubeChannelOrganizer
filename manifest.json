@@ -24,6 +24,7 @@
         "modules/settings.js",
         "modules/visibility.js",
         "modules/metadata.js",
+        "modules/pages.js",
         "modules/playlists.js",
         "modules/backup.js",
         "content.js"

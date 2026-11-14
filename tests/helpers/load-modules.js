@@ -13,6 +13,7 @@ const MODULES = [
   "settings.js",
   "visibility.js",
   "metadata.js",
+  "pages.js",
   "playlists.js",
   "backup.js",
 ];
@@ -72,6 +73,7 @@ function loadModules(initialStore = {}, { latencyMs = 0 } = {}) {
       context,
     ),
     YouTubeGroupsMetadata: vm.runInContext("YouTubeGroupsMetadata", context),
+    YouTubeGroupsPages: vm.runInContext("YouTubeGroupsPages", context),
     YouTubeGroupsPlaylists: vm.runInContext("YouTubeGroupsPlaylists", context),
     YouTubeGroupsBackup: vm.runInContext("YouTubeGroupsBackup", context),
   };
