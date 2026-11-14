@@ -41,7 +41,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 a
   `YouTubeGroupsPages`) · Ficheros: `modules/pages.js` (nuevo), `manifest.json`, `tests/helpers/load-modules.js`,
   `tests/pages.test.js` (nuevo) · Test: cada ruta de **Decisiones** da su tipo; `/shorts/` sin id, `/feed/history` y
   `/playlist` dan `other`; `/@x/videos` da `channel`; `shouldShowCardControls` es `true` solo en los tres tipos.
-- [ ] T2 · Usar `YouTubeGroupsPages` en `content.js` y botones en tarjetas de búsqueda con su ancla y estilo ·
+- [x] T2 · Usar `YouTubeGroupsPages` en `content.js` y botones en tarjetas de búsqueda con su ancla y estilo ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1, V2 y V4.
 - [ ] T3 · "Añadir a grupo" en resultados de canal · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y a mano V3.
@@ -85,3 +85,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: módulo pages para clasificar el tipo de página` | `modules/pages.js` con `getPageType` y `shouldShowCardControls`; en manifest y helper de tests. |
+| 2026-11-14 | T2 | `feat: botones de canal en las tarjetas de búsqueda` | `content.js` usa `YouTubeGroupsPages`; ancla `ytd-channel-name` en búsqueda y control en línea propia (CSS). Verificación manual V1, V2 y V4 pendiente. |

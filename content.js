@@ -1947,8 +1947,6 @@
       : null;
   }
 
-  const SUBSCRIPTIONS_PATH = "/feed/subscriptions";
-
   function createSubscriptionChannelControl(card) {
     const control = document.createElement("span");
     control.className = "youtube-groups__subscription-control";
@@ -2519,15 +2517,14 @@
     return container;
   }
 
-  function shouldShowChannelControls() {
-    const { pathname } = window.location;
-    return pathname === SUBSCRIPTIONS_PATH || pathname === "/";
-  }
-
   // Un control por tarjeta; es idempotente porque insertarlo provoca una
   // mutación que vuelve a programar la tarjeta.
   function ensureChannelControl(card) {
-    if (!card.isConnected || !shouldShowChannelControls()) {
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    if (
+      !card.isConnected ||
+      !YouTubeGroupsPages.shouldShowCardControls(pageType)
+    ) {
       return;
     }
 
@@ -2540,7 +2537,12 @@
       return;
     }
 
-    channelLink.insertAdjacentElement(
+    // En búsqueda el control va tras el nombre del canal completo, en línea propia.
+    const anchor =
+      (pageType === "search" && channelLink.closest("ytd-channel-name")) ||
+      channelLink;
+
+    anchor.insertAdjacentElement(
       "afterend",
       createSubscriptionChannelControl(card),
     );
