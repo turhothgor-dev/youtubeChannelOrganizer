@@ -950,7 +950,8 @@
   }
 
   function shouldShowChannelControls() {
-    return window.location.pathname === SUBSCRIPTIONS_PATH;
+    const { pathname } = window.location;
+    return pathname === SUBSCRIPTIONS_PATH || pathname === "/";
   }
 
   // Un control por tarjeta; es idempotente porque insertarlo provoca una

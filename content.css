@@ -89,6 +89,7 @@
 .youtube-groups__subscription-control {
   display: inline-block;
   margin-left: 8px;
+  max-width: 100%;
   vertical-align: middle;
 }
 

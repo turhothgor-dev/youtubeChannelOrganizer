@@ -165,7 +165,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   no hay canal, muestra en el desplegable "No se ha podido identificar el canal.". Se mantienen las clases CSS y
   el `stopPropagation` del control · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1, V2 y
   V3.
-- [ ] T6 · Botón también en la página de inicio. `shouldShowChannelControls()` devuelve cierto en `/` y en
+- [x] T6 · Botón también en la página de inicio. `shouldShowChannelControls()` devuelve cierto en `/` y en
   `/feed/subscriptions`; ajustar `content.css` si el control rompe la rejilla de inicio (que no aumente la altura
   de la tarjeta más de una línea ni desborde el ancho) · Ficheros: `content.js`, `content.css` · Test: a mano V1
   y V2 en `/`, y V8.
@@ -258,3 +258,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T3 | `fix: mantener el filtro de grupo al guardar y con subgrupos activos` (propuesto) | `getGroupChannelUrls` en el módulo; `refreshActiveGroupFilter` la usa y `applyFilterToCard` usa el canal del dataset; `console.log` quitados; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V5 a mano. |
 | 2026-11-14 | T4 | `refactor: compartir el selector de grupos y avisar cuando no hay grupos` (propuesto) | `renderChannelGroupChoices` compartido por panel y desplegable, aviso y Guardar deshabilitado sin grupos, contador de aperturas y posición ajustada a la ventana; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V4 y V7 a mano. |
 | 2026-11-14 | T5 | `feat: un botón por tarjeta en suscripciones dentro del recorrido de tarjetas` (propuesto) | Eliminado `scanSubscriptionsPage` y su estado; `findChannelLink` y `ensureChannelControl` desde `processPendingCards`; el control lee el canal de la tarjeta al pulsar y avisa si no hay; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V1, V2 y V3 a mano. |
+| 2026-11-14 | T6 | `feat: mostrar el botón de canal también en la página de inicio` (propuesto) | `shouldShowChannelControls` cierto en `/` y en suscripciones; `max-width: 100%` en el control; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V1, V2 y V8 a mano (el ajuste de CSS no está verificado en la rejilla real). |
