@@ -2646,21 +2646,19 @@
   }
 
   /**
-   * Indica si una tarjeta pasa el filtro activo. Sin grupo activo, sin canal
-   * o sin canales del grupo todavía, pasa.
+   * Indica si una tarjeta pasa el filtro activo (ver
+   * `YouTubeGroupsVisibility.matchesGroupFilter`). Con grupo activo, una
+   * tarjeta con vídeo pero sin canal identificado no pasa.
    * @param {Element} card - Tarjeta de vídeo.
    * @returns {boolean}
    */
   function cardMatchesFilter(card) {
-    const channelUrl = card.dataset.youtubeGroupsChannelUrl;
-    if (
-      getActiveGroupId() === null ||
-      !channelUrl ||
-      activeGroupChannelUrls === null
-    ) {
-      return true;
-    }
-    return activeGroupChannelUrls.has(channelUrl);
+    return YouTubeGroupsVisibility.matchesGroupFilter({
+      activeGroupId: getActiveGroupId(),
+      channelUrls: activeGroupChannelUrls,
+      channelUrl: card.dataset.youtubeGroupsChannelUrl,
+      hasVideoId: findVideoId(card) !== null,
+    });
   }
 
   /** Filtros avanzados activos (en memoria; se pierden al recargar). */

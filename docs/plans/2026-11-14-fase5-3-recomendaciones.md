@@ -51,7 +51,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   Test: índice con canales de subgrupos; nombre repetido con la misma URL se queda, con dos URL se excluye; textos con
   un nombre conocido dan su canal; con dos nombres de URL distintas, `null`; sin coincidencias, `null`; espacios
   alrededor se ignoran.
-- [ ] T2 · `matchesGroupFilter` y su uso en `cardMatchesFilter` · Ficheros: `modules/visibility.js`,
+- [x] T2 · `matchesGroupFilter` y su uso en `cardMatchesFilter` · Ficheros: `modules/visibility.js`,
   `tests/visibility.test.js`, `content.js` · Test: los cuatro casos de **Decisiones** y `channelUrls === null`;
   `make lint` y a mano V3.
 - [ ] T3 · Detección de `yt-lockup-view-model` y canal por nombre en `detectCard` con `channelNameIndex` · Ficheros:
@@ -99,3 +99,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | feat: índice de canales por nombre y coincidencia por textos | `buildChannelNameIndex` y `matchChannelByTexts` en `modules/groups.js` con tests. |
+| 2026-11-14 | T2 | feat: regla de filtro de grupo para tarjetas sin canal | `matchesGroupFilter` en `modules/visibility.js` con tests; `cardMatchesFilter` la usa. V3 pendiente a mano. |
