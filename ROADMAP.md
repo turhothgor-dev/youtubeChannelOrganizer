@@ -21,7 +21,7 @@
 
 ## Fase 4 (Integración y Sincronización):
 - ✅ Sincronización cruzada
-- ☐ Integración en sidebar
+- ✅ Integración en sidebar
 
 ## Fase 5 (Funcionalidades Opcionales):
 - ☐ Limpieza de canales

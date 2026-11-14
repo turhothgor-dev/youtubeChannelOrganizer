@@ -1,6 +1,6 @@
 # Plan: Fase 4 (3/3) · Grupos en la guía lateral de YouTube
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 4: "Integración en sidebar".
 
@@ -55,7 +55,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 a
 - [x] T3 · Sección "Grupos" en la guía (ver **Decisiones**) y estilos (claro y `html[dark]`) · Ficheros:
   `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1–V3.
 - [x] T4 · Minimizar el panel · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V4.
-- [ ] T5 · Cerrar el plan: `ROADMAP.md` marca ✅ "Integración en sidebar"; `docs/ARCHITECTURE.md` (flujo "Guía
+- [x] T5 · Cerrar el plan: `ROADMAP.md` marca ✅ "Integración en sidebar"; `docs/ARCHITECTURE.md` (flujo "Guía
   lateral", `panelCollapsed` en la fila de `settings.js`, `flattenGroups` en la de `groups.js`). Estado a `hecho` ·
   Ficheros: `ROADMAP.md`, `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
 
@@ -99,3 +99,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | `feat: ajuste panelCollapsed para minimizar el panel` | Campo `panelCollapsed` en `modules/settings.js`, tests y mención en ADR 0003. |
 | 2026-11-14 | T3 | `feat: sección Grupos en la guía lateral de YouTube` | `renderGuideSection` y `scheduleGuideCheck` en `content.js`, estilos claro/oscuro en `content.css`. Pendiente V1–V3 a mano. |
 | 2026-11-14 | T4 | `feat: minimizar el panel de grupos` | Botón `youtube-groups__collapse-button` en la cabecera, sincronizado con `panelCollapsed` vía `syncSettingsControls` (carga y `storage.onChanged`); estilos de panel minimizado. Pendiente V4 a mano. |
+| 2026-11-14 | T5 | `docs: cerrar la integración en sidebar` | `ROADMAP.md` con ✅, `docs/ARCHITECTURE.md` con flujo "Guía lateral", `panelCollapsed` y `flattenGroups`; plan a `hecho`. |

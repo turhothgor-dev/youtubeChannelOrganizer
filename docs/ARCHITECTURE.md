@@ -18,11 +18,11 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `manifest.json` | WebExtensions MV3 | Permiso `storage` y content scripts en `*://www.youtube.com/*` |
 | `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005), los lectores puros `readGroupsValue`, `readWatchedValue`, `readSettingsValue` y `readPlaylistsValue`, y `getChangedKeys(changes, areaName)` para `storage.onChanged` (ADR 0006) |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos |
-| `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos y URL de un grupo para el filtro |
+| `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos, URL de un grupo para el filtro y `flattenGroups` (árbol aplanado en preorden con nivel) |
 | `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) |
 | `modules/playlists.js` | JS clásico (`YouTubeGroupsPlaylists`), sin DOM | Listas de vídeos propias: crear, renombrar y borrar listas, guardar y quitar vídeos, ids de listas de un vídeo y URLs de reproducción (`buildPlayAllUrl`, `buildVideoUrl`) |
 | `modules/backup.js` | JS clásico (`YouTubeGroupsBackup`), sin DOM | Copia de seguridad (ADR 0006): `buildBackup`, `parseBackup` (valida y descarta entradas no válidas contando `dropped`), `exportBackup` e `importBackup` (escribe ajustes, grupos, listas y vistos con `withLock`). Se carga tras `playlists.js` |
-| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`), normalizarlos, leerlos y actualizarlos con validación |
+| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`, `panelCollapsed`), normalizarlos, leerlos y actualizarlos con validación |
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
 | `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos |
@@ -69,6 +69,13 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   repinta su parte: vistos (tarjetas y "Vídeo actual"), ajustes (controles y visibilidad), grupos (filtro activo y
   panel) y listas (sección "Listas" y modal "Ver", que se cierra si la lista ya no existe). El evento llega también
   a la pestaña que escribe; repintar dos veces es inocuo.
+- **Guía lateral**: `renderGuideSection` (al final de `renderGroupsPanel`) inserta una sección "Grupos" en
+  `ytd-guide-renderer #sections`, tras la primera sección, con "Todos" y los grupos aplanados
+  (`YouTubeGroups.flattenGroups`) sangrados por nivel; elegir uno llama a `setActiveGroup` y filtra la página
+  actual sin navegar. Si la guía aparece tarde, el `MutationObserver` llama a `scheduleGuideCheck` (como mucho una
+  comprobación por frame). Si el contenedor no existe, no se pinta nada y el panel sigue funcionando. El panel se
+  puede minimizar con el botón de su cabecera; el estado se guarda en el ajuste `panelCollapsed` y se aplica al leer
+  los ajustes y en `storage.onChanged`.
 - **Copia de seguridad**: la sección "Ajustes" tiene "Exportar copia" e "Importar copia". Exportar descarga
   `youtube-groups-AAAA-MM-DD.json` (`exportBackup`, formato del ADR 0006). Importar pide confirmación, lee el fichero
   y llama a `importBackup`: `parseBackup` valida todo antes de escribir (si falla, no cambia nada) y descarta las
