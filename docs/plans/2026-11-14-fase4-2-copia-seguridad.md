@@ -1,6 +1,6 @@
 # Plan: Fase 4 (2/3) · Copia de seguridad para llevar los datos a otro dispositivo
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 4: "Sincronización cruzada" (segunda mitad; al terminar, el punto queda ✅).
 
@@ -66,7 +66,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   bloqueada (ambas promesas se resuelven).
 - [x] T3 · Botones de exportar e importar en "Ajustes" (ver **Decisiones**) y estilos (claro y `html[dark]`) ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1–V4.
-- [ ] T4 · Cerrar el plan: `ROADMAP.md` marca ✅ "Sincronización cruzada"; `docs/ARCHITECTURE.md` (fila de
+- [x] T4 · Cerrar el plan: `ROADMAP.md` marca ✅ "Sincronización cruzada"; `docs/ARCHITECTURE.md` (fila de
   `modules/backup.js`, orden de carga, flujo "Copia de seguridad"). Estado a `hecho` · Ficheros: `ROADMAP.md`,
   `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
 
@@ -105,3 +105,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | `feat: validar copias de seguridad con parseBackup y buildBackup` | `cleanVideoEntry` en playlists, `modules/backup.js` y tests; 120 tests y lint en verde. |
 | 2026-11-14 | T2 | `feat: exportar e importar copias de seguridad en backup.js` | `exportBackup`/`importBackup` con `withLock` por clave y tests; 123 tests y lint en verde. |
 | 2026-11-14 | T3 | `feat: botones de exportar e importar copia en Ajustes` | Botones, `input` de fichero y mensaje en `content.js`, estilos en `content.css`; V1–V4 pendientes a mano. |
+| 2026-11-14 | T4 | `docs: cerrar la copia de seguridad` | ROADMAP con ✅ en "Sincronización cruzada" y ARCHITECTURE con `backup.js` y el flujo; plan a `hecho`. |

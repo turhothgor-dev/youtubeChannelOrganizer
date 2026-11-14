@@ -20,7 +20,7 @@
 - ✅ Marcar videos vistos
 
 ## Fase 4 (Integración y Sincronización):
-- ☐ Sincronización cruzada
+- ✅ Sincronización cruzada
 - ☐ Integración en sidebar
 
 ## Fase 5 (Funcionalidades Opcionales):
