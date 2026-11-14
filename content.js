@@ -648,6 +648,12 @@
               </select>
             </label>
             <p class="youtube-groups__settings-error" aria-live="polite"></p>
+            <div class="youtube-groups__backup">
+              <button class="youtube-groups__backup-export action-button secondary-button" type="button">Exportar copia</button>
+              <button class="youtube-groups__backup-import action-button secondary-button" type="button">Importar copia</button>
+              <input class="youtube-groups__backup-file" type="file" accept=".json,application/json" hidden>
+            </div>
+            <p class="youtube-groups__backup-message" aria-live="polite"></p>
           </details>
           <form class="youtube-groups__form" hidden>
             <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
@@ -709,6 +715,63 @@
         );
       });
     syncSettingsControls(panel);
+
+    const backupMessage = panel.querySelector(
+      ".youtube-groups__backup-message",
+    );
+    const backupFile = panel.querySelector(".youtube-groups__backup-file");
+    panel
+      .querySelector(".youtube-groups__backup-export")
+      .addEventListener("click", async () => {
+        backupMessage.textContent = "";
+        try {
+          const text = await YouTubeGroupsBackup.exportBackup();
+          const blob = new Blob([text], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download =
+            "youtube-groups-" + new Date().toISOString().slice(0, 10) + ".json";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch (error) {
+          backupMessage.textContent = error.message;
+          console.error("[YouTube Groups] No se pudo exportar", error);
+        }
+      });
+    panel
+      .querySelector(".youtube-groups__backup-import")
+      .addEventListener("click", () => {
+        backupFile.click();
+      });
+    backupFile.addEventListener("change", async () => {
+      const file = backupFile.files[0];
+      if (!file) {
+        return;
+      }
+      backupMessage.textContent = "";
+      try {
+        if (
+          !confirm(
+            "Se reemplazarán los grupos, vistos, ajustes y listas de este navegador. ¿Continuar?",
+          )
+        ) {
+          return;
+        }
+        const text = await file.text();
+        const { dropped } = await YouTubeGroupsBackup.importBackup(text);
+        backupMessage.textContent =
+          dropped > 0
+            ? "Copia importada (" + dropped + " entradas descartadas)."
+            : "Copia importada.";
+      } catch (error) {
+        backupMessage.textContent = error.message;
+      } finally {
+        backupFile.value = "";
+      }
+    });
 
     panel
       .querySelector(".youtube-groups__playlist-form")

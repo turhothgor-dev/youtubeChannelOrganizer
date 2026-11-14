@@ -64,7 +64,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   importar en otro `loadModules` deja las cuatro claves iguales con `version: 1`; importar una copia no válida no
   llama a `set` (`calls.set === 0`); `importBackup` con `latencyMs` y un `setVideoWatched` simultáneo no deja la cola
   bloqueada (ambas promesas se resuelven).
-- [ ] T3 · Botones de exportar e importar en "Ajustes" (ver **Decisiones**) y estilos (claro y `html[dark]`) ·
+- [x] T3 · Botones de exportar e importar en "Ajustes" (ver **Decisiones**) y estilos (claro y `html[dark]`) ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1–V4.
 - [ ] T4 · Cerrar el plan: `ROADMAP.md` marca ✅ "Sincronización cruzada"; `docs/ARCHITECTURE.md` (fila de
   `modules/backup.js`, orden de carga, flujo "Copia de seguridad"). Estado a `hecho` · Ficheros: `ROADMAP.md`,
@@ -104,3 +104,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: validar copias de seguridad con parseBackup y buildBackup` | `cleanVideoEntry` en playlists, `modules/backup.js` y tests; 120 tests y lint en verde. |
 | 2026-11-14 | T2 | `feat: exportar e importar copias de seguridad en backup.js` | `exportBackup`/`importBackup` con `withLock` por clave y tests; 123 tests y lint en verde. |
+| 2026-11-14 | T3 | `feat: botones de exportar e importar copia en Ajustes` | Botones, `input` de fichero y mensaje en `content.js`, estilos en `content.css`; V1–V4 pendientes a mano. |

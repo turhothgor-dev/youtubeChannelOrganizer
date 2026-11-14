@@ -63,6 +63,24 @@
   font-size: 12px;
 }
 
+.youtube-groups__backup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.youtube-groups__backup-message {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #0f0f0f;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__backup-message {
+  color: #f1f1f1;
+}
+
 html[dark] .youtube-groups__settings,
 html[dark] .youtube-groups__filters {
   border-color: #555;
