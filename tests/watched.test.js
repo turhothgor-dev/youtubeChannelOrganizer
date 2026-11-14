@@ -140,6 +140,15 @@ test("shouldAutoMark decide según el porcentaje de reproducción", () => {
   assert.strictEqual(W.shouldAutoMark(NaN, 100, 50), false);
 });
 
+test("updateAutoMarkArm arma el ID solo con currentTime < 1", () => {
+  const { YouTubeGroupsWatched: W } = loadModules();
+
+  assert.strictEqual(W.updateAutoMarkArm(null, ID, 0.5), ID);
+  assert.strictEqual(W.updateAutoMarkArm(ID2, ID, 30), ID2);
+  assert.strictEqual(W.updateAutoMarkArm(null, ID, NaN), null);
+  assert.strictEqual(W.updateAutoMarkArm(ID2, ID, Infinity), ID2);
+});
+
 test("marcar dos vídeos a la vez conserva los dos", async () => {
   const { YouTubeGroupsWatched: W, store } = loadModules({}, { latencyMs: 5 });
 

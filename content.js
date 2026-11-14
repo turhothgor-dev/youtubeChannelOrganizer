@@ -123,6 +123,9 @@
   /** IDs que el marcado automático ya no debe volver a intentar en esta pestaña. */
   const autoMarkHandledIds = new Set();
 
+  /** ID de vídeo del que se ha visto el inicio (`currentTime < 1`); en Shorts habilita el marcado. */
+  let autoMarkArmedId = null;
+
   /** Ajustes en memoria; valores por defecto hasta cargar los guardados. */
   let settings = YouTubeGroupsSettings.DEFAULT_SETTINGS;
 
@@ -510,7 +513,7 @@
     if (!(video instanceof HTMLVideoElement)) {
       return;
     }
-    const player = video.closest("#movie_player");
+    const player = video.closest("#movie_player, #shorts-player");
     if (!player || player.classList.contains("ad-showing")) {
       return;
     }
@@ -519,6 +522,17 @@
       return;
     }
     if (!isWatchPageInSync(videoId)) {
+      return;
+    }
+    autoMarkArmedId = YouTubeGroupsWatched.updateAutoMarkArm(
+      autoMarkArmedId,
+      videoId,
+      video.currentTime,
+    );
+    if (
+      YouTubeGroupsPages.getPageType(window.location.pathname) === "shorts" &&
+      autoMarkArmedId !== videoId
+    ) {
       return;
     }
     if (

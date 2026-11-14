@@ -129,10 +129,27 @@ const YouTubeGroupsWatched = (() => {
     );
   }
 
+  /**
+   * Actualiza el ID "armado" para el marcado automático: se arma un vídeo
+   * cuando se ha visto su reproducción cerca del inicio (`currentTime < 1`).
+   *
+   * @param {string|null} armedId - ID armado hasta ahora.
+   * @param {string} videoId - ID del vídeo actual.
+   * @param {number} currentTime - Posición actual en segundos.
+   * @returns {string|null} `videoId` si se arma; `armedId` en otro caso.
+   */
+  function updateAutoMarkArm(armedId, videoId, currentTime) {
+    if (Number.isFinite(currentTime) && currentTime < 1) {
+      return videoId;
+    }
+    return armedId;
+  }
+
   return {
     isValidVideoId,
     extractVideoId,
     shouldAutoMark,
+    updateAutoMarkArm,
     isVideoWatched,
     applyVideoWatched,
     setVideoWatched,
