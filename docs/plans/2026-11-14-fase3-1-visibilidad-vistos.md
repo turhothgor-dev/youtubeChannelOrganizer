@@ -107,7 +107,7 @@ lint.
 - [x] T1 · Correcciones del botón de visto (las tres de **Decisiones**, "Correcciones de la revisión"):
   `watchedLoadError`, `savingWatchedIds`, parámetro `card` en `toggleVideoWatched` y `refreshWatchedUi` ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1, V2 y V3.
-- [ ] T2 · Almacenamiento de ajustes. En `modules/storage.js`, `getSettings()` y `saveSettings(settings)` con la
+- [x] T2 · Almacenamiento de ajustes. En `modules/storage.js`, `getSettings()` y `saveSettings(settings)` con la
   clave `youtubeSettings` (ver **Decisiones**). Estado del ADR 0003 a `aceptada` · Ficheros: `modules/storage.js`,
   `tests/storage.test.js`, `docs/adr/0003-formato-almacenamiento-ajustes.md` · Test (`tests/storage.test.js`):
   sin datos devuelve `{}` con `calls.set === 0`; con `settings: []`, `settings: null` y `settings: 3` devuelve `{}`;
@@ -201,3 +201,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `fix: corregir el estado y el doble clic del botón de visto` | `watchedLoadError`, `savingWatchedIds`, `refreshWatchedUi`; V1-V3 pendientes de comprobar a mano |
+| 2026-11-14 | T2 | `feat: añadir el almacenamiento de ajustes (ADR 0003)` | `getSettings` y `saveSettings` en `modules/storage.js`; ADR 0003 a `aceptada` |

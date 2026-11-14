@@ -72,6 +72,65 @@ test("guardar vistos no cambia youtubeGroups", async () => {
   assert.strictEqual(JSON.stringify(store.youtubeGroups), before);
 });
 
+test("getSettings sin datos devuelve {} y no escribe", async () => {
+  const { YouTubeGroupsStorage, calls } = loadModules();
+
+  const settings = await YouTubeGroupsStorage.getSettings();
+
+  assert.deepStrictEqual(plain(settings), {});
+  assert.strictEqual(calls.set, 0);
+});
+
+test("getSettings con datos corruptos devuelve {}", async () => {
+  for (const corrupt of [[], null, 3]) {
+    const { YouTubeGroupsStorage, store, calls } = loadModules();
+    store.youtubeSettings = { version: 1, settings: corrupt };
+
+    const settings = await YouTubeGroupsStorage.getSettings();
+
+    assert.deepStrictEqual(plain(settings), {});
+    assert.strictEqual(calls.set, 0);
+  }
+});
+
+test("saveSettings y getSettings conservan los ajustes con version 1", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  const settings = { watchedMode: "hide", outsideMode: "dim" };
+
+  await YouTubeGroupsStorage.saveSettings(settings);
+  const loaded = await YouTubeGroupsStorage.getSettings();
+
+  assert.deepStrictEqual(plain(loaded), settings);
+  assert.strictEqual(store.youtubeSettings.version, 1);
+});
+
+test("saveSettings con algo que no es un objeto plano lanza TypeError", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  for (const invalid of [[], null]) {
+    await assert.rejects(
+      () => YouTubeGroupsStorage.saveSettings(invalid),
+      (error) => error.name === "TypeError",
+    );
+  }
+});
+
+test("guardar ajustes no cambia youtubeGroups ni youtubeWatched", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  await YouTubeGroupsStorage.saveGroups([{ id: "a" }]);
+  await YouTubeGroupsStorage.saveWatchedVideos({
+    dQw4w9WgXcQ: { watchedAt: 1 },
+  });
+  const before = JSON.stringify([store.youtubeGroups, store.youtubeWatched]);
+
+  await YouTubeGroupsStorage.saveSettings({ watchedMode: "hide" });
+
+  assert.strictEqual(
+    JSON.stringify([store.youtubeGroups, store.youtubeWatched]),
+    before,
+  );
+});
+
 test("saveGroups con algo que no es un array lanza TypeError", async () => {
   const { YouTubeGroupsStorage } = loadModules();
 

@@ -1,6 +1,6 @@
 # 0003 · Formato de los ajustes en browser.storage.local (versión 1)
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-14
 
 ## Contexto

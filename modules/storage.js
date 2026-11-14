@@ -1,6 +1,7 @@
 const YouTubeGroupsStorage = (() => {
   const STORAGE_KEY = "youtubeGroups";
   const WATCHED_KEY = "youtubeWatched";
+  const SETTINGS_KEY = "youtubeSettings";
   let groupsInitializationPromise = null;
 
   async function getGroups() {
@@ -68,6 +69,38 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee los ajustes guardados (ADR 0003). Sin datos válidos devuelve {} y no escribe.
+   * @returns {Promise<Object>} Objeto de ajustes tal como se guardó.
+   */
+  async function getSettings() {
+    const stored = await browser.storage.local.get(SETTINGS_KEY);
+    const data = stored[SETTINGS_KEY];
+
+    if (!data || !isPlainObject(data.settings)) {
+      return {};
+    }
+
+    return data.settings;
+  }
+
+  /**
+   * Guarda los ajustes con el formato versión 1 (ADR 0003).
+   * @param {Object} settings Objeto de ajustes.
+   */
+  async function saveSettings(settings) {
+    if (!isPlainObject(settings)) {
+      throw new TypeError("Los ajustes deben ser un objeto.");
+    }
+
+    await browser.storage.local.set({
+      [SETTINGS_KEY]: {
+        version: 1,
+        settings,
+      },
+    });
+  }
+
   function isPlainObject(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
@@ -77,5 +110,7 @@ const YouTubeGroupsStorage = (() => {
     saveGroups,
     getWatchedVideos,
     saveWatchedVideos,
+    getSettings,
+    saveSettings,
   };
 })();
