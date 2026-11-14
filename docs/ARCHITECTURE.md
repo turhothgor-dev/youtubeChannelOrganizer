@@ -34,14 +34,21 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 
 - **Detección**: un `MutationObserver` sobre el documento programa las tarjetas (`VIDEO_CARD_SELECTOR`) y las
   procesa en un `requestAnimationFrame` (`processPendingCards`); cada tarjeta guarda nombre y URL de su canal en
-  `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones y búsqueda (`shouldShowCardControls`);
-  en búsqueda, los resultados de canal (`ytd-channel-renderer`) reciben solo "Añadir a grupo". En `yt-navigate-finish` (navegación SPA) se reinicia y se vuelve a recorrer el documento.
+  `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
+  de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`);
+  en búsqueda, los resultados de canal (`ytd-channel-renderer`) reciben solo "Añadir a grupo". Las recomendaciones de
+  `/watch` son `yt-lockup-view-model`; si la tarjeta no enlaza al canal, `detectCard` lo busca por nombre entre los
+  canales guardados (`buildChannelNameIndex` y `matchChannelByTexts` de `YouTubeGroups`, índice `channelNameIndex`
+  recalculado en `renderGroupsPanel`; un nombre con dos URL distintas no se usa). En `yt-navigate-finish` (navegación SPA) se reinicia y se vuelve a recorrer el documento.
 - **Añadir un canal a grupos**: desde el botón de una tarjeta (insertado en el mismo recorrido de tarjetas, uno
   por tarjeta) o desde la sección "Canal actual" del panel en `/watch`. Ambos usan el mismo selector de casillas
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez. La operación se encola por clave
   (`withLock`, ADR 0005), de modo que dos operaciones solapadas sobre los grupos no se pisan.
 - **Filtro**: al elegir un grupo o subgrupo en el panel, las tarjetas cuyo canal no pertenece a él ni
-  a sus descendientes se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro".
+  a sus descendientes se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro". La regla es
+  `YouTubeGroupsVisibility.matchesGroupFilter`: sin grupo activo o con los canales aún cargando, pasa; con canal,
+  según pertenezca; sin canal identificado pero con ID de vídeo, no pasa (mixes, colaboraciones); sin canal ni ID
+  (tarjeta aún sin pintar), pasa.
 - **Filtros avanzados**: la sección "Filtros" del panel filtra por duración, fecha y visualizaciones (opciones
   fijas, estado en memoria de la pestaña). `content.js` lee los textos visibles de la tarjeta (`getCardTexts`) y
   `YouTubeGroupsMetadata` los interpreta en español e inglés; si un dato no se reconoce, ese criterio deja pasar la

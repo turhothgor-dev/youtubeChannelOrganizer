@@ -28,4 +28,4 @@
 - ☐ Auto-reproducción
 - ☐ Soporte para Shorts
 - ✅ Soporte para resultados de búsqueda
-- ☐ Soporte para recomendaciones
+- ✅ Soporte para recomendaciones

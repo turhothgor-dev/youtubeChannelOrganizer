@@ -1,6 +1,6 @@
 # Plan: Fase 5 (3/5) · Recomendaciones de `/watch`
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 5: "Soporte para recomendaciones".
 
@@ -59,7 +59,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
 - [x] T4 · Botones compactos en la columna de `/watch` (`modules/pages.js` y `content.js`) y estilos (claro y
   `html[dark]`) · Ficheros: `modules/pages.js`, `tests/pages.test.js`, `content.js`, `content.css` · Test:
   `shouldShowCardControls("watch") === true`; `make lint` y a mano V4.
-- [ ] T5 · Cerrar el plan: `ROADMAP.md` marca ✅ "Soporte para recomendaciones"; `docs/ARCHITECTURE.md` (regla del
+- [x] T5 · Cerrar el plan: `ROADMAP.md` marca ✅ "Soporte para recomendaciones"; `docs/ARCHITECTURE.md` (regla del
   filtro sin canal, canal por nombre, superficies). Estado a `hecho` · Ficheros: `ROADMAP.md`, `docs/ARCHITECTURE.md`,
   este plan · Test: `make lint` y `make test`.
 
@@ -102,3 +102,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | feat: regla de filtro de grupo para tarjetas sin canal | `matchesGroupFilter` en `modules/visibility.js` con tests; `cardMatchesFilter` la usa. V3 pendiente a mano. |
 | 2026-11-14 | T3 | feat: detectar recomendaciones de /watch y canal por nombre | Selector `yt-lockup-view-model`, `channelNameIndex` y `detectCard` con `matchChannelByTexts`. V1, V2 y V5 pendientes a mano. |
 | 2026-11-14 | T4 | feat: botones compactos en las recomendaciones de /watch | `shouldShowCardControls("watch")` true; control compacto solo en `#related`, "Añadir a grupo" deshabilitado sin canal; estilos claro/oscuro. V4 pendiente a mano. |
+| 2026-11-14 | T5 | docs: cerrar la Fase 5 de recomendaciones | ROADMAP con ✅ y ARCHITECTURE con regla del filtro, canal por nombre y superficies. Plan a `hecho`. |
