@@ -23,6 +23,7 @@ Thumbs.db
 
 # Salidas
 *.log
+/web-ext-artifacts/
 /coverage/
 .phpunit.cache/
 .php-cs-fixer.cache

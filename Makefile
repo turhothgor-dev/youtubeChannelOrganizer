@@ -33,33 +33,48 @@ kit-update: ## Actualiza a la última versión de ai-kit y deja los cambios en s
 	git add -A && git commit -q -m "chore: actualizar ai-kit a v$$v" && echo "Commit creado: chore: actualizar ai-kit a v$$v (revísalo con git show --stat)"
 
 
-# Preset genérico: sustituye cada TODO por el comando real del proyecto.
-setup: ## Instala dependencias
-	@echo "TODO: define 'setup' en el Makefile"
+# Extensión de Firefox (Manifest V3): web-ext (lint, ejecutar, empaquetar) y Prettier (formato).
+WEB_EXT := npx --no-install web-ext
+PRETTIER := npx --no-install prettier
+EXT_FILES := "**/*.{js,mjs,css,html,json}"
 
-up: ## Levanta los servicios
-	@echo "TODO: define 'up' en el Makefile"
+.PHONY: build
 
-down: ## Para los servicios
-	@echo "TODO: define 'down' en el Makefile"
+setup: ## Instala dependencias (web-ext y Prettier)
+	npm install --no-fund --no-audit
 
-logs: ## Logs de los servicios
-	@echo "TODO: define 'logs' en el Makefile"
+up: ## Abre Firefox con la extensión cargada y recarga al guardar
+	$(WEB_EXT) run --url https://www.youtube.com
 
-test: ## Todos los tests
-	@echo "TODO: define 'test' en el Makefile"
+down: ## Para Firefox lanzado con make up
+	@echo "Cierra la ventana de Firefox o pulsa Ctrl+C en la terminal de make up."
+
+logs: ## Dónde ver los logs de la extensión
+	@echo "Los mensajes de content.js salen en la consola web de la pestaña de YouTube (F12)."
+	@echo "Los de la extensión: about:debugging#/runtime/this-firefox -> Inspeccionar."
+
+test: ## Todos los tests (node --test; ficheros *.test.js)
+	node --test
 
 test-affected: ## Tests de lo cambiado
 	@$(MAKE) -s test
 
-lint: ## Comprobaciones estáticas
-	@echo "TODO: define 'lint' en el Makefile"
+lint: ## Comprobaciones estáticas: web-ext lint y formato (Prettier)
+	$(WEB_EXT) lint
+	$(PRETTIER) --check $(EXT_FILES)
 
-format: ## Formato
-	@echo "TODO: define 'format' en el Makefile"
+format: ## Formatea el código de la extensión (Prettier)
+	$(PRETTIER) --write $(EXT_FILES)
 
-typecheck: ## Comprobación de tipos
-	@echo "TODO: define 'typecheck' en el Makefile"
+typecheck: ## Comprobación de tipos (no hay TypeScript)
+	@echo "Sin comprobación de tipos: el proyecto es JavaScript sin TypeScript."
 
-check-file: ## Comprueba un fichero: make check-file FILE=ruta
-	@true
+build: ## Empaqueta la extensión en web-ext-artifacts/
+	$(WEB_EXT) build
+
+check-file: ## Comprueba un fichero: make check-file FILE=ruta (lo usa el hook de Claude Code)
+	@f="$(FILE)"; \
+	case "$$f" in *.js|*.mjs) node --check "$$f" || exit 1 ;; esac; \
+	case "$$f" in *.js|*.mjs|*.css|*.html|*.json) \
+	  [ ! -x node_modules/.bin/prettier ] || node_modules/.bin/prettier --write --ignore-unknown --log-level warn "$$f" ;; \
+	esac

@@ -1,0 +1,10 @@
+{
+  "name": "youtube-groups",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Organiza canales de YouTube en grupos personalizados.",
+  "devDependencies": {
+    "prettier": "^3.10.1",
+    "web-ext": "^10.8.0"
+  }
+}

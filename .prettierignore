@@ -1,0 +1,11 @@
+# Prettier solo formatea el código de la extensión (el Markdown lo revisa make lint-md)
+.claude/
+.kit/
+.vscode/
+ai/
+docs/
+web-ext-artifacts/
+package-lock.json
+.mcp.json
+.markdownlint.json
+*.md
