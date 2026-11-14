@@ -34,7 +34,12 @@ function sample() {
       },
     ],
     watched: { [V1]: { watchedAt: 1700000000000 } },
-    settings: { watchedMode: "hide", outsideMode: "dim", autoMarkPercent: 95 },
+    settings: {
+      watchedMode: "hide",
+      outsideMode: "dim",
+      autoMarkPercent: 95,
+      panelCollapsed: false,
+    },
     playlists: [
       {
         id: "p1",
@@ -174,6 +179,7 @@ test("parseBackup descarta vistos inválidos y normaliza ajustes", () => {
     watchedMode: "dim",
     outsideMode: "hide",
     autoMarkPercent: 50,
+    panelCollapsed: false,
   });
 });
 

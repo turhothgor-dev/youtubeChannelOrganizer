@@ -36,6 +36,8 @@ Los ajustes se guardan en una clave propia, `youtubeSettings`:
   vídeos que no pasan el filtro activo (grupo y, cuando existan, filtros avanzados).
 - `autoMarkPercent`: `0` (desactivado), `50`, `80` o `95`; por defecto `80`. Lo introduce el plan
   `2026-11-14-fase3-2-marcado-automatico`; hasta entonces no se guarda ni se lee.
+- `panelCollapsed`: `false` o `true`; por defecto `false`. Indica si el panel flotante está minimizado. Lo
+  introduce el plan `2026-11-14-fase4-3-sidebar`.
 - Todos los campos son opcionales al leer: si falta uno o su valor no es válido, se usa su valor por defecto. Leer
   sin datos devuelve los valores por defecto y no escribe nada.
 - La normalización conserva solo los campos conocidos.
