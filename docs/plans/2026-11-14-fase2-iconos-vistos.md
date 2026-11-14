@@ -160,7 +160,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   botón no navega ni abre menús de YouTube (el control ya detiene `click` y `mousedown`) · Ficheros:
   `content.js`, `content.css` (si hace falta separar los dos botones) · Test: `make lint`, `make test` y a mano V4,
   V5 y V6.
-- [ ] T8 · Botón en el panel para el vídeo actual. En `content.js`: sección estática "Vídeo actual" en la plantilla
+- [x] T8 · Botón en el panel para el vídeo actual. En `content.js`: sección estática "Vídeo actual" en la plantilla
   del panel (sin interpolaciones) con el mismo botón; visible solo en `/watch` con ID válido en
   `window.location.href`; se actualiza en `renderGroupsPanel` (también tras `yt-navigate-finish`) y tras cada
   cambio de visto desde cualquier botón · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V7.
@@ -241,3 +241,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T5 | `feat: añadir la lógica de vídeos vistos` | `modules/watched.js` (`extractVideoId`, `isVideoWatched`, `applyVideoWatched`, `setVideoWatched`), manifest, helper de tests y `tests/watched.test.js`. |
 | 2026-11-14 | T6 | `feat: marcar las tarjetas de vídeos vistos` | `findVideoId` y `applyWatchedToCard` en `content.js`, carga de vistos al arrancar y regla `.youtube-groups--watched`. |
 | 2026-11-14 | T7 | `feat: añadir el botón Marcar visto en las tarjetas` | Segundo botón en el control de la tarjeta, `toggleVideoWatched` y `updateWatchedButton` en `content.js`; estilos del botón. |
+| 2026-11-14 | T8 | `feat: añadir el botón de visto del vídeo actual en el panel` | Sección "Vídeo actual" en el panel, `getCurrentWatchVideoId` y `renderCurrentVideoSection` en `content.js`. |

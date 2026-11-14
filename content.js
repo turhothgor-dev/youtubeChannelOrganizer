@@ -169,10 +169,46 @@
           applyWatchedToCard(card);
         }
       }
+      renderCurrentVideoSection();
     } catch (error) {
       button.title = "No se pudo guardar: " + error.message;
       console.error("[YouTube Groups] No se pudo guardar el visto", error);
     }
+  }
+
+  /**
+   * Devuelve el ID del vídeo abierto, solo en páginas /watch.
+   * @returns {string|null} ID de 11 caracteres o null.
+   */
+  function getCurrentWatchVideoId() {
+    if (window.location.pathname !== "/watch") {
+      return null;
+    }
+    return YouTubeGroupsWatched.extractVideoId(window.location.href);
+  }
+
+  /**
+   * Muestra u oculta la sección "Vídeo actual" del panel y refleja su estado.
+   */
+  function renderCurrentVideoSection() {
+    const panel = document.getElementById("youtube-groups-panel");
+    const section = panel?.querySelector(".youtube-groups__current-video");
+    if (!section) {
+      return;
+    }
+    const videoId = getCurrentWatchVideoId();
+    section.hidden = !videoId;
+    if (!videoId) {
+      return;
+    }
+    const isWatched =
+      watchedVideos !== null &&
+      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
+    updateWatchedButton(
+      section.querySelector(".youtube-groups__current-video-button"),
+      videoId,
+      isWatched,
+    );
   }
 
   YouTubeGroupsStorage.getWatchedVideos()
@@ -181,6 +217,7 @@
       for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
         applyWatchedToCard(card);
       }
+      renderCurrentVideoSection();
     })
     .catch((error) => {
       console.error("[YouTube Groups] No se pudieron leer los vistos", error);
@@ -249,6 +286,10 @@
               <p class="youtube-groups__channel-error" aria-live="polite"></p>
             </form>
           </section>
+          <section class="youtube-groups__current-video" hidden>
+            <h3 class="youtube-groups__section-title">Vídeo actual</h3>
+            <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
+          </section>
           <form class="youtube-groups__form" hidden>
             <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
             <div class="youtube-groups__form-actions">
@@ -266,6 +307,12 @@
             <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
           </form>
         `;
+
+    panel
+      .querySelector(".youtube-groups__current-video-button")
+      .addEventListener("click", (event) => {
+        toggleVideoWatched(getCurrentWatchVideoId(), event.currentTarget);
+      });
 
     const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
@@ -721,6 +768,7 @@
     });
 
     renderCurrentChannelSection(groups);
+    renderCurrentVideoSection();
   }
 
   // URL del canal pintado por última vez en la sección "Canal actual".
