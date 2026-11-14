@@ -367,10 +367,28 @@
   }
 
   /**
+   * Indica si el DOM de /watch ya corresponde al vídeo de la URL. Durante una
+   * navegación SPA, `ytd-watch-flexy` puede seguir con el `video-id` anterior.
+   * @param {string} videoId - ID del vídeo de la URL.
+   * @returns {boolean} false solo si `ytd-watch-flexy` declara otro vídeo.
+   */
+  function isWatchPageInSync(videoId) {
+    const flexyVideoId = document
+      .querySelector("ytd-watch-flexy")
+      ?.getAttribute("video-id");
+    return !flexyVideoId || flexyVideoId === videoId;
+  }
+
+  /**
    * Lee del DOM los datos del vídeo abierto en /watch para guardarlo en una lista.
+   * Si el DOM aún es del vídeo anterior, devuelve id null y textos vacíos.
    * @returns {{id: string|null, title: string, channelName: string}} Datos del vídeo.
    */
   function getCurrentWatchVideoData() {
+    const videoId = getCurrentWatchVideoId();
+    if (videoId && !isWatchPageInSync(videoId)) {
+      return { id: null, title: "", channelName: "" };
+    }
     let title =
       document.querySelector("ytd-watch-metadata h1")?.textContent.trim() ?? "";
     if (!title) {
@@ -378,7 +396,7 @@
     }
 
     return {
-      id: getCurrentWatchVideoId(),
+      id: videoId,
       title,
       channelName: getCurrentVideoChannel()?.name ?? "",
     };
@@ -467,10 +485,7 @@
     if (!videoId) {
       return;
     }
-    const flexyVideoId = document
-      .querySelector("ytd-watch-flexy")
-      ?.getAttribute("video-id");
-    if (flexyVideoId && flexyVideoId !== videoId) {
+    if (!isWatchPageInSync(videoId)) {
       return;
     }
     if (

@@ -140,7 +140,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
 - [x] T8 · Cerrar solo el modal de listas. Clase `youtube-groups__channel-list-modal--playlist` en el modal de
   `openPlaylistVideosModal` y `closePlaylistModal` busca solo esa clase (sugerencia c) · Ficheros: `content.js` ·
   Test: `make lint`, `make test` y a mano V6.
-- [ ] T9 · Datos del vídeo actual sincronizados. Helper `isWatchPageInSync(videoId)`, usado por
+- [x] T9 · Datos del vídeo actual sincronizados. Helper `isWatchPageInSync(videoId)`, usado por
   `handleVideoProgress` y `getCurrentWatchVideoData` (sugerencia d) · Ficheros: `content.js` · Test: `make lint`,
   `make test` y a mano V7 y repetir V1.
 - [ ] T10 · Cerrar el plan. En `docs/ARCHITECTURE.md`: la fila de `modules/storage.js` menciona `withLock` y
@@ -210,3 +210,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T6 | fix: ignorar textos de la extensión en los metadatos de tarjeta | `getCardTexts` salta los elementos dentro de `[class*="youtube-groups__"]`. Pendiente V4 a mano. |
 | 2026-11-14 | T7 | fix: registrar los escuchadores de los desplegables una sola vez | Booleanos `subscriptionDropdownListenersAdded`, `playlistDropdownListenersAdded` e `iconPickerListenersAdded`; la creación del elemento queda separada del registro. Pendiente V5 a mano. |
 | 2026-11-14 | T8 | fix: cerrar solo el modal de listas al repintarlo | Clase `youtube-groups__channel-list-modal--playlist` en el modal de `openPlaylistVideosModal`; `closePlaylistModal` solo busca esa clase. Pendiente V6 a mano. |
+| 2026-11-14 | T9 | fix: no leer datos del vídeo anterior al navegar por la SPA | Helper `isWatchPageInSync` usado por `handleVideoProgress` y `getCurrentWatchVideoData` (devuelve `{ id: null, title: "", channelName: "" }` si no está sincronizado). Pendientes V7 y repetir V1 a mano. |
