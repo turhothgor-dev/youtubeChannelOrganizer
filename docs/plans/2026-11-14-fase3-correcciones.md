@@ -99,7 +99,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
 
 - [x] T1 · Marcado automático solo con ajustes leídos. En `handleVideoProgress`, salir al principio si
   `!settingsLoaded` (ver **Importante 1**) · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1.
-- [ ] T2 · Cola por clave en el almacenamiento. En `modules/storage.js`, `KEYS` y `withLock(key, fn)` (ver
+- [x] T2 · Cola por clave en el almacenamiento. En `modules/storage.js`, `KEYS` y `withLock(key, fn)` (ver
   **Importante 2**). En `tests/helpers/load-modules.js`, segundo parámetro opcional
   `loadModules(initialStore = {}, { latencyMs = 0 } = {})`: con `latencyMs > 0`, `get` y `set` del simulador esperan
   ese tiempo (`setTimeout`) antes de leer o escribir el `store`, para que las operaciones se solapen de verdad; sin
@@ -203,3 +203,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | fix: no marcar automáticamente hasta leer los ajustes | `handleVideoProgress` sale si `!settingsLoaded`. Pendiente V1 a mano. |
+| 2026-11-14 | T2 | feat: cola de escrituras por clave en el almacenamiento | `KEYS` y `withLock` en `modules/storage.js`, `latencyMs` en el simulador y ADR 0005 aceptada. |

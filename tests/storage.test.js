@@ -214,6 +214,86 @@ test("guardar listas no cambia grupos, vistos ni ajustes", async () => {
   );
 });
 
+test("KEYS tiene las cuatro claves con sus nombres reales", () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  assert.deepStrictEqual(plain(YouTubeGroupsStorage.KEYS), {
+    groups: "youtubeGroups",
+    watched: "youtubeWatched",
+    settings: "youtubeSettings",
+    playlists: "youtubePlaylists",
+  });
+  assert.ok(Object.isFrozen(YouTubeGroupsStorage.KEYS));
+});
+
+test("withLock con la misma clave ejecuta en orden", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+  const events = [];
+  let release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+
+  const first = YouTubeGroupsStorage.withLock("k", async () => {
+    events.push("first:start");
+    await gate;
+    events.push("first:end");
+  });
+  const second = YouTubeGroupsStorage.withLock("k", async () => {
+    events.push("second:start");
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.deepStrictEqual(events, ["first:start"]);
+
+  release();
+  await Promise.all([first, second]);
+
+  assert.deepStrictEqual(events, ["first:start", "first:end", "second:start"]);
+});
+
+test("withLock con claves distintas no se esperan", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+  const gate = new Promise(() => {});
+
+  YouTubeGroupsStorage.withLock("a", () => gate);
+  const result = await YouTubeGroupsStorage.withLock("b", () => "listo");
+
+  assert.strictEqual(result, "listo");
+});
+
+test("withLock devuelve el valor de fn, síncrono o asíncrono", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  assert.strictEqual(await YouTubeGroupsStorage.withLock("k", () => 1), 1);
+  assert.strictEqual(
+    await YouTubeGroupsStorage.withLock("k", async () => 2),
+    2,
+  );
+});
+
+test("withLock rechaza con el error de fn y la cola sigue", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+  const rejected = new Error("async");
+  const thrown = new Error("sync");
+
+  const first = YouTubeGroupsStorage.withLock("k", async () => {
+    throw rejected;
+  });
+  const second = YouTubeGroupsStorage.withLock("k", () => {
+    throw thrown;
+  });
+  const third = YouTubeGroupsStorage.withLock("k", () => "ok");
+
+  await assert.rejects(first, (error) => error === rejected);
+  await assert.rejects(second, (error) => error === thrown);
+  assert.strictEqual(await third, "ok");
+  assert.strictEqual(
+    await YouTubeGroupsStorage.withLock("k", () => "otra"),
+    "otra",
+  );
+});
+
 test("saveGroups con algo que no es un array lanza TypeError", async () => {
   const { YouTubeGroupsStorage } = loadModules();
 

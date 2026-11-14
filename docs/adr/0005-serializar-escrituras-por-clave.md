@@ -1,6 +1,6 @@
 # 0005 · Serializar las escrituras leer-modificar-escribir por clave de almacenamiento
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-14
 
 ## Contexto

@@ -20,19 +20,25 @@ const MODULES = [
  * Carga los scripts clásicos de modules/ en un contexto vm con un
  * browser.storage.local simulado (guarda y devuelve copias, cuenta llamadas a set).
  */
-function loadModules(initialStore = {}) {
+function loadModules(initialStore = {}, { latencyMs = 0 } = {}) {
   const store = structuredClone(initialStore);
   const calls = { get: 0, set: 0 };
+  const delay = () =>
+    latencyMs > 0
+      ? new Promise((resolve) => setTimeout(resolve, latencyMs))
+      : null;
 
   const browser = {
     storage: {
       local: {
         async get(key) {
           calls.get += 1;
+          await delay();
           return key in store ? { [key]: structuredClone(store[key]) } : {};
         },
         async set(items) {
           calls.set += 1;
+          await delay();
           Object.assign(store, structuredClone(items));
         },
       },

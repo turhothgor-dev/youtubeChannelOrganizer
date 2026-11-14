@@ -1,9 +1,42 @@
 const YouTubeGroupsStorage = (() => {
-  const STORAGE_KEY = "youtubeGroups";
-  const WATCHED_KEY = "youtubeWatched";
-  const SETTINGS_KEY = "youtubeSettings";
-  const PLAYLISTS_KEY = "youtubePlaylists";
+  /** Nombres reales de las claves de almacenamiento (ADR 0005). */
+  const KEYS = Object.freeze({
+    groups: "youtubeGroups",
+    watched: "youtubeWatched",
+    settings: "youtubeSettings",
+    playlists: "youtubePlaylists",
+  });
+  const STORAGE_KEY = KEYS.groups;
+  const WATCHED_KEY = KEYS.watched;
+  const SETTINGS_KEY = KEYS.settings;
+  const PLAYLISTS_KEY = KEYS.playlists;
   let groupsInitializationPromise = null;
+  const lockQueues = new Map();
+
+  /**
+   * Ejecuta `fn` cuando han terminado todas las llamadas anteriores con la misma clave (cola FIFO, ADR 0005).
+   * Un error de `fn` rechaza la promesa devuelta y no bloquea la cola. No es reentrante.
+   * @param {string} key Clave de la cola (normalmente un valor de KEYS).
+   * @param {Function} fn Función síncrona o asíncrona.
+   * @returns {Promise<*>} Resultado de `fn`.
+   */
+  function withLock(key, fn) {
+    const previous = lockQueues.get(key) || Promise.resolve();
+    const run = previous.then(() => fn());
+    const tail = run.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    lockQueues.set(key, tail);
+    tail.then(() => {
+      if (lockQueues.get(key) === tail) {
+        lockQueues.delete(key);
+      }
+    });
+
+    return run;
+  }
 
   async function getGroups() {
     const stored = await browser.storage.local.get(STORAGE_KEY);
@@ -139,6 +172,8 @@ const YouTubeGroupsStorage = (() => {
   }
 
   return {
+    KEYS,
+    withLock,
     getGroups,
     saveGroups,
     getWatchedVideos,
