@@ -25,7 +25,7 @@
 
 ## Fase 5 (Funcionalidades Opcionales):
 - ✅ Limpieza de canales
-- ☐ Auto-reproducción
+- ✅ Auto-reproducción
 - ✅ Soporte para Shorts
 - ✅ Soporte para resultados de búsqueda
 - ✅ Soporte para recomendaciones

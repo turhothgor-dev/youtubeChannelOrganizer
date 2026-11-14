@@ -1,6 +1,6 @@
 # Plan: Fase 5 (5/5) · Reproducir en cadena lo visible
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 5: "Auto-reproducción".
 
@@ -43,7 +43,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
   atenuadas, vistas y no visibles y quita repetidos.
 - [x] T2 · Botón "Reproducir lo visible" y estilos (claro y `html[dark]`) · Ficheros: `content.js`, `content.css` ·
   Test: `make lint`, `make test` y a mano V1–V3.
-- [ ] T3 · Cerrar el plan: `ROADMAP.md` marca ✅ "Auto-reproducción"; `docs/ARCHITECTURE.md` (flujo "Reproducir lo
+- [x] T3 · Cerrar el plan: `ROADMAP.md` marca ✅ "Auto-reproducción"; `docs/ARCHITECTURE.md` (flujo "Reproducir lo
   visible", funciones nuevas en la fila de `playlists.js`). Estado a `hecho` · Ficheros: `ROADMAP.md`,
   `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
 
@@ -81,3 +81,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: cola de reproducción de lo visible (URL y selección)` | `buildWatchVideosUrl` y `selectQueueIds`; `buildPlayAllUrl` delega en la primera. |
 | 2026-11-14 | T2 | `feat: botón Reproducir lo visible en el panel` | Botón, mensaje aria-live y estilos claro/oscuro; V1–V3 pendientes a mano. |
+| 2026-11-14 | T3 | `docs: cerrar auto-reproducción (Fase 5)` | ROADMAP con ✅, ARCHITECTURE con el flujo y las funciones nuevas; plan a `hecho`. |
