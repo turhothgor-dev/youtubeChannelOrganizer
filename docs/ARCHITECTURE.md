@@ -58,12 +58,15 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `youtube-groups--hidden` y `youtube-groups--dimmed`. Ocultar gana a atenuar. Se reevalúa al procesar cada
   tarjeta, al cambiar el filtro, al marcar un vídeo y al cambiar un ajuste.
 - **Marcar como visto**: `content.js` lee los vistos al arrancar (`watchedVideos`). El botón "Marcar visto" de la
-  tarjeta o el de "Vídeo actual" del panel (en `/watch`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
+  tarjeta o el de "Vídeo actual" del panel (en `/watch` y `/shorts`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
   aplica el cambio y escribe una vez solo si cambia algo, encolada por clave (`withLock`, ADR 0005). Después `content.js` actualiza la caché, la clase
   `youtube-groups--watched` de todas las tarjetas con ese ID de vídeo y los botones.
+  Las tarjetas de Shorts de las estanterías (`ytd-reel-item-renderer`, `ytm-shorts-lockup-view-model*`) reciben marca
+  de visto y filtro, sin botones. En `/shorts` el canal actual sale de `ytd-reel-video-renderer[is-active]`.
 - **Marcado automático**: un escuchador de `timeupdate` en `document` (fase de captura) llama a
-  `handleVideoProgress`. Solo actúa una vez leídos los ajustes (`settingsLoaded`), si `autoMarkPercent` no es 0, el `<video>` está en `#movie_player` sin
-  `ad-showing`, el ID de `/watch` coincide con `ytd-watch-flexy[video-id]` (si existe), el vídeo no está visto ni
+  `handleVideoProgress`. Solo actúa una vez leídos los ajustes (`settingsLoaded`), si `autoMarkPercent` no es 0, el `<video>` está en `#movie_player` o `#shorts-player` sin
+  `ad-showing`, el ID de `/watch` coincide con `ytd-watch-flexy[video-id]` (si existe), en `/shorts` el ID actual está
+  armado (`YouTubeGroupsWatched.updateAutoMarkArm`: se arma al ver `currentTime < 1`), el vídeo no está visto ni
   guardándose ni ya tratado en la pestaña (`autoMarkHandledIds`) y `YouTubeGroupsWatched.shouldAutoMark` da `true`.
   Entonces `markVideoWatched` guarda igual que el marcado manual. El porcentaje (0, 50, 80 o 95) se elige en
   "Ajustes".
