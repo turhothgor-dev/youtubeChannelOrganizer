@@ -24,7 +24,7 @@
 - ✅ Integración en sidebar
 
 ## Fase 5 (Funcionalidades Opcionales):
-- ☐ Limpieza de canales
+- ✅ Limpieza de canales
 - ☐ Auto-reproducción
 - ☐ Soporte para Shorts
 - ☐ Soporte para resultados de búsqueda
