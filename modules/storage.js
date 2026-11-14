@@ -2,6 +2,7 @@ const YouTubeGroupsStorage = (() => {
   const STORAGE_KEY = "youtubeGroups";
   const WATCHED_KEY = "youtubeWatched";
   const SETTINGS_KEY = "youtubeSettings";
+  const PLAYLISTS_KEY = "youtubePlaylists";
   let groupsInitializationPromise = null;
 
   async function getGroups() {
@@ -101,6 +102,38 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee las listas de vídeos (ADR 0004). Sin datos válidos devuelve [] y no escribe.
+   * @returns {Promise<Array>} Listas tal como se guardaron.
+   */
+  async function getPlaylists() {
+    const stored = await browser.storage.local.get(PLAYLISTS_KEY);
+    const data = stored[PLAYLISTS_KEY];
+
+    if (!data || !Array.isArray(data.playlists)) {
+      return [];
+    }
+
+    return data.playlists;
+  }
+
+  /**
+   * Guarda las listas de vídeos con el formato versión 1 (ADR 0004).
+   * @param {Array} playlists Listas con sus vídeos.
+   */
+  async function savePlaylists(playlists) {
+    if (!Array.isArray(playlists)) {
+      throw new TypeError("Las listas deben ser un array.");
+    }
+
+    await browser.storage.local.set({
+      [PLAYLISTS_KEY]: {
+        version: 1,
+        playlists,
+      },
+    });
+  }
+
   function isPlainObject(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
@@ -112,5 +145,7 @@ const YouTubeGroupsStorage = (() => {
     saveWatchedVideos,
     getSettings,
     saveSettings,
+    getPlaylists,
+    savePlaylists,
   };
 })();

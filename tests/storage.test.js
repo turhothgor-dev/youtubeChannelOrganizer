@@ -131,6 +131,89 @@ test("guardar ajustes no cambia youtubeGroups ni youtubeWatched", async () => {
   );
 });
 
+test("getPlaylists sin datos devuelve [] y no escribe", async () => {
+  const { YouTubeGroupsStorage, calls } = loadModules();
+
+  const playlists = await YouTubeGroupsStorage.getPlaylists();
+
+  assert.deepStrictEqual(plain(playlists), []);
+  assert.strictEqual(calls.set, 0);
+});
+
+test("getPlaylists con datos corruptos devuelve []", async () => {
+  for (const corrupt of [{}, null]) {
+    const { YouTubeGroupsStorage, store, calls } = loadModules();
+    store.youtubePlaylists = { version: 1, playlists: corrupt };
+
+    const playlists = await YouTubeGroupsStorage.getPlaylists();
+
+    assert.deepStrictEqual(plain(playlists), []);
+    assert.strictEqual(calls.set, 0);
+  }
+});
+
+test("savePlaylists y getPlaylists conservan las listas con version 1", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  const playlists = [
+    {
+      id: "p1",
+      name: "Para luego",
+      videos: [
+        {
+          id: "dQw4w9WgXcQ",
+          title: "T",
+          channelName: "C",
+          addedAt: 1794672642000,
+        },
+      ],
+    },
+  ];
+
+  await YouTubeGroupsStorage.savePlaylists(playlists);
+  const loaded = await YouTubeGroupsStorage.getPlaylists();
+
+  assert.deepStrictEqual(plain(loaded), playlists);
+  assert.strictEqual(store.youtubePlaylists.version, 1);
+});
+
+test("savePlaylists con algo que no es un array lanza TypeError", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  for (const invalid of [{}, null]) {
+    await assert.rejects(
+      () => YouTubeGroupsStorage.savePlaylists(invalid),
+      (error) => error.name === "TypeError",
+    );
+  }
+});
+
+test("guardar listas no cambia grupos, vistos ni ajustes", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  await YouTubeGroupsStorage.saveGroups([{ id: "a" }]);
+  await YouTubeGroupsStorage.saveWatchedVideos({
+    dQw4w9WgXcQ: { watchedAt: 1 },
+  });
+  await YouTubeGroupsStorage.saveSettings({ watchedMode: "hide" });
+  const before = JSON.stringify([
+    store.youtubeGroups,
+    store.youtubeWatched,
+    store.youtubeSettings,
+  ]);
+
+  await YouTubeGroupsStorage.savePlaylists([
+    { id: "p", name: "x", videos: [] },
+  ]);
+
+  assert.strictEqual(
+    JSON.stringify([
+      store.youtubeGroups,
+      store.youtubeWatched,
+      store.youtubeSettings,
+    ]),
+    before,
+  );
+});
+
 test("saveGroups con algo que no es un array lanza TypeError", async () => {
   const { YouTubeGroupsStorage } = loadModules();
 

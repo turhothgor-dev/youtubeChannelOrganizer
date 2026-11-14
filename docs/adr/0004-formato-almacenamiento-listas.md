@@ -1,6 +1,6 @@
 # 0004 · Listas de vídeos locales en browser.storage.local (versión 1)
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-14
 
 ## Contexto
