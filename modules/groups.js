@@ -321,6 +321,62 @@ const YouTubeGroups = (() => {
     return urls;
   }
 
+  /**
+   * Índice nombre de canal (recortado) → URL con todos los canales del árbol.
+   * Un nombre con dos URL distintas se excluye por ambiguo.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @returns {Map<string, string>} Índice nombre → URL.
+   */
+  function buildChannelNameIndex(groups) {
+    const index = new Map();
+    const ambiguous = new Set();
+    const visit = (list) => {
+      for (const group of list || []) {
+        for (const channel of group.channels || []) {
+          const name =
+            typeof channel.name === "string" ? channel.name.trim() : "";
+          if (!name || typeof channel.url !== "string") {
+            continue;
+          }
+          if (index.has(name) && index.get(name) !== channel.url) {
+            ambiguous.add(name);
+          } else {
+            index.set(name, channel.url);
+          }
+        }
+        visit(group.subgroups);
+      }
+    };
+    visit(groups);
+    for (const name of ambiguous) {
+      index.delete(name);
+    }
+    return index;
+  }
+
+  /**
+   * Busca el canal cuyos nombres aparecen exactamente en los textos dados.
+   * @param {Map<string, string>} index - Índice de `buildChannelNameIndex`.
+   * @param {string[]} texts - Textos de la tarjeta.
+   * @returns {{name: string, url: string}|null} El canal si todas las
+   *   coincidencias apuntan a una sola URL; si no, null.
+   */
+  function matchChannelByTexts(index, texts) {
+    let found = null;
+    for (const text of texts || []) {
+      const name = typeof text === "string" ? text.trim() : "";
+      if (!index.has(name)) {
+        continue;
+      }
+      const url = index.get(name);
+      if (found && found.url !== url) {
+        return null;
+      }
+      found = { name, url };
+    }
+    return found;
+  }
+
   // Nueva función para verificar si un canal está en un grupo
   function isChannelInGroup(group, channelUrl) {
     return group.channels.some((item) => item.url === channelUrl);
@@ -746,6 +802,8 @@ const YouTubeGroups = (() => {
     applyChannelGroupSelection,
     setChannelGroups,
     getGroupChannelUrls,
+    buildChannelNameIndex,
+    matchChannelByTexts,
     createSubGroup, // Nueva función
     deleteSubGroup, // Nueva función
     getSubGroups, // Nueva función

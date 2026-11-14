@@ -47,7 +47,7 @@ Alternativa descartada: buscar el nombre del canal con selectores internos del l
 Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `plain`; `make test` y `make lint`
 (0 avisos) en verde.
 
-- [ ] T1 · `buildChannelNameIndex` y `matchChannelByTexts` · Ficheros: `modules/groups.js`, `tests/groups.test.js` ·
+- [x] T1 · `buildChannelNameIndex` y `matchChannelByTexts` · Ficheros: `modules/groups.js`, `tests/groups.test.js` ·
   Test: índice con canales de subgrupos; nombre repetido con la misma URL se queda, con dos URL se excluye; textos con
   un nombre conocido dan su canal; con dos nombres de URL distintas, `null`; sin coincidencias, `null`; espacios
   alrededor se ignoran.
@@ -98,3 +98,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | feat: índice de canales por nombre y coincidencia por textos | `buildChannelNameIndex` y `matchChannelByTexts` en `modules/groups.js` con tests. |

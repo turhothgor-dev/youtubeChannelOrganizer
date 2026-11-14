@@ -656,6 +656,58 @@ test("cleanupGroups con duplicados escribe una vez", async () => {
   assert.deepStrictEqual(store.youtubeGroups.groups[0].channels.length, 1);
 });
 
+test("buildChannelNameIndex incluye subgrupos, repite misma URL y excluye nombres ambiguos", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    grp(
+      "a",
+      [
+        ch(" Uno ", `${YT}/@uno`),
+        ch("Dup", `${YT}/@x`),
+        ch("Mismo", `${YT}/@m`),
+      ],
+      [
+        grp("b", [
+          ch("Sub", `${YT}/@sub`),
+          ch("Dup", `${YT}/@y`),
+          ch("Mismo", `${YT}/@m`),
+        ]),
+      ],
+    ),
+  ];
+
+  const index = YouTubeGroups.buildChannelNameIndex(groups);
+
+  assert.strictEqual(index.get("Uno"), `${YT}/@uno`);
+  assert.strictEqual(index.get("Sub"), `${YT}/@sub`);
+  assert.strictEqual(index.get("Mismo"), `${YT}/@m`);
+  assert.strictEqual(index.has("Dup"), false);
+});
+
+test("matchChannelByTexts devuelve el canal si los textos coinciden con una sola URL", () => {
+  const { YouTubeGroups } = loadModules();
+  const index = YouTubeGroups.buildChannelNameIndex([
+    grp("a", [ch("Uno", `${YT}/@uno`), ch("Dos", `${YT}/@dos`)]),
+  ]);
+
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.matchChannelByTexts(index, ["Título", "  Uno  "])),
+    { name: "Uno", url: `${YT}/@uno` },
+  );
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.matchChannelByTexts(index, ["Uno", "Uno"])),
+    { name: "Uno", url: `${YT}/@uno` },
+  );
+  assert.strictEqual(
+    YouTubeGroups.matchChannelByTexts(index, ["Uno", "Dos"]),
+    null,
+  );
+  assert.strictEqual(
+    YouTubeGroups.matchChannelByTexts(index, ["Nada", "Otro"]),
+    null,
+  );
+});
+
 test("cleanupGroups a la vez que createGroup no pierde el grupo creado", async () => {
   const { YouTubeGroups, store } = loadModules(
     {
