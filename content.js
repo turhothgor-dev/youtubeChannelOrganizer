@@ -1638,11 +1638,17 @@
   // recorte el selector dentro del flujo de la tarjeta (overflow).
   let subscriptionDropdown = null;
   let subscriptionDropdownOpenCount = 0;
+  let subscriptionDropdownListenersAdded = false;
 
   function getOrCreateSubscriptionDropdown() {
     if (!subscriptionDropdown || !subscriptionDropdown.isConnected) {
       subscriptionDropdown = createSubscriptionDropdown();
       document.body.appendChild(subscriptionDropdown);
+    }
+
+    // Los escuchadores se registran una sola vez aunque el elemento se recree
+    if (!subscriptionDropdownListenersAdded) {
+      subscriptionDropdownListenersAdded = true;
 
       // Cerrar dropdown al hacer clic fuera de él
       document.addEventListener("mousedown", (event) => {
@@ -1865,6 +1871,7 @@
   // Desplegable flotante único para guardar un vídeo en listas
   let playlistDropdown = null;
   let playlistDropdownOpenCount = 0;
+  let playlistDropdownListenersAdded = false;
 
   function hidePlaylistDropdown() {
     const form = playlistDropdown?.querySelector(
@@ -1879,8 +1886,12 @@
     if (!playlistDropdown || !playlistDropdown.isConnected) {
       playlistDropdown = createPlaylistDropdown();
       document.body.appendChild(playlistDropdown);
+    }
 
-      // Cerrar al hacer clic fuera o al hacer scroll (posiciones obsoletas)
+    // Cerrar al hacer clic fuera o al hacer scroll (posiciones obsoletas);
+    // se registra una sola vez aunque el elemento se recree.
+    if (!playlistDropdownListenersAdded) {
+      playlistDropdownListenersAdded = true;
       document.addEventListener("mousedown", (event) => {
         if (playlistDropdown && !playlistDropdown.contains(event.target)) {
           hidePlaylistDropdown();
@@ -2497,11 +2508,17 @@
 
   // --- Icon Picker (singleton lazy) ---
   let iconPicker = null;
+  let iconPickerListenersAdded = false;
 
   function getOrCreateIconPicker() {
     if (!iconPicker || !iconPicker.isConnected) {
       iconPicker = createIconPicker();
       document.body.appendChild(iconPicker);
+    }
+    // Los escuchadores globales se registran una sola vez: leen la variable
+    // del singleton, así que sirven también para el elemento recreado.
+    if (!iconPickerListenersAdded) {
+      iconPickerListenersAdded = true;
       document.addEventListener("mousedown", (event) => {
         if (iconPicker && !iconPicker.contains(event.target)) {
           const form = iconPicker.querySelector(

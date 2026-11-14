@@ -134,7 +134,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
   con él · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V2 y V3.
 - [x] T6 · Metadatos sin textos de la extensión. `getCardTexts` salta los elementos dentro de
   `[class*="youtube-groups__"]` (sugerencia a) · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V4.
-- [ ] T7 · Escuchadores de los desplegables una sola vez. Un booleano por desplegable en
+- [x] T7 · Escuchadores de los desplegables una sola vez. Un booleano por desplegable en
   `getOrCreateSubscriptionDropdown`, `getOrCreatePlaylistDropdown` y `getOrCreateIconPicker` (sugerencia b) ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V5.
 - [ ] T8 · Cerrar solo el modal de listas. Clase `youtube-groups__channel-list-modal--playlist` en el modal de
@@ -208,3 +208,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T4 | fix: serializar las escrituras de grupos | Las 10 operaciones de `modules/groups.js` dentro de `withLock(KEYS.groups)` mediante el helper `withGroupsLock`. Con `latencyMs: 5` fallaban sin la cola los tests de `setChannelGroups` y de `createSubGroup` + `setGroupAppearance`; los de dos `createGroup` y `renameGroup` inexistente + `createGroup` pasan también sin ella (el simulador devuelve la misma referencia del array y las operaciones no compiten). |
 | 2026-11-14 | T5 | fix: no aplicar resultados viejos al estado en memoria | Contadores `watchedWriteSeq`/`watchedAppliedSeq` en `toggleVideoWatched` y `markVideoWatched`, y `settingsWriteSeq`/`settingsAppliedSeq` en `changeSetting` (sin reaplicar visibilidad si el resultado es viejo). Pendientes V2 y V3 a mano. |
 | 2026-11-14 | T6 | fix: ignorar textos de la extensión en los metadatos de tarjeta | `getCardTexts` salta los elementos dentro de `[class*="youtube-groups__"]`. Pendiente V4 a mano. |
+| 2026-11-14 | T7 | fix: registrar los escuchadores de los desplegables una sola vez | Booleanos `subscriptionDropdownListenersAdded`, `playlistDropdownListenersAdded` e `iconPickerListenersAdded`; la creación del elemento queda separada del registro. Pendiente V5 a mano. |
