@@ -239,6 +239,30 @@ const YouTubeGroups = (() => {
     return result;
   }
 
+  /**
+   * URL de los canales de un grupo y de todos sus descendientes.
+   *
+   * @returns {Set<string>|null} null si el grupo no existe.
+   */
+  function getGroupChannelUrls(groups, groupId) {
+    const group = findGroupById(groups, groupId);
+    if (!group) {
+      return null;
+    }
+
+    const urls = new Set();
+    const collect = (item) => {
+      for (const channel of item.channels || []) {
+        urls.add(channel.url);
+      }
+      for (const child of item.subgroups || []) {
+        collect(child);
+      }
+    };
+    collect(group);
+    return urls;
+  }
+
   // Nueva función para verificar si un canal está en un grupo
   function isChannelInGroup(group, channelUrl) {
     return group.channels.some((item) => item.url === channelUrl);
@@ -388,6 +412,7 @@ const YouTubeGroups = (() => {
     removeChannelFromGroup,
     applyChannelGroupSelection,
     setChannelGroups,
+    getGroupChannelUrls,
     createSubGroup, // Nueva función
     deleteSubGroup, // Nueva función
     getSubGroups, // Nueva función

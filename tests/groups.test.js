@@ -165,6 +165,27 @@ test("setChannelGroups escribe una sola vez con cambios", async () => {
   assert.strictEqual(saved[1].channels.length, 0);
 });
 
+test("getGroupChannelUrls reúne canales propios y de descendientes", () => {
+  const { YouTubeGroups } = loadModules();
+  const { groups } = seedGroups();
+  groups[0].channels.push({ name: "A", url: `${YT}/@a` });
+  groups[0].subgroups[0].channels.push({ name: "B", url: `${YT}/@b` });
+
+  const parent = YouTubeGroups.getGroupChannelUrls(groups, "g1");
+  assert.deepStrictEqual([...parent].sort(), [`${YT}/@a`, `${YT}/@b`]);
+
+  const sub = YouTubeGroups.getGroupChannelUrls(groups, "s1");
+  assert.deepStrictEqual([...sub], [`${YT}/@b`]);
+});
+
+test("getGroupChannelUrls devuelve Set vacío sin canales y null si no existe", () => {
+  const { YouTubeGroups } = loadModules();
+  const { groups } = seedGroups();
+
+  assert.strictEqual(YouTubeGroups.getGroupChannelUrls(groups, "s1").size, 0);
+  assert.strictEqual(YouTubeGroups.getGroupChannelUrls(groups, "nope"), null);
+});
+
 test("setChannelGroups no escribe sin cambios ni con error", async () => {
   const { YouTubeGroups, calls } = loadModules({
     youtubeGroups: seedGroups(),

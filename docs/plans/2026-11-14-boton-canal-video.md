@@ -133,7 +133,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   anidado, baja, sin cambios, canal ya presente, id desconocido, canal sin nombre o URL (error), URL que no es de
   canal (error) y entrada no mutada; `setChannelGroups` hace una sola llamada a `set` con cambios, ninguna sin
   cambios, y ninguna si hay error; a mano, V3.
-- [ ] T3 · El filtro sobrevive al guardado. En `modules/groups.js`, añadir y exportar
+- [x] T3 · El filtro sobrevive al guardado. En `modules/groups.js`, añadir y exportar
   `getGroupChannelUrls(groups, groupId)`, pura: busca el grupo a cualquier nivel y devuelve un `Set` con las URL
   de sus canales y las de todos sus descendientes, o `null` si no existe. En `content.js`,
   `refreshActiveGroupFilter` la usa (así funciona también con un subgrupo activo) y `applyFilterToCard` usa
@@ -255,3 +255,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `test: añadir base de tests y exportar normalizeChannelUrl del módulo` (propuesto) | Helper vm, tests de storage y groups, `tests` fuera del paquete; 6 tests en verde, lint sin avisos nuevos. |
 | 2026-11-14 | T2 | `feat: guardar la pertenencia del canal en una sola escritura` (propuesto) | `applyChannelGroupSelection` y `setChannelGroups` en el módulo; los dos formularios los usan, con `finally` y refresco de panel y filtro; 12 tests en verde, lint sin avisos nuevos (4). Pendiente V3 a mano. |
+| 2026-11-14 | T3 | `fix: mantener el filtro de grupo al guardar y con subgrupos activos` (propuesto) | `getGroupChannelUrls` en el módulo; `refreshActiveGroupFilter` la usa y `applyFilterToCard` usa el canal del dataset; `console.log` quitados; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V5 a mano. |

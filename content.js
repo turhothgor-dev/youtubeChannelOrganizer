@@ -1096,18 +1096,6 @@
   }
 
   function applyFilterToCard(card, detectedChannel = null) {
-    console.log(
-      "applyFilterToCard:" +
-        card.dataset.youtubeGroupsChannelUrl +
-        " " +
-        detectedChannel?.url,
-    );
-    // If we don't have channel info, show card
-    if (!detectedChannel) {
-      setCardVisibility(card, true);
-      return;
-    }
-
     const channelUrl =
       detectedChannel?.url ?? card.dataset.youtubeGroupsChannelUrl;
 
@@ -1142,7 +1130,6 @@
   }
 
   function filterAllDetectedCards() {
-    console.log("filterAllDetectedCards");
     for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
       applyFilterToCard(card);
     }
@@ -1151,11 +1138,6 @@
   async function refreshActiveGroupFilter() {
     const updateVersion = ++filterUpdateVersion;
     const activeId = getActiveGroupId();
-
-    console.log("refreshActiveGroupFilter: id -> " + activeId);
-    console.log(
-      "refreshActiveGroupFilter: updateVersion -> " + filterUpdateVersion,
-    );
 
     // Reset activeGroupChannelUrls when no group is active
     if (activeId === null) {
@@ -1176,9 +1158,9 @@
         return;
       }
 
-      // Find the active group
-      const activeGroup = groups.find((group) => group.id === activeId);
-      if (!activeGroup) {
+      // Canales del grupo o subgrupo activo y de sus descendientes
+      const urls = YouTubeGroups.getGroupChannelUrls(groups, activeId);
+      if (!urls) {
         console.warn(
           "[YouTube Groups][FILTER] Grupo activo no encontrado",
           activeId,
@@ -1186,68 +1168,7 @@
         return;
       }
 
-      // Debug logging
-      console.log(
-        "[YouTube Groups][FILTER] Refreshing filter for group:",
-        activeGroup.name,
-        "type:",
-        activeGroup.type,
-      );
-
-      // COLLECT CHANNELS FOR THE ACTIVE GROUP
-      // This is the key fix: ensure we collect the right channels regardless of group type
-      let allChannels = [];
-
-      if (activeGroup.type === "subgroup") {
-        // For subgroups, only use channels directly in this subgroup
-        console.log(
-          "[YouTube Groups][FILTER] Processing subgroup:",
-          activeGroup.name,
-        );
-        allChannels = [...activeGroup.channels];
-      } else {
-        // For regular groups, collect channels from this group and all its subgroups
-        console.log(
-          "[YouTube Groups][FILTER] Processing regular group:",
-          activeGroup.name,
-        );
-        allChannels = [...activeGroup.channels];
-
-        // Add channels from all subgroups recursively
-        function addAllSubgroupChannels(group) {
-          if (group.subgroups && group.subgroups.length > 0) {
-            group.subgroups.forEach((subgroup) => {
-              console.log(
-                "[YouTube Groups][FILTER] Adding channels from subgroup:",
-                subgroup.name,
-              );
-              allChannels.push(...subgroup.channels);
-              addAllSubgroupChannels(subgroup);
-            });
-          }
-        }
-
-        addAllSubgroupChannels(activeGroup);
-      }
-
-      console.log(
-        "[YouTube Groups][FILTER] Total channels collected:",
-        allChannels.length,
-      );
-      console.log(
-        "[YouTube Groups][FILTER] Channel URLs to filter:",
-        allChannels.map((c) => c.url),
-      );
-
-      // Store URLs exactly as they are (they should be normalized in the groups)
-      activeGroupChannelUrls = new Set(
-        allChannels.map((channel) => channel.url),
-      );
-
-      console.log(
-        "[YouTube Groups][FILTER] Channel URLs in set:",
-        Array.from(activeGroupChannelUrls),
-      );
+      activeGroupChannelUrls = urls;
 
       // Force re-filtering of all detected cards
       setTimeout(() => {
