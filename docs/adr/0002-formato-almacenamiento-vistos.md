@@ -1,6 +1,6 @@
 # 0002 · Formato de los vídeos vistos en browser.storage.local (versión 1)
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-14
 
 ## Contexto

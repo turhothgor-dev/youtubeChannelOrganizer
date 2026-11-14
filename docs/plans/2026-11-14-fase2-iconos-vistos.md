@@ -125,7 +125,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   10 px) y estilos del selector de iconos en claro por defecto con su variante `html[dark]` (fondo, borde, texto
   de las opciones y etiquetas) · Ficheros: `content.js`, `content.css` · Test: `make lint` sin ningún aviso
   `UNSAFE_VAR_ASSIGNMENT`, `make test`, y a mano V1, V2 y V3.
-- [ ] T4 · Almacenamiento de vistos. En `modules/storage.js`, añadir `getWatchedVideos()` y
+- [x] T4 · Almacenamiento de vistos. En `modules/storage.js`, añadir `getWatchedVideos()` y
   `saveWatchedVideos(videos)` con la clave `youtubeWatched` y el formato del ADR 0002: leer sin datos, sin
   `videos`, con `videos` `null` o array devuelve `{}` y no escribe; guardar algo que no sea un objeto plano (array,
   `null`, número) lanza `TypeError`; guarda `{ version: 1, videos }`. Cambiar el estado del ADR 0002 a `aceptada` ·
@@ -237,3 +237,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | `feat: validar iconos y colores y rellenar el icono de educación` | Ruta rellena de `education`, `isValidColor` solo `#rrggbb`, `tests/icons.test.js`, orden de carga en el manifest. |
 | 2026-11-14 | T2 | `feat: calcular la apariencia heredada de un grupo` | `getGroupAppearance` en `modules/groups.js` (color heredado, icono propio) y sus tests. |
 | 2026-11-14 | T3 | `feat: pintar iconos sin innerHTML y en los selectores de casillas` | `createIconSvg` y `createGroupMark` en `content.js`, punto de color, selector de iconos con tema claro y oscuro. |
+| 2026-11-14 | T4 | `feat: guardar los vídeos vistos en el almacenamiento` | `getWatchedVideos` y `saveWatchedVideos` en `modules/storage.js`, tests y ADR 0002 a `aceptada`. |

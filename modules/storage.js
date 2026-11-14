@@ -1,5 +1,6 @@
 const YouTubeGroupsStorage = (() => {
   const STORAGE_KEY = "youtubeGroups";
+  const WATCHED_KEY = "youtubeWatched";
   let groupsInitializationPromise = null;
 
   async function getGroups() {
@@ -35,8 +36,46 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee el mapa de vídeos vistos (ADR 0002). Sin datos válidos devuelve {} y no escribe.
+   * @returns {Promise<Object>} Mapa ID de vídeo -> entrada.
+   */
+  async function getWatchedVideos() {
+    const stored = await browser.storage.local.get(WATCHED_KEY);
+    const data = stored[WATCHED_KEY];
+
+    if (!data || !isPlainObject(data.videos)) {
+      return {};
+    }
+
+    return data.videos;
+  }
+
+  /**
+   * Guarda el mapa de vídeos vistos con el formato versión 1 (ADR 0002).
+   * @param {Object} videos Mapa ID de vídeo -> entrada.
+   */
+  async function saveWatchedVideos(videos) {
+    if (!isPlainObject(videos)) {
+      throw new TypeError("Los vídeos vistos deben ser un objeto.");
+    }
+
+    await browser.storage.local.set({
+      [WATCHED_KEY]: {
+        version: 1,
+        videos,
+      },
+    });
+  }
+
+  function isPlainObject(value) {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   return {
     getGroups,
     saveGroups,
+    getWatchedVideos,
+    saveWatchedVideos,
   };
 })();
