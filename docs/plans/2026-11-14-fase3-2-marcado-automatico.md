@@ -1,6 +1,6 @@
 # Plan: Fase 3 (2/4) · Marcar vídeos vistos automáticamente
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 3: "Marcar videos vistos".
 
@@ -86,7 +86,7 @@ Reglas comunes: nada de `innerHTML` con valores interpolados; JSDoc en las funci
   `handleVideoProgress` con sus guardas y el escuchador de captura; el botón del vídeo actual del panel añade el ID
   a `autoMarkHandledIds` al pulsar; el tercer `<select>` de "Ajustes" · Ficheros: `content.js` (y `content.css` solo
   si el `<select>` nuevo necesita estilo) · Test: `make lint`, `make test` y a mano V1 a V6.
-- [ ] T3 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Marcar videos vistos". En `docs/ARCHITECTURE.md`: la fila
+- [x] T3 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Marcar videos vistos". En `docs/ARCHITECTURE.md`: la fila
   de `modules/watched.js` menciona `shouldAutoMark`, y el flujo "Marcar como visto" describe el marcado automático
   (escuchador de `timeupdate`, guardas y ajuste). Estado de este plan a `hecho` · Ficheros: `ROADMAP.md`,
   `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
@@ -137,3 +137,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: añadir la lógica del marcado automático (shouldAutoMark y autoMarkPercent)` | `shouldAutoMark` y ajuste `autoMarkPercent` con sus tests; los tests de ajustes existentes se actualizan al nuevo campo por defecto. |
 | 2026-11-14 | T2 | `feat: marcar vídeos como vistos automáticamente al reproducirlos en /watch` | Escuchador `timeupdate` en captura con guardas, `markVideoWatched`, `autoMarkHandledIds` y tercer selector en Ajustes; `changeSetting` gana un parámetro opcional `parse`. V1 a V6 pendientes a mano. |
+| 2026-11-14 | T3 | `docs: cerrar el plan del marcado automático (Fase 3, 2/4)` | ROADMAP con ✅, ARCHITECTURE con `shouldAutoMark` y el flujo de marcado automático; plan en `hecho`. |

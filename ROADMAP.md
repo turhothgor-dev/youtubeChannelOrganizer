@@ -17,7 +17,7 @@
 - ☐ Gestor de playlists
 - ☐ Filtros avanzados (duración, fecha, popularidad)
 - ✅ Ocultar videos vistos
-- ☐ Marcar videos vistos
+- ✅ Marcar videos vistos
 
 ## Fase 4 (Integración y Sincronización):
 - ☐ Sincronización cruzada

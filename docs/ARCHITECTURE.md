@@ -19,8 +19,8 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002) y los ajustes (ADR 0003) |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos |
 | `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos y URL de un grupo para el filtro |
-| `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos |
-| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`), normalizarlos, leerlos y actualizarlos con validación |
+| `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) |
+| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`), normalizarlos, leerlos y actualizarlos con validación |
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botones por vídeo (grupo y visto), filtro, sección de ajustes y selector de iconos |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
@@ -44,6 +44,12 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   tarjeta o el de "Vídeo actual" del panel (en `/watch`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
   aplica el cambio y escribe una vez solo si cambia algo. Después `content.js` actualiza la caché, la clase
   `youtube-groups--watched` de todas las tarjetas con ese ID de vídeo y los botones.
+- **Marcado automático**: un escuchador de `timeupdate` en `document` (fase de captura) llama a
+  `handleVideoProgress`. Solo actúa si `autoMarkPercent` no es 0, el `<video>` está en `#movie_player` sin
+  `ad-showing`, el ID de `/watch` coincide con `ytd-watch-flexy[video-id]` (si existe), el vídeo no está visto ni
+  guardándose ni ya tratado en la pestaña (`autoMarkHandledIds`) y `YouTubeGroupsWatched.shouldAutoMark` da `true`.
+  Entonces `markVideoWatched` guarda igual que el marcado manual. El porcentaje (0, 50, 80 o 95) se elige en
+  "Ajustes".
 
 ## Decisiones
 
