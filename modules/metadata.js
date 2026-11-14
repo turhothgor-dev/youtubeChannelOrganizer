@@ -95,5 +95,108 @@ const YouTubeGroupsMetadata = (() => {
     return entry ? Number(match[1]) * entry[1] : null;
   }
 
-  return { parseDuration, parseViewCount, parseAge };
+  /**
+   * Opciones fijas de cada criterio. `test` recibe el dato y dice si cumple.
+   * Los umbrales de duración y antigüedad están en segundos.
+   */
+  const FILTER_DEFS = {
+    duration: [
+      { id: "any", label: "Cualquiera" },
+      { id: "short", label: "Menos de 4 min", test: (d) => d < 240 },
+      {
+        id: "medium",
+        label: "De 4 a 20 min",
+        test: (d) => d >= 240 && d <= 1200,
+      },
+      { id: "long", label: "Más de 20 min", test: (d) => d > 1200 },
+    ],
+    age: [
+      { id: "any", label: "Cualquiera" },
+      { id: "day", label: "Últimas 24 horas", test: (a) => a <= 86400 },
+      { id: "week", label: "Última semana", test: (a) => a <= 604800 },
+      { id: "month", label: "Último mes", test: (a) => a <= 2592000 },
+      { id: "year", label: "Último año", test: (a) => a <= 31536000 },
+    ],
+    views: [
+      { id: "any", label: "Cualquiera" },
+      { id: "1k", label: "Desde 1 mil", test: (v) => v >= 1e3 },
+      { id: "10k", label: "Desde 10 mil", test: (v) => v >= 1e4 },
+      { id: "100k", label: "Desde 100 mil", test: (v) => v >= 1e5 },
+      { id: "1m", label: "Desde 1 M", test: (v) => v >= 1e6 },
+    ],
+  };
+
+  const FILTER_OPTIONS = Object.fromEntries(
+    Object.entries(FILTER_DEFS).map(([key, options]) => [
+      key,
+      options.map(({ id, label }) => ({ id, label })),
+    ]),
+  );
+
+  /**
+   * Extrae duración, antigüedad y visualizaciones de los textos de una tarjeta.
+   *
+   * @param {string[]} texts - Textos de la tarjeta.
+   * @returns {{duration: number|null, age: number|null, views: number|null}}
+   *   Primer valor no nulo de cada tipo, o null.
+   */
+  function extractCardMetadata(texts) {
+    const result = { duration: null, age: null, views: null };
+    const parsers = [
+      ["duration", parseDuration],
+      ["age", parseAge],
+      ["views", parseViewCount],
+    ];
+    for (const text of texts) {
+      for (const [key, parse] of parsers) {
+        if (result[key] === null) {
+          result[key] = parse(text);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Indica si una tarjeta cumple los filtros avanzados. Un dato desconocido
+   * (null), un criterio "any" o un id desconocido no excluyen la tarjeta.
+   *
+   * @param {{duration: number|null, age: number|null, views: number|null}} metadata
+   * @param {{duration: string, age: string, views: string}} filters
+   * @returns {boolean} true si la tarjeta pasa todos los criterios.
+   */
+  function matchesAdvancedFilters(metadata, filters) {
+    return Object.keys(FILTER_DEFS).every((key) => {
+      const value = metadata ? metadata[key] : null;
+      if (value === null || value === undefined) {
+        return true;
+      }
+      const option = FILTER_DEFS[key].find(
+        (o) => o.id === (filters && filters[key]),
+      );
+      return !option || !option.test || option.test(value);
+    });
+  }
+
+  /**
+   * Indica si algún criterio de filtro está activo (distinto de "any").
+   *
+   * @param {{duration: string, age: string, views: string}} filters
+   * @returns {boolean} true si hay algún filtro activo.
+   */
+  function hasActiveFilters(filters) {
+    return Object.keys(FILTER_DEFS).some(
+      (key) => filters && filters[key] !== undefined && filters[key] !== "any",
+    );
+  }
+
+  return {
+    parseDuration,
+    parseViewCount,
+    parseAge,
+    extractCardMetadata,
+    FILTER_OPTIONS,
+    matchesAdvancedFilters,
+    hasActiveFilters,
+  };
 })();

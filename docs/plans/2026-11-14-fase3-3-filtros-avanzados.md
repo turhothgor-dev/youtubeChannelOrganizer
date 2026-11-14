@@ -105,7 +105,7 @@ sin avisos.
   `"Emitido hace 2 semanas"` 1209600, `"hace 5 meses"` 12960000, `"hace 1 año"` 31536000, `"3 days ago"` 259200,
   `"Streamed 1 month ago"` 2592000, `"10 minutes ago"` 600; `null` para `"345 visualizaciones"`, `"ayer"`,
   `"12:34"`.
-- [ ] T2 · Criterios de filtro. En `modules/metadata.js`: `extractCardMetadata`, `FILTER_OPTIONS`,
+- [x] T2 · Criterios de filtro. En `modules/metadata.js`: `extractCardMetadata`, `FILTER_OPTIONS`,
   `matchesAdvancedFilters` y `hasActiveFilters` · Ficheros: `modules/metadata.js`, `tests/metadata.test.js` · Test:
   `extractCardMetadata(["Título", "12:34", "1,2 M de visualizaciones", "hace 3 días"])` devuelve los tres datos;
   con textos sin datos devuelve tres `null`; usa el primer valor de cada tipo. `matchesAdvancedFilters`: todo `any`
@@ -169,3 +169,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | feat: añadir los intérpretes de metadatos de tarjeta (duración, visualizaciones, antigüedad) | `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`; en manifest y helper de tests. |
+| 2026-11-14 | T2 | feat: añadir los criterios de filtro avanzado (extractCardMetadata, FILTER_OPTIONS, matchesAdvancedFilters, hasActiveFilters) | En `modules/metadata.js`, con tests de límites y dato desconocido. |
