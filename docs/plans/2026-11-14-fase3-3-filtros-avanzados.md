@@ -113,7 +113,7 @@ sin avisos.
   `day` con 86400 sí y 86401 no; `1k` con 999 no y 1000 sí); dato `null` pasa en cada criterio; un criterio que
   falla basta para no pasar; id desconocido = `any`. `hasActiveFilters` con todo `any` es `false` y con uno activo
   `true`. Cada criterio de `FILTER_OPTIONS` empieza por `any` y tiene ids únicos y etiquetas no vacías.
-- [ ] T3 · Filtros en el panel y en las tarjetas. En `content.js`: `advancedFilters`, `getCardTexts`, la caché de
+- [x] T3 · Filtros en el panel y en las tarjetas. En `content.js`: `advancedFilters`, `getCardTexts`, la caché de
   metadatos, el cálculo de `matchesFilter` (grupo Y filtros avanzados) dentro de `applyCardVisibility`, la sección
   "Filtros" (ver **Decisiones**) y sus manejadores. En `content.css`: estilos de la sección (claro y `html[dark]`) ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1 a V6.
@@ -170,3 +170,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | feat: añadir los intérpretes de metadatos de tarjeta (duración, visualizaciones, antigüedad) | `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`; en manifest y helper de tests. |
 | 2026-11-14 | T2 | feat: añadir los criterios de filtro avanzado (extractCardMetadata, FILTER_OPTIONS, matchesAdvancedFilters, hasActiveFilters) | En `modules/metadata.js`, con tests de límites y dato desconocido. |
+| 2026-11-14 | T3 | feat: añadir los filtros avanzados al panel y a las tarjetas | `content.js` (estado, `getCardTexts`, caché, sección "Filtros") y `content.css`; V1 a V6 pendientes de comprobar a mano. |

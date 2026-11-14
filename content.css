@@ -16,13 +16,19 @@
   box-sizing: border-box;
 }
 
-.youtube-groups__settings {
+.youtube-groups__settings,
+.youtube-groups__filters {
   margin-bottom: 12px;
   padding-top: 12px;
   border-top: 1px solid #d8d8d8;
 }
 
-.youtube-groups__settings summary {
+.youtube-groups__filters-reset {
+  margin-top: 8px;
+}
+
+.youtube-groups__settings summary,
+.youtube-groups__filters summary {
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -57,7 +63,8 @@
   font-size: 12px;
 }
 
-html[dark] .youtube-groups__settings {
+html[dark] .youtube-groups__settings,
+html[dark] .youtube-groups__filters {
   border-color: #555;
 }
 

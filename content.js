@@ -152,6 +152,26 @@
     }
   }
 
+  /**
+   * Refleja `advancedFilters` en los selectores de la sección "Filtros" y
+   * pone el resumen "Filtros (N)" con N criterios activos.
+   * @param {Element} panel - Panel de grupos.
+   */
+  function syncFiltersControls(panel) {
+    let active = 0;
+    for (const select of panel.querySelectorAll(
+      ".youtube-groups__filter-select",
+    )) {
+      const value = advancedFilters[select.dataset.filter];
+      select.value = value;
+      if (value !== "any") {
+        active += 1;
+      }
+    }
+    panel.querySelector(".youtube-groups__filters summary").textContent =
+      active > 0 ? `Filtros (${active})` : "Filtros";
+  }
+
   YouTubeGroupsSettings.getSettings()
     .then((loaded) => {
       settings = loaded;
@@ -505,6 +525,22 @@
             <h3 class="youtube-groups__section-title">Vídeo actual</h3>
             <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
           </section>
+          <details class="youtube-groups__filters">
+            <summary>Filtros</summary>
+            <label class="youtube-groups__setting">
+              <span>Duración</span>
+              <select class="youtube-groups__filter-select" data-filter="duration"></select>
+            </label>
+            <label class="youtube-groups__setting">
+              <span>Fecha</span>
+              <select class="youtube-groups__filter-select" data-filter="age"></select>
+            </label>
+            <label class="youtube-groups__setting">
+              <span>Popularidad</span>
+              <select class="youtube-groups__filter-select" data-filter="views"></select>
+            </label>
+            <button class="youtube-groups__filters-reset action-button secondary-button" type="button">Quitar filtros</button>
+          </details>
           <details class="youtube-groups__settings">
             <summary>Ajustes</summary>
             <label class="youtube-groups__setting">
@@ -585,6 +621,34 @@
         );
       });
     syncSettingsControls(panel);
+
+    const filterSelects = panel.querySelectorAll(
+      ".youtube-groups__filter-select",
+    );
+    for (const select of filterSelects) {
+      const key = select.dataset.filter;
+      for (const option of YouTubeGroupsMetadata.FILTER_OPTIONS[key]) {
+        const optionElement = document.createElement("option");
+        optionElement.value = option.id;
+        optionElement.textContent = option.label;
+        select.append(optionElement);
+      }
+      select.addEventListener("change", () => {
+        advancedFilters[key] = select.value;
+        syncFiltersControls(panel);
+        applyVisibilityToAllCards();
+      });
+    }
+    panel
+      .querySelector(".youtube-groups__filters-reset")
+      .addEventListener("click", () => {
+        for (const key of Object.keys(advancedFilters)) {
+          advancedFilters[key] = "any";
+        }
+        syncFiltersControls(panel);
+        applyVisibilityToAllCards();
+      });
+    syncFiltersControls(panel);
 
     const form = panel.querySelector(".youtube-groups__form");
     const input = panel.querySelector(".youtube-groups__input");
@@ -1557,6 +1621,71 @@
     return activeGroupChannelUrls.has(channelUrl);
   }
 
+  /** Filtros avanzados activos (en memoria; se pierden al recargar). */
+  const advancedFilters = { duration: "any", age: "any", views: "any" };
+
+  /** Caché tarjeta -> { videoId, metadata } de los metadatos ya leídos. */
+  const cardMetadataCache = new WeakMap();
+
+  /**
+   * Lee los textos visibles de una tarjeta: los `span` y `div` sin hijos
+   * elemento, con 1 a 60 caracteres y fuera del título.
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {string[]} Textos recortados.
+   */
+  function getCardTexts(card) {
+    const texts = [];
+    for (const element of card.querySelectorAll("span, div")) {
+      if (element.children.length > 0 || element.closest("h3, #video-title")) {
+        continue;
+      }
+      const text = (element.textContent ?? "").trim();
+      if (text.length >= 1 && text.length <= 60) {
+        texts.push(text);
+      }
+    }
+    return texts;
+  }
+
+  /**
+   * Devuelve los metadatos de una tarjeta, con caché por ID de vídeo. Se
+   * vuelven a leer mientras falte algún dato (YouTube pinta la duración tarde).
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {{duration: number|null, age: number|null, views: number|null}}
+   */
+  function getCardMetadata(card) {
+    const videoId = card.getAttribute(VIDEO_ID_ATTRIBUTE);
+    const cached = cardMetadataCache.get(card);
+    if (cached && cached.videoId === videoId) {
+      return cached.metadata;
+    }
+    const metadata = YouTubeGroupsMetadata.extractCardMetadata(
+      getCardTexts(card),
+    );
+    const complete = Object.values(metadata).every((value) => value !== null);
+    if (complete) {
+      cardMetadataCache.set(card, { videoId, metadata });
+    } else {
+      cardMetadataCache.delete(card);
+    }
+    return metadata;
+  }
+
+  /**
+   * Indica si una tarjeta pasa los filtros avanzados (sin filtros, pasa).
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {boolean}
+   */
+  function cardMatchesAdvancedFilters(card) {
+    if (!YouTubeGroupsMetadata.hasActiveFilters(advancedFilters)) {
+      return true;
+    }
+    return YouTubeGroupsMetadata.matchesAdvancedFilters(
+      getCardMetadata(card),
+      advancedFilters,
+    );
+  }
+
   /**
    * Único punto que pinta la visibilidad de una tarjeta: combina filtro,
    * visto y ajustes, y alterna las clases `hidden` y `dimmed`.
@@ -1565,7 +1694,8 @@
   function applyCardVisibility(card) {
     const visibility = YouTubeGroupsVisibility.getCardVisibility(
       {
-        matchesFilter: cardMatchesFilter(card),
+        matchesFilter:
+          cardMatchesFilter(card) && cardMatchesAdvancedFilters(card),
         isWatched: card.classList.contains(WATCHED_CLASS),
       },
       settings,
