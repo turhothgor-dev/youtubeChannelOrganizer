@@ -107,7 +107,7 @@ quitar los `console.log`/`console.debug` de diagnóstico de las funciones que se
   sale sin guardar; se guarda el valor de `subscriptionDropdownOpenCount` al empezar y el `finally` solo restaura
   texto y estado de Guardar si no ha cambiado (si ha cambiado, solo restaura el texto y lo deja deshabilitado;
   la nueva apertura lo habilitará) · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V2 y V3.
-- [ ] T3 · Filtro sin parpadeo. En `content.js`, `refreshActiveGroupFilter`: sin grupo activo, como hoy
+- [x] T3 · Filtro sin parpadeo. En `content.js`, `refreshActiveGroupFilter`: sin grupo activo, como hoy
   (`activeGroupChannelUrls = null` y `showAllVideoCards()`); con grupo activo, no toca `activeGroupChannelUrls` ni
   la visibilidad antes de `await getGroups()`; si la actualización sigue vigente, calcula
   `YouTubeGroups.getGroupChannelUrls`; si devuelve `null`, llama a `setActiveGroup(null)` y sale; si no, asigna el
@@ -188,3 +188,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `fix: eliminar grupos y subgrupos a cualquier nivel` | `removeGroupById` pura, `deleteGroup` devuelve `removedIds`; V1 pendiente a mano |
 | 2026-11-14 | T2 | `fix: no guardar en el desplegable hasta cargar el canal` | Guardar deshabilitado y `dataset` vacío al abrir; `submit` ignora canal vacío y respeta `subscriptionDropdownOpenCount`; V2 y V3 pendientes a mano |
+| 2026-11-14 | T3 | `fix: aplicar el filtro de grupo sin mostrar todas las tarjetas` | `refreshActiveGroupFilter` no resetea el filtro con grupo activo y filtra de forma síncrona; grupo inexistente llama a `setActiveGroup(null)`; sin `setTimeout` en `setActiveGroup`; V4 y V5 pendientes a mano |

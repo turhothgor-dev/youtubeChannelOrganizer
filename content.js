@@ -52,16 +52,7 @@
       activeGroupChannelUrls = null;
     }
 
-    console.log(
-      "[YouTube Groups][FILTER] grupo activo cambiado",
-      group?.name ?? "Todos",
-    );
     refreshActiveGroupFilter();
-
-    // Re-apply filter to all detected cards after refresh
-    setTimeout(() => {
-      filterAllDetectedCards();
-    }, 0);
 
     renderGroupsPanel().catch((error) => {
       console.error(
@@ -1124,9 +1115,8 @@
       return;
     }
 
-    activeGroupChannelUrls = null;
-    showAllVideoCards();
-
+    // Con grupo activo no se toca el filtro actual hasta tener los grupos,
+    // para no mostrar todas las tarjetas mientras tanto.
     try {
       const groups = await getGroups();
       if (
@@ -1143,15 +1133,12 @@
           "[YouTube Groups][FILTER] Grupo activo no encontrado",
           activeId,
         );
+        setActiveGroup(null);
         return;
       }
 
       activeGroupChannelUrls = urls;
-
-      // Force re-filtering of all detected cards
-      setTimeout(() => {
-        filterAllDetectedCards();
-      }, 0);
+      filterAllDetectedCards();
     } catch (error) {
       console.error(
         "[YouTube Groups][FILTER] No se pudo aplicar el filtro",
