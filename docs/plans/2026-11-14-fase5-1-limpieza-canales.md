@@ -44,7 +44,7 @@ Decisiones (delegadas por la persona), en `modules/groups.js`:
 Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `plain`; `make test` y `make lint`
 (0 avisos) en verde.
 
-- [ ] T1 · `getChannelKey`, `analyzeGroups` y `applyCleanup` · Ficheros: `modules/groups.js`, `tests/groups.test.js` ·
+- [x] T1 · `getChannelKey`, `analyzeGroups` y `applyCleanup` · Ficheros: `modules/groups.js`, `tests/groups.test.js` ·
   Test: `/@Foo` y `/@foo` en el mismo grupo son duplicado y se conserva el primero; en grupos distintos no;
   `/@%C3%B1u` y `/@ñu` duplicados; `/channel/UCx` y `/@x` no; URL `javascript:x` y `/watch?v=1` inválidas; árbol
   con un grupo vacío que contiene un subgrupo vacío informa solo del grupo; grupo con un subgrupo con canales no está
@@ -85,6 +85,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `/@ñu` sin codificar cuenta como URL no válida; los no válidos no entran en la detección de repetidos | `normalizeChannelUrl` no la devuelve igual; coherente con el formato del ADR 0001 | Persona (delegó decisiones a la opción recomendada) |
 
 ## Registro
 
@@ -92,3 +93,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: analizar y aplicar la limpieza de canales y grupos` | `/@ñu` sin codificar cuenta como no válida (no está normalizada), así que el test de repetidos usa `/@%C3%91u` y `/@%C3%B1u`. Los canales no válidos no entran en la detección de repetidos. |

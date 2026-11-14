@@ -511,3 +511,117 @@ test("flattenGroups no muta la entrada", () => {
 
   assert.strictEqual(JSON.stringify(groups), before);
 });
+
+const ch = (name, url) => ({ name, url });
+const grp = (id, channels, subgroups) => ({
+  id,
+  name: id.toUpperCase(),
+  channels,
+  subgroups: subgroups || [],
+});
+
+test("analyzeGroups detecta repetidos en el mismo grupo y conserva el primero", () => {
+  const { YouTubeGroups } = loadModules();
+  const result = plain(
+    YouTubeGroups.analyzeGroups([
+      grp("a", [ch("Foo", `${YT}/@Foo`), ch("foo", `${YT}/@foo`)]),
+      grp("b", [ch("foo", `${YT}/@foo`)]),
+    ]),
+  );
+
+  assert.strictEqual(result.duplicates.length, 1);
+  assert.strictEqual(result.duplicates[0].groupId, "a");
+  assert.strictEqual(result.duplicates[0].url, `${YT}/@foo`);
+  assert.strictEqual(result.duplicates[0].keptUrl, `${YT}/@Foo`);
+});
+
+test("analyzeGroups trata /@%C3%B1u y /@ñu como repetidos y /channel y /@x no", () => {
+  const { YouTubeGroups } = loadModules();
+  const result = plain(
+    YouTubeGroups.analyzeGroups([
+      grp("a", [
+        ch("n1", `${YT}/@%C3%91u`),
+        ch("n2", `${YT}/@%C3%B1u`),
+        ch("x1", `${YT}/channel/UCx`),
+        ch("x2", `${YT}/@x`),
+      ]),
+    ]),
+  );
+
+  assert.strictEqual(result.duplicates.length, 1);
+  assert.strictEqual(result.duplicates[0].name, "n2");
+});
+
+test("analyzeGroups marca URL no válidas", () => {
+  const { YouTubeGroups } = loadModules();
+  const result = plain(
+    YouTubeGroups.analyzeGroups([
+      grp("a", [
+        ch("j", "javascript:x"),
+        ch("w", `${YT}/watch?v=1`),
+        ch("ok", `${YT}/@ok`),
+      ]),
+    ]),
+  );
+
+  assert.strictEqual(result.invalid.length, 2);
+  assert.strictEqual(result.duplicates.length, 0);
+});
+
+test("analyzeGroups informa solo del grupo vacío más alto y no vacía si un subgrupo tiene canales", () => {
+  const { YouTubeGroups } = loadModules();
+  const result = plain(
+    YouTubeGroups.analyzeGroups([
+      grp("a", [], [grp("a1", [])]),
+      grp("b", [], [grp("b1", [ch("x", `${YT}/@x`)])]),
+    ]),
+  );
+
+  assert.deepStrictEqual(result.emptyGroups, [{ id: "a", name: "A" }]);
+});
+
+test("applyCleanup con todo false no cambia nada", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    grp("a", [
+      ch("F", `${YT}/@F`),
+      ch("f", `${YT}/@f`),
+      ch("j", "javascript:x"),
+    ]),
+    grp("e", []),
+  ];
+  const result = plain(
+    YouTubeGroups.applyCleanup(groups, {
+      duplicates: false,
+      invalid: false,
+      emptyGroups: false,
+    }),
+  );
+
+  assert.strictEqual(result.changed, false);
+  assert.deepStrictEqual(result.groups, groups);
+  assert.deepStrictEqual(result.removedGroupIds, []);
+});
+
+test("applyCleanup quita repetidos e inválidas y después los grupos que quedan vacíos sin mutar", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    grp("a", [ch("F", `${YT}/@F`), ch("f", `${YT}/@f`)]),
+    grp("b", [ch("j", "javascript:x")], [grp("b1", [])]),
+  ];
+  const before = JSON.stringify(groups);
+
+  const result = plain(
+    YouTubeGroups.applyCleanup(groups, {
+      duplicates: true,
+      invalid: true,
+      emptyGroups: true,
+    }),
+  );
+
+  assert.strictEqual(JSON.stringify(groups), before);
+  assert.strictEqual(result.changed, true);
+  assert.strictEqual(result.groups.length, 1);
+  assert.deepStrictEqual(result.groups[0].channels, [ch("F", `${YT}/@F`)]);
+  assert.deepStrictEqual(result.removedGroupIds.sort(), ["b", "b1"]);
+});

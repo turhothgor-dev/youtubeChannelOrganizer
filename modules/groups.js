@@ -529,8 +529,190 @@ const YouTubeGroups = (() => {
     return result;
   }
 
+  /**
+   * Clave para detectar canales repetidos: para `/@handle`, origen más `/@` y
+   * el handle decodificado en minúsculas; para el resto, la URL sin cambios.
+   * @param {string} url - URL del canal.
+   * @returns {string} La clave de comparación.
+   */
+  function getChannelKey(url) {
+    let parsed;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return url;
+    }
+    if (!parsed.pathname.startsWith("/@")) {
+      return url;
+    }
+    let handle = parsed.pathname.slice(2);
+    try {
+      handle = decodeURIComponent(handle);
+    } catch {
+      // Se deja el handle tal cual.
+    }
+    return `${parsed.origin}/@${handle.toLowerCase()}`;
+  }
+
+  /**
+   * Indica si una URL guardada no es válida (no es cadena o no está normalizada).
+   * @param {*} url - Valor guardado.
+   * @returns {boolean} true si no es válida.
+   */
+  function isInvalidChannelUrl(url) {
+    if (typeof url !== "string") {
+      return true;
+    }
+    try {
+      return normalizeChannelUrl(url) !== url;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Indica si un grupo no tiene canales en todo su subárbol.
+   * @param {Object} group - Grupo o subgrupo.
+   * @returns {boolean} true si está vacío.
+   */
+  function isEmptyGroup(group) {
+    const channels = Array.isArray(group.channels) ? group.channels : [];
+    const subgroups = Array.isArray(group.subgroups) ? group.subgroups : [];
+    return channels.length === 0 && subgroups.every(isEmptyGroup);
+  }
+
+  /**
+   * Analiza el árbol y busca canales repetidos, URL no válidas y grupos vacíos.
+   * No muta la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @returns {{
+   *   duplicates: Array<{groupId: string, groupName: string, name: string, url: string, keptUrl: string}>,
+   *   invalid: Array<{groupId: string, groupName: string, name: string, url: *}>,
+   *   emptyGroups: Array<{id: string, name: string}>
+   * }} Resultado del análisis.
+   */
+  function analyzeGroups(groups) {
+    const duplicates = [];
+    const invalid = [];
+    const emptyGroups = [];
+
+    const visit = (list) => {
+      for (const group of list) {
+        if (isEmptyGroup(group)) {
+          emptyGroups.push({ id: group.id, name: group.name });
+          continue;
+        }
+        const seen = new Map();
+        for (const channel of Array.isArray(group.channels)
+          ? group.channels
+          : []) {
+          if (isInvalidChannelUrl(channel.url)) {
+            invalid.push({
+              groupId: group.id,
+              groupName: group.name,
+              name: channel.name,
+              url: channel.url,
+            });
+            continue;
+          }
+          const key = getChannelKey(channel.url);
+          if (seen.has(key)) {
+            duplicates.push({
+              groupId: group.id,
+              groupName: group.name,
+              name: channel.name,
+              url: channel.url,
+              keptUrl: seen.get(key),
+            });
+          } else {
+            seen.set(key, channel.url);
+          }
+        }
+        visit(Array.isArray(group.subgroups) ? group.subgroups : []);
+      }
+    };
+    visit(groups);
+
+    return { duplicates, invalid, emptyGroups };
+  }
+
+  /**
+   * Aplica las limpiezas elegidas sin mutar la entrada. Primero quita canales
+   * y después los grupos que quedan vacíos.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {{duplicates?: boolean, invalid?: boolean, emptyGroups?: boolean}} options
+   *   Qué limpiezas aplicar.
+   * @returns {{groups: Array<Object>, changed: boolean, removedGroupIds: string[]}}
+   *   Árbol limpio, si hubo cambios y ids de los grupos eliminados (con su subárbol).
+   */
+  function applyCleanup(groups, options = {}) {
+    const { duplicates, invalid, emptyGroups } = options;
+    const removedGroupIds = [];
+    let changed = false;
+
+    const collectIds = (group) => {
+      removedGroupIds.push(group.id);
+      for (const sub of group.subgroups || []) {
+        collectIds(sub);
+      }
+    };
+
+    const clean = (list) =>
+      list.map((group) => {
+        const copy = { ...group };
+        if (Array.isArray(group.channels)) {
+          const seen = new Set();
+          copy.channels = [];
+          for (const channel of group.channels) {
+            if (invalid && isInvalidChannelUrl(channel.url)) {
+              changed = true;
+              continue;
+            }
+            if (duplicates && !isInvalidChannelUrl(channel.url)) {
+              const key = getChannelKey(channel.url);
+              if (seen.has(key)) {
+                changed = true;
+                continue;
+              }
+              seen.add(key);
+            }
+            copy.channels.push({ ...channel });
+          }
+        }
+        if (Array.isArray(group.subgroups)) {
+          copy.subgroups = clean(group.subgroups);
+        }
+        return copy;
+      });
+
+    const prune = (list) => {
+      const kept = [];
+      for (const group of list) {
+        if (isEmptyGroup(group)) {
+          collectIds(group);
+          changed = true;
+          continue;
+        }
+        if (Array.isArray(group.subgroups)) {
+          group.subgroups = prune(group.subgroups);
+        }
+        kept.push(group);
+      }
+      return kept;
+    };
+
+    let result = clean(groups);
+    if (emptyGroups) {
+      result = prune(result);
+    }
+    return { groups: result, changed, removedGroupIds };
+  }
+
   return {
     normalizeChannelUrl,
+    getChannelKey,
+    analyzeGroups,
+    applyCleanup,
     flattenGroups,
     getGroupAppearance,
     createGroup,
