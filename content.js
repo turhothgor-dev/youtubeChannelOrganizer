@@ -525,6 +525,15 @@
             <h3 class="youtube-groups__section-title">Vídeo actual</h3>
             <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
           </section>
+          <details class="youtube-groups__playlists">
+            <summary>Listas</summary>
+            <form class="youtube-groups__playlist-form">
+              <input class="youtube-groups__playlist-input" type="text" name="playlistName" placeholder="Nueva lista" maxlength="80" required>
+              <button class="youtube-groups__playlist-create-button action-button primary-button" type="submit">Crear</button>
+            </form>
+            <ul class="youtube-groups__playlist-list"></ul>
+            <p class="youtube-groups__playlist-error" aria-live="polite"></p>
+          </details>
           <details class="youtube-groups__filters">
             <summary>Filtros</summary>
             <label class="youtube-groups__setting">
@@ -621,6 +630,27 @@
         );
       });
     syncSettingsControls(panel);
+
+    panel
+      .querySelector(".youtube-groups__playlist-form")
+      .addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const playlistInput = panel.querySelector(
+          ".youtube-groups__playlist-input",
+        );
+        const playlistError = panel.querySelector(
+          ".youtube-groups__playlist-error",
+        );
+        playlistError.textContent = "";
+        try {
+          await YouTubeGroupsPlaylists.createPlaylist(playlistInput.value);
+          playlistInput.value = "";
+          await renderPlaylistsSection();
+        } catch (exception) {
+          playlistError.textContent = exception.message;
+        }
+      });
+    renderPlaylistsSection();
 
     const filterSelects = panel.querySelectorAll(
       ".youtube-groups__filter-select",
@@ -831,6 +861,205 @@
 
     document.body.append(panel);
     return panel;
+  }
+
+  /**
+   * Muestra un error en la sección "Listas" del panel.
+   *
+   * @param {Error|string} error - Error o mensaje a mostrar.
+   */
+  function showPlaylistError(error) {
+    const errorElement = document.querySelector(
+      `#${GROUPS_PANEL_ID} .youtube-groups__playlist-error`,
+    );
+    if (errorElement) {
+      errorElement.textContent =
+        error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  /**
+   * Cierra el modal de vídeos de una lista, si está abierto.
+   */
+  function closePlaylistModal() {
+    document.querySelector(".youtube-groups__channel-list-modal")?.remove();
+  }
+
+  /**
+   * Abre (o repinta) el modal con los vídeos de una lista.
+   *
+   * @param {string} playlistId - ID de la lista a mostrar.
+   */
+  async function openPlaylistVideosModal(playlistId) {
+    const playlists = await YouTubeGroupsStorage.getPlaylists();
+    const playlist = playlists.find((item) => item.id === playlistId);
+    closePlaylistModal();
+    if (!playlist) {
+      return;
+    }
+
+    const modal = document.createElement("div");
+    modal.className = "youtube-groups__channel-list-modal";
+    const content = document.createElement("div");
+    content.className = "youtube-groups__channel-list-content";
+
+    const header = document.createElement("div");
+    header.className = "youtube-groups__channel-list-header";
+    const headerTitle = document.createElement("h3");
+    headerTitle.textContent = "Vídeos de la lista";
+    const closeButton = document.createElement("button");
+    closeButton.className = "youtube-groups__close-channels-button";
+    closeButton.type = "button";
+    closeButton.textContent = "×";
+    closeButton.addEventListener("click", closePlaylistModal);
+    header.append(headerTitle, closeButton);
+
+    const listTitle = document.createElement("h4");
+    listTitle.textContent = `${playlist.name} (${playlist.videos.length})`;
+
+    const list = document.createElement("ul");
+    for (const video of playlist.videos) {
+      const item = document.createElement("li");
+      item.className = "youtube-groups__playlist-video";
+      const url = YouTubeGroupsPlaylists.buildVideoUrl(video.id);
+      const title = video.title || video.id;
+      let titleElement;
+      if (url) {
+        titleElement = document.createElement("a");
+        titleElement.href = url;
+      } else {
+        titleElement = document.createElement("span");
+      }
+      titleElement.textContent = title;
+      const channel = document.createElement("span");
+      channel.className = "youtube-groups__playlist-video-channel";
+      channel.textContent = video.channelName;
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className =
+        "youtube-groups__playlist-remove-button action-button noaction-button";
+      removeButton.textContent = "Quitar";
+      removeButton.addEventListener("click", async () => {
+        try {
+          await YouTubeGroupsPlaylists.removeVideoFromPlaylist(
+            playlistId,
+            video.id,
+          );
+          await openPlaylistVideosModal(playlistId);
+          await renderPlaylistsSection();
+        } catch (exception) {
+          showPlaylistError(exception);
+        }
+      });
+      item.append(titleElement, channel, removeButton);
+      list.append(item);
+    }
+
+    content.append(header, listTitle, list);
+    modal.append(content);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closePlaylistModal();
+      }
+    });
+    document.body.append(modal);
+  }
+
+  /**
+   * Pinta la lista de listas de vídeos en la sección "Listas" del panel.
+   */
+  async function renderPlaylistsSection() {
+    const panel = document.getElementById(GROUPS_PANEL_ID);
+    const listElement = panel?.querySelector(".youtube-groups__playlist-list");
+    if (!listElement) {
+      return;
+    }
+
+    let playlists;
+    try {
+      playlists = await YouTubeGroupsStorage.getPlaylists();
+    } catch (exception) {
+      showPlaylistError(exception);
+      return;
+    }
+    listElement.replaceChildren();
+
+    for (const playlist of playlists) {
+      const item = document.createElement("li");
+      item.className = "youtube-groups__playlist-item";
+
+      const label = document.createElement("span");
+      label.className = "youtube-groups__playlist-name";
+      label.textContent = `${playlist.name} (${playlist.videos.length})`;
+
+      const actions = document.createElement("div");
+      actions.className = "youtube-groups__playlist-actions";
+
+      const viewButton = document.createElement("button");
+      viewButton.type = "button";
+      viewButton.className = "action-button secondary-button";
+      viewButton.textContent = "Ver";
+      viewButton.addEventListener("click", async () => {
+        try {
+          await openPlaylistVideosModal(playlist.id);
+        } catch (exception) {
+          showPlaylistError(exception);
+        }
+      });
+      actions.append(viewButton);
+
+      const playUrl = YouTubeGroupsPlaylists.buildPlayAllUrl(playlist);
+      if (playUrl) {
+        const playLink = document.createElement("a");
+        playLink.className =
+          "youtube-groups__playlist-play action-button secondary-button";
+        playLink.href = playUrl;
+        playLink.textContent = "Reproducir";
+        actions.append(playLink);
+      }
+
+      const renameButton = document.createElement("button");
+      renameButton.type = "button";
+      renameButton.className = "action-button secondary-button";
+      renameButton.textContent = "Renombrar";
+      renameButton.addEventListener("click", async () => {
+        const newName = prompt("Nuevo nombre de la lista:", playlist.name);
+        if (newName === null) {
+          return;
+        }
+        try {
+          await YouTubeGroupsPlaylists.renamePlaylist(playlist.id, newName);
+          await renderPlaylistsSection();
+        } catch (exception) {
+          showPlaylistError(exception);
+        }
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "action-button noaction-button";
+      deleteButton.textContent = "Eliminar";
+      deleteButton.addEventListener("click", async () => {
+        if (
+          !confirm(
+            `¿Estás seguro de que quieres eliminar la lista "${playlist.name}"?`,
+          )
+        ) {
+          return;
+        }
+        try {
+          await YouTubeGroupsPlaylists.deletePlaylist(playlist.id);
+          closePlaylistModal();
+          await renderPlaylistsSection();
+        } catch (exception) {
+          showPlaylistError(exception);
+        }
+      });
+      actions.append(renameButton, deleteButton);
+
+      item.append(label, actions);
+      listElement.append(item);
+    }
   }
 
   async function renderGroupsPanel() {

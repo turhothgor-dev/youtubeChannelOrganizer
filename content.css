@@ -74,6 +74,96 @@ html[dark] .youtube-groups__setting select {
   border-color: #777;
 }
 
+.youtube-groups__playlists {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
+}
+
+.youtube-groups__playlists summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.youtube-groups__playlist-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.youtube-groups__playlist-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #8f8f8f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.youtube-groups__playlist-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.youtube-groups__playlist-item {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.youtube-groups__playlist-name {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.youtube-groups__playlist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.youtube-groups__playlist-play {
+  text-decoration: none;
+}
+
+.youtube-groups__playlist-error {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+.youtube-groups__playlist-video {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.youtube-groups__playlist-video a {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.youtube-groups__playlist-video-channel {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__playlists {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__playlist-input {
+  color: #f1f1f1;
+  background: #121212;
+  border-color: #777;
+}
+
 .youtube-groups--hidden {
   display: none !important;
 }
