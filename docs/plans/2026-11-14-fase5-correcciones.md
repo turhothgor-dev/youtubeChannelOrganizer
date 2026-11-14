@@ -70,7 +70,7 @@ Cada tarea termina con `make lint` (0 avisos) y `make test` en verde.
   cambia `.../@ñu` por `.../@%C3%B1u` y `.../@x/videos` por `.../@x` conservando `name`; quita `42`, `"no-url"` y
   `https://example.com/@x`; quita la recuperable cuya URL corregida ya está en el grupo; `changed` es `true`;
   `analyzeGroups` da `fixedUrl` correcto o `null`. Los tests existentes siguen pasando. A mano V2.
-- [ ] T3 · Detección de tarjetas más barata y precisa (sugerencias a, b, c, e) · Ficheros: `content.js` · Test:
+- [x] T3 · Detección de tarjetas más barata y precisa (sugerencias a, b, c, e) · Ficheros: `content.js` · Test:
   `make lint`, `make test` y a mano V3, V4 y V5.
 - [ ] T4 · Modal de lista sin reaperturas (sugerencia f) y cierre. En `docs/ARCHITECTURE.md`: detección (canal de
   la página en páginas de canal, textos de metadatos para el nombre, lockups de listas excluidos) y Limpieza
@@ -126,3 +126,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | fix: usar el canal de la página en páginas de canal | `getChannelUrlFromPath` y uso en `detectCard`; V1 pendiente a mano |
 | 2026-11-14 | T2 | fix: corregir las URL recuperables en la limpieza | `applyCleanup`/`analyzeGroups` (`fixedUrl`) y textos del panel; `normalizeChannelUrl` devuelve null con subrutas (`/@x/videos`), así que esas son irrecuperables y los tests usan `?a=1`; V2 pendiente a mano |
+| 2026-11-14 | T3 | fix: hacer más barata y precisa la detección de tarjetas | Sugerencias a, b, c, e en `content.js` (`detectedCards` con `link: null`, `getChannelTexts`, selector sin listas/mixes); V3, V4 y V5 pendientes a mano |

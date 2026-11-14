@@ -79,7 +79,8 @@
     "ytd-compact-video-renderer",
     "ytd-playlist-video-renderer",
     // Recomendaciones de /watch; en inicio la tarjeta es el rich-item
-    "yt-lockup-view-model:not(ytd-rich-item-renderer yt-lockup-view-model)",
+    // Los de listas y mixes (enlace con list=) no son vídeos
+    'yt-lockup-view-model:not(ytd-rich-item-renderer yt-lockup-view-model):not(:has(a[href*="list="]))',
     // Estanterías de Shorts (búsqueda, suscripciones, canal); sin botones
     "ytd-reel-item-renderer:not(ytd-rich-item-renderer *)",
     "ytm-shorts-lockup-view-model:not(ytd-rich-item-renderer *)",
@@ -2775,6 +2776,10 @@
       return;
     }
     for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      const known = detectedCards.get(card);
+      if (known && known.link === null) {
+        detectedCards.delete(card);
+      }
       if (!detectedCards.has(card)) {
         scheduleCard(card);
       }
@@ -2786,13 +2791,21 @@
       return;
     }
 
-    // Saltar la tarjeta solo si su enlace de canal sigue siendo el mismo
+    // Saltar la tarjeta si su enlace de canal sigue siendo el mismo, o, si no
+    // tenía enlace, si sigue sin tenerlo y el vídeo no ha cambiado
     const known = detectedCards.get(card);
-    if (known && card.contains(known.link) && known.link.href === known.href) {
-      return;
+    const videoId = card.getAttribute(VIDEO_ID_ATTRIBUTE);
+    const link = findChannelLink(card);
+    if (known) {
+      if (known.link === null) {
+        if (link === null && known.videoId === videoId) {
+          return;
+        }
+      } else if (card.contains(known.link) && known.link.href === known.href) {
+        return;
+      }
     }
 
-    const link = findChannelLink(card);
     let channel = null;
     if (link) {
       channel = {
@@ -2801,7 +2814,6 @@
       };
       detectedCards.set(card, { link, href: link.href });
     } else {
-      detectedCards.delete(card);
       const pageChannelUrl =
         YouTubeGroupsPages.getPageType(window.location.pathname) === "channel"
           ? YouTubeGroupsPages.getChannelUrlFromPath(
@@ -2826,9 +2838,10 @@
         // Sin enlace: se busca por nombre entre los canales guardados
         channel = YouTubeGroups.matchChannelByTexts(
           channelNameIndex,
-          getCardTexts(card),
+          getChannelTexts(card),
         );
       }
+      detectedCards.set(card, { link: null, videoId, channel });
     }
 
     if (!channel) {
@@ -2858,7 +2871,7 @@
       activeGroupId: getActiveGroupId(),
       channelUrls: activeGroupChannelUrls,
       channelUrl: card.dataset.youtubeGroupsChannelUrl,
-      hasVideoId: findVideoId(card) !== null,
+      hasVideoId: card.hasAttribute(VIDEO_ID_ATTRIBUTE),
     });
   }
 
@@ -2875,9 +2888,9 @@
    * @param {Element} card - Tarjeta de vídeo.
    * @returns {string[]} Textos recortados.
    */
-  function getCardTexts(card) {
+  function getCardTexts(card, root = card) {
     const texts = [];
-    for (const element of card.querySelectorAll("span, div")) {
+    for (const element of root.querySelectorAll("span, div")) {
       if (
         element.children.length > 0 ||
         element.closest('h3, #video-title, [class*="youtube-groups__"]')
@@ -2890,6 +2903,21 @@
       }
     }
     return texts;
+  }
+
+  /** Zona de la tarjeta donde YouTube pinta el canal y los metadatos. */
+  const CHANNEL_TEXT_SCOPE_SELECTOR =
+    "yt-content-metadata-view-model, #metadata, #byline-container";
+
+  /**
+   * Textos de la zona de metadatos de la tarjeta, para buscar el canal por
+   * nombre. Sin esa zona no hay textos (no se busca por nombre).
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {string[]} Textos recortados.
+   */
+  function getChannelTexts(card) {
+    const scope = card.querySelector(CHANNEL_TEXT_SCOPE_SELECTOR);
+    return scope ? getCardTexts(card, scope) : [];
   }
 
   /**
@@ -3019,8 +3047,9 @@
         continue;
       }
 
-      detectCard(card);
+      // Primero el ID de vídeo: el filtro de detectCard lo necesita al día
       applyWatchedToCard(card);
+      detectCard(card);
       ensureChannelControl(card);
     }
 
