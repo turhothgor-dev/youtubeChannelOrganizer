@@ -42,7 +42,7 @@ Decisiones (delegadas por la persona):
 
 Reglas comunes: sin `innerHTML` con datos; JSDoc en funciones nuevas; `make test` y `make lint` (0 avisos) en verde.
 
-- [ ] T1 · Lectores puros y `getChangedKeys` en `modules/storage.js` (los `get*` los usan) · Ficheros:
+- [x] T1 · Lectores puros y `getChangedKeys` en `modules/storage.js` (los `get*` los usan) · Ficheros:
   `modules/storage.js`, `tests/storage.test.js` · Test: cada `read*Value` con `undefined`, `null`, formato válido y
   campo de tipo incorrecto; `getChangedKeys` con área `sync` (`[]`), con dos claves en desorden (orden de `KEYS`) y
   con una clave ajena; los tests existentes de `get*` siguen pasando.
@@ -87,3 +87,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: lectores puros y getChangedKeys en storage` | `read*Value` y `getChangedKeys` con tests; los `get*` los reutilizan. |

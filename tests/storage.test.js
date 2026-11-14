@@ -302,3 +302,64 @@ test("saveGroups con algo que no es un array lanza TypeError", async () => {
     (error) => error.name === "TypeError",
   );
 });
+
+test("readGroupsValue y readPlaylistsValue devuelven el array o []", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+  const cases = [
+    ["readGroupsValue", "groups"],
+    ["readPlaylistsValue", "playlists"],
+  ];
+
+  for (const [reader, field] of cases) {
+    assert.deepStrictEqual(plain(S[reader](undefined)), []);
+    assert.deepStrictEqual(plain(S[reader](null)), []);
+    assert.deepStrictEqual(
+      plain(S[reader]({ version: 1, [field]: [{ id: "a" }] })),
+      [{ id: "a" }],
+    );
+    assert.deepStrictEqual(plain(S[reader]({ version: 1, [field]: {} })), []);
+    assert.deepStrictEqual(plain(S[reader]({ version: 1, [field]: "x" })), []);
+  }
+});
+
+test("readWatchedValue y readSettingsValue devuelven el objeto o {}", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+  const cases = [
+    ["readWatchedValue", "videos"],
+    ["readSettingsValue", "settings"],
+  ];
+
+  for (const [reader, field] of cases) {
+    assert.deepStrictEqual(plain(S[reader](undefined)), {});
+    assert.deepStrictEqual(plain(S[reader](null)), {});
+    assert.deepStrictEqual(
+      plain(S[reader]({ version: 1, [field]: { a: 1 } })),
+      { a: 1 },
+    );
+    assert.deepStrictEqual(plain(S[reader]({ version: 1, [field]: [] })), {});
+    assert.deepStrictEqual(plain(S[reader]({ version: 1, [field]: null })), {});
+  }
+});
+
+test("getChangedKeys ignora áreas distintas de local", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(
+    plain(S.getChangedKeys({ youtubeGroups: {} }, "sync")),
+    [],
+  );
+});
+
+test("getChangedKeys devuelve los nombres lógicos en el orden de KEYS", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+  const changes = { youtubePlaylists: {}, youtubeGroups: {}, otraClave: {} };
+
+  assert.deepStrictEqual(plain(S.getChangedKeys(changes, "local")), [
+    "groups",
+    "playlists",
+  ]);
+  assert.deepStrictEqual(
+    plain(S.getChangedKeys({ otraClave: {} }, "local")),
+    [],
+  );
+});

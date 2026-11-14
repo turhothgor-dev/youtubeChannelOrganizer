@@ -38,6 +38,58 @@ const YouTubeGroupsStorage = (() => {
     return run;
   }
 
+  /**
+   * Extrae los grupos de un valor guardado (o de un `newValue` de onChanged).
+   * @param {*} data Valor guardado bajo la clave de grupos.
+   * @returns {Array} Grupos, o [] si el formato no es válido.
+   */
+  function readGroupsValue(data) {
+    return data && Array.isArray(data.groups) ? data.groups : [];
+  }
+
+  /**
+   * Extrae el mapa de vídeos vistos de un valor guardado.
+   * @param {*} data Valor guardado bajo la clave de vistos.
+   * @returns {Object} Mapa de vídeos, o {} si el formato no es válido.
+   */
+  function readWatchedValue(data) {
+    return data && isPlainObject(data.videos) ? data.videos : {};
+  }
+
+  /**
+   * Extrae los ajustes de un valor guardado.
+   * @param {*} data Valor guardado bajo la clave de ajustes.
+   * @returns {Object} Ajustes, o {} si el formato no es válido.
+   */
+  function readSettingsValue(data) {
+    return data && isPlainObject(data.settings) ? data.settings : {};
+  }
+
+  /**
+   * Extrae las listas de un valor guardado.
+   * @param {*} data Valor guardado bajo la clave de listas.
+   * @returns {Array} Listas, o [] si el formato no es válido.
+   */
+  function readPlaylistsValue(data) {
+    return data && Array.isArray(data.playlists) ? data.playlists : [];
+  }
+
+  /**
+   * Nombres lógicos de KEYS cuya clave real aparece en un evento storage.onChanged.
+   * @param {Object} changes Objeto `changes` del evento.
+   * @param {string} areaName Área del evento.
+   * @returns {string[]} Nombres lógicos, en el orden de KEYS; [] si el área no es "local".
+   */
+  function getChangedKeys(changes, areaName) {
+    if (areaName !== "local" || !changes) {
+      return [];
+    }
+
+    return Object.keys(KEYS).filter((name) =>
+      Object.prototype.hasOwnProperty.call(changes, KEYS[name]),
+    );
+  }
+
   async function getGroups() {
     const stored = await browser.storage.local.get(STORAGE_KEY);
     const data = stored[STORAGE_KEY];
@@ -55,7 +107,7 @@ const YouTubeGroupsStorage = (() => {
       return groupsInitializationPromise;
     }
 
-    return data.groups;
+    return readGroupsValue(data);
   }
 
   async function saveGroups(groups) {
@@ -79,11 +131,7 @@ const YouTubeGroupsStorage = (() => {
     const stored = await browser.storage.local.get(WATCHED_KEY);
     const data = stored[WATCHED_KEY];
 
-    if (!data || !isPlainObject(data.videos)) {
-      return {};
-    }
-
-    return data.videos;
+    return readWatchedValue(data);
   }
 
   /**
@@ -111,11 +159,7 @@ const YouTubeGroupsStorage = (() => {
     const stored = await browser.storage.local.get(SETTINGS_KEY);
     const data = stored[SETTINGS_KEY];
 
-    if (!data || !isPlainObject(data.settings)) {
-      return {};
-    }
-
-    return data.settings;
+    return readSettingsValue(data);
   }
 
   /**
@@ -143,11 +187,7 @@ const YouTubeGroupsStorage = (() => {
     const stored = await browser.storage.local.get(PLAYLISTS_KEY);
     const data = stored[PLAYLISTS_KEY];
 
-    if (!data || !Array.isArray(data.playlists)) {
-      return [];
-    }
-
-    return data.playlists;
+    return readPlaylistsValue(data);
   }
 
   /**
@@ -174,6 +214,11 @@ const YouTubeGroupsStorage = (() => {
   return {
     KEYS,
     withLock,
+    readGroupsValue,
+    readWatchedValue,
+    readSettingsValue,
+    readPlaylistsValue,
+    getChangedKeys,
     getGroups,
     saveGroups,
     getWatchedVideos,
