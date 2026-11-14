@@ -142,7 +142,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   `modules/groups.js`, `content.js`, `tests/groups.test.js` · Test: grupo con canales propios y de subgrupos,
   subgrupo (solo los suyos y los de sus descendientes), grupo sin canales (`Set` vacío) e id desconocido
   (`null`); a mano, V5.
-- [ ] T4 · Selector compartido y estado sin grupos. Extraer en `content.js` una función
+- [x] T4 · Selector compartido y estado sin grupos. Extraer en `content.js` una función
   `renderChannelGroupChoices(container, groups, channelUrl, choiceClassName)` que pinta el árbol de casillas
   (sangría por nivel, marcadas las de los grupos que ya contienen el canal) y la usan el panel y el desplegable,
   en lugar de sus dos copias. Si no hay grupos, muestra "Crea un grupo en el panel para añadir canales." y
@@ -256,3 +256,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | `test: añadir base de tests y exportar normalizeChannelUrl del módulo` (propuesto) | Helper vm, tests de storage y groups, `tests` fuera del paquete; 6 tests en verde, lint sin avisos nuevos. |
 | 2026-11-14 | T2 | `feat: guardar la pertenencia del canal en una sola escritura` (propuesto) | `applyChannelGroupSelection` y `setChannelGroups` en el módulo; los dos formularios los usan, con `finally` y refresco de panel y filtro; 12 tests en verde, lint sin avisos nuevos (4). Pendiente V3 a mano. |
 | 2026-11-14 | T3 | `fix: mantener el filtro de grupo al guardar y con subgrupos activos` (propuesto) | `getGroupChannelUrls` en el módulo; `refreshActiveGroupFilter` la usa y `applyFilterToCard` usa el canal del dataset; `console.log` quitados; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V5 a mano. |
+| 2026-11-14 | T4 | `refactor: compartir el selector de grupos y avisar cuando no hay grupos` (propuesto) | `renderChannelGroupChoices` compartido por panel y desplegable, aviso y Guardar deshabilitado sin grupos, contador de aperturas y posición ajustada a la ventana; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V4 y V7 a mano. |

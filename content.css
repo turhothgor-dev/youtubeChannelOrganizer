@@ -131,6 +131,12 @@
   font-size: 12px;
 }
 
+.youtube-groups__empty-choices {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 .youtube-groups__subscription-actions {
   display: flex;
   justify-content: flex-end;

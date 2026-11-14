@@ -597,38 +597,72 @@
 
     currentChannelName.textContent = channel.name;
 
-    function renderAllGroupsForChannel(groupsArray, level = 0) {
+    renderChannelGroupChoices(
+      currentChannelGroups,
+      groups,
+      channel.url,
+      "youtube-groups__group-choice",
+    );
+  }
+
+  // Pinta el árbol de casillas de grupos y subgrupos para un canal. Lo usan el
+  // panel y el desplegable de las tarjetas. Sin grupos, muestra un aviso y
+  // deshabilita el botón Guardar del formulario que contiene el contenedor.
+  function renderChannelGroupChoices(
+    container,
+    groups,
+    channelUrl,
+    choiceClassName,
+  ) {
+    container.replaceChildren();
+
+    const submitButton = container
+      .closest("form")
+      ?.querySelector("button[type='submit']");
+
+    if (groups.length === 0) {
+      const message = document.createElement("p");
+      message.className = "youtube-groups__empty-choices";
+      message.textContent = "Crea un grupo en el panel para añadir canales.";
+      container.append(message);
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      return;
+    }
+
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
+
+    function renderLevel(groupsArray, level) {
       for (const group of groupsArray) {
         const label = document.createElement("label");
-        label.className = "youtube-groups__group-choice";
+        label.className = choiceClassName;
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.value = group.id;
-        // Marcar si el canal está en este grupo
         checkbox.checked = group.channels.some(
-          (item) => item.url === channel.url,
+          (item) => item.url === channelUrl,
         );
 
         const groupName = document.createElement("span");
         groupName.textContent = group.name;
-
-        // Añadir indentación para mejor visualización
         if (level > 0) {
           groupName.style.marginLeft = `${level * 12}px`;
         }
 
         label.append(checkbox, groupName);
-        currentChannelGroups.append(label);
+        container.append(label);
 
-        // Procesar subgrupos si existen
         if (group.subgroups && group.subgroups.length > 0) {
-          renderAllGroupsForChannel(group.subgroups, level + 1);
+          renderLevel(group.subgroups, level + 1);
         }
       }
     }
 
-    renderAllGroupsForChannel(groups, 0);
+    renderLevel(groups, 0);
   }
 
   // Añadir nueva función para obtener todos los canales de un grupo y sus subgrupos
@@ -817,6 +851,7 @@
   // Dropdown flotante único, anclado a document.body para evitar que YouTube
   // recorte el selector dentro del flujo de la tarjeta (overflow).
   let subscriptionDropdown = null;
+  let subscriptionDropdownOpenCount = 0;
 
   function getOrCreateSubscriptionDropdown() {
     if (!subscriptionDropdown || !subscriptionDropdown.isConnected) {
@@ -868,64 +903,51 @@
     );
     const error = dropdown.querySelector(".youtube-groups__subscription-error");
 
-    // Posicionar el dropdown junto al botón pulsado
-    const rect = anchorButton.getBoundingClientRect();
-    dropdown.style.left = `${rect.left}px`;
-    dropdown.style.top = `${rect.bottom + 6}px`;
+    // Cada apertura invalida las respuestas pendientes de aperturas anteriores
+    subscriptionDropdownOpenCount += 1;
+    const openId = subscriptionDropdownOpenCount;
 
     error.textContent = "";
     groupsContainer.replaceChildren();
 
     getGroups()
       .then((groups) => {
-        // Función recursiva para renderizar grupos y subgrupos en el selector
-        function renderGroupChoices(groupsArray, level = 0) {
-          for (const group of groupsArray) {
-            const label = document.createElement("label");
-            label.className = "youtube-groups__subscription-group-choice";
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.value = group.id;
-            checkbox.checked = group.channels.some(
-              (item) => item.url === channel.url,
-            );
-
-            const groupName = document.createElement("span");
-            groupName.textContent = group.name;
-
-            // Añadir indentación para subgrupos
-            if (level > 0) {
-              groupName.style.marginLeft = `${level * 12}px`;
-            }
-
-            label.append(checkbox, groupName);
-            groupsContainer.append(label);
-
-            // Procesar subgrupos si existen
-            if (group.subgroups && group.subgroups.length > 0) {
-              renderGroupChoices(group.subgroups, level + 1);
-            }
-          }
+        if (openId !== subscriptionDropdownOpenCount) {
+          return;
         }
 
-        renderGroupChoices(groups);
+        renderChannelGroupChoices(
+          groupsContainer,
+          groups,
+          channel.url,
+          "youtube-groups__subscription-group-choice",
+        );
 
         // Guardar el canal en el formulario para la operación de guardado
         form.dataset.channelName = channel.name;
         form.dataset.channelUrl = channel.url;
 
         form.hidden = false;
-        console.log(
-          "[YouTube Groups][SUBSCRIPTIONS-UI] Selector de grupos abierto",
-          {
-            channelName: channel.name,
-            channelUrl: channel.url,
-          },
-        );
+
+        // Posicionar junto al botón pulsado, sin salirse de la ventana
+        const rect = anchorButton.getBoundingClientRect();
+        const formRect = form.getBoundingClientRect();
+        let left = rect.left;
+        let top = rect.bottom + 6;
+
+        if (top + formRect.height > window.innerHeight) {
+          top = rect.top - formRect.height - 6;
+        }
+        if (left + formRect.width > window.innerWidth) {
+          left = window.innerWidth - formRect.width - 6;
+        }
+        dropdown.style.left = `${Math.max(left, 6)}px`;
+        dropdown.style.top = `${Math.max(top, 6)}px`;
       })
       .catch((exception) => {
-        error.textContent = exception.message;
+        if (openId === subscriptionDropdownOpenCount) {
+          error.textContent = exception.message;
+        }
       });
   }
 
