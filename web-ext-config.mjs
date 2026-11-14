@@ -13,6 +13,7 @@ export default {
     "web-ext-config.mjs",
     "ai",
     "docs",
+    "tests",
     "web-ext-artifacts",
   ],
   build: {

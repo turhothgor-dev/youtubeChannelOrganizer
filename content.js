@@ -694,25 +694,7 @@
   const pendingCards = new Set();
   let processingScheduled = false;
 
-  function normalizeChannelUrl(href) {
-    const url = new URL(href, window.location.origin);
-    if (url.origin !== window.location.origin) {
-      return null;
-    }
-
-    const match = url.pathname.match(
-      /^(\/@[^/]+|\/channel\/[^/]+|\/c\/[^/]+|\/user\/[^/]+)\/?$/,
-    );
-
-    if (!match) {
-      return null;
-    }
-
-    const cleanUrl = new URL(match[1], url.origin);
-    cleanUrl.search = "";
-    cleanUrl.hash = "";
-    return cleanUrl.href;
-  }
+  const { normalizeChannelUrl } = YouTubeGroups;
 
   function getChannelName(link) {
     return (

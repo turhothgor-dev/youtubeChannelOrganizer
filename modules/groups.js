@@ -308,6 +308,7 @@ const YouTubeGroups = (() => {
   }
 
   return {
+    normalizeChannelUrl,
     createGroup,
     deleteGroup,
     renameGroup,

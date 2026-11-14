@@ -108,7 +108,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
 no introducir `innerHTML` con valores interpolados (las plantillas literales sin `${}` existentes pueden quedarse)
 y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
 
-- [ ] T1 · Base de tests y `normalizeChannelUrl` único. Crear `tests/helpers/load-modules.js` (contexto `vm` y
+- [x] T1 · Base de tests y `normalizeChannelUrl` único. Crear `tests/helpers/load-modules.js` (contexto `vm` y
   mock de storage descritos arriba). Exportar `normalizeChannelUrl` en el objeto que devuelve `YouTubeGroups` y
   borrar la copia de `content.js` (que pasa a usar la del módulo). Añadir `"tests"` a `ignoreFiles` de
   `web-ext-config.mjs`. Sin cambios de comportamiento · Ficheros: `tests/helpers/load-modules.js`,
@@ -253,3 +253,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `test: añadir base de tests y exportar normalizeChannelUrl del módulo` (propuesto) | Helper vm, tests de storage y groups, `tests` fuera del paquete; 6 tests en verde, lint sin avisos nuevos. |
