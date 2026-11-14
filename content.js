@@ -706,122 +706,30 @@
     );
   }
 
-  function getChannelFromCard(card) {
-    const links = card.querySelectorAll("a[href]");
-
-    for (const link of links) {
-      const name = getChannelName(link);
-      const url = normalizeChannelUrl(link.href);
-
-      if (name && url) {
-        return { name, url };
+  // Enlace con nombre y URL de canal de una tarjeta
+  function findChannelLink(card) {
+    for (const link of card.querySelectorAll("a[href]")) {
+      if (getChannelName(link) && normalizeChannelUrl(link.href)) {
+        return link;
       }
     }
 
     return null;
   }
 
+  function getChannelFromCard(card) {
+    const link = findChannelLink(card);
+
+    return link
+      ? { name: getChannelName(link), url: normalizeChannelUrl(link.href) }
+      : null;
+  }
+
   const SUBSCRIPTIONS_PATH = "/feed/subscriptions";
-  const SUBSCRIPTIONS_CANDIDATE_SELECTOR = [
-    VIDEO_CARD_SELECTOR,
-    "ytd-channel-renderer",
-  ].join(", ");
 
-  let subscriptionsPageLogged = false;
-  let subscriptionCandidateCount = null;
-  let subscriptionNoChannelLogged = false;
-  let subscriptionScanScheduled = false;
-  let subscriptionChannelUrls = new Set();
-  let subscriptionChannelControls = new Map();
-
-  function isSubscriptionsPage() {
-    return window.location.pathname === SUBSCRIPTIONS_PATH;
-  }
-
-  function resetSubscriptionsDiagnostics() {
-    subscriptionsPageLogged = false;
-    subscriptionCandidateCount = null;
-    subscriptionNoChannelLogged = false;
-    subscriptionScanScheduled = false;
-    subscriptionChannelUrls = new Set();
-    subscriptionChannelControls = new Map();
-  }
-
-  function scanSubscriptionsPage() {
-    subscriptionScanScheduled = false;
-    if (!isSubscriptionsPage()) {
-      return;
-    }
-
-    if (!subscriptionsPageLogged) {
-      subscriptionsPageLogged = true;
-      console.log(
-        "[YouTube Groups][SUBSCRIPTIONS] Página de suscripciones detectada",
-      );
-    }
-
-    const candidates = document.querySelectorAll(
-      SUBSCRIPTIONS_CANDIDATE_SELECTOR,
-    );
-    if (subscriptionCandidateCount !== candidates.length) {
-      subscriptionCandidateCount = candidates.length;
-      console.log(
-        "[YouTube Groups][SUBSCRIPTIONS] Elementos candidatos encontrados",
-        candidates.length,
-      );
-    }
-
-    for (const candidate of candidates) {
-      const channel = getChannelFromCard(candidate);
-
-      if (!channel) {
-        continue;
-      }
-
-      if (!subscriptionChannelUrls.has(channel.url)) {
-        subscriptionChannelUrls.add(channel.url);
-        if (subscriptionChannelUrls.size <= 10) {
-          console.log("[YouTube Groups][SUBSCRIPTIONS] Canal detectado", {
-            channelName: channel.name,
-            channelUrl: channel.url,
-          });
-        }
-      }
-
-      addSubscriptionChannelControl(candidate, channel);
-    }
-
-    if (subscriptionChannelUrls.size === 0 && !subscriptionNoChannelLogged) {
-      subscriptionNoChannelLogged = true;
-      console.log(
-        "[YouTube Groups][SUBSCRIPTIONS] No se han detectado canales",
-        {
-          candidateSelector: SUBSCRIPTIONS_CANDIDATE_SELECTOR,
-          candidatesFound: candidates.length,
-        },
-      );
-    }
-  }
-
-  function scheduleSubscriptionsScan() {
-    if (!isSubscriptionsPage() || subscriptionScanScheduled) {
-      return;
-    }
-
-    subscriptionScanScheduled = true;
-    requestAnimationFrame(scanSubscriptionsPage);
-  }
-
-  function getChannelLinkFromCard(card, channelUrl) {
-    return Array.from(card.querySelectorAll("a[href]")).find(
-      (link) => normalizeChannelUrl(link.href) === channelUrl,
-    );
-  }
-
-  function createSubscriptionChannelControl(channel) {
+  function createSubscriptionChannelControl(card) {
     const control = document.createElement("span");
     control.className = "youtube-groups__subscription-control";
-    control.dataset.youtubeGroupsSubscriptionChannelUrl = channel.url;
 
     const button = document.createElement("button");
     button.className =
@@ -839,10 +747,11 @@
       event.stopPropagation();
     });
 
-    button.addEventListener("click", async (event) => {
+    button.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      await openSubscriptionGroupsForm(channel, button);
+      // El canal se lee de la tarjeta al abrir, no al crear el control
+      openSubscriptionGroupsForm(getChannelFromCard(card), button);
     });
 
     return control;
@@ -893,6 +802,23 @@
     return subscriptionDropdown;
   }
 
+  // Posiciona el desplegable junto al botón pulsado, sin salirse de la ventana
+  function positionSubscriptionDropdown(dropdown, form, anchorButton) {
+    const rect = anchorButton.getBoundingClientRect();
+    const formRect = form.getBoundingClientRect();
+    let left = rect.left;
+    let top = rect.bottom + 6;
+
+    if (top + formRect.height > window.innerHeight) {
+      top = rect.top - formRect.height - 6;
+    }
+    if (left + formRect.width > window.innerWidth) {
+      left = window.innerWidth - formRect.width - 6;
+    }
+    dropdown.style.left = `${Math.max(left, 6)}px`;
+    dropdown.style.top = `${Math.max(top, 6)}px`;
+  }
+
   function openSubscriptionGroupsForm(channel, anchorButton) {
     const dropdown = getOrCreateSubscriptionDropdown();
     const form = dropdown.querySelector(
@@ -909,6 +835,19 @@
 
     error.textContent = "";
     groupsContainer.replaceChildren();
+
+    if (!channel) {
+      const submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      error.textContent = "No se ha podido identificar el canal.";
+      form.dataset.channelName = "";
+      form.dataset.channelUrl = "";
+      form.hidden = false;
+      positionSubscriptionDropdown(dropdown, form, anchorButton);
+      return;
+    }
 
     getGroups()
       .then((groups) => {
@@ -929,20 +868,7 @@
 
         form.hidden = false;
 
-        // Posicionar junto al botón pulsado, sin salirse de la ventana
-        const rect = anchorButton.getBoundingClientRect();
-        const formRect = form.getBoundingClientRect();
-        let left = rect.left;
-        let top = rect.bottom + 6;
-
-        if (top + formRect.height > window.innerHeight) {
-          top = rect.top - formRect.height - 6;
-        }
-        if (left + formRect.width > window.innerWidth) {
-          left = window.innerWidth - formRect.width - 6;
-        }
-        dropdown.style.left = `${Math.max(left, 6)}px`;
-        dropdown.style.top = `${Math.max(top, 6)}px`;
+        positionSubscriptionDropdown(dropdown, form, anchorButton);
       })
       .catch((exception) => {
         if (openId === subscriptionDropdownOpenCount) {
@@ -1023,35 +949,30 @@
     return container;
   }
 
-  function addSubscriptionChannelControl(card, channel) {
-    const existingControl =
-      subscriptionChannelControls.get(channel.url) ??
-      Array.from(
-        document.querySelectorAll(".youtube-groups__subscription-control"),
-      ).find(
-        (control) =>
-          control.dataset.youtubeGroupsSubscriptionChannelUrl === channel.url,
-      );
+  function shouldShowChannelControls() {
+    return window.location.pathname === SUBSCRIPTIONS_PATH;
+  }
 
-    if (existingControl?.isConnected) {
-      subscriptionChannelControls.set(channel.url, existingControl);
+  // Un control por tarjeta; es idempotente porque insertarlo provoca una
+  // mutación que vuelve a programar la tarjeta.
+  function ensureChannelControl(card) {
+    if (!card.isConnected || !shouldShowChannelControls()) {
       return;
     }
 
-    const channelLink = getChannelLinkFromCard(card, channel.url);
+    if (card.querySelector(".youtube-groups__subscription-control")) {
+      return;
+    }
 
+    const channelLink = findChannelLink(card);
     if (!channelLink) {
       return;
     }
 
-    const control = createSubscriptionChannelControl(channel);
-    channelLink.insertAdjacentElement("afterend", control);
-    subscriptionChannelControls.set(channel.url, control);
-
-    console.log("[YouTube Groups][SUBSCRIPTIONS-UI] Control añadido al canal", {
-      channelName: channel.name,
-      channelUrl: channel.url,
-    });
+    channelLink.insertAdjacentElement(
+      "afterend",
+      createSubscriptionChannelControl(card),
+    );
   }
 
   const CURRENT_VIDEO_OWNER_SELECTOR =
@@ -1219,6 +1140,7 @@
     processingScheduled = false;
     for (const card of pendingCards) {
       detectCard(card);
+      ensureChannelControl(card);
     }
 
     pendingCards.clear();
@@ -1305,7 +1227,6 @@
         }
       }
     }
-    scheduleSubscriptionsScan();
   });
 
   observer.observe(document.documentElement, {
@@ -1317,10 +1238,8 @@
   document.addEventListener("yt-navigate-finish", () => {
     detectedCards = new WeakSet();
     loggedChannelUrls = new Set();
-    resetSubscriptionsDiagnostics();
     clearDetectedChannelData();
     scanDocument();
-    scheduleSubscriptionsScan();
     refreshActiveGroupFilter();
     renderGroupsPanel().catch((error) => {
       console.error(
@@ -1331,7 +1250,6 @@
   });
 
   scanDocument();
-  scheduleSubscriptionsScan();
   refreshActiveGroupFilter();
   renderGroupsPanel().catch((error) => {
     console.error(

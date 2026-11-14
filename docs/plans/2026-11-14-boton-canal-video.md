@@ -151,7 +151,7 @@ y quitar los `console.log` de diagnóstico de las funciones que se modifiquen.
   ventana (como hace `openIconPicker`). La plantilla del desplegable sigue sin interpolaciones · Ficheros:
   `content.js`, `content.css` (estilo del mensaje vacío) · Test: `make lint` (sin avisos nuevos), `make test` y
   a mano V4 y V7.
-- [ ] T5 · Un botón por tarjeta en suscripciones, dentro del recorrido de tarjetas. Eliminar
+- [x] T5 · Un botón por tarjeta en suscripciones, dentro del recorrido de tarjetas. Eliminar
   `scanSubscriptionsPage`, `scheduleSubscriptionsScan`, `resetSubscriptionsDiagnostics`,
   `addSubscriptionChannelControl`, `getChannelLinkFromCard` y su estado (`subscriptionChannelControls`,
   `subscriptionChannelUrls`, contadores y `console.log`), y sus llamadas en el observador, en
@@ -257,3 +257,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | `feat: guardar la pertenencia del canal en una sola escritura` (propuesto) | `applyChannelGroupSelection` y `setChannelGroups` en el módulo; los dos formularios los usan, con `finally` y refresco de panel y filtro; 12 tests en verde, lint sin avisos nuevos (4). Pendiente V3 a mano. |
 | 2026-11-14 | T3 | `fix: mantener el filtro de grupo al guardar y con subgrupos activos` (propuesto) | `getGroupChannelUrls` en el módulo; `refreshActiveGroupFilter` la usa y `applyFilterToCard` usa el canal del dataset; `console.log` quitados; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V5 a mano. |
 | 2026-11-14 | T4 | `refactor: compartir el selector de grupos y avisar cuando no hay grupos` (propuesto) | `renderChannelGroupChoices` compartido por panel y desplegable, aviso y Guardar deshabilitado sin grupos, contador de aperturas y posición ajustada a la ventana; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V4 y V7 a mano. |
+| 2026-11-14 | T5 | `feat: un botón por tarjeta en suscripciones dentro del recorrido de tarjetas` (propuesto) | Eliminado `scanSubscriptionsPage` y su estado; `findChannelLink` y `ensureChannelControl` desde `processPendingCards`; el control lee el canal de la tarjeta al pulsar y avisa si no hay; 14 tests en verde, lint sin avisos nuevos (4). Pendiente V1, V2 y V3 a mano. |
