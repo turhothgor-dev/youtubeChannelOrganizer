@@ -621,3 +621,11 @@ html[dark] .youtube-groups__icon-picker-actions {
   margin: 0;
   min-height: 14px;
 }
+
+.youtube-groups--watched {
+  opacity: 0.55;
+}
+
+.youtube-groups--watched:hover {
+  opacity: 1;
+}

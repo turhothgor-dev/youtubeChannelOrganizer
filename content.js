@@ -87,6 +87,59 @@
     );
   });
 
+  const WATCHED_CLASS = "youtube-groups--watched";
+  const VIDEO_ID_ATTRIBUTE = "data-youtube-groups-video-id";
+
+  /** Vídeos vistos en memoria; null hasta cargarlos (sin datos no se marca nada). */
+  let watchedVideos = null;
+
+  /**
+   * Busca el ID del vídeo de una tarjeta en su primer enlace válido.
+   * @param {Element} card - Tarjeta de vídeo.
+   * @returns {string|null} ID de 11 caracteres o null.
+   */
+  function findVideoId(card) {
+    for (const link of card.querySelectorAll("a[href]")) {
+      const videoId = YouTubeGroupsWatched.extractVideoId(
+        link.getAttribute("href"),
+      );
+      if (videoId) {
+        return videoId;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Guarda el ID del vídeo en la tarjeta y marca si está visto.
+   * Se reevalúa en cada procesado: YouTube puede reutilizar tarjetas.
+   * @param {Element} card - Tarjeta de vídeo.
+   */
+  function applyWatchedToCard(card) {
+    const videoId = findVideoId(card);
+    if (videoId) {
+      card.setAttribute(VIDEO_ID_ATTRIBUTE, videoId);
+    } else {
+      card.removeAttribute(VIDEO_ID_ATTRIBUTE);
+    }
+    const isWatched =
+      Boolean(videoId) &&
+      watchedVideos !== null &&
+      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
+    card.classList.toggle(WATCHED_CLASS, isWatched);
+  }
+
+  YouTubeGroupsStorage.getWatchedVideos()
+    .then((videos) => {
+      watchedVideos = videos;
+      for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+        applyWatchedToCard(card);
+      }
+    })
+    .catch((error) => {
+      console.error("[YouTube Groups] No se pudieron leer los vistos", error);
+    });
+
   const GROUPS_PANEL_ID = "youtube-groups-panel";
   let activeGroupId = null;
   let activeGroupChannelUrls = null;
@@ -1209,6 +1262,7 @@
     processingScheduled = false;
     for (const card of pendingCards) {
       detectCard(card);
+      applyWatchedToCard(card);
       ensureChannelControl(card);
     }
 

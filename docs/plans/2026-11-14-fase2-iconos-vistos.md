@@ -146,7 +146,7 @@ interpolados (las plantillas estáticas existentes se mantienen); nombres de gru
   clave; desmarcar uno no visto da `changed: false`; ID inválido lanza "Vídeo inválido."; no muta la entrada.
   `isVideoWatched` verdadero y falso. `setVideoWatched`: escribe una vez al marcar, no escribe si no hay cambio, y
   con ID inválido rechaza sin escribir.
-- [ ] T6 · Marca de visto en las tarjetas. En `content.js`: leer los vistos al arrancar en `watchedVideos`;
+- [x] T6 · Marca de visto en las tarjetas. En `content.js`: leer los vistos al arrancar en `watchedVideos`;
   `findVideoId(card)` (primer `a[href]` con `extractVideoId` no nulo); `applyWatchedToCard(card)` guarda o borra
   `data-youtube-groups-video-id` y alterna `youtube-groups--watched`, y llamarla en `processPendingCards` para cada
   tarjeta; al cargar los vistos, aplicarla a todas las tarjetas de `VIDEO_CARD_SELECTOR`. En `content.css`, la
@@ -239,3 +239,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T3 | `feat: pintar iconos sin innerHTML y en los selectores de casillas` | `createIconSvg` y `createGroupMark` en `content.js`, punto de color, selector de iconos con tema claro y oscuro. |
 | 2026-11-14 | T4 | `feat: guardar los vídeos vistos en el almacenamiento` | `getWatchedVideos` y `saveWatchedVideos` en `modules/storage.js`, tests y ADR 0002 a `aceptada`. |
 | 2026-11-14 | T5 | `feat: añadir la lógica de vídeos vistos` | `modules/watched.js` (`extractVideoId`, `isVideoWatched`, `applyVideoWatched`, `setVideoWatched`), manifest, helper de tests y `tests/watched.test.js`. |
+| 2026-11-14 | T6 | `feat: marcar las tarjetas de vídeos vistos` | `findVideoId` y `applyWatchedToCard` en `content.js`, carga de vistos al arrancar y regla `.youtube-groups--watched`. |
