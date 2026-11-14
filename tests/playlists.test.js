@@ -254,3 +254,44 @@ test("un error de validación no escribe", async () => {
   await assert.rejects(P.setVideoPlaylists(video("mal"), []));
   assert.strictEqual(calls.set, 0);
 });
+
+test("dos createPlaylist a la vez crean dos listas", async () => {
+  const { YouTubeGroupsPlaylists: P, store } = loadModules(
+    {},
+    { latencyMs: 5 },
+  );
+
+  await Promise.all([P.createPlaylist("Uno"), P.createPlaylist("Dos")]);
+
+  assert.strictEqual(store.youtubePlaylists.playlists.length, 2);
+});
+
+test("setVideoPlaylists de dos vídeos a la vez conserva los dos", async () => {
+  const { YouTubeGroupsPlaylists: P, store } = loadModules(
+    { youtubePlaylists: { version: 1, playlists: [list("a")] } },
+    { latencyMs: 5 },
+  );
+
+  await Promise.all([
+    P.setVideoPlaylists(video(V1), ["a"]),
+    P.setVideoPlaylists(video(V2), ["a"]),
+  ]);
+
+  const ids = store.youtubePlaylists.playlists[0].videos.map((v) => v.id);
+  assert.deepStrictEqual(ids.sort(), [V1, V2].sort());
+});
+
+test("una operación que falla no impide otra a la vez", async () => {
+  const { YouTubeGroupsPlaylists: P, store } = loadModules(
+    {},
+    { latencyMs: 5 },
+  );
+
+  const [renamed] = await Promise.allSettled([
+    P.renamePlaylist("no-existe", "X"),
+    P.createPlaylist("Uno"),
+  ]);
+
+  assert.strictEqual(renamed.status, "rejected");
+  assert.strictEqual(store.youtubePlaylists.playlists.length, 1);
+});

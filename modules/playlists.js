@@ -219,12 +219,17 @@ const YouTubeGroupsPlaylists = (() => {
    * @returns {Promise<{playlists: Array, changed: boolean}>}
    */
   async function update(apply) {
-    const playlists = await YouTubeGroupsStorage.getPlaylists();
-    const result = apply(playlists);
-    if (result.changed) {
-      await YouTubeGroupsStorage.savePlaylists(result.playlists);
-    }
-    return result;
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.playlists,
+      async () => {
+        const playlists = await YouTubeGroupsStorage.getPlaylists();
+        const result = apply(playlists);
+        if (result.changed) {
+          await YouTubeGroupsStorage.savePlaylists(result.playlists);
+        }
+        return result;
+      },
+    );
   }
 
   /**

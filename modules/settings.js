@@ -73,17 +73,22 @@ const YouTubeGroupsSettings = (() => {
       }
     }
 
-    const current = await getSettings();
-    const settings = { ...current, ...patch };
-    const changed = Object.keys(settings).some(
-      (key) => settings[key] !== current[key],
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.settings,
+      async () => {
+        const current = await getSettings();
+        const settings = { ...current, ...patch };
+        const changed = Object.keys(settings).some(
+          (key) => settings[key] !== current[key],
+        );
+
+        if (changed) {
+          await YouTubeGroupsStorage.saveSettings(settings);
+        }
+
+        return { settings, changed };
+      },
     );
-
-    if (changed) {
-      await YouTubeGroupsStorage.saveSettings(settings);
-    }
-
-    return { settings, changed };
   }
 
   return {

@@ -110,7 +110,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
   hasta que termina la primera); con claves distintas, la segunda termina aunque la primera siga bloqueada;
   devuelve el valor de `fn`; si `fn` rechaza o lanza de forma síncrona, `withLock` rechaza con ese error y la
   siguiente llamada con la misma clave se ejecuta y resuelve.
-- [ ] T3 · Serializar vistos, ajustes y listas. `setVideoWatched` (`modules/watched.js`), `updateSettings`
+- [x] T3 · Serializar vistos, ajustes y listas. `setVideoWatched` (`modules/watched.js`), `updateSettings`
   (`modules/settings.js`) y `update` (`modules/playlists.js`) hacen lectura, cálculo y escritura dentro de
   `withLock` de su clave · Ficheros: `modules/watched.js`, `modules/settings.js`, `modules/playlists.js`,
   `tests/watched.test.js`, `tests/settings.test.js`, `tests/playlists.test.js` · Test (con
@@ -204,3 +204,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | fix: no marcar automáticamente hasta leer los ajustes | `handleVideoProgress` sale si `!settingsLoaded`. Pendiente V1 a mano. |
 | 2026-11-14 | T2 | feat: cola de escrituras por clave en el almacenamiento | `KEYS` y `withLock` en `modules/storage.js`, `latencyMs` en el simulador y ADR 0005 aceptada. |
+| 2026-11-14 | T3 | fix: serializar las escrituras de vistos, ajustes y listas | `setVideoWatched`, `updateSettings` y `update` de listas dentro de `withLock`. Con `latencyMs: 5` los 3 tests de solapamiento fallaban sin la cola; el de validación + `createPlaylist` pasa también sin ella (operaciones independientes). |

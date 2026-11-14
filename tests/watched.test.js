@@ -139,3 +139,17 @@ test("shouldAutoMark decide según el porcentaje de reproducción", () => {
   assert.strictEqual(W.shouldAutoMark(10, 0, 50), false);
   assert.strictEqual(W.shouldAutoMark(NaN, 100, 50), false);
 });
+
+test("marcar dos vídeos a la vez conserva los dos", async () => {
+  const { YouTubeGroupsWatched: W, store } = loadModules({}, { latencyMs: 5 });
+
+  await Promise.all([
+    W.setVideoWatched(ID, true),
+    W.setVideoWatched(ID2, true),
+  ]);
+
+  assert.deepStrictEqual(Object.keys(store.youtubeWatched.videos).sort(), [
+    ID2,
+    ID,
+  ]);
+});

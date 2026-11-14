@@ -166,3 +166,15 @@ test("updateSettings rechaza claves y valores inválidos sin leer ni escribir", 
     assert.strictEqual(calls.get, 0);
   }
 });
+
+test("dos updateSettings a la vez conservan los dos cambios", async () => {
+  const { YouTubeGroupsSettings: S, store } = loadModules({}, { latencyMs: 5 });
+
+  await Promise.all([
+    S.updateSettings({ watchedMode: "hide" }),
+    S.updateSettings({ outsideMode: "dim" }),
+  ]);
+
+  assert.strictEqual(store.youtubeSettings.settings.watchedMode, "hide");
+  assert.strictEqual(store.youtubeSettings.settings.outsideMode, "dim");
+});

@@ -91,14 +91,24 @@ const YouTubeGroupsWatched = (() => {
    * @returns {Promise<{videos: Object, changed: boolean}>}
    */
   async function setVideoWatched(videoId, isWatched) {
-    const videos = await YouTubeGroupsStorage.getWatchedVideos();
-    const result = applyVideoWatched(videos, videoId, isWatched, Date.now());
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.watched,
+      async () => {
+        const videos = await YouTubeGroupsStorage.getWatchedVideos();
+        const result = applyVideoWatched(
+          videos,
+          videoId,
+          isWatched,
+          Date.now(),
+        );
 
-    if (result.changed) {
-      await YouTubeGroupsStorage.saveWatchedVideos(result.videos);
-    }
+        if (result.changed) {
+          await YouTubeGroupsStorage.saveWatchedVideos(result.videos);
+        }
 
-    return result;
+        return result;
+      },
+    );
   }
 
   /**
