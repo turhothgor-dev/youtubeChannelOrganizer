@@ -2681,12 +2681,24 @@
   const CURRENT_VIDEO_OWNER_SELECTOR =
     "ytd-watch-metadata #owner, ytd-video-owner-renderer";
 
+  const SHORTS_OWNER_SELECTOR = "ytd-reel-video-renderer[is-active]";
+
+  /**
+   * Canal del vídeo actual: en /watch, el propietario; en /shorts, el del
+   * Short activo.
+   * @returns {{name: string, url: string}|null}
+   */
   function getCurrentVideoChannel() {
-    if (window.location.pathname !== "/watch") {
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    if (pageType !== "watch" && pageType !== "shorts") {
       return null;
     }
 
-    const owner = document.querySelector(CURRENT_VIDEO_OWNER_SELECTOR);
+    const owner = document.querySelector(
+      pageType === "shorts"
+        ? SHORTS_OWNER_SELECTOR
+        : CURRENT_VIDEO_OWNER_SELECTOR,
+    );
     return owner ? getChannelFromCard(owner) : null;
   }
 
@@ -2978,9 +2990,10 @@
   }
 
   function scheduleCurrentChannelPanelUpdate() {
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
     if (
       currentChannelUpdateScheduled ||
-      window.location.pathname !== "/watch"
+      (pageType !== "watch" && pageType !== "shorts")
     ) {
       return;
     }
@@ -3009,7 +3022,10 @@
     for (const mutation of mutations) {
       if (mutation.target instanceof Element) {
         scheduleContainingCard(mutation.target);
-        if (nodeBelongsToCurrentVideoOwner(mutation.target)) {
+        if (
+          nodeBelongsToCurrentVideoOwner(mutation.target) ||
+          mutation.target.localName === "ytd-reel-video-renderer"
+        ) {
           scheduleCurrentChannelPanelUpdate();
         }
       }
@@ -3030,7 +3046,7 @@
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ["href"],
+    attributeFilter: ["href", "is-active"],
   });
 
   // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
