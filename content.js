@@ -575,6 +575,131 @@
     });
   }
 
+  /**
+   * Conecta la sección "Limpieza" del panel: analiza el árbol de grupos y,
+   * tras confirmar, aplica las limpiezas elegidas.
+   * @param {HTMLElement} panel Panel de grupos ya creado.
+   */
+  function setupCleanupSection(panel) {
+    const analyzeButton = panel.querySelector(
+      ".youtube-groups__cleanup-analyze",
+    );
+    const result = panel.querySelector(".youtube-groups__cleanup-result");
+    const report = panel.querySelector(".youtube-groups__cleanup-report");
+    const duplicatesBox = panel.querySelector(
+      ".youtube-groups__cleanup-duplicates",
+    );
+    const invalidBox = panel.querySelector(".youtube-groups__cleanup-invalid");
+    const emptyBox = panel.querySelector(".youtube-groups__cleanup-empty");
+    const applyButton = panel.querySelector(".youtube-groups__cleanup-apply");
+    const message = panel.querySelector(".youtube-groups__cleanup-message");
+    let analysis = null;
+
+    function getChosen() {
+      return {
+        duplicates: duplicatesBox.checked,
+        invalid: invalidBox.checked,
+        emptyGroups: emptyBox.checked,
+      };
+    }
+
+    function countChosen() {
+      if (!analysis) {
+        return 0;
+      }
+      const chosen = getChosen();
+      return (
+        (chosen.duplicates ? analysis.duplicates.length : 0) +
+        (chosen.invalid ? analysis.invalid.length : 0) +
+        (chosen.emptyGroups ? analysis.emptyGroups.length : 0)
+      );
+    }
+
+    function syncApplyButton() {
+      applyButton.disabled = countChosen() === 0;
+    }
+
+    function appendSection(title, items, describe) {
+      const heading = document.createElement("h4");
+      heading.className = "youtube-groups__cleanup-title";
+      heading.textContent = title + ": " + items.length;
+      report.append(heading);
+      if (items.length === 0) {
+        return;
+      }
+      const list = document.createElement("ul");
+      list.className = "youtube-groups__cleanup-list";
+      for (const item of items) {
+        const entry = document.createElement("li");
+        entry.textContent = describe(item);
+        list.append(entry);
+      }
+      report.append(list);
+    }
+
+    function renderReport() {
+      report.replaceChildren();
+      const describeChannel = (item) =>
+        item.groupName + " › " + item.name + " (" + item.url + ")";
+      appendSection("Canales repetidos", analysis.duplicates, describeChannel);
+      appendSection("URL no válidas", analysis.invalid, describeChannel);
+      appendSection("Grupos vacíos", analysis.emptyGroups, (item) => item.name);
+      result.hidden = false;
+      syncApplyButton();
+    }
+
+    async function analyze() {
+      const groups = await getGroups();
+      analysis = YouTubeGroups.analyzeGroups(groups);
+      renderReport();
+    }
+
+    analyzeButton.addEventListener("click", async () => {
+      message.textContent = "";
+      try {
+        await analyze();
+      } catch (error) {
+        message.textContent = "No se pudo analizar: " + error.message;
+        console.error("[YouTube Groups] No se pudo analizar", error);
+      }
+    });
+
+    for (const box of [duplicatesBox, invalidBox, emptyBox]) {
+      box.addEventListener("change", syncApplyButton);
+    }
+
+    applyButton.addEventListener("click", async () => {
+      message.textContent = "";
+      const total = countChosen();
+      if (total === 0) {
+        return;
+      }
+      if (
+        !confirm(
+          "Se quitarán " + total + " elementos de los grupos. ¿Continuar?",
+        )
+      ) {
+        return;
+      }
+      applyButton.disabled = true;
+      try {
+        const { removedGroupIds } =
+          await YouTubeGroups.cleanupGroups(getChosen());
+        if (removedGroupIds.includes(getActiveGroupId())) {
+          setActiveGroup(null);
+        }
+        await renderGroupsPanel();
+        await refreshActiveGroupFilter();
+        await analyze();
+        message.textContent = "Limpieza hecha.";
+      } catch (error) {
+        message.textContent = "No se pudo limpiar: " + error.message;
+        console.error("[YouTube Groups] No se pudo limpiar", error);
+        syncApplyButton();
+      }
+    });
+  }
+
   function createGroupsPanel() {
     const existingPanel = document.getElementById(GROUPS_PANEL_ID);
     if (existingPanel) {
@@ -621,6 +746,27 @@
             </form>
             <ul class="youtube-groups__playlist-list"></ul>
             <p class="youtube-groups__playlist-error" aria-live="polite"></p>
+          </details>
+          <details class="youtube-groups__cleanup">
+            <summary>Limpieza</summary>
+            <button class="youtube-groups__cleanup-analyze action-button secondary-button" type="button">Analizar</button>
+            <div class="youtube-groups__cleanup-result" hidden>
+              <div class="youtube-groups__cleanup-report"></div>
+              <label class="youtube-groups__cleanup-option">
+                <input type="checkbox" class="youtube-groups__cleanup-duplicates" checked>
+                <span>Unir canales repetidos</span>
+              </label>
+              <label class="youtube-groups__cleanup-option">
+                <input type="checkbox" class="youtube-groups__cleanup-invalid" checked>
+                <span>Quitar URL no válidas</span>
+              </label>
+              <label class="youtube-groups__cleanup-option">
+                <input type="checkbox" class="youtube-groups__cleanup-empty">
+                <span>Eliminar grupos vacíos</span>
+              </label>
+              <button class="youtube-groups__cleanup-apply action-button primary-button" type="button" disabled>Limpiar</button>
+            </div>
+            <p class="youtube-groups__cleanup-message" aria-live="polite"></p>
           </details>
           <details class="youtube-groups__filters">
             <summary>Filtros</summary>
@@ -833,6 +979,7 @@
         }
       });
     renderPlaylistsSection();
+    setupCleanupSection(panel);
 
     const filterSelects = panel.querySelectorAll(
       ".youtube-groups__filter-select",

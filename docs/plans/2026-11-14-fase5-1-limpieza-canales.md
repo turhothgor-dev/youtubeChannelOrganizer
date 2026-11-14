@@ -53,7 +53,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; tests con `loadModules` y `pla
 - [x] T2 · `cleanupGroups` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test: sin nada que limpiar no
   escribe (`calls.set === 0`); con duplicados escribe una vez; con `latencyMs` y un `createGroup` simultáneo, el grupo
   creado no se pierde.
-- [ ] T3 · Sección "Limpieza" del panel y estilos (claro y `html[dark]`) · Ficheros: `content.js`, `content.css` ·
+- [x] T3 · Sección "Limpieza" del panel y estilos (claro y `html[dark]`) · Ficheros: `content.js`, `content.css` ·
   Test: `make lint`, `make test` y a mano V1–V3.
 - [ ] T4 · Cerrar el plan: `ROADMAP.md` marca ✅ "Limpieza de canales"; `docs/ARCHITECTURE.md` (funciones nuevas en
   la fila de `groups.js` y flujo "Limpieza"). Estado a `hecho` · Ficheros: `ROADMAP.md`, `docs/ARCHITECTURE.md`, este
@@ -95,3 +95,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: analizar y aplicar la limpieza de canales y grupos` | `/@ñu` sin codificar cuenta como no válida (no está normalizada), así que el test de repetidos usa `/@%C3%91u` y `/@%C3%B1u`. Los canales no válidos no entran en la detección de repetidos. |
 | 2026-11-14 | T2 | `feat: añadir cleanupGroups con escritura única bajo el bloqueo` | `cleanupGroups` devuelve `{ changed, removedGroupIds }` y solo escribe si hay cambios. |
+| 2026-11-14 | T3 | `feat: sección Limpieza en el panel de grupos` | Sección `<details>` con Analizar, casillas y Limpiar con `confirm`; estilos claro y oscuro. V1–V3 pendientes a mano. |
