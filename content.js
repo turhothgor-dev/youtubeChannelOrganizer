@@ -78,7 +78,16 @@
     "ytd-grid-video-renderer",
     "ytd-compact-video-renderer",
     "ytd-playlist-video-renderer",
+    // Recomendaciones de /watch; en inicio la tarjeta es el rich-item
+    "yt-lockup-view-model:not(ytd-rich-item-renderer yt-lockup-view-model)",
   ].join(",");
+
+  /**
+   * Índice nombre de canal → URL de los canales guardados; sirve para
+   * identificar tarjetas sin enlace de canal.
+   * @type {Map<string, string>}
+   */
+  let channelNameIndex = new Map();
 
   getGroups().catch((error) => {
     console.error(
@@ -1405,6 +1414,7 @@
     // Get groups FIRST, before any early returns
     const groups = await getGroups();
     options.replaceChildren();
+    refreshChannelNameIndex(groups);
 
     const allOption = document.createElement("button");
     allOption.type = "button";
@@ -2612,6 +2622,27 @@
     return owner ? getChannelFromCard(owner) : null;
   }
 
+  /**
+   * Recalcula el índice de canales por nombre; si cambia, reprograma las
+   * tarjetas que aún no tienen canal identificado.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   */
+  function refreshChannelNameIndex(groups) {
+    const next = YouTubeGroups.buildChannelNameIndex(groups);
+    const changed =
+      next.size !== channelNameIndex.size ||
+      [...next].some(([name, url]) => channelNameIndex.get(name) !== url);
+    channelNameIndex = next;
+    if (!changed) {
+      return;
+    }
+    for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+      if (!detectedCards.has(card)) {
+        scheduleCard(card);
+      }
+    }
+  }
+
   function detectCard(card) {
     if (!card.isConnected) {
       return;
@@ -2624,20 +2655,30 @@
     }
 
     const link = findChannelLink(card);
-    if (!link) {
-      // La tarjeta ya no tiene canal: borrar los datos del anterior
+    let channel = null;
+    if (link) {
+      channel = {
+        name: getChannelName(link),
+        url: normalizeChannelUrl(link.href),
+      };
+      detectedCards.set(card, { link, href: link.href });
+    } else {
+      // Sin enlace: se busca por nombre entre los canales guardados
       detectedCards.delete(card);
+      channel = YouTubeGroups.matchChannelByTexts(
+        channelNameIndex,
+        getCardTexts(card),
+      );
+    }
+
+    if (!channel) {
+      // La tarjeta no tiene canal: borrar los datos del anterior
       delete card.dataset.youtubeGroupsChannelName;
       delete card.dataset.youtubeGroupsChannelUrl;
+      applyCardVisibility(card);
       return;
     }
 
-    const channel = {
-      name: getChannelName(link),
-      url: normalizeChannelUrl(link.href),
-    };
-
-    detectedCards.set(card, { link, href: link.href });
     card.dataset.youtubeGroupsChannelName = channel.name;
     card.dataset.youtubeGroupsChannelUrl = channel.url;
 
