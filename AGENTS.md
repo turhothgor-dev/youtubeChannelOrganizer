@@ -5,6 +5,8 @@ Organiza canales de YouTube en grupos personalizados.
 Instrucciones para agentes de IA (Claude Code, Cline, Continue) y para personas.
 Fuente única: los ficheros de cada herramienta importan o se generan desde aquí.
 
+Firefox MV3 extension, vanilla JS, make up to try it, and PROJECT.md for the roadmap.
+
 ## Comandos
 
 Usa **siempre** estos objetivos de `make`; no llames directamente a docker, composer o npm salvo que se indique.
@@ -24,6 +26,7 @@ de bash se omiten automáticamente.
 | `make ai-models` | Qué modelo usa cada rol y cómo configurarlo en cada herramienta |
 
 Una tarea no está terminada hasta que `make lint` y los tests afectados pasan.
+
 
 <!-- ai-kit:reglas -->
 ## Forma de trabajar
