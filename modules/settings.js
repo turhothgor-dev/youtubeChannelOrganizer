@@ -2,13 +2,16 @@ const YouTubeGroupsSettings = (() => {
   const DEFAULT_SETTINGS = Object.freeze({
     watchedMode: "dim",
     outsideMode: "hide",
+    autoMarkPercent: 80,
   });
   const WATCHED_MODES = Object.freeze(["show", "dim", "hide"]);
   const OUTSIDE_MODES = Object.freeze(["hide", "dim"]);
+  const AUTO_MARK_PERCENTS = Object.freeze([0, 50, 80, 95]);
 
   const ALLOWED_VALUES = {
     watchedMode: WATCHED_MODES,
     outsideMode: OUTSIDE_MODES,
+    autoMarkPercent: AUTO_MARK_PERCENTS,
   };
 
   /**
@@ -25,7 +28,7 @@ const YouTubeGroupsSettings = (() => {
    * Devuelve unos ajustes completos y válidos a partir de lo guardado.
    *
    * @param {*} raw - Lo leído del almacenamiento (puede ser cualquier cosa).
-   * @returns {{watchedMode: string, outsideMode: string}} Objeto nuevo con solo los campos conocidos.
+   * @returns {{watchedMode: string, outsideMode: string, autoMarkPercent: number}} Objeto nuevo con solo los campos conocidos.
    */
   function normalizeSettings(raw) {
     const source = isPlainObject(raw) ? raw : {};
@@ -43,7 +46,7 @@ const YouTubeGroupsSettings = (() => {
   /**
    * Lee los ajustes guardados y los normaliza.
    *
-   * @returns {Promise<{watchedMode: string, outsideMode: string}>}
+   * @returns {Promise<{watchedMode: string, outsideMode: string, autoMarkPercent: number}>}
    */
   async function getSettings() {
     return normalizeSettings(await YouTubeGroupsStorage.getSettings());
@@ -87,6 +90,7 @@ const YouTubeGroupsSettings = (() => {
     DEFAULT_SETTINGS,
     WATCHED_MODES,
     OUTSIDE_MODES,
+    AUTO_MARK_PERCENTS,
     normalizeSettings,
     getSettings,
     updateSettings,

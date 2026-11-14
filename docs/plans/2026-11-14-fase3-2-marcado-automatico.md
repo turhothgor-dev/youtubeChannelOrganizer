@@ -74,7 +74,7 @@ Sin ADR nuevo: el campo ya está descrito en el ADR 0003. `docs/ARCHITECTURE.md`
 Reglas comunes: nada de `innerHTML` con valores interpolados; JSDoc en las funciones nuevas; los tests usan
 `loadModules` y `plain`. Cada tarea termina con `make test` y `make lint` en verde y sin avisos.
 
-- [ ] T1 · Lógica del marcado automático. En `modules/watched.js`, añadir y exportar `shouldAutoMark`. En
+- [x] T1 · Lógica del marcado automático. En `modules/watched.js`, añadir y exportar `shouldAutoMark`. En
   `modules/settings.js`, `autoMarkPercent` en `DEFAULT_SETTINGS`, `AUTO_MARK_PERCENTS`, normalización y validación ·
   Ficheros: `modules/watched.js`, `modules/settings.js`, `tests/watched.test.js`, `tests/settings.test.js` ·
   Test: `shouldAutoMark(80, 100, 80)` es `true`; `(79.9, 100, 80)` `false`; `(100, 100, 0)` `false`;
@@ -135,3 +135,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | `feat: añadir la lógica del marcado automático (shouldAutoMark y autoMarkPercent)` | `shouldAutoMark` y ajuste `autoMarkPercent` con sus tests; los tests de ajustes existentes se actualizan al nuevo campo por defecto. |

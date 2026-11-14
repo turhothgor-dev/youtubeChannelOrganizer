@@ -115,3 +115,16 @@ test("setVideoWatched con ID inválido rechaza sin escribir", async () => {
   });
   assert.strictEqual(calls.set, 0);
 });
+
+test("shouldAutoMark decide según el porcentaje de reproducción", () => {
+  const { YouTubeGroupsWatched: W } = loadModules();
+
+  assert.strictEqual(W.shouldAutoMark(80, 100, 80), true);
+  assert.strictEqual(W.shouldAutoMark(95, 100, 95), true);
+  assert.strictEqual(W.shouldAutoMark(79.9, 100, 80), false);
+  assert.strictEqual(W.shouldAutoMark(100, 100, 0), false);
+  assert.strictEqual(W.shouldAutoMark(10, Infinity, 50), false);
+  assert.strictEqual(W.shouldAutoMark(10, NaN, 50), false);
+  assert.strictEqual(W.shouldAutoMark(10, 0, 50), false);
+  assert.strictEqual(W.shouldAutoMark(NaN, 100, 50), false);
+});

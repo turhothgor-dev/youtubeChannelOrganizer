@@ -91,8 +91,27 @@ const YouTubeGroupsWatched = (() => {
     return result;
   }
 
+  /**
+   * Indica si la reproducción ha alcanzado el porcentaje para marcar como visto.
+   *
+   * @param {number} currentTime - Posición actual en segundos.
+   * @param {number} duration - Duración en segundos (Infinity en directos).
+   * @param {number} percent - Porcentaje de umbral; 0 desactiva el marcado.
+   * @returns {boolean}
+   */
+  function shouldAutoMark(currentTime, duration, percent) {
+    return (
+      percent > 0 &&
+      Number.isFinite(duration) &&
+      duration > 0 &&
+      Number.isFinite(currentTime) &&
+      currentTime >= (duration * percent) / 100
+    );
+  }
+
   return {
     extractVideoId,
+    shouldAutoMark,
     isVideoWatched,
     applyVideoWatched,
     setVideoWatched,
