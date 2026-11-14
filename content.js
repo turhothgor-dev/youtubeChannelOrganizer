@@ -96,6 +96,18 @@
   /** Mensaje del error al leer los vistos; null si no ha fallado. */
   let watchedLoadError = null;
 
+  /** Número de la última operación de vistos iniciada. */
+  let watchedWriteSeq = 0;
+
+  /** Número de la última operación de vistos cuyo resultado se aplicó. */
+  let watchedAppliedSeq = 0;
+
+  /** Número de la última operación de ajustes iniciada. */
+  let settingsWriteSeq = 0;
+
+  /** Número de la última operación de ajustes cuyo resultado se aplicó. */
+  let settingsAppliedSeq = 0;
+
   /** IDs de vídeo cuyo cambio de visto se está guardando. */
   const savingWatchedIds = new Set();
 
@@ -202,12 +214,17 @@
   ) {
     errorElement.textContent = "";
     select.disabled = true;
+    settingsWriteSeq += 1;
+    const seq = settingsWriteSeq;
     try {
       const result = await YouTubeGroupsSettings.updateSettings({
         [key]: parse(select.value),
       });
-      settings = result.settings;
-      applyVisibilityToAllCards();
+      if (seq > settingsAppliedSeq) {
+        settingsAppliedSeq = seq;
+        settings = result.settings;
+        applyVisibilityToAllCards();
+      }
     } catch (error) {
       select.value = String(settings[key]);
       errorElement.textContent =
@@ -296,12 +313,17 @@
     }
     savingWatchedIds.add(videoId);
     refreshWatchedUi(videoId, card);
+    watchedWriteSeq += 1;
+    const seq = watchedWriteSeq;
     try {
       const result = await YouTubeGroupsWatched.setVideoWatched(
         videoId,
         !YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId),
       );
-      watchedVideos = result.videos;
+      if (seq > watchedAppliedSeq) {
+        watchedAppliedSeq = seq;
+        watchedVideos = result.videos;
+      }
       button.removeAttribute("title");
     } catch (error) {
       button.title = "No se pudo guardar: " + error.message;
@@ -398,9 +420,14 @@
     const panelButton = document.querySelector(
       ".youtube-groups__current-video-button",
     );
+    watchedWriteSeq += 1;
+    const seq = watchedWriteSeq;
     try {
       const result = await YouTubeGroupsWatched.setVideoWatched(videoId, true);
-      watchedVideos = result.videos;
+      if (seq > watchedAppliedSeq) {
+        watchedAppliedSeq = seq;
+        watchedVideos = result.videos;
+      }
       panelButton?.removeAttribute("title");
     } catch (error) {
       if (panelButton) {

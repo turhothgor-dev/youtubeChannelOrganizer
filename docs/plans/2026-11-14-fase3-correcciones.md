@@ -128,7 +128,7 @@ sin la cola (o anótalo en **Registro** si con el simulador no fallaba). Cada ta
   `createSubGroup` y `setGroupAppearance` sobre el mismo grupo a la vez conservan el subgrupo y la apariencia;
   `renameGroup` de un id inexistente a la vez que `createGroup` rechaza y el grupo nuevo se guarda. Los tests
   existentes siguen pasando sin cambios.
-- [ ] T5 · Estado en memoria sin resultados viejos. En `content.js`, contadores `watchedWriteSeq`/`watchedAppliedSeq`
+- [x] T5 · Estado en memoria sin resultados viejos. En `content.js`, contadores `watchedWriteSeq`/`watchedAppliedSeq`
   en `toggleVideoWatched` y `markVideoWatched`, y `settingsWriteSeq`/`settingsAppliedSeq` en `changeSetting` (ver
   **Importante 2**); en `changeSetting`, si el resultado no se aplica por viejo, tampoco se reaplica la visibilidad
   con él · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V2 y V3.
@@ -206,3 +206,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T2 | feat: cola de escrituras por clave en el almacenamiento | `KEYS` y `withLock` en `modules/storage.js`, `latencyMs` en el simulador y ADR 0005 aceptada. |
 | 2026-11-14 | T3 | fix: serializar las escrituras de vistos, ajustes y listas | `setVideoWatched`, `updateSettings` y `update` de listas dentro de `withLock`. Con `latencyMs: 5` los 3 tests de solapamiento fallaban sin la cola; el de validación + `createPlaylist` pasa también sin ella (operaciones independientes). |
 | 2026-11-14 | T4 | fix: serializar las escrituras de grupos | Las 10 operaciones de `modules/groups.js` dentro de `withLock(KEYS.groups)` mediante el helper `withGroupsLock`. Con `latencyMs: 5` fallaban sin la cola los tests de `setChannelGroups` y de `createSubGroup` + `setGroupAppearance`; los de dos `createGroup` y `renameGroup` inexistente + `createGroup` pasan también sin ella (el simulador devuelve la misma referencia del array y las operaciones no compiten). |
+| 2026-11-14 | T5 | fix: no aplicar resultados viejos al estado en memoria | Contadores `watchedWriteSeq`/`watchedAppliedSeq` en `toggleVideoWatched` y `markVideoWatched`, y `settingsWriteSeq`/`settingsAppliedSeq` en `changeSetting` (sin reaplicar visibilidad si el resultado es viejo). Pendientes V2 y V3 a mano. |
