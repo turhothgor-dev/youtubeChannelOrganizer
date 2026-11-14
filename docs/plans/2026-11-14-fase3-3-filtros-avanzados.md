@@ -1,6 +1,6 @@
 # Plan: Fase 3 (3/4) · Filtros avanzados (duración, fecha, popularidad)
 
-**Estado:** aprobado (2026-11-14)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 3: "Filtros avanzados (duración, fecha, popularidad)".
 
@@ -117,7 +117,7 @@ sin avisos.
   metadatos, el cálculo de `matchesFilter` (grupo Y filtros avanzados) dentro de `applyCardVisibility`, la sección
   "Filtros" (ver **Decisiones**) y sus manejadores. En `content.css`: estilos de la sección (claro y `html[dark]`) ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1 a V6.
-- [ ] T4 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Filtros avanzados (duración, fecha, popularidad)". En
+- [x] T4 · Cerrar el plan. En `ROADMAP.md`, marcar con ✅ "Filtros avanzados (duración, fecha, popularidad)". En
   `docs/ARCHITECTURE.md`: fila de `modules/metadata.js`, orden de carga, y el flujo "Filtro" describe los filtros
   avanzados (texto visible, español e inglés, desconocido = pasa, combinación Y con el grupo). Estado de este plan a
   `hecho` · Ficheros: `ROADMAP.md`, `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
@@ -171,3 +171,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-14 | T1 | feat: añadir los intérpretes de metadatos de tarjeta (duración, visualizaciones, antigüedad) | `modules/metadata.js` con `parseDuration`, `parseViewCount` y `parseAge`; en manifest y helper de tests. |
 | 2026-11-14 | T2 | feat: añadir los criterios de filtro avanzado (extractCardMetadata, FILTER_OPTIONS, matchesAdvancedFilters, hasActiveFilters) | En `modules/metadata.js`, con tests de límites y dato desconocido. |
 | 2026-11-14 | T3 | feat: añadir los filtros avanzados al panel y a las tarjetas | `content.js` (estado, `getCardTexts`, caché, sección "Filtros") y `content.css`; V1 a V6 pendientes de comprobar a mano. |
+| 2026-11-14 | T4 | docs: cerrar el plan de filtros avanzados (Fase 3, 3/4) | ROADMAP con ✅, `docs/ARCHITECTURE.md` con `modules/metadata.js` y el flujo de filtros avanzados; plan a `hecho`. |

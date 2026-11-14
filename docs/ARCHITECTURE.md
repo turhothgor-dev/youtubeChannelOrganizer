@@ -22,7 +22,8 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) |
 | `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`), normalizarlos, leerlos y actualizarlos con validación |
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
-| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botones por vídeo (grupo y visto), filtro, sección de ajustes y selector de iconos |
+| `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
+| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
 | `tests/` | `node:test` + `node:vm` | Tests de `modules/` con un `browser.storage.local` simulado; excluidos del paquete por `web-ext-config.mjs` |
 
@@ -36,6 +37,10 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez.
 - **Filtro**: al elegir un grupo o subgrupo en el panel, las tarjetas cuyo canal no pertenece a él ni
   a sus descendientes se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro".
+- **Filtros avanzados**: la sección "Filtros" del panel filtra por duración, fecha y visualizaciones (opciones
+  fijas, estado en memoria de la pestaña). `content.js` lee los textos visibles de la tarjeta (`getCardTexts`) y
+  `YouTubeGroupsMetadata` los interpreta en español e inglés; si un dato no se reconoce, ese criterio deja pasar la
+  tarjeta (desconocido = pasa). El resultado se combina con Y con el grupo activo y entra como `matchesFilter`.
 - **Visibilidad**: un único `applyCardVisibility` en `content.js` combina el filtro, el estado de visto y los
   ajustes (caché `settings`) mediante `YouTubeGroupsVisibility.getCardVisibility`, y alterna las clases
   `youtube-groups--hidden` y `youtube-groups--dimmed`. Ocultar gana a atenuar. Se reevalúa al procesar cada
