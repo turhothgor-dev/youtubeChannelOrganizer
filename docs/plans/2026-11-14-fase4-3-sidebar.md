@@ -52,7 +52,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make test` y `make lint` (0 a
   `tests/settings.test.js`, `docs/adr/0003-formato-almacenamiento-ajustes.md` · Test: por defecto `false`;
   `normalizeSettings({ panelCollapsed: "sí" })` da `false`; `updateSettings({ panelCollapsed: true })` escribe una
   vez y conserva los demás campos; `updateSettings({ panelCollapsed: 1 })` lanza.
-- [ ] T3 · Sección "Grupos" en la guía (ver **Decisiones**) y estilos (claro y `html[dark]`) · Ficheros:
+- [x] T3 · Sección "Grupos" en la guía (ver **Decisiones**) y estilos (claro y `html[dark]`) · Ficheros:
   `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1–V3.
 - [ ] T4 · Minimizar el panel · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V4.
 - [ ] T5 · Cerrar el plan: `ROADMAP.md` marca ✅ "Integración en sidebar"; `docs/ARCHITECTURE.md` (flujo "Guía
@@ -97,3 +97,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-14 | T1 | `feat: flattenGroups para aplanar el árbol de grupos` | Función pura en `modules/groups.js` con tests (preorden, niveles, vacío, sin mutar). |
 | 2026-11-14 | T2 | `feat: ajuste panelCollapsed para minimizar el panel` | Campo `panelCollapsed` en `modules/settings.js`, tests y mención en ADR 0003. |
+| 2026-11-14 | T3 | `feat: sección Grupos en la guía lateral de YouTube` | `renderGuideSection` y `scheduleGuideCheck` en `content.js`, estilos claro/oscuro en `content.css`. Pendiente V1–V3 a mano. |

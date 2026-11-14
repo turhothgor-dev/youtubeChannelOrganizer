@@ -1480,6 +1480,118 @@
 
     renderCurrentChannelSection(groups);
     renderCurrentVideoSection();
+    renderGuideSection(groups);
+  }
+
+  const GUIDE_SECTIONS_SELECTOR = "ytd-guide-renderer #sections";
+  const GUIDE_SECTION_ID = "youtube-groups-guide";
+
+  /** Si ya hay una comprobación de la guía programada para el próximo frame. */
+  let guideCheckScheduled = false;
+
+  /**
+   * Crea un botón de la sección "Grupos" de la guía lateral.
+   * @param {string} label - Texto del botón.
+   * @param {boolean} pressed - Si es el filtro activo.
+   * @param {number} level - Nivel de sangría (0 = primer nivel).
+   * @param {HTMLElement|null} mark - Marca del grupo, si la tiene.
+   * @param {function(): void} onClick - Acción al pulsar.
+   * @returns {HTMLButtonElement} Botón creado.
+   */
+  function createGuideButton(label, pressed, level, mark, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "youtube-groups__guide-item";
+    button.setAttribute("aria-pressed", String(pressed));
+    if (level > 0) {
+      button.style.paddingLeft = `${24 + level * 16}px`;
+    }
+    if (mark) {
+      button.append(mark);
+    }
+    const name = document.createElement("span");
+    name.className = "youtube-groups__guide-name";
+    name.textContent = label;
+    button.append(name);
+    button.addEventListener("click", onClick);
+    return button;
+  }
+
+  /**
+   * Pinta la sección "Grupos" en la guía lateral de YouTube. Si la guía no
+   * existe, no hace nada; si la sección ya existe, la reutiliza.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   */
+  function renderGuideSection(groups) {
+    const container = document.querySelector(GUIDE_SECTIONS_SELECTOR);
+    if (!container) {
+      return;
+    }
+    let section = document.getElementById(GUIDE_SECTION_ID);
+    if (!section) {
+      section = document.createElement("div");
+      section.id = GUIDE_SECTION_ID;
+      section.className = "youtube-groups__guide";
+      const firstSection = container.querySelector(
+        ":scope > ytd-guide-section-renderer",
+      );
+      if (firstSection) {
+        firstSection.after(section);
+      } else {
+        container.prepend(section);
+      }
+    } else if (!section.isConnected || section.parentElement !== container) {
+      container.prepend(section);
+    }
+
+    const title = document.createElement("h3");
+    title.className = "youtube-groups__guide-title";
+    title.textContent = "Grupos";
+    const items = [
+      createGuideButton("Todos", getActiveGroupId() === null, 0, null, () =>
+        setActiveGroup(null),
+      ),
+    ];
+    for (const { id, name, level } of YouTubeGroups.flattenGroups(groups)) {
+      items.push(
+        createGuideButton(
+          name,
+          getActiveGroupId() === id,
+          level,
+          createGroupMark(groups, id, 24),
+          () => setActiveGroup({ id }),
+        ),
+      );
+    }
+    section.replaceChildren(title, ...items);
+  }
+
+  /**
+   * Programa, como mucho una vez por frame, el pintado de la sección de la
+   * guía cuando esta aparece tarde. Solo lee los grupos si hay contenedor.
+   */
+  function scheduleGuideCheck() {
+    if (guideCheckScheduled) {
+      return;
+    }
+    guideCheckScheduled = true;
+    requestAnimationFrame(() => {
+      guideCheckScheduled = false;
+      if (
+        !document.querySelector(GUIDE_SECTIONS_SELECTOR) ||
+        document.getElementById(GUIDE_SECTION_ID)?.isConnected
+      ) {
+        return;
+      }
+      getGroups()
+        .then((groups) => renderGuideSection(groups))
+        .catch((error) => {
+          console.error(
+            "[YouTube Groups] No se pudo pintar la guía lateral",
+            error,
+          );
+        });
+    });
   }
 
   // URL del canal pintado por última vez en la sección "Canal actual".
@@ -2551,6 +2663,9 @@
           scheduleCurrentChannelPanelUpdate();
         }
       }
+    }
+    if (!document.getElementById(GUIDE_SECTION_ID)?.isConnected) {
+      scheduleGuideCheck();
     }
   });
 
