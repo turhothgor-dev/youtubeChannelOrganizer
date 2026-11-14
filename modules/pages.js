@@ -49,5 +49,21 @@ const YouTubeGroupsPages = (() => {
     return CARD_CONTROL_PAGES.has(pageType);
   }
 
-  return { getPageType, shouldShowCardControls };
+  /**
+   * URL del canal al que pertenece una página de canal (primer tramo de la
+   * ruta, sin subrutas ni barra final y sin decodificar).
+   *
+   * @param {string} pathname Ruta de la URL (location.pathname).
+   * @param {string} origin Origen de la URL (location.origin).
+   * @returns {string|null} null si la ruta no es de canal.
+   */
+  function getChannelUrlFromPath(pathname, origin) {
+    if (typeof pathname !== "string" || typeof origin !== "string") {
+      return null;
+    }
+    const match = pathname.match(/^\/(@[^/]+|(?:channel|c|user)\/[^/]+)/);
+    return match ? `${origin}/${match[1]}` : null;
+  }
+
+  return { getPageType, shouldShowCardControls, getChannelUrlFromPath };
 })();

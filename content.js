@@ -2794,12 +2794,34 @@
       };
       detectedCards.set(card, { link, href: link.href });
     } else {
-      // Sin enlace: se busca por nombre entre los canales guardados
       detectedCards.delete(card);
-      channel = YouTubeGroups.matchChannelByTexts(
-        channelNameIndex,
-        getCardTexts(card),
-      );
+      const pageChannelUrl =
+        YouTubeGroupsPages.getPageType(window.location.pathname) === "channel"
+          ? YouTubeGroupsPages.getChannelUrlFromPath(
+              window.location.pathname,
+              window.location.origin,
+            )
+          : null;
+      if (pageChannelUrl) {
+        // En páginas de canal las tarjetas son del canal de la página
+        const name = pageChannelUrl.replace(
+          /^[^/]+:\/\/[^/]+\/(?:@|(?:channel|c|user)\/)/,
+          "",
+        );
+        let decoded = name;
+        try {
+          decoded = decodeURIComponent(name);
+        } catch {
+          // Se deja sin decodificar
+        }
+        channel = { name: decoded, url: pageChannelUrl };
+      } else {
+        // Sin enlace: se busca por nombre entre los canales guardados
+        channel = YouTubeGroups.matchChannelByTexts(
+          channelNameIndex,
+          getCardTexts(card),
+        );
+      }
     }
 
     if (!channel) {

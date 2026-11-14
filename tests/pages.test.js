@@ -53,6 +53,32 @@ test("getPageType devuelve other para el resto de rutas", () => {
   }
 });
 
+test("getChannelUrlFromPath devuelve el canal de la página o null", () => {
+  const { YouTubeGroupsPages } = loadModules();
+  const origin = "https://www.youtube.com";
+  const cases = {
+    "/@foo/videos": `${origin}/@foo`,
+    "/@foo": `${origin}/@foo`,
+    "/@foo/": `${origin}/@foo`,
+    "/channel/UCabc/shorts": `${origin}/channel/UCabc`,
+    "/@%C3%B1u/videos": `${origin}/@%C3%B1u`,
+    "/watch": null,
+    "/": null,
+    "/shorts/abc": null,
+    [undefined]: null,
+  };
+  for (const [pathname, expected] of Object.entries(cases)) {
+    assert.strictEqual(
+      YouTubeGroupsPages.getChannelUrlFromPath(
+        pathname === "undefined" ? undefined : pathname,
+        origin,
+      ),
+      expected,
+      pathname,
+    );
+  }
+});
+
 test("shouldShowCardControls es true solo en inicio, suscripciones, búsqueda y watch", () => {
   const { YouTubeGroupsPages } = loadModules();
 

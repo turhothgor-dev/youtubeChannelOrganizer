@@ -59,7 +59,7 @@ Sin dependencias nuevas ni ADR (no cambia formatos ni estructura).
 
 Cada tarea termina con `make lint` (0 avisos) y `make test` en verde.
 
-- [ ] T1 · Canal de la página en páginas de canal. `getChannelUrlFromPath` en `modules/pages.js` (exportada) y, en
+- [x] T1 · Canal de la página en páginas de canal. `getChannelUrlFromPath` en `modules/pages.js` (exportada) y, en
   `detectCard`, si no hay enlace y `getPageType(location.pathname) === "channel"`, canal = el de la página (antes de
   buscar por nombre) · Ficheros: `modules/pages.js`, `tests/pages.test.js`, `content.js` · Test
   (`tests/pages.test.js`): `"/@foo/videos"`, `"/@foo"` y `"/@foo/"` → `origin + "/@foo"`;
@@ -123,3 +123,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-14 | T1 | fix: usar el canal de la página en páginas de canal | `getChannelUrlFromPath` y uso en `detectCard`; V1 pendiente a mano |
