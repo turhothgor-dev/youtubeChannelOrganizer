@@ -176,7 +176,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
   aunque contenga el canal activo; `findGuideInsertionIndex` encuentra la sección con
   `https://studio.youtube.com/` o `https://music.youtube.com/` aunque haya `/feed/history` y hrefs relativos o no
   válidos, y da `-1` sin ellas; la entrada no se muta.
-- [ ] T4 · `YouTubeGroups.validateGroupName` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test: `"a"`,
+- [x] T4 · `YouTubeGroups.validateGroupName` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test: `"a"`,
   `"  a "` y `42` dan el mensaje de mínimo; 81 caracteres el de máximo; `"ab"` y 80 caracteres dan `null`; con
   `"subgroup"` los mensajes dicen "subgrupo".
 - [ ] T5 · Sección "YouTube Groups" en la guía: posición, cabecera, botón "+ Crear grupo" visible pero aún sin
@@ -284,3 +284,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | `feat: módulo de filtro activo (todos, grupo o canal)` | `modules/filter.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
 | 2026-11-15 | T2 | `refactor: content.js usa un filtro activo general` | `activeFilter`, `setActiveFilter`, `refreshActiveFilter` y `handleGroupsRemoved`; sin cambios visibles. V1 manual pendiente. |
 | 2026-11-15 | T3 | `feat: módulo puro de la columna de la guía lateral` | `modules/guide.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
+| 2026-11-15 | T4 | `feat: YouTubeGroups.validateGroupName` | Validación de nombre de grupo/subgrupo en `modules/groups.js` con tests. |

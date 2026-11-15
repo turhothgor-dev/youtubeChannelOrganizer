@@ -56,6 +56,24 @@ const YouTubeGroups = (() => {
     return YouTubeGroupsStorage.withLock(YouTubeGroupsStorage.KEYS.groups, fn);
   }
 
+  /**
+   * Valida el nombre de un grupo o subgrupo (2 a 80 caracteres sin espacios en los extremos).
+   * @param {*} name Nombre propuesto.
+   * @param {string} [kind="group"] `"group"` o `"subgroup"`; solo cambia el texto del mensaje.
+   * @returns {string|null} Mensaje de error o `null` si el nombre es válido.
+   */
+  function validateGroupName(name, kind = "group") {
+    const label = kind === "subgroup" ? "del subgrupo" : "del grupo";
+    const trimmed = typeof name === "string" ? name.trim() : "";
+    if (trimmed.length < 2) {
+      return `El nombre ${label} debe tener al menos 2 caracteres`;
+    }
+    if (trimmed.length > 80) {
+      return `El nombre ${label} no puede exceder 80 caracteres`;
+    }
+    return null;
+  }
+
   async function createGroup(name) {
     const groupName = name.trim();
     if (!groupName) {
@@ -827,6 +845,7 @@ const YouTubeGroups = (() => {
     cleanupGroups,
     flattenGroups,
     getGroupAppearance,
+    validateGroupName,
     createGroup,
     removeGroupById,
     deleteGroup,

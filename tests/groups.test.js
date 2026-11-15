@@ -27,6 +27,35 @@ test("normalizeChannelUrl devuelve null si no es un canal", () => {
   assert.strictEqual(normalize("https://example.com/@handle"), null);
 });
 
+test("validateGroupName valida longitud mínima y máxima", () => {
+  const { YouTubeGroups } = loadModules();
+  const validate = YouTubeGroups.validateGroupName;
+  const min = "El nombre del grupo debe tener al menos 2 caracteres";
+  const max = "El nombre del grupo no puede exceder 80 caracteres";
+
+  assert.strictEqual(validate("a"), min);
+  assert.strictEqual(validate("  a "), min);
+  assert.strictEqual(validate(42), min);
+  assert.strictEqual(validate("a".repeat(81)), max);
+  assert.strictEqual(validate("ab"), null);
+  assert.strictEqual(validate("a".repeat(80)), null);
+});
+
+test("validateGroupName con subgroup habla de subgrupo", () => {
+  const { YouTubeGroups } = loadModules();
+  const validate = YouTubeGroups.validateGroupName;
+
+  assert.strictEqual(
+    validate("a", "subgroup"),
+    "El nombre del subgrupo debe tener al menos 2 caracteres",
+  );
+  assert.strictEqual(
+    validate("a".repeat(81), "subgroup"),
+    "El nombre del subgrupo no puede exceder 80 caracteres",
+  );
+  assert.strictEqual(validate("ab", "subgroup"), null);
+});
+
 test("createSubGroup anida el subgrupo con type y parentId", async () => {
   const { YouTubeGroups, YouTubeGroupsStorage } = loadModules();
 
