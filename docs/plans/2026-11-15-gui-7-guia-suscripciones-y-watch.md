@@ -78,7 +78,7 @@ verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en ver
   `home`, `search`, `shorts`, `channel`, `other` y `watch` → `false` a 1400 px; se mantiene el caso de `/live/<id>`),
   comentarios que digan "fuera de /watch" en `content.js` (~3449-3451 y ~3479) y `content.css` (~1323) · Test:
   `make test` (`tests/pages.test.js`) y V1–V2.
-- [ ] T2 · Documentar la guía fija en suscripciones · Ficheros: `docs/adr/0012-guia-fija-solo-en-suscripciones.md`
+- [x] T2 · Documentar la guía fija en suscripciones · Ficheros: `docs/adr/0012-guia-fija-solo-en-suscripciones.md`
   (estado `aceptada`), `docs/adr/0010-seccion-en-la-guia-de-youtube-fija.md` (cabecera: "Modificado por: 0012"; no se
   reescribe el resto), `docs/ARCHITECTURE.md` (fila de `modules/pages.js`: `shouldPinGuide` solo en `subscriptions`;
   flujo **Guía lateral**: "En `/watch` y por debajo de 792 px…" pasa a "Fuera de suscripciones y por debajo de 792
@@ -204,3 +204,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `feat: fijar la guía de YouTube solo en suscripciones` | `shouldPinGuide` exige `subscriptions`; test y comentarios actualizados. V1-V2 pendientes a mano. |
+| 2026-11-15 | T2 | `docs: documentar la guía fija solo en suscripciones` | ADR 0012 aceptada, 0010 enlazado como modificado y ARCHITECTURE actualizada. |

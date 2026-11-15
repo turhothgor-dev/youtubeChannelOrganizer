@@ -1,6 +1,6 @@
 # 0012 · Guía fija solo en /feed/subscriptions
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 - Modifica: [0010](0010-seccion-en-la-guia-de-youtube-fija.md) (puntos 2 y 4 y Consecuencias)
 
