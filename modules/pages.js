@@ -86,6 +86,23 @@ const YouTubeGroupsPages = (() => {
   }
 
   /**
+   * Indica si se muestran los botones sobre el reproductor de /watch: solo con
+   * el vídeo pausado o terminado, sin pantalla completa y sin anuncio.
+   *
+   * @param {{pageType?: string, paused?: boolean, fullscreen?: boolean, adShowing?: boolean}} [state]
+   * @returns {boolean}
+   */
+  function shouldShowPlayerControls(state) {
+    const { pageType, paused, fullscreen, adShowing } = state || {};
+    return (
+      pageType === "watch" &&
+      paused === true &&
+      fullscreen !== true &&
+      adShowing !== true
+    );
+  }
+
+  /**
    * Ruta de una URL de navegación (absoluta o relativa) resuelta contra el
    * origen.
    *
@@ -111,5 +128,6 @@ const YouTubeGroupsPages = (() => {
     shouldShowCardControls,
     getChannelUrlFromPath,
     shouldPinGuide,
+    shouldShowPlayerControls,
   };
 })();

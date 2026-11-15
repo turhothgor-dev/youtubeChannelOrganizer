@@ -83,7 +83,7 @@ verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en ver
   reescribe el resto), `docs/ARCHITECTURE.md` (fila de `modules/pages.js`: `shouldPinGuide` solo en `subscriptions`;
   flujo **Guía lateral**: "En `/watch` y por debajo de 792 px…" pasa a "Fuera de suscripciones y por debajo de 792
   px…"; **Decisiones**: enlace al 0012) · Test: `make lint`.
-- [ ] T3 · Decisión pura de los botones del reproductor · Ficheros: `modules/pages.js` (`shouldShowPlayerControls({
+- [x] T3 · Decisión pura de los botones del reproductor · Ficheros: `modules/pages.js` (`shouldShowPlayerControls({
   pageType, paused, fullscreen, adShowing })`, exportada), `tests/pages.test.js` · Test: nuevo test en
   `tests/pages.test.js`: `watch` + pausado → `true`; reproduciendo → `false`; pantalla completa → `false`; anuncio →
   `false`; `home`, `subscriptions`, `shorts`, `search`, `channel`, `other` pausados → `false`; `paused` no booleano
@@ -205,3 +205,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `feat: fijar la guía de YouTube solo en suscripciones` | `shouldPinGuide` exige `subscriptions`; test y comentarios actualizados. V1-V2 pendientes a mano. |
 | 2026-11-15 | T2 | `docs: documentar la guía fija solo en suscripciones` | ADR 0012 aceptada, 0010 enlazado como modificado y ARCHITECTURE actualizada. |
+| 2026-11-15 | T3 | `feat: decidir cuándo mostrar los botones del reproductor` | `shouldShowPlayerControls` en `modules/pages.js` con su test. |

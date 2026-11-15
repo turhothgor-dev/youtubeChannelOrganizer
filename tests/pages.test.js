@@ -143,3 +143,50 @@ test("shouldPinGuide fija la guía solo en suscripciones, con ancho suficiente y
     assert.strictEqual(P.shouldPinGuide(type, 1400, false), false, type);
   }
 });
+
+test("shouldShowPlayerControls solo muestra los botones en watch pausado, sin pantalla completa ni anuncio", () => {
+  const { YouTubeGroupsPages: P } = loadModules();
+  const base = { pageType: "watch", paused: true };
+
+  assert.strictEqual(P.shouldShowPlayerControls(base), true);
+  assert.strictEqual(
+    P.shouldShowPlayerControls({
+      ...base,
+      fullscreen: false,
+      adShowing: false,
+    }),
+    true,
+  );
+  assert.strictEqual(
+    P.shouldShowPlayerControls({ ...base, paused: false }),
+    false,
+  );
+  assert.strictEqual(
+    P.shouldShowPlayerControls({ ...base, fullscreen: true }),
+    false,
+  );
+  assert.strictEqual(
+    P.shouldShowPlayerControls({ ...base, adShowing: true }),
+    false,
+  );
+  for (const type of [
+    "home",
+    "subscriptions",
+    "shorts",
+    "search",
+    "channel",
+    "other",
+  ]) {
+    assert.strictEqual(
+      P.shouldShowPlayerControls({ pageType: type, paused: true }),
+      false,
+      type,
+    );
+  }
+  assert.strictEqual(
+    P.shouldShowPlayerControls({ pageType: "watch", paused: undefined }),
+    false,
+  );
+  assert.strictEqual(P.shouldShowPlayerControls(), false);
+  assert.strictEqual(P.shouldShowPlayerControls(null), false);
+});
