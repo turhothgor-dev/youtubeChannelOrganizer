@@ -847,9 +847,7 @@
           <div class="youtube-groups__header">
             <h2 class="youtube-groups__title">YouTube Groups</h2>
             <button class="youtube-groups__collapse-button" type="button" aria-expanded="true" title="Minimizar panel" disabled>−</button>
-            <button class="youtube-groups__create-button action-button primary-button" type="button">Crear grupo</button>
           </div>
-          <div class="youtube-groups__options" role="listbox" aria-label="Grupos"></div>
           <button class="youtube-groups__play-visible action-button secondary-button" type="button">Reproducir lo visible</button>
           <p class="youtube-groups__play-visible-message" aria-live="polite"></p>
           <section class="youtube-groups__current-channel" hidden>
@@ -950,22 +948,6 @@
             </div>
             <p class="youtube-groups__backup-message" aria-live="polite"></p>
           </details>
-          <form class="youtube-groups__form" hidden>
-            <input class="youtube-groups__input" type="text" name="groupName" placeholder="Nombre del grupo" maxlength="80" required>
-            <div class="youtube-groups__form-actions">
-              <button class="youtube-groups__cancel-button action-button noaction-button" type="button">Cancelar</button>
-              <button class="youtube-groups__confirm-button action-button primary-button" type="submit">Guardar</button>
-            </div>
-            <p class="youtube-groups__error" aria-live="polite"></p>
-          </form>
-          <form class="youtube-groups__subgroup-form" hidden>
-            <input class="youtube-groups__input" type="text" name="subGroupName" placeholder="Nombre del subgrupo" maxlength="80" required>
-            <div class="youtube-groups__form-actions">
-              <button class="youtube-subgroups__cancel-button action-button noaction-button" type="button">Cancelar</button>
-              <button class="youtube-subgroups__confirm-button action-button primary-button" type="submit">Guardar</button>
-            </div>
-            <p class="youtube-groups__subgroup-error" aria-live="polite"></p>
-          </form>
         `;
 
     panel
@@ -1172,38 +1154,12 @@
       });
     syncFiltersControls(panel);
 
-    const form = panel.querySelector(".youtube-groups__form");
-    const input = panel.querySelector(".youtube-groups__input");
-    const error = panel.querySelector(".youtube-groups__error");
-    const subgroupForm = panel.querySelector(".youtube-groups__subgroup-form");
-    const subgroupInput = panel.querySelector(
-      ".youtube-groups__input[name='subGroupName']",
-    );
-    const subgroupError = panel.querySelector(
-      ".youtube-groups__subgroup-error",
-    );
     const currentChannelForm = panel.querySelector(
       ".youtube-groups__channel-groups-form",
     );
     const currentChannelError = panel.querySelector(
       ".youtube-groups__channel-error",
     );
-
-    panel
-      .querySelector(".youtube-groups__create-button")
-      .addEventListener("click", () => {
-        form.hidden = false;
-        error.textContent = "";
-        input.focus();
-      });
-
-    panel
-      .querySelector(".youtube-groups__cancel-button")
-      .addEventListener("click", () => {
-        form.reset();
-        form.hidden = true;
-        error.textContent = "";
-      });
 
     panel
       .querySelector(".youtube-groups__add-channel-button")
@@ -1218,96 +1174,6 @@
         currentChannelForm.hidden = true;
         currentChannelError.textContent = "";
       });
-
-    // Subgroup form handlers
-    panel
-      .querySelector(".youtube-subgroups__cancel-button")
-      .addEventListener("click", () => {
-        subgroupForm.reset();
-        subgroupForm.hidden = true;
-        subgroupError.textContent = "";
-      });
-
-    subgroupForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      subgroupError.textContent = "";
-
-      try {
-        // Validación adicional
-        const subGroupName = subgroupInput.value.trim();
-        if (subGroupName.length < 2) {
-          subgroupError.textContent =
-            "El nombre del subgrupo debe tener al menos 2 caracteres";
-          return;
-        }
-
-        if (subGroupName.length > 80) {
-          subgroupError.textContent =
-            "El nombre del subgrupo no puede exceder 80 caracteres";
-          return;
-        }
-
-        // We need to get the parent group ID - this will be set when the form is shown
-        const parentGroupId = subgroupForm.dataset.parentGroupId;
-        if (!parentGroupId) {
-          subgroupError.textContent = "No se pudo identificar el grupo padre";
-          return;
-        }
-
-        await createSubGroup(parentGroupId, subgroupInput.value);
-        subgroupForm.reset();
-        subgroupForm.hidden = true;
-        await renderGroupsPanel();
-
-        // Feedback visual
-        const createSubGroupButton = panel.querySelector(
-          ".youtube-groups__create-subgroup-button",
-        );
-        createSubGroupButton.textContent = "✓ Subgrupo creado";
-        setTimeout(() => {
-          createSubGroupButton.textContent = "+ Subgrupo";
-        }, 2000);
-      } catch (exception) {
-        subgroupError.textContent = exception.message;
-      }
-    });
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      error.textContent = "";
-
-      try {
-        // Validación adicional
-        const groupName = input.value.trim();
-        if (groupName.length < 2) {
-          error.textContent =
-            "El nombre del grupo debe tener al menos 2 caracteres";
-          return;
-        }
-
-        if (groupName.length > 80) {
-          error.textContent =
-            "El nombre del grupo no puede exceder 80 caracteres";
-          return;
-        }
-
-        await createGroup(input.value);
-        form.reset();
-        form.hidden = true;
-        await renderGroupsPanel();
-
-        // Feedback visual
-        const createButton = panel.querySelector(
-          ".youtube-groups__create-button",
-        );
-        createButton.textContent = "✓ Grupo creado";
-        setTimeout(() => {
-          createButton.textContent = "Crear grupo";
-        }, 2000);
-      } catch (exception) {
-        error.textContent = exception.message;
-      }
-    });
 
     currentChannelForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1571,291 +1437,62 @@
     }
   }
 
+  /**
+   * Pide un nuevo nombre y renombra un grupo o subgrupo.
+   *
+   * Sin uso a propósito: la usará la pantalla de edición de grupos, ver
+   * ROADMAP.md.
+   *
+   * @param {{ id: string, name: string }} group - Grupo o subgrupo a renombrar.
+   * @returns {Promise<void>}
+   */
+  async function promptRenameGroup(group) {
+    const newName = prompt("Nuevo nombre del grupo:", group.name);
+    if (newName === null) {
+      return;
+    }
+    try {
+      await renameGroup(group.id, newName);
+      await renderGroupsPanel();
+    } catch (exception) {
+      alert(exception.message);
+    }
+  }
+
+  /**
+   * Pide confirmación y elimina un grupo o subgrupo.
+   *
+   * Sin uso a propósito: la usará la pantalla de edición de grupos, ver
+   * ROADMAP.md.
+   *
+   * @param {{ id: string, name: string }} group - Grupo o subgrupo a eliminar.
+   * @returns {Promise<void>}
+   */
+  async function confirmDeleteGroup(group) {
+    if (
+      !confirm(
+        `¿Estás seguro de que quieres eliminar el grupo "${group.name}"?`,
+      )
+    ) {
+      return;
+    }
+    try {
+      const removedIds = await deleteGroup(group.id);
+      await handleGroupsRemoved(removedIds);
+      await renderGroupsPanel();
+    } catch (exception) {
+      alert(exception.message);
+    }
+  }
+
   async function renderGroupsPanel() {
     const panel = createGroupsPanel();
     if (!panel) {
       return;
     }
 
-    const options = panel.querySelector(".youtube-groups__options");
-    // Get groups FIRST, before any early returns
     const groups = await getGroups();
-    options.replaceChildren();
     refreshChannelNameIndex(groups);
-
-    const allOption = document.createElement("button");
-    allOption.type = "button";
-    allOption.className = "youtube-groups__option";
-    allOption.textContent = "Todos";
-    allOption.setAttribute(
-      "aria-pressed",
-      String(getActiveFilterKey() === null),
-    );
-    allOption.addEventListener("click", () =>
-      setActiveFilter(YouTubeGroupsFilter.ALL_FILTER),
-    );
-    options.append(allOption);
-
-    // Función auxiliar para renderizar grupos y subgrupos
-    function renderGroupWithSubGroups(group, level = 0) {
-      const groupOption = document.createElement("button");
-      groupOption.type = "button";
-      groupOption.className = "youtube-groups__option";
-      const mark = createGroupMark(groups, group.id, 16);
-      if (mark) {
-        groupOption.appendChild(mark);
-      }
-
-      var nameSpan = document.createElement("span");
-      nameSpan.className = "youtube-groups__option-name";
-      nameSpan.textContent = group.name;
-      groupOption.appendChild(nameSpan);
-      groupOption.setAttribute(
-        "aria-pressed",
-        String(getActiveFilterKey() === "group:" + group.id),
-      );
-      groupOption.setAttribute("data-level", level); // Para estilos jerárquicos
-
-      // Añadir ícono de grupo/subgrupo
-      if (group.type === "subgroup") {
-        groupOption.style.fontStyle = "italic";
-        groupOption.style.color = "#666";
-      }
-
-      // Añadir contador de canales
-      if (group.channels && group.channels.length > 0) {
-        const channelCount = document.createElement("span");
-        channelCount.className = "youtube-groups__channel-count";
-        channelCount.textContent = ` (${group.channels.length})`;
-        groupOption.appendChild(channelCount);
-      }
-
-      // Añadir indentación visual para subgrupos
-      if (level > 0) {
-        groupOption.style.paddingLeft = `${12 + level * 16}px`;
-        groupOption.style.fontStyle = "italic";
-      }
-
-      // Añadir botones de edición y eliminación
-      const editButton = document.createElement("button");
-      editButton.className =
-        "youtube-groups__edit-button action-button secondary-button";
-      editButton.textContent = "Editar";
-      editButton.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        const newName = prompt("Nuevo nombre del grupo:", group.name);
-        if (newName !== null) {
-          try {
-            await renameGroup(group.id, newName);
-            await renderGroupsPanel();
-          } catch (exception) {
-            alert(exception.message);
-          }
-        }
-      });
-
-      const deleteButton = document.createElement("button");
-      deleteButton.className =
-        "youtube-groups__delete-button action-button noaction-button";
-      deleteButton.textContent = "Eliminar";
-      deleteButton.setAttribute("aria-label", `Eliminar grupo ${group.name}`);
-      deleteButton.addEventListener("click", async (event) => {
-        event.stopPropagation();
-
-        if (
-          confirm(
-            `¿Estás seguro de que quieres eliminar el grupo "${group.name}"?`,
-          )
-        ) {
-          try {
-            const removedIds = await deleteGroup(group.id);
-            await handleGroupsRemoved(removedIds);
-            await renderGroupsPanel();
-          } catch (exception) {
-            alert(exception.message);
-          }
-        }
-      });
-
-      // Botón para crear subgrupo (solo para grupos principales)
-      if (group.type !== "subgroup") {
-        const createSubGroupButton = document.createElement("button");
-        createSubGroupButton.className =
-          "youtube-groups__create-subgroup-button action-button secondary-button";
-        createSubGroupButton.textContent = "+ Subgrupo";
-        createSubGroupButton.setAttribute(
-          "aria-label",
-          `Crear subgrupo en ${group.name}`,
-        );
-        createSubGroupButton.addEventListener("click", async (event) => {
-          event.stopPropagation();
-          // Show the subgroup form instead of using prompt
-          const subgroupForm = panel.querySelector(
-            ".youtube-groups__subgroup-form",
-          );
-          const subgroupInput = panel.querySelector(
-            ".youtube-groups__input[name='subGroupName']",
-          );
-          const subgroupError = panel.querySelector(
-            ".youtube-groups__subgroup-error",
-          );
-
-          subgroupForm.hidden = false;
-          subgroupForm.dataset.parentGroupId = group.id;
-          subgroupError.textContent = "";
-          subgroupInput.focus();
-        });
-
-        groupOption.appendChild(createSubGroupButton);
-      }
-
-      // Add view channels button - only for user-created groups (not "Todos")
-      const viewChannelsButton = document.createElement("button");
-      viewChannelsButton.className =
-        "youtube-groups__view-channels-button action-button secondary-button";
-      viewChannelsButton.textContent = "Ver canales";
-      viewChannelsButton.setAttribute(
-        "aria-label",
-        `Ver canales del grupo ${group.name}`,
-      );
-      // In the "Ver canales" button click handler:
-      viewChannelsButton.addEventListener("click", async (event) => {
-        event.stopPropagation();
-
-        try {
-          // Obtener todos los grupos y subgrupos para localizar también subgrupos
-          const groupsData = await getAllGroupsAndSubGroups();
-          const targetGroup = groupsData.find((g) => g.id === group.id);
-          if (
-            targetGroup &&
-            targetGroup.channels &&
-            targetGroup.channels.length > 0
-          ) {
-            console.log(
-              "[YouTube Groups][VIEW CHANNELS] Grupo:",
-              targetGroup.name,
-              "Canales:",
-              targetGroup.channels.length,
-            );
-
-            // Check if modal already exists
-            const existingModal = document.querySelector(
-              ".youtube-groups__channel-list-modal",
-            );
-            if (existingModal) {
-              document.body.removeChild(existingModal);
-            }
-
-            const modal = document.createElement("div");
-            modal.className = "youtube-groups__channel-list-modal";
-
-            const content = document.createElement("div");
-            content.className = "youtube-groups__channel-list-content";
-
-            const header = document.createElement("div");
-            header.className = "youtube-groups__channel-list-header";
-            const headerTitle = document.createElement("h3");
-            headerTitle.textContent = "Lista de Canales";
-            const closeButton = document.createElement("button");
-            closeButton.className = "youtube-groups__close-channels-button";
-            closeButton.type = "button";
-            closeButton.textContent = "×";
-            header.append(headerTitle, closeButton);
-
-            const listTitle = document.createElement("h4");
-            listTitle.textContent = `Canales en "${targetGroup.name}" (${targetGroup.channels.length})`;
-
-            const list = document.createElement("ul");
-            for (const channel of targetGroup.channels) {
-              const item = document.createElement("li");
-              const channelName = document.createElement("strong");
-              channelName.textContent = channel.name;
-              item.append(
-                channelName,
-                document.createElement("br"),
-                channel.url,
-              );
-              list.appendChild(item);
-            }
-
-            content.append(header, listTitle, list);
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-
-            // Add close functionality
-            closeButton.addEventListener("click", () => {
-              document.body.removeChild(modal);
-            });
-
-            // Close when clicking outside
-            modal.addEventListener("click", (event) => {
-              if (event.target === modal) {
-                document.body.removeChild(modal);
-              }
-            });
-          } else {
-            console.log(
-              "[YouTube Groups][VIEW CHANNELS] Grupo:",
-              targetGroup.name,
-              "Sin canales",
-            );
-            alert(`El grupo "${targetGroup.name}" no tiene canales.`);
-          }
-        } catch (exception) {
-          console.error(
-            "[YouTube Groups][VIEW CHANNELS] Error mostrando canales:",
-            exception,
-          );
-          alert("Error al mostrar los canales del grupo.");
-        }
-      });
-
-      groupOption.appendChild(viewChannelsButton);
-      // --- Icon Picker (singleton lazy) ---
-      const iconButton = document.createElement("button");
-      iconButton.className =
-        "youtube-groups__icon-button action-button secondary-button";
-      iconButton.textContent = "Icono";
-      iconButton.setAttribute("aria-label", "Cambiar icono de " + group.name);
-      iconButton.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        openIconPicker(
-          { iconId: group.icon || "", colorHex: group.color || "" },
-          iconButton,
-          async ({ iconId, colorHex }) => {
-            await YouTubeGroups.setGroupAppearance(group.id, iconId, colorHex);
-            renderGroupsPanel().catch((err) => {
-              console.error(
-                "[YouTube Groups] Error re-renderizando panel",
-                err,
-              );
-            });
-          },
-        );
-      });
-      groupOption.appendChild(iconButton);
-      groupOption.appendChild(editButton);
-      groupOption.appendChild(deleteButton);
-      groupOption.addEventListener("click", () =>
-        setActiveFilter({ type: "group", id: group.id }),
-      );
-      options.append(groupOption);
-
-      // Renderizar subgrupos si existen
-      if (group.subgroups && group.subgroups.length > 0) {
-        group.subgroups.forEach((subgroup) => {
-          renderGroupWithSubGroups(subgroup, level + 1);
-        });
-      }
-    }
-
-    // Renderizar todos los grupos y subgrupos
-    groups.forEach((group) => {
-      if (group.type !== "subgroup") {
-        // Solo renderizar grupos principales
-        renderGroupWithSubGroups(group, 0);
-      }
-    });
 
     renderCurrentChannelSection(groups);
     renderCurrentVideoSection();
