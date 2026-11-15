@@ -275,16 +275,108 @@
       active > 0 ? `Filtros (${active})` : "Filtros";
   }
 
+  /** ID de la columna propia "YouTube Groups" (ADR 0008). */
+  const SIDEBAR_ID = "youtube-groups-sidebar";
+
+  /** Si ya se intentó leer los ajustes (con éxito o no): la columna puede crearse. */
+  let settingsReady = false;
+
+  /**
+   * Sincroniza la columna y las clases de `<html>` con `settings` y con la
+   * pantalla completa. Sin columna creada no hace nada.
+   */
+  function applySidebarState() {
+    const sidebar = document.getElementById(SIDEBAR_ID);
+    if (!sidebar) {
+      return;
+    }
+    const root = document.documentElement;
+    const collapsed = settings.sidebarCollapsed;
+    root.classList.add("youtube-groups--sidebar");
+    root.classList.toggle("youtube-groups--sidebar-collapsed", collapsed);
+    root.classList.toggle(
+      "youtube-groups--fullscreen",
+      document.fullscreenElement !== null,
+    );
+    sidebar.classList.toggle("youtube-groups__sidebar--collapsed", collapsed);
+    const button = sidebar.querySelector(".youtube-groups__sidebar-toggle");
+    button.textContent = collapsed ? "»" : "«";
+    button.title = collapsed
+      ? "Mostrar YouTube Groups"
+      : "Plegar YouTube Groups";
+    button.setAttribute(
+      "aria-label",
+      collapsed ? "Mostrar YouTube Groups" : "Plegar YouTube Groups",
+    );
+    button.setAttribute("aria-expanded", String(!collapsed));
+  }
+
+  /**
+   * Guarda el plegado de la columna. Si falla, repinta el estado guardado.
+   * @param {HTMLButtonElement} button - Botón de plegar.
+   * @returns {Promise<void>}
+   */
+  async function toggleSidebar(button) {
+    button.disabled = true;
+    settingsWriteSeq += 1;
+    const seq = settingsWriteSeq;
+    try {
+      const result = await YouTubeGroupsSettings.updateSettings({
+        sidebarCollapsed: !settings.sidebarCollapsed,
+      });
+      if (seq > settingsAppliedSeq) {
+        settingsAppliedSeq = seq;
+        settings = result.settings;
+      }
+    } catch (error) {
+      console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
+    } finally {
+      button.disabled = false;
+      applySidebarState();
+    }
+  }
+
+  /**
+   * Crea la columna propia si hay ajustes leídos, existe `ytd-app` y la
+   * columna no está ya conectada.
+   */
+  function ensureSidebar() {
+    if (
+      !settingsReady ||
+      document.getElementById(SIDEBAR_ID)?.isConnected ||
+      !document.querySelector("ytd-app")
+    ) {
+      return;
+    }
+    const sidebar = document.createElement("aside");
+    sidebar.id = SIDEBAR_ID;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "youtube-groups__sidebar-toggle";
+    button.addEventListener("click", () => {
+      toggleSidebar(button);
+    });
+    sidebar.append(button);
+    document.body.append(sidebar);
+    applySidebarState();
+  }
+
+  document.addEventListener("fullscreenchange", applySidebarState);
+
   YouTubeGroupsSettings.getSettings()
     .then((loaded) => {
       settings = loaded;
       settingsLoaded = true;
+      settingsReady = true;
       applyVisibilityToAllCards();
       syncSettingsControls();
+      ensureSidebar();
     })
     .catch((error) => {
       settingsLoadError = error.message;
+      settingsReady = true;
       syncSettingsControls();
+      ensureSidebar();
       console.error("[YouTube Groups] No se pudieron leer los ajustes", error);
     });
 
@@ -3366,6 +3458,9 @@
         }
       }
     }
+    if (!document.getElementById(SIDEBAR_ID)?.isConnected) {
+      ensureSidebar();
+    }
     if (!document.getElementById(GUIDE_SECTION_ID)?.isConnected) {
       scheduleGuideCheck();
     }
@@ -3688,6 +3783,7 @@
           settingsLoadError = null;
           settingsAppliedSeq = settingsWriteSeq;
           syncSettingsControls();
+          applySidebarState();
           applyVisibilityToAllCards();
         } else if (name === "groups") {
           refreshActiveFilter().catch((error) => {

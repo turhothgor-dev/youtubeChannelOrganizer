@@ -73,7 +73,7 @@ verde; tema claro y oscuro.
   "sí" })` da `false`; `true` se conserva; `updateSettings({ sidebarCollapsed: true })` escribe una vez y conserva los
   demás campos; `updateSettings({ sidebarCollapsed: 1 })` lanza. Los tests que comparan el objeto completo añaden el
   campo (cambio intencionado).
-- [ ] T2 · Columna vacía con su botón de plegar, clases de `<html>`, desplazamiento del contenido, posición junto a
+- [x] T2 · Columna vacía con su botón de plegar, clases de `<html>`, desplazamiento del contenido, posición junto a
   la guía o mini-guía de YouTube, pantalla completa y sincronización por `storage.onChanged` (ver **Decisiones**). La
   sección sigue aún en la guía de YouTube · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y
   a mano V1–V4.
@@ -141,3 +141,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: ajuste sidebarCollapsed (por defecto false) y ADR 0003 al día | Tests de ajustes y de copia de seguridad actualizados con el campo nuevo. |
+| 2026-11-15 | T2 | feat: columna propia YouTube Groups con botón de plegar que desplaza el contenido | Columna vacía, clases de `<html>`, CSS de posición y pantalla completa; V1–V4 pendientes a mano. |
