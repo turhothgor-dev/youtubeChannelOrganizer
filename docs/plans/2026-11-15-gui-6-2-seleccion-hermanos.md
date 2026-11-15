@@ -114,6 +114,6 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
-| 2026-11-15 | T1 | feat: claves de canal con contenedor y traspaso version 3 | `filter.js`, `guide.js` y `content.js`; tests adaptados. `make lint` y `make test-affected` en verde; V3, V4 a mano pendientes. |
+| 2026-11-15 | T1 | feat: clave de canal con contenedor en la selección | `filter.js`, `guide.js` y `content.js`; tests adaptados. `make lint` y `make test-affected` en verde; V3, V4 a mano pendientes. |
 | 2026-11-15 | T2 | feat: la selección se limita a elementos hermanos | `toggleSelection(groups, selection, filter)` y `resolveSelection` con `areSiblings`; `content.js` pasa `guideGroups`; tests adaptados. `make lint` y `make test-affected` en verde; V1, V2, V5 a mano pendientes. |
 | 2026-11-15 | T3 | docs: ARCHITECTURE al día, ADR 0011 aceptada y ADR 0009 sustituida | `ARCHITECTURE.md` (filtro, claves con contenedor, `version: 3`), ADR 0011 aceptada, 0009 y 0007 con su estado; plan a `hecho`. |

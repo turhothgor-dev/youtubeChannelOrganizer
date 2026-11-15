@@ -1,6 +1,6 @@
 # Plan: GUI 6 · Correcciones de la revisión (guía fija, observer, /live, hermanos)
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: revisión del diff `5f9b30c..HEAD` (planes `2026-11-15-gui-6-1-guia-fija`, `-2-seleccion-hermanos`,
 `-3-boton-crear`; ADR 0010 y 0011).
@@ -84,7 +84,7 @@ Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make t
   Test: con grupos `"a" > "b/c" > "x"` y `"a/b" > "c" > "y"` (rutas de padre `["a","b/c"]` y `["a/b","c"]`, que con
   `join("/")` coincidían), `toggleSelection` con `x` seleccionado y pulsando `y` deja solo `y`; los hermanos reales se
   siguen conservando como antes.
-- [ ] T6 · Cerrar: ADR 0010 con los selectores definitivos (punto 2 y **A vigilar**: `#guide-spacer`,
+- [x] T6 · Cerrar: ADR 0010 con los selectores definitivos (punto 2 y **A vigilar**: `#guide-spacer`,
   `--ytd-mini-guide-width`, `#frosted-glass`, chips, `ytd-shorts`, `overflow-x: clip`, `pointer-events`, y el porqué
   del desplazamiento único en el host) y `/live/<id>` como `watch`; `docs/ARCHITECTURE.md` (fila de `pages.js` con
   `/live` y `getNavigationPathname`; flujo **Guía lateral** con la caché del ancla y el destino de
@@ -146,3 +146,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T3 | `perf: caché del ancla de la sección en la guía` | `getGuideAnchor` con `guideAnchorCache`; el observer la invalida con mutaciones en `#sections` ajenas a nuestra sección. Pendiente V4 a mano. |
 | 2026-11-15 | T4 | `fix: /live como watch y guía según la ruta de destino` | `getPageType` con `/live/<id>`, `getNavigationPathname` y `syncGuidePin(pathname)`; `yt-navigate-start` usa el destino. Pendiente V5 a mano. |
 | 2026-11-15 | T5 | `fix: hermanos comparados por ruta elemento a elemento` | `areSiblings` sin `join("/")`; test con ids que contienen `/`. Pendiente V6 a mano. |
+| 2026-11-15 | T6 | `docs: selectores definitivos de la guía fija y caché del ancla` | ADR 0010, `ARCHITECTURE.md` y mensaje de T1 en `gui-6-2`. Plan a `hecho`. |

@@ -37,16 +37,37 @@ margen del contenido lo pone el CSS de YouTube en `ytd-page-manager#page-manager
      haya desbordamiento horizontal ni elementos fijos de la página (barra de chips, `#frosted-glass`, Shorts) mal
      alineados.
 
-   Selectores finales (todos bajo `html.youtube-groups--guide-pinned`): `ytd-mini-guide-renderer` (`display: none`),
-   `tp-yt-app-drawer#guide` y `tp-yt-app-drawer#guide #contentContainer` (visibles, sin `transform` ni sombra,
-   `top: var(--ytd-masthead-height, 56px)`), `tp-yt-app-drawer#guide #scrim` (oculto),
-   `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` (oculto), `ytd-page-manager#page-manager`
-   (`margin-left: var(--app-drawer-width, 240px)`) y `ytd-app` (`overflow-x: hidden`). Se escribieron a partir del
-   conocimiento del DOM de YouTube, sin inspección en vivo; los ajustes que salgan de la verificación manual (V2–V4,
-   V6) se anotarán aquí.
+   Selectores finales (todos bajo `html.youtube-groups--guide-pinned`):
+   - `ytd-mini-guide-renderer` (`display: none`).
+   - `tp-yt-app-drawer#guide` (host): visible, sin `transform` ni sombra, con `top: var(--ytd-masthead-height, 56px)`,
+     `bottom: 0`, `right: auto`, `width: var(--app-drawer-width, 240px)` y `pointer-events: none`. Fuera del modo
+     persistente el host es `position: fixed` con `left: 0; right: 0`; sin ese ancho y sin `pointer-events: none`
+     cubriría la página entre 792 y ~1312 px y se comería los clics. Las dos cosas a la vez: la primera quita la
+     causa, la segunda protege si YouTube cambia el ancho.
+   - `tp-yt-app-drawer#guide #contentContainer`: visible, sin `transform` ni sombra, `top: 0`, sin `padding` vertical
+     y `pointer-events: auto` (la guía sí recibe clics).
+   - `tp-yt-app-drawer#guide #guide-spacer` (`display: none`) y `#scrim` (oculto);
+     `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` (oculto).
+   - **Desplazamiento vertical único en el host**: antes se sumaban el `top` del host, el de `#contentContainer` y
+     `#guide-spacer` (~168 px). Se descarta dejar el host en `top: 0` y que `#guide-spacer` desplace: fuera del modo
+     persistente el cajón tiene un `z-index` por encima del masthead y taparía el logo y la búsqueda; con el host bajo
+     el masthead no puede pasar y el resultado no depende de cómo YouTube dimensione `#guide-spacer`.
+   - `ytd-page-manager#page-manager` (`margin-left: var(--app-drawer-width, 240px)`).
+   - `ytd-app`: `overflow-x: clip` (no `hidden`: `hidden` crea un contenedor de scroll y rompe los `position: sticky`
+     de la página; `clip` recorta sin crearlo, Firefox ≥ 81) y `--ytd-mini-guide-width: var(--app-drawer-width,
+     240px)`, de modo que todo lo que YouTube alinea con la mini-guía se alinea con la guía.
+   - Elementos fijos con valor fijo, `left: var(--app-drawer-width, 240px)`: `#frosted-glass`,
+     `ytd-rich-grid-renderer #header ytd-feed-filter-chip-bar-renderer`, `ytd-rich-grid-renderer #header
+     #chips-wrapper` y `ytd-shorts`. `left` no afecta a elementos sin posicionar.
+
+   Se escribieron a partir del conocimiento del DOM de YouTube, sin inspección en vivo; los ajustes que salgan de la
+   verificación manual (V1–V6 del plan `gui-6-correcciones`) se anotarán aquí. `/live/<id>` se clasifica como `watch`
+   (página de vídeo): no se fija la guía y allí se comporta como `/watch`.
 3. **Cuándo se recalcula** (`syncGuidePin`, idempotente): al arrancar, en `yt-navigate-start`, `yt-navigate-finish`,
    `popstate`, `fullscreenchange`, `resize` (como mucho una vez por frame) y desde el `MutationObserver` si
-   `location.pathname` ha cambiado desde la última vez. Así, al ir a `/watch` la clase se quita al vuelo y YouTube
+   `location.pathname` ha cambiado desde la última vez. En `yt-navigate-start` se usa la ruta de destino
+   (`event.detail.url`) para clasificar la página, para que la guía no quede fija durante la transición a `/watch`;
+   la ruta guardada para detectar cambios sigue siendo `location.pathname`. Así, al ir a `/watch` la clase se quita al vuelo y YouTube
    recupera su comportamiento normal sin recargar.
 4. **Botón ☰ en páginas fijadas**: sin efecto. Un escuchador de `click` en `document`, en fase de captura, detiene el
    evento si la clase está puesta y el objetivo está dentro de `ytd-masthead #guide-button`. Así el estado interno de
@@ -76,8 +97,10 @@ margen del contenido lo pone el CSS de YouTube en `ytd-page-manager#page-manager
   sin tapar el contenido. Quitar la clase devuelve exactamente el comportamiento de YouTube.
 - Se pierde: en `/watch` la sección vuelve a estar solo en el cajón de ☰ (aceptado por la persona); ☰ no hace nada en
   las páginas fijadas; por debajo de 792 px la sección solo está en el cajón.
-- A vigilar: dependemos de `tp-yt-app-drawer#guide`, `#contentContainer`, `#scrim`, `ytd-mini-guide-renderer`,
-  `ytd-page-manager#page-manager`, `#guide-button` y de que `ytd-guide-renderer` tenga contenido sin haberse abierto.
+- A vigilar: dependemos de `tp-yt-app-drawer#guide`, `#contentContainer`, `#guide-spacer`, `#scrim`,
+  `ytd-mini-guide-renderer`, `ytd-page-manager#page-manager`, la variable `--ytd-mini-guide-width`, `#frosted-glass`,
+  la barra de chips (`ytd-feed-filter-chip-bar-renderer`, `#chips-wrapper`), `ytd-shorts`, `#guide-button`, de
+  `overflow-x: clip` y `pointer-events` (soportados por Firefox) y de que `ytd-guide-renderer` tenga contenido sin haberse abierto.
   Si YouTube los cambia, la guía deja de forzarse (vuelve su comportamiento normal) o queda mal colocada; la sección
   sigue funcionando en la guía o el cajón. Si cambia el DOM de la guía y la sección no aparece, no se puede filtrar
   hasta corregirlo (el riesgo del ADR 0007 vuelve).
