@@ -33,7 +33,7 @@ recomendada en cada caso.
   `youtube-groups__thumb-host`; el CSS pasa a `[data-youtube-groups-thumb-host]`; actualizar la mención en
   `docs/ARCHITECTURE.md` · Ficheros: `content.js`, `content.css`, `docs/ARCHITECTURE.md` · Test: `make test` sin
   regresiones + verificación manual V1
-- [ ] T2 · Al abrir un desplegable de la extensión cerrar los demás: `openSubscriptionGroupsForm` oculta el de listas
+- [x] T2 · Al abrir un desplegable de la extensión cerrar los demás: `openSubscriptionGroupsForm` oculta el de listas
   (`hidePlaylistDropdown`) y el selector de iconos (`hideIconPicker`); `openPlaylistForm` oculta el formulario de grupos
   (extraer un `hideSubscriptionDropdown()` con lo que ya hace el escuchador de `mousedown` ~2346) y el selector de
   iconos · Ficheros: `content.js` · Test: verificación manual V2
@@ -80,3 +80,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: marcar la miniatura anfitriona con atributo para no romper el filtro de duración` | Atributo `data-youtube-groups-thumb-host` en lugar de clase; pendiente V1 manual |
+| 2026-11-15 | T2 | `fix: cerrar los demás desplegables al abrir uno de grupos o de listas` | `hideSubscriptionDropdown()` extraído; pendiente V2 manual |

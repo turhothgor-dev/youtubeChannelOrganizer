@@ -2348,33 +2348,26 @@
           subscriptionDropdown &&
           !subscriptionDropdown.contains(event.target)
         ) {
-          const form = subscriptionDropdown.querySelector(
-            ".youtube-groups__subscription-groups-form",
-          );
-          if (form) {
-            form.hidden = true;
-          }
+          hideSubscriptionDropdown();
         }
       });
 
       // Cerrar dropdown al hacer scroll para evitar posiciones obsoletas
-      window.addEventListener(
-        "scroll",
-        () => {
-          if (subscriptionDropdown) {
-            const form = subscriptionDropdown.querySelector(
-              ".youtube-groups__subscription-groups-form",
-            );
-            if (form) {
-              form.hidden = true;
-            }
-          }
-        },
-        { passive: true },
-      );
+      window.addEventListener("scroll", hideSubscriptionDropdown, {
+        passive: true,
+      });
     }
 
     return subscriptionDropdown;
+  }
+
+  function hideSubscriptionDropdown() {
+    const form = subscriptionDropdown?.querySelector(
+      ".youtube-groups__subscription-groups-form",
+    );
+    if (form) {
+      form.hidden = true;
+    }
   }
 
   // Posiciona el desplegable junto al botón pulsado, sin salirse de la ventana
@@ -2395,6 +2388,8 @@
   }
 
   function openSubscriptionGroupsForm(channel, anchorButton) {
+    hidePlaylistDropdown();
+    hideIconPicker();
     const dropdown = getOrCreateSubscriptionDropdown();
     const form = dropdown.querySelector(
       ".youtube-groups__subscription-groups-form",
@@ -2633,6 +2628,8 @@
    * @param {Element} anchorButton - Botón junto al que se muestra.
    */
   function openPlaylistForm(video, anchorButton) {
+    hideSubscriptionDropdown();
+    hideIconPicker();
     const dropdown = getOrCreatePlaylistDropdown();
     const form = dropdown.querySelector(
       ".youtube-groups__playlist-dropdown-form",
