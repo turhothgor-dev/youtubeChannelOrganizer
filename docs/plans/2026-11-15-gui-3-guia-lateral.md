@@ -163,7 +163,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
   `current`; `shouldNavigateToSubscriptions` para `home`, `watch` y `subscriptions` con grupo, canal y "todos";
   `parsePendingFilter(serializePendingFilter(f, t), t + 1000)` devuelve `f`; da `null` con `t + 31000`, con
   `createdAt` en el futuro, con JSON roto, `version: 2` o filtro "todos".
-- [ ] T2 · `content.js` con `activeFilter`, `setActiveFilter`, `refreshActiveFilter`, `isFilterOnRemovedGroup` y
+- [x] T2 · `content.js` con `activeFilter`, `setActiveFilter`, `refreshActiveFilter`, `isFilterOnRemovedGroup` y
   `handleGroupsRemoved(removedIds)` (usada por la limpieza y por "Eliminar" del panel), sin cambios visibles ·
   Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V1 (regresión de filtros).
 - [ ] T3 · `modules/guide.js` (ver **Decisiones**) · Ficheros: `modules/guide.js`, `tests/guide.test.js`,
@@ -282,3 +282,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `feat: módulo de filtro activo (todos, grupo o canal)` | `modules/filter.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
+| 2026-11-15 | T2 | `refactor: content.js usa un filtro activo general` | `activeFilter`, `setActiveFilter`, `refreshActiveFilter` y `handleGroupsRemoved`; sin cambios visibles. V1 manual pendiente. |
