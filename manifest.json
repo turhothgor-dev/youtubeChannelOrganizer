@@ -26,6 +26,7 @@
         "modules/metadata.js",
         "modules/pages.js",
         "modules/filter.js",
+        "modules/guide.js",
         "modules/playlists.js",
         "modules/backup.js",
         "content.js"
