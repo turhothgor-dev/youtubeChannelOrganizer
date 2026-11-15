@@ -1,6 +1,7 @@
 # 0007 · Filtro activo (todos, grupo o canal) y paso a /feed/subscriptions
 
-- Estado: aceptada; puntos 1, 2, 4 y 5 sustituidos por [0009](0009-seleccion-multiple-como-filtro.md)
+- Estado: aceptada; puntos 1, 2, 4 y 5 sustituidos por [0009](0009-seleccion-multiple-como-filtro.md), a su vez
+  sustituido por [0011](0011-seleccion-de-hermanos.md)
 - Fecha: 2026-11-15
 
 ## Contexto

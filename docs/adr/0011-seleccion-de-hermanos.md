@@ -1,6 +1,6 @@
 # 0011 · Selección limitada a hermanos
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 - Sustituye a: [0009](0009-seleccion-multiple-como-filtro.md)
 

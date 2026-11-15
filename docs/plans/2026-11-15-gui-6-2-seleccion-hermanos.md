@@ -1,6 +1,6 @@
 # Plan: GUI 6 (2/3) · Selección limitada a hermanos
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-5-*` en Firefox (2026-11-15), punto 2.
 
@@ -67,7 +67,7 @@ verde. Cada commit deja la extensión funcionando.
   pulsar A1 → `[A1]`; desde `[x@A]` pulsar A → `[A]`; desde `[x@A1a]` pulsar A → `[A]`; con `[A, B]` pulsar `x@A` → `[x@A]`; `x@A` + otro canal de A → ambos; `x@A` + `x@B` → `[x@B]`; pulsar una
   seleccionada la quita sin tocar las demás; nunca quedan padre e hijo; no muta la entrada; `resolveSelection([A,
   A1])` → `[A1]` (hermanos del último). A mano V1, V2, V5.
-- [ ] T3 · Cerrar: `docs/ARCHITECTURE.md` (fila de `filter.js` y flujo **Filtro** con la regla de hermanos, claves con
+- [x] T3 · Cerrar: `docs/ARCHITECTURE.md` (fila de `filter.js` y flujo **Filtro** con la regla de hermanos, claves con
   contenedor y `version: 3`; enlace al ADR 0011); ADR 0011 a `aceptada`; ADR 0009 a "sustituida por 0011"; ADR 0007:
   "puntos 1, 2, 4 y 5 sustituidos por 0009, a su vez sustituido por 0011". Estado de este plan a `hecho` · Ficheros:
   `docs/ARCHITECTURE.md`, `docs/adr/0011-seleccion-de-hermanos.md`, `docs/adr/0009-seleccion-multiple-como-filtro.md`,
@@ -116,3 +116,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: claves de canal con contenedor y traspaso version 3 | `filter.js`, `guide.js` y `content.js`; tests adaptados. `make lint` y `make test-affected` en verde; V3, V4 a mano pendientes. |
 | 2026-11-15 | T2 | feat: la selección se limita a elementos hermanos | `toggleSelection(groups, selection, filter)` y `resolveSelection` con `areSiblings`; `content.js` pasa `guideGroups`; tests adaptados. `make lint` y `make test-affected` en verde; V1, V2, V5 a mano pendientes. |
+| 2026-11-15 | T3 | docs: ARCHITECTURE al día, ADR 0011 aceptada y ADR 0009 sustituida | `ARCHITECTURE.md` (filtro, claves con contenedor, `version: 3`), ADR 0011 aceptada, 0009 y 0007 con su estado; plan a `hecho`. |

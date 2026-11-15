@@ -26,7 +26,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
 | `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch`, `shorts`, `channel`, `other`) `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas y `shouldPinGuide(pageType, width, isFullscreen)` si la guía de YouTube se fuerza abierta y fija (no en `watch`, con `PINNED_GUIDE_MIN_WIDTH` = 792 px o más y sin pantalla completa; ADR 0010). Se carga tras `metadata.js` |
-| `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo como selección múltiple (ADR 0007 y 0009): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `parseFilterKey`, `normalizeSelection`, `toggleSelection` (añade o quita una clave), `clearSelection`, `resolveSelection` (descarta claves inexistentes y da la unión de URL), `shouldNavigateOnSelect` (solo navega al añadir fuera de suscripciones) y el traspaso por `sessionStorage` (`serializePendingSelection`, `parsePendingSelection`, `version: 2`). Se carga tras `pages.js` |
+| `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo como selección múltiple (ADR 0007 y 0011): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `parseFilterKey`, `normalizeSelection`, `toggleSelection` (añade o quita una clave, conservando solo hermanos), `clearSelection`, `resolveSelection` (descarta claves inexistentes y da la unión de URL), `shouldNavigateOnSelect` (solo navega al añadir fuera de suscripciones) y el traspaso por `sessionStorage` (`serializePendingSelection`, `parsePendingSelection`, `version: 3`). Se carga tras `pages.js` |
 | `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la sección de la guía lateral: `findGuideInsertionIndex` (dónde insertarla en `ytd-guide-renderer`, sin depender del idioma), `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup`, `getCreateTarget`, `findGuidePath` e `isChannelListOpen`. Se carga tras `filter.js` |
 | `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), sección "YouTube Groups" en la guía de YouTube y guía fija (ADR 0010), botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
@@ -52,10 +52,12 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   por tarjeta) o desde la sección "Canal actual" del panel en `/watch`. Ambos usan el mismo selector de casillas
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez. La operación se encola por clave
   (`withLock`, ADR 0005), de modo que dos operaciones solapadas sobre los grupos no se pisan.
-- **Filtro** (ADR 0007 y [0009](adr/0009-seleccion-multiple-como-filtro.md)): `content.js` guarda una
-  `activeSelection` en memoria, un array de claves (`group:<id>`, `channel:<url>`) en orden de adición; `[]` es "todos".
-  Cada clic en la columna lateral sobre un grupo, subgrupo o canal lo añade o lo quita (`toggleSelectionItem`, con
-  `toggleSelection`); el filtro muestra la unión de sus canales (`resolveSelection`, `activeSelectionUrls`). El botón
+- **Filtro** (ADR 0007 y [0011](adr/0011-seleccion-de-hermanos.md)): `content.js` guarda una
+  `activeSelection` en memoria, un array de claves (`group:<id>`, `channel:<contenedor>:<url>`, con el contenedor
+  codificado) en orden de adición; `[]` es "todos". Cada clic en la columna lateral sobre un grupo, subgrupo o canal
+  lo añade o lo quita (`toggleSelectionItem`, con `toggleSelection(groups, selection, filter)`); al añadir solo se
+  conservan los seleccionados **hermanos** (mismo tipo y mismo contenedor), así que nunca hay un padre con su hijo ni
+  grupos con canales, y un canal se marca solo en la lista donde se pulsó; el filtro muestra la unión de sus canales (`resolveSelection`, `activeSelectionUrls`). El botón
   "Limpiar selección (N)", visible solo con selección, la vacía sin navegar. Los elementos borrados salen de la
   selección (`refreshActiveSelection`). Si se añade un elemento y la página no es `/feed/subscriptions`
   (`shouldNavigateOnSelect`), se navega a suscripciones pulsando el enlace de suscripciones de la guía de YouTube (o
@@ -138,5 +140,5 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 Las decisiones relevantes están en `docs/adr/`. El filtro activo y el paso a suscripciones:
 [ADR 0007](adr/0007-filtro-activo-y-paso-a-suscripciones.md). La columna lateral propia (sustituida):
 [ADR 0008](adr/0008-columna-propia-que-desplaza-el-contenido.md). La sección en la guía de YouTube, fija fuera de
-`/watch`: [ADR 0010](adr/0010-seccion-en-la-guia-de-youtube-fija.md). La selección múltiple como filtro (sustituye en
-parte al 0007): [ADR 0009](adr/0009-seleccion-multiple-como-filtro.md).
+`/watch`: [ADR 0010](adr/0010-seccion-en-la-guia-de-youtube-fija.md). La selección limitada a hermanos (sustituye al 0009,
+que sustituía en parte al 0007): [ADR 0011](adr/0011-seleccion-de-hermanos.md).
