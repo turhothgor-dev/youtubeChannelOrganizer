@@ -1,6 +1,6 @@
 # Plan: guía fija solo en suscripciones, ☰ del cajón y botones sobre el reproductor (gui-7)
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: tres peticiones de la persona tras probar en Firefox (2026-11-15), sobre el ADR 0010 y los planes `gui-2` y
 `gui-6-*`.
@@ -122,11 +122,12 @@ verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en ver
     `display: flex` y anularía `hidden`), y para `.youtube-groups__player-actions` un `top`/`left` de 12 px y un
     `z-index` por encima de los controles del reproductor (punto de partida 60; se ajusta en V7 con una línea en
     **Cambios aprobados** si hace falta). No se toca `position` de `#movie_player` (YouTube ya lo posiciona).
-- [ ] T6 · Documentación y cierre · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/pages.js`:
+- [x] T6 · Documentación y cierre · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/pages.js`:
   `shouldShowPlayerControls`; fila de `content.js`: botones sobre el reproductor; flujo **Detección** o uno nuevo
   **Botones del reproductor** con `#movie_player`, `video.paused`, eventos y `youtube-groups__player-actions`; flujo
   **Marcar como visto** y **Listas**: también desde el reproductor), este plan (resultado de V3–V5 y estado `hecho`) ·
-  Test: `make lint`.
+  Test: `make lint`. Resultado de V3–V5: **pendiente** (la persona las hará en Firefox; no se anota ningún resultado
+  hasta entonces).
 
 ### Verificación manual (tu Firefox con sesión; recarga la extensión en `about:debugging`)
 
@@ -210,3 +211,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T4 | `refactor: extraer el escudo de eventos y el marcado de visto actual` | `shieldControlEvents` y `toggleCurrentVideoWatched` en `content.js`, sin cambio de comportamiento. V6 pendiente a mano. |
 | 2026-11-15 | T5 | `feat: mostrar los botones de grupo, visto y lista sobre el reproductor en pausa` | `createPlayerControl`, `syncPlayerControl` y programación en `content.js`, más CSS. V6-V12 pendientes a mano; el z-index 60 se ajusta en V7. |
 | 2026-11-15 | T5 (corrección) | `fix: ocultar los botones del reproductor durante la navegación y endurecer su sincronización` | Marca `playerNavigating` entre `yt-navigate-start` y `yt-navigate-finish`; +G deshabilitado si la página no está sincronizada; el observer usa la referencia `playerControl`; escudo también en `keyup`. V11 pendiente a mano. |
+| 2026-11-15 | T6 | `docs: documentar los botones del reproductor y cerrar el plan gui-7` | ARCHITECTURE actualizada (pages.js, content.js, flujo Botones del reproductor, visto y listas). Plan en `hecho` con verificación manual pendiente: V3-V5 (hallazgo ☰) y V6-V12 sin resultado hasta que la persona las pruebe en Firefox. |

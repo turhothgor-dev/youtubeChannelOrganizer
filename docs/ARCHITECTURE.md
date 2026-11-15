@@ -25,10 +25,10 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`, `panelCollapsed`, este último `true` por defecto; `sidebarCollapsed` se retiró y se ignora si viene guardado), normalizarlos, leerlos y actualizarlos con validación |
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
-| `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch` —también `/live/<id>`—, `shorts`, `channel`, `other`), `getNavigationPathname(url, origin)` (ruta de destino de una navegación, o `null`), `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas y `shouldPinGuide(pageType, width, isFullscreen)` si la guía de YouTube se fuerza abierta y fija (solo en `subscriptions`, con `PINNED_GUIDE_MIN_WIDTH` = 792 px o más y sin pantalla completa; ADR 0010 y 0012). Se carga tras `metadata.js` |
+| `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch` —también `/live/<id>`—, `shorts`, `channel`, `other`), `getNavigationPathname(url, origin)` (ruta de destino de una navegación, o `null`), `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas y `shouldPinGuide(pageType, width, isFullscreen)` si la guía de YouTube se fuerza abierta y fija (solo en `subscriptions`, con `PINNED_GUIDE_MIN_WIDTH` = 792 px o más y sin pantalla completa; ADR 0010 y 0012) y `shouldShowPlayerControls({ pageType, paused, fullscreen, adShowing })` si se muestran los botones sobre el reproductor (solo en `watch`, con el vídeo pausado o terminado, sin pantalla completa ni anuncio). Se carga tras `metadata.js` |
 | `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo como selección múltiple (ADR 0007 y 0011): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `parseFilterKey`, `normalizeSelection`, `toggleSelection` (añade o quita una clave, conservando solo hermanos), `clearSelection`, `resolveSelection` (descarta claves inexistentes y da la unión de URL), `shouldNavigateOnSelect` (solo navega al añadir fuera de suscripciones) y el traspaso por `sessionStorage` (`serializePendingSelection`, `parsePendingSelection`, `version: 3`). Se carga tras `pages.js` |
 | `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la sección de la guía lateral: `findGuideInsertionIndex` (dónde insertarla en `ytd-guide-renderer`, sin depender del idioma), `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup`, `getCreateTarget`, `findGuidePath` e `isChannelListOpen`. Se carga tras `filter.js` |
-| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), sección "YouTube Groups" en la guía de YouTube y guía fija (ADR 0010), botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
+| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), sección "YouTube Groups" en la guía de YouTube y guía fija (ADR 0010), botones por vídeo (grupo y visto), botones sobre el reproductor de `/watch` con el vídeo en pausa, filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
 | `tests/` | `node:test` + `node:vm` | Tests de `modules/` con un `browser.storage.local` simulado; excluidos del paquete por `web-ext-config.mjs` |
 
@@ -48,6 +48,15 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   (`getChannelUrlFromPath`) y en el resto lo busca por nombre, solo con los textos de la zona de metadatos
   (`getChannelTexts`), entre los canales guardados (`buildChannelNameIndex` y `matchChannelByTexts` de `YouTubeGroups`, índice `channelNameIndex`
   recalculado en `renderGroupsPanel`; un nombre con dos URL distintas no se usa). En `yt-navigate-finish` (navegación SPA) se reinicia y se vuelve a recorrer el documento.
+- **Botones del reproductor**: en `/watch`, `syncPlayerControl` mantiene un único control
+  (`youtube-groups__player-actions`, referencia `playerControl`) dentro de `#movie_player`, con +G, visto y lista del
+  vídeo actual (mismas funciones que "Vídeo actual" del panel) y el aspecto de las miniaturas. Se muestra según
+  `shouldShowPlayerControls` con `video.paused` del `<video>` de `#movie_player`, `document.fullscreenElement` y
+  `ad-showing`. Se recalcula, una vez por frame (`schedulePlayerControlSync`), al arrancar, con `play`, `pause` y `ended`
+  (captura en `document`, solo vídeos de `#movie_player`), `yt-navigate-finish`, `fullscreenchange`, al refrescar los
+  vistos, al actualizar el canal actual y desde el `MutationObserver` si falta el control. Entre `yt-navigate-start` y
+  `yt-navigate-finish` (`playerNavigating`) queda oculto para no mostrar el vídeo anterior. El control detiene los
+  eventos de puntero y teclado para no pausar, reanudar ni abrir nada del reproductor.
 - **Añadir un canal a grupos**: desde el botón de una tarjeta (insertado en el mismo recorrido de tarjetas, uno
   por tarjeta) o desde la sección "Canal actual" del panel en `/watch`. Ambos usan el mismo selector de casillas
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez. La operación se encola por clave
@@ -75,7 +84,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `youtube-groups--hidden` y `youtube-groups--dimmed`. Ocultar gana a atenuar. Se reevalúa al procesar cada
   tarjeta, al cambiar el filtro, al marcar un vídeo y al cambiar un ajuste.
 - **Marcar como visto**: `content.js` lee los vistos al arrancar (`watchedVideos`). El botón "Marcar visto" de la
-  tarjeta o el de "Vídeo actual" del panel (en `/watch` y `/shorts`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
+  tarjeta o el de "Vídeo actual" del panel (en `/watch` y `/shorts`) o el del reproductor (en `/watch`) llama a `YouTubeGroupsWatched.setVideoWatched`, que lee,
   aplica el cambio y escribe una vez solo si cambia algo, encolada por clave (`withLock`, ADR 0005). Después `content.js` actualiza la caché, la clase
   `youtube-groups--watched` de todas las tarjetas con ese ID de vídeo y los botones.
   Las tarjetas de Shorts de las estanterías (`ytd-reel-item-renderer`, `ytm-shorts-lockup-view-model*`) reciben marca
@@ -88,7 +97,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   Entonces `markVideoWatched` guarda igual que el marcado manual. El porcentaje (0, 50, 80 o 95) se elige en
   "Ajustes".
 - **Listas**: listas de vídeos locales, sin API de YouTube (ADR 0004). El botón "Lista" de la tarjeta o "Guardar en
-  lista" de "Vídeo actual" (en `/watch`) abre el mismo desplegable de casillas (`openPlaylistForm`), que llama a
+  lista" de "Vídeo actual" (en `/watch`) o el "Lista" del reproductor abre el mismo desplegable de casillas (`openPlaylistForm`), que llama a
   `YouTubeGroupsPlaylists.setVideoPlaylists` (una lectura y, solo si cambia algo, una escritura, encoladas por clave con `withLock`, ADR 0005). Las listas se
   gestionan en la sección "Listas" del panel: crear, renombrar, eliminar, ver (modal con "Quitar") y reproducir.
   "Reproducir" es un enlace a `https://www.youtube.com/watch_videos?video_ids=...` con los 50 primeros vídeos.
