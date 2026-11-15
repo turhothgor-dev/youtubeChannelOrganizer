@@ -69,7 +69,7 @@ Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make t
   `MutationObserver`, antes de `isGuideSectionInPlace()`, se invalida si alguna mutación cumple
   `sections.contains(target) && !ourSection?.contains(target)` (con `sections` resuelto una vez por lote) · Test:
   `make lint`, `make test` y a mano V4.
-- [ ] T4 · `/live/<id>` como `watch` y pin con la ruta de destino en `yt-navigate-start` · Ficheros:
+- [x] T4 · `/live/<id>` como `watch` y pin con la ruta de destino en `yt-navigate-start` · Ficheros:
   `modules/pages.js`, `tests/pages.test.js`, `content.js` · Cambios: `getPageType` devuelve `"watch"` para
   `/^\/live\/[^/]+/`; nueva pura `getNavigationPathname(url, origin)` en `pages.js` (ruta de `url` resuelta contra
   `origin`; `null` si `url` no es `string` o no es válida). `syncGuidePin(pathname = location.pathname)` usa ese
@@ -144,3 +144,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | `fix: cajón de la guía fija con su ancho y sin capturar clics` | Host con ancho de guía, `pointer-events`, desplazamiento único y `overflow-x: clip`. Pendiente V1, V2, V5 a mano. |
 | 2026-11-15 | T2 | `fix: elementos fijos alineados con la guía fija` | Variable `--ytd-mini-guide-width` y `left` explícito en `#frosted-glass`, chips y `ytd-shorts`. Pendiente V3 a mano. |
 | 2026-11-15 | T3 | `perf: caché del ancla de la sección en la guía` | `getGuideAnchor` con `guideAnchorCache`; el observer la invalida con mutaciones en `#sections` ajenas a nuestra sección. Pendiente V4 a mano. |
+| 2026-11-15 | T4 | `fix: /live como watch y guía según la ruta de destino` | `getPageType` con `/live/<id>`, `getNavigationPathname` y `syncGuidePin(pathname)`; `yt-navigate-start` usa el destino. Pendiente V5 a mano. |

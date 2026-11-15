@@ -1,6 +1,7 @@
 const YouTubeGroupsPages = (() => {
   const CHANNEL_PREFIX_RE = /^\/(?:@[^/]+|(?:channel|c|user)\/[^/]+)(?:\/.*)?$/;
   const SHORTS_RE = /^\/shorts\/[^/]+/;
+  const LIVE_RE = /^\/live\/[^/]+/;
   /** Ancho mínimo de ventana (px) con el que la guía se fuerza fija. */
   const PINNED_GUIDE_MIN_WIDTH = 792;
   const CARD_CONTROL_PAGES = new Set([
@@ -29,7 +30,7 @@ const YouTubeGroupsPages = (() => {
     if (pathname === "/results") {
       return "search";
     }
-    if (pathname === "/watch") {
+    if (pathname === "/watch" || LIVE_RE.test(pathname)) {
       return "watch";
     }
     if (SHORTS_RE.test(pathname)) {
@@ -81,9 +82,29 @@ const YouTubeGroupsPages = (() => {
     );
   }
 
+  /**
+   * Ruta de una URL de navegación (absoluta o relativa) resuelta contra el
+   * origen.
+   *
+   * @param {*} url URL de destino (por ejemplo, detail.url de yt-navigate-start).
+   * @param {string} origin Origen de la URL (location.origin).
+   * @returns {string|null} null si `url` no es un string o no es válida.
+   */
+  function getNavigationPathname(url, origin) {
+    if (typeof url !== "string") {
+      return null;
+    }
+    try {
+      return new URL(url, origin).pathname;
+    } catch {
+      return null;
+    }
+  }
+
   return {
     PINNED_GUIDE_MIN_WIDTH,
     getPageType,
+    getNavigationPathname,
     shouldShowCardControls,
     getChannelUrlFromPath,
     shouldPinGuide,

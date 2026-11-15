@@ -3449,11 +3449,15 @@
   /**
    * Pone o quita la clase que fuerza la guía de YouTube abierta y fija
    * (ADR 0010). Es idempotente.
+   *
+   * @param {string} [pathname] Ruta con la que decidir (por defecto, la
+   *   actual; en yt-navigate-start, la de destino). La ruta que se recuerda
+   *   para el observer es siempre la actual.
    */
-  function syncGuidePin() {
+  function syncGuidePin(pathname = window.location.pathname) {
     guidePinPath = window.location.pathname;
     const pinned = YouTubeGroupsPages.shouldPinGuide(
-      YouTubeGroupsPages.getPageType(window.location.pathname),
+      YouTubeGroupsPages.getPageType(pathname),
       window.innerWidth,
       document.fullscreenElement !== null,
     );
@@ -3489,10 +3493,21 @@
     true,
   );
 
-  document.addEventListener("yt-navigate-start", syncGuidePin);
-  document.addEventListener("yt-navigate-finish", syncGuidePin);
-  window.addEventListener("popstate", syncGuidePin);
-  document.addEventListener("fullscreenchange", syncGuidePin);
+  document.addEventListener("yt-navigate-start", (event) => {
+    let destination = null;
+    try {
+      destination = YouTubeGroupsPages.getNavigationPathname(
+        event.detail?.url,
+        window.location.origin,
+      );
+    } catch {
+      // detail puede ser inaccesible desde el content script.
+    }
+    syncGuidePin(destination ?? window.location.pathname);
+  });
+  document.addEventListener("yt-navigate-finish", () => syncGuidePin());
+  window.addEventListener("popstate", () => syncGuidePin());
+  document.addEventListener("fullscreenchange", () => syncGuidePin());
   window.addEventListener("resize", scheduleGuidePinSync);
   syncGuidePin();
 

@@ -31,6 +31,40 @@ test("getPageType clasifica las rutas conocidas", () => {
   }
 });
 
+test("getPageType trata /live/<id> como watch", () => {
+  const { YouTubeGroupsPages: P } = loadModules();
+
+  assert.strictEqual(P.getPageType("/live/abc"), "watch");
+  assert.strictEqual(P.getPageType("/live/abc/"), "watch");
+  assert.strictEqual(P.getPageType("/live"), "other");
+  assert.strictEqual(P.getPageType("/@canal/live"), "channel");
+  assert.strictEqual(
+    P.shouldPinGuide(P.getPageType("/live/abc"), 1400, false),
+    false,
+  );
+});
+
+test("getNavigationPathname devuelve la ruta de destino o null", () => {
+  const { YouTubeGroupsPages: P } = loadModules();
+  const origin = "https://www.youtube.com";
+
+  assert.strictEqual(P.getNavigationPathname("/watch?v=x", origin), "/watch");
+  assert.strictEqual(
+    P.getNavigationPathname(
+      "https://www.youtube.com/feed/subscriptions",
+      origin,
+    ),
+    "/feed/subscriptions",
+  );
+  for (const value of [undefined, 123, "http://["]) {
+    assert.strictEqual(
+      P.getNavigationPathname(value, origin),
+      null,
+      String(value),
+    );
+  }
+});
+
 test("getPageType devuelve other para el resto de rutas", () => {
   const { YouTubeGroupsPages } = loadModules();
 
