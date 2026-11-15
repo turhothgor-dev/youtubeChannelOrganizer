@@ -1,6 +1,6 @@
 # Plan: GUI 5 (1/3) · Columna propia "YouTube Groups" que desplaza el contenido
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-*` en Firefox (2026-11-15), punto 1.
 
@@ -82,7 +82,7 @@ verde; tema claro y oscuro.
   test); ajustar el CSS de la sección al ancho de la columna (nombres con elipsis) · Ficheros: `content.js`,
   `content.css`, `modules/guide.js`, `tests/guide.test.js` · Test: `make test` (los demás tests de `guide.test.js`
   sin cambios) y a mano V5, V6.
-- [ ] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `content.js`, `guide.js` sin `findGuideInsertionIndex`,
+- [x] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `content.js`, `guide.js` sin `findGuideInsertionIndex`,
   `settings.js` con `sidebarCollapsed`; flujo **Guía lateral** pasa a **Columna lateral** con la técnica del ADR 0008 y
   sin el riesgo "sin guía no se puede filtrar"; enlace al ADR 0008). ADR 0008 a `aceptada`. Estado de este plan a
   `hecho` · Ficheros: `docs/ARCHITECTURE.md`, `docs/adr/0008-columna-propia-que-desplaza-el-contenido.md`, este plan
@@ -143,3 +143,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | feat: ajuste sidebarCollapsed (por defecto false) y ADR 0003 al día | Tests de ajustes y de copia de seguridad actualizados con el campo nuevo. |
 | 2026-11-15 | T2 | feat: columna propia YouTube Groups con botón de plegar que desplaza el contenido | Columna vacía, clases de `<html>`, CSS de posición y pantalla completa; V1–V4 pendientes a mano. |
 | 2026-11-15 | T3 | feat: pintar la sección YouTube Groups en la columna propia y quitarla de la guía de YouTube | `scheduleSidebarCheck`; eliminados `findGuideAnchor`, `findGuideInsertionIndex` y su test; V5–V6 pendientes a mano. |
+| 2026-11-15 | T4 | docs: cerrar plan gui-5-1 con ARCHITECTURE al día y ADR 0008 aceptada | Columna lateral en ARCHITECTURE.md, ADR 0008 a aceptada, plan a hecho. |

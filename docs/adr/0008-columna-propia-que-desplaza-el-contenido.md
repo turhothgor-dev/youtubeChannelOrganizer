@@ -1,6 +1,6 @@
 # 0008 · Columna propia fija a la izquierda que desplaza el contenido de YouTube
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 
 ## Contexto
