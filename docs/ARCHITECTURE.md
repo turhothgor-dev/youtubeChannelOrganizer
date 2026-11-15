@@ -17,9 +17,9 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | --- | --- | --- |
 | `manifest.json` | WebExtensions MV3 | Permiso `storage` y content scripts en `*://www.youtube.com/*` |
 | `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005), los lectores puros `readGroupsValue`, `readWatchedValue`, `readSettingsValue` y `readPlaylistsValue`, y `getChangedKeys(changes, areaName)` para `storage.onChanged` (ADR 0006) |
-| `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos |
+| `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos, y `getUiIconPath(id)` con los iconos de interfaz de los botones de tarjeta (`eye`, `check`, `playlist-add`), separados de `ICON_SET` |
 | `modules/groups.js` | JS clásico (`YouTubeGroups`), sin DOM | Lógica de grupos y subgrupos, apariencia heredada, normalizar URL de canal, pertenencia de un canal a grupos, URL de un grupo para el filtro y `flattenGroups` (árbol aplanado en preorden con nivel), `getChannelKey`, `analyzeGroups` y `applyCleanup` (limpieza, puras) y `cleanupGroups` |
-| `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) |
+| `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) y `getWatchedButtonState` (etiqueta, glifo, pulsado y deshabilitado del botón de visto) |
 | `modules/playlists.js` | JS clásico (`YouTubeGroupsPlaylists`), sin DOM | Listas de vídeos propias: crear, renombrar y borrar listas, guardar y quitar vídeos, ids de listas de un vídeo y URLs de reproducción (`buildPlayAllUrl`, `buildVideoUrl`, `buildWatchVideosUrl`) y `selectQueueIds` (IDs de la cola de lo visible) |
 | `modules/backup.js` | JS clásico (`YouTubeGroupsBackup`), sin DOM | Copia de seguridad (ADR 0006): `buildBackup`, `parseBackup` (valida y descarta entradas no válidas contando `dropped`), `exportBackup` e `importBackup` (escribe ajustes, grupos, listas y vistos con `withLock`). Se carga tras `playlists.js` |
 | `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`, `panelCollapsed`), normalizarlos, leerlos y actualizarlos con validación |
@@ -35,7 +35,11 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 - **Detección**: un `MutationObserver` sobre el documento programa las tarjetas (`VIDEO_CARD_SELECTOR`) y las
   procesa en un `requestAnimationFrame` (`processPendingCards`); cada tarjeta guarda nombre y URL de su canal en
   `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
-  de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`);
+  de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`). En las tarjetas de vídeo el
+  control es una columna superpuesta arriba a la izquierda de la miniatura (`ytd-thumbnail` o
+  `yt-thumbnail-view-model`, clase `youtube-groups__thumb-host`), con los botones colapsados (glifo) que muestran su
+  texto con el cursor o el foco, y con un escudo de eventos para que pulsarlos no abra el vídeo; si aún no hay
+  miniatura, va tras el canal con los textos visibles y se mueve a la miniatura en un procesado posterior;
   en búsqueda, los resultados de canal (`ytd-channel-renderer`) reciben solo "Añadir a grupo". Las recomendaciones de
   `/watch` son `yt-lockup-view-model` (los de listas y mixes quedan excluidos de `VIDEO_CARD_SELECTOR`); si la
   tarjeta no enlaza al canal, en páginas de canal `detectCard` usa el canal de la propia página
