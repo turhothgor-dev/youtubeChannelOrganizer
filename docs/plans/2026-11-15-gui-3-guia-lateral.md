@@ -191,7 +191,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
   por `sessionStorage` · Ficheros: `content.js` · Test: `make lint`, `make test` y a mano V5.
 - [x] T8 · Botón de crear y su formulario, sin icono todavía (grupo en la raíz, subgrupo en las demás columnas) con
   `validateGroupName` · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V6.
-- [ ] T9 · Icono y color al crear: nueva firma de `openIconPicker(initial, anchorButton, onSave)` (ver **Selector de
+- [x] T9 · Icono y color al crear: nueva firma de `openIconPicker(initial, anchorButton, onSave)` (ver **Selector de
   iconos al crear**), botón "Icono" con vista previa en el formulario de la guía y `setGroupAppearance` tras crear; el
   botón "Icono" del panel pasa a la nueva firma sin cambiar su comportamiento · Ficheros: `content.js`, `content.css`
   · Test: `make lint`, `make test` y a mano V8.
@@ -289,3 +289,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T6 | `feat: columnas de subgrupos con animación en la guía lateral` | Botones "›" y "‹", título del padre no pulsable, "+ Crear subgrupo" sin función, animación de 200 ms (sin ella con `prefers-reduced-motion`). V4 manual pendiente. |
 | 2026-11-15 | T7 | `feat: paso a suscripciones al elegir filtro desde la guía` | `selectFilter` navega con el filtro resultante; traspaso por `sessionStorage` (guardar, consumir al arrancar, borrar en `yt-navigate-finish`). V5 manual pendiente. |
 | 2026-11-15 | T8 | `feat: crear grupos y subgrupos desde la guía lateral` | Formulario oculto bajo el botón de crear (grupo en la raíz, subgrupo en las demás columnas) con `validateGroupName`; se oculta y vacía al cambiar de columna. Sin icono todavía. V6 manual pendiente. |
+| 2026-11-15 | T9 | `feat: elegir icono y color al crear grupos desde la guía` | `openIconPicker(initial, anchor, onSave)`; botón "Icono" con vista previa en el formulario de la guía y `setGroupAppearance` tras crear; el panel usa la nueva firma. V8 manual pendiente. |

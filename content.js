@@ -1819,7 +1819,19 @@
       iconButton.setAttribute("aria-label", "Cambiar icono de " + group.name);
       iconButton.addEventListener("click", async (event) => {
         event.stopPropagation();
-        openIconPicker(group, iconButton);
+        openIconPicker(
+          { iconId: group.icon || "", colorHex: group.color || "" },
+          iconButton,
+          async ({ iconId, colorHex }) => {
+            await YouTubeGroups.setGroupAppearance(group.id, iconId, colorHex);
+            renderGroupsPanel().catch((err) => {
+              console.error(
+                "[YouTube Groups] Error re-renderizando panel",
+                err,
+              );
+            });
+          },
+        );
       });
       groupOption.appendChild(iconButton);
       groupOption.appendChild(editButton);
@@ -2064,6 +2076,9 @@
       return;
     }
     form.reset();
+    if (form._resetAppearance) {
+      form._resetAppearance();
+    }
     form.hidden = true;
     form.querySelector(".youtube-groups__guide-form-error").textContent = "";
   }
@@ -2087,6 +2102,40 @@
     // Evita que salten los atajos de teclado de YouTube
     input.addEventListener("keydown", (event) => event.stopPropagation());
 
+    // Icono y color elegidos (no se escriben hasta pulsar "Guardar")
+    let appearance = { iconId: "", colorHex: "" };
+
+    const iconButton = document.createElement("button");
+    iconButton.type = "button";
+    iconButton.className = "youtube-groups__guide-form-icon";
+    const iconPreview = document.createElement("span");
+    iconPreview.className = "youtube-groups__guide-form-icon-preview";
+    const iconLabel = document.createElement("span");
+    iconLabel.textContent = "Icono";
+    iconButton.append(iconPreview, iconLabel);
+
+    function paintAppearance() {
+      iconPreview.replaceChildren();
+      iconPreview.style.color = appearance.colorHex || "";
+      const svg = appearance.iconId
+        ? createIconSvg(appearance.iconId, 18)
+        : null;
+      if (svg) {
+        iconPreview.append(svg);
+      }
+    }
+    iconButton.addEventListener("click", () => {
+      openIconPicker(appearance, iconButton, (choice) => {
+        appearance = choice;
+        paintAppearance();
+      });
+    });
+    // Lo usa resetGuideCreateForm para descartar la elección
+    form._resetAppearance = () => {
+      appearance = { iconId: "", colorHex: "" };
+      paintAppearance();
+    };
+
     const actions = document.createElement("div");
     actions.className = "youtube-groups__guide-form-actions";
 
@@ -2101,6 +2150,7 @@
     cancel.textContent = "Cancelar";
     cancel.addEventListener("click", () => {
       form.reset();
+      form._resetAppearance();
       form.hidden = true;
       error.textContent = "";
     });
@@ -2122,12 +2172,28 @@
         return;
       }
       try {
-        if (parentId) {
-          await createSubGroup(parentId, input.value);
-        } else {
-          await createGroup(input.value);
+        const created = parentId
+          ? await createSubGroup(parentId, input.value)
+          : await createGroup(input.value);
+        if (appearance.iconId || appearance.colorHex) {
+          try {
+            await YouTubeGroups.setGroupAppearance(
+              created.id,
+              appearance.iconId,
+              appearance.colorHex,
+            );
+          } catch (exception) {
+            // El grupo ya existe: se avisa y se deja el formulario abierto
+            error.textContent =
+              "El grupo se creó sin icono: " + exception.message;
+            form.reset();
+            form._resetAppearance();
+            await renderGroupsPanel();
+            return;
+          }
         }
         form.reset();
+        form._resetAppearance();
         form.hidden = true;
         await renderGroupsPanel();
       } catch (exception) {
@@ -2135,7 +2201,7 @@
       }
     });
 
-    form.append(input, actions, error);
+    form.append(input, iconButton, actions, error);
     return form;
   }
 
@@ -3900,21 +3966,14 @@
       event.preventDefault();
       event.stopPropagation();
       error.textContent = "";
-      const groupId = form.dataset.groupId;
-      if (!groupId) {
-        error.textContent = "No se pudo identificar el grupo.";
+      const onSave = container._onSave;
+      if (typeof onSave !== "function") {
+        error.textContent = "No se pudo guardar la elección.";
         return;
       }
       try {
-        await YouTubeGroups.setGroupAppearance(
-          groupId,
-          selectedIconId,
-          selectedColorHex,
-        );
+        await onSave({ iconId: selectedIconId, colorHex: selectedColorHex });
         hideIconPicker();
-        renderGroupsPanel().catch((err) => {
-          console.error("[YouTube Groups] Error re-renderizando panel", err);
-        });
       } catch (exception) {
         error.textContent = exception.message;
       }
@@ -3925,7 +3984,14 @@
 
     return container;
   }
-  function openIconPicker(group, anchorButton) {
+  /**
+   * Abre el selector de iconos junto a un botón.
+   * @param {{iconId: string, colorHex: string}} initial - Elección de partida.
+   * @param {Element} anchorButton - Botón junto al que se abre.
+   * @param {function({iconId: string, colorHex: string}): (void|Promise<void>)} onSave
+   *   Se llama al pulsar "Guardar"; si lanza, el selector sigue abierto con el error.
+   */
+  function openIconPicker(initial, anchorButton, onSave) {
     const picker = getOrCreateIconPicker();
     const form = picker.querySelector(".youtube-groups__icon-picker-form");
     const error = picker.querySelector(".youtube-groups__icon-picker-error");
@@ -3950,10 +4016,10 @@
 
     picker.style.left = left + "px";
     picker.style.top = top + "px";
-    form.dataset.groupId = group.id;
+    picker._onSave = onSave;
     error.textContent = "";
-    picker._renderIconGrid(group.icon || "");
-    picker._renderColorGrid(group.color || "");
+    picker._renderIconGrid((initial && initial.iconId) || "");
+    picker._renderColorGrid((initial && initial.colorHex) || "");
     picker._updatePreview();
     picker.hidden = false;
     form.hidden = false;
