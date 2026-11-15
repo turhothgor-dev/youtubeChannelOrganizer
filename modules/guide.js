@@ -221,7 +221,13 @@ const YouTubeGroupsGuide = (() => {
     if (
       Array.isArray(selection) &&
       item.channels.some((channel) =>
-        selection.includes(`channel:${channel.url}`),
+        selection.includes(
+          YouTubeGroupsFilter.getFilterKey({
+            type: "channel",
+            containerId: item.id,
+            url: channel.url,
+          }),
+        ),
       )
     ) {
       return true;

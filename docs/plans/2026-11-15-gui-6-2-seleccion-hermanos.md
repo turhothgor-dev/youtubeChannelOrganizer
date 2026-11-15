@@ -51,7 +51,7 @@ Se descarta modelar la selección como objeto (ver ADR 0011).
 Reglas comunes: sin `innerHTML` con datos; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en
 verde. Cada commit deja la extensión funcionando.
 
-- [ ] T1 · Claves de canal con contenedor, `resolveFilterUrls`/`resolveSelection` con la regla de contenedor (sin el
+- [x] T1 · Claves de canal con contenedor, `resolveFilterUrls`/`resolveSelection` con la regla de contenedor (sin el
   paso de hermanos aún), traspaso `version: 3`, `isChannelListOpen` con contenedor y `content.js` (botones de canal y
   `aria-pressed`) · Ficheros: `modules/filter.js`, `tests/filter.test.js`, `modules/guide.js`, `tests/guide.test.js`,
   `content.js` · Test: `getFilterKey({type:"channel", containerId:"a", url:"https://www.youtube.com/@x?a=1"})` →
@@ -114,3 +114,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | feat: claves de canal con contenedor y traspaso version 3 | `filter.js`, `guide.js` y `content.js`; tests adaptados. `make lint` y `make test-affected` en verde; V3, V4 a mano pendientes. |

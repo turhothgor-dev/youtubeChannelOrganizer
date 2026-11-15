@@ -1672,11 +1672,18 @@
     for (const channel of item.channels) {
       const channelButton = createGuideButton(
         channel.name,
-        activeSelection.includes(`channel:${channel.url}`),
+        activeSelection.includes(
+          YouTubeGroupsFilter.getFilterKey({
+            type: "channel",
+            containerId: item.id,
+            url: channel.url,
+          }),
+        ),
         null,
         () =>
           toggleSelectionItem({
             type: "channel",
+            containerId: item.id,
             url: channel.url,
             name: channel.name,
           }),

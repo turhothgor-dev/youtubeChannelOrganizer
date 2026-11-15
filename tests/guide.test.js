@@ -196,16 +196,20 @@ test("isChannelListOpen aplica override, selección y profundidad", () => {
     false,
   );
   assert.strictEqual(
-    G.isChannelListOpen(none, item, 0, [`channel:${X}`]),
+    G.isChannelListOpen(none, item, 0, [`channel:a:${X}`]),
     true,
   );
   assert.strictEqual(
-    G.isChannelListOpen(none, item, 0, ["group:b", `channel:${X}`]),
+    G.isChannelListOpen(none, item, 0, ["group:b", `channel:a:${X}`]),
     true,
+  );
+  assert.strictEqual(
+    G.isChannelListOpen(none, item, 0, [`channel:b:${X}`]),
+    false,
   );
   assert.strictEqual(G.isChannelListOpen(none, item, 0, ["group:a"]), false);
   assert.strictEqual(
-    G.isChannelListOpen(new Map([["a", false]]), item, 0, [`channel:${X}`]),
+    G.isChannelListOpen(new Map([["a", false]]), item, 0, [`channel:a:${X}`]),
     false,
   );
 });

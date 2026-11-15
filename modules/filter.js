@@ -7,7 +7,7 @@ const YouTubeGroupsFilter = (() => {
    * Normaliza un filtro recibido (de la interfaz o de sessionStorage).
    *
    * @param {*} raw Filtro a validar.
-   * @returns {{type: "all"}|{type: "group", id: string}|{type: "channel", url: string, name: string}}
+   * @returns {{type: "all"}|{type: "group", id: string}|{type: "channel", containerId: string, url: string, name: string}}
    *   El filtro normalizado, o ALL_FILTER si no es válido.
    */
   function normalizeFilter(raw) {
@@ -23,7 +23,11 @@ const YouTubeGroupsFilter = (() => {
     }
 
     if (raw.type === "channel") {
-      if (typeof raw.url !== "string") {
+      if (
+        typeof raw.url !== "string" ||
+        typeof raw.containerId !== "string" ||
+        raw.containerId === ""
+      ) {
         return ALL_FILTER;
       }
       let url = null;
@@ -37,6 +41,7 @@ const YouTubeGroupsFilter = (() => {
       }
       return {
         type: "channel",
+        containerId: raw.containerId,
         url,
         name: typeof raw.name === "string" ? raw.name : "",
       };
@@ -49,7 +54,8 @@ const YouTubeGroupsFilter = (() => {
    * Clave comparable de un filtro, con el tipo delante.
    *
    * @param {*} filter Filtro (se normaliza antes).
-   * @returns {string|null} null para "todos", "group:<id>" o "channel:<url>".
+   * @returns {string|null} null para "todos", "group:<id>" o
+   *   "channel:<contenedor codificado>:<url>".
    */
   function getFilterKey(filter) {
     const normalized = normalizeFilter(filter);
@@ -57,7 +63,7 @@ const YouTubeGroupsFilter = (() => {
       return `group:${normalized.id}`;
     }
     if (normalized.type === "channel") {
-      return `channel:${normalized.url}`;
+      return `channel:${encodeURIComponent(normalized.containerId)}:${normalized.url}`;
     }
     return null;
   }
@@ -76,7 +82,7 @@ const YouTubeGroupsFilter = (() => {
       return urls ? { status: "ok", urls } : { status: "missing" };
     }
     if (normalized.type === "channel") {
-      return channelInGroups(groups, normalized.url)
+      return groupOwnsChannel(groups, normalized.containerId, normalized.url)
         ? { status: "ok", urls: new Set([normalized.url]) }
         : { status: "missing" };
     }
@@ -84,13 +90,15 @@ const YouTubeGroupsFilter = (() => {
   }
 
   /**
-   * Indica si un canal (URL normalizada) está en algún grupo o subgrupo.
+   * Indica si el grupo `containerId` (en cualquier nivel) tiene el canal
+   * entre sus propios canales (sin contar subgrupos).
    *
    * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} containerId Id del grupo contenedor.
    * @param {string} url URL normalizada del canal.
    * @returns {boolean}
    */
-  function channelInGroups(groups, url) {
+  function groupOwnsChannel(groups, containerId, url) {
     if (!Array.isArray(groups)) {
       return false;
     }
@@ -98,20 +106,20 @@ const YouTubeGroupsFilter = (() => {
       if (!group) {
         continue;
       }
-      const channels = Array.isArray(group.channels) ? group.channels : [];
-      for (const channel of channels) {
-        if (!channel || typeof channel.url !== "string") {
-          continue;
-        }
-        try {
-          if (YouTubeGroups.normalizeChannelUrl(channel.url) === url) {
-            return true;
+      if (group.id === containerId) {
+        const channels = Array.isArray(group.channels) ? group.channels : [];
+        return channels.some((channel) => {
+          if (!channel || typeof channel.url !== "string") {
+            return false;
           }
-        } catch {
-          // URL no normalizable: no coincide
-        }
+          try {
+            return YouTubeGroups.normalizeChannelUrl(channel.url) === url;
+          } catch {
+            return false;
+          }
+        });
       }
-      if (channelInGroups(group.subgroups, url)) {
+      if (groupOwnsChannel(group.subgroups, containerId, url)) {
         return true;
       }
     }
@@ -121,7 +129,7 @@ const YouTubeGroupsFilter = (() => {
   /**
    * Convierte una clave de selección en un filtro normalizado.
    *
-   * @param {*} key Clave "group:<id>" o "channel:<url>".
+   * @param {*} key Clave "group:<id>" o "channel:<contenedor codificado>:<url>".
    * @returns {Object|null} El filtro normalizado, o null si la clave no es válida.
    */
   function parseFilterKey(key) {
@@ -132,7 +140,22 @@ const YouTubeGroupsFilter = (() => {
     if (key.startsWith("group:")) {
       filter = normalizeFilter({ type: "group", id: key.slice(6) });
     } else if (key.startsWith("channel:")) {
-      filter = normalizeFilter({ type: "channel", url: key.slice(8) });
+      const rest = key.slice(8);
+      const separator = rest.indexOf(":");
+      if (separator <= 0) {
+        return null;
+      }
+      const url = rest.slice(separator + 1);
+      if (!url.startsWith("https://") && !url.startsWith("http://")) {
+        return null;
+      }
+      let containerId;
+      try {
+        containerId = decodeURIComponent(rest.slice(0, separator));
+      } catch {
+        return null;
+      }
+      filter = normalizeFilter({ type: "channel", containerId, url });
     }
     return filter.type === "all" ? null : filter;
   }
@@ -233,7 +256,7 @@ const YouTubeGroupsFilter = (() => {
    */
   function serializePendingSelection(selection, now) {
     return JSON.stringify({
-      version: 2,
+      version: 3,
       selection: normalizeSelection(selection),
       createdAt: now,
     });
@@ -254,7 +277,7 @@ const YouTubeGroupsFilter = (() => {
     } catch {
       return null;
     }
-    if (!data || typeof data !== "object" || data.version !== 2) {
+    if (!data || typeof data !== "object" || data.version !== 3) {
       return null;
     }
     if (typeof data.createdAt !== "number") {
