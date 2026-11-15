@@ -1098,13 +1098,70 @@ html[dark] .youtube-groups__icon-picker-actions {
   font-weight: 700;
 }
 
+.youtube-groups__guide-create {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 4px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.youtube-groups__guide-empty {
+  margin: 0;
+  padding: 6px 12px;
+  color: var(--yt-spec-text-secondary, #606060);
+  font-size: 13px;
+}
+
+.youtube-groups__guide-row {
+  display: flex;
+  align-items: center;
+}
+
+.youtube-groups__guide-toggle {
+  flex: none;
+  width: 24px;
+  height: 36px;
+  color: var(--yt-spec-text-secondary, #606060);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.youtube-groups__guide-toggle[hidden],
+.youtube-groups__guide-channels[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-row .youtube-groups__guide-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.youtube-groups__guide-channels {
+  padding-left: 24px;
+}
+
+.youtube-groups__guide-item.youtube-groups__guide-channel {
+  height: 32px;
+  color: var(--yt-spec-text-secondary, #606060);
+}
+
 .youtube-groups__guide-item {
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
-  height: 40px;
-  padding: 0 24px;
+  height: 36px;
+  padding: 0 12px;
   box-sizing: border-box;
   color: var(--yt-spec-text-primary, #0f0f0f);
   text-align: left;
@@ -1136,8 +1193,19 @@ html[dark] .youtube-groups__guide {
 }
 
 html[dark] .youtube-groups__guide-title,
+html[dark] .youtube-groups__guide-create,
 html[dark] .youtube-groups__guide-item {
   color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .youtube-groups__guide-create {
+  background: var(--yt-spec-badge-chip-background, #272727);
+}
+
+html[dark] .youtube-groups__guide-empty,
+html[dark] .youtube-groups__guide-toggle,
+html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {
+  color: var(--yt-spec-text-secondary, #aaa);
 }
 
 html[dark] .youtube-groups__guide-item:hover,

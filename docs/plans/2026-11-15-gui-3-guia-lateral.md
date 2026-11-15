@@ -179,7 +179,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
 - [x] T4 · `YouTubeGroups.validateGroupName` · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test: `"a"`,
   `"  a "` y `42` dan el mensaje de mínimo; 81 caracteres el de máximo; `"ab"` y 80 caracteres dan `null`; con
   `"subgroup"` los mensajes dicen "subgrupo".
-- [ ] T5 · Sección "YouTube Groups" en la guía: posición, cabecera, botón "+ Crear grupo" visible pero aún sin
+- [x] T5 · Sección "YouTube Groups" en la guía: posición, cabecera, botón "+ Crear grupo" visible pero aún sin
   función, columna raíz sin "Todos" con grupos, listas de canales plegadas (salvo la que contiene el canal activo) y
   selección que alterna por grupo y por canal (`selectFilter` con `toggleFilter`, sin navegar todavía); estilos
   claro/oscuro. Sustituye la sección "Grupos" actual · Ficheros: `content.js`, `content.css` · Test: `make lint`,
@@ -285,3 +285,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T2 | `refactor: content.js usa un filtro activo general` | `activeFilter`, `setActiveFilter`, `refreshActiveFilter` y `handleGroupsRemoved`; sin cambios visibles. V1 manual pendiente. |
 | 2026-11-15 | T3 | `feat: módulo puro de la columna de la guía lateral` | `modules/guide.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
 | 2026-11-15 | T4 | `feat: YouTubeGroups.validateGroupName` | Validación de nombre de grupo/subgrupo en `modules/groups.js` con tests. |
+| 2026-11-15 | T5 | `feat: sección YouTube Groups en la guía lateral con filtro que alterna` | Sección sobre "Más de YouTube", columna raíz con canales plegables y selección alternante; "+ Crear grupo" aún sin función. V2 y V3 manuales pendientes. |

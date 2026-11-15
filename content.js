@@ -1856,23 +1856,35 @@
   /** Si ya hay una comprobación de la guía programada para el próximo frame. */
   let guideCheckScheduled = false;
 
+  /** Estado en memoria de la guía: columna actual y listas de canales. */
+  let guidePath = [];
+  const guideChannelOverrides = new Map();
+
   /**
-   * Crea un botón de la sección "Grupos" de la guía lateral.
+   * Elige un filtro desde la guía: alterna (clic sobre lo elegido lo quita).
+   * @param {Object} filter - Filtro pulsado.
+   */
+  function selectFilter(filter) {
+    setActiveFilter(YouTubeGroupsFilter.toggleFilter(activeFilter, filter));
+  }
+
+  /**
+   * Crea un botón de la sección "YouTube Groups" de la guía lateral.
    * @param {string} label - Texto del botón.
    * @param {boolean} pressed - Si es el filtro activo.
-   * @param {number} level - Nivel de sangría (0 = primer nivel).
    * @param {HTMLElement|null} mark - Marca del grupo, si la tiene.
    * @param {function(): void} onClick - Acción al pulsar.
+   * @param {string} [extraClass] - Clase adicional.
    * @returns {HTMLButtonElement} Botón creado.
    */
-  function createGuideButton(label, pressed, level, mark, onClick) {
+  function createGuideButton(label, pressed, mark, onClick, extraClass) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "youtube-groups__guide-item";
-    button.setAttribute("aria-pressed", String(pressed));
-    if (level > 0) {
-      button.style.paddingLeft = `${24 + level * 16}px`;
+    if (extraClass) {
+      button.classList.add(extraClass);
     }
+    button.setAttribute("aria-pressed", String(pressed));
     if (mark) {
       button.append(mark);
     }
@@ -1882,6 +1894,99 @@
     button.append(name);
     button.addEventListener("click", onClick);
     return button;
+  }
+
+  /**
+   * Crea la fila de un grupo en la columna de la guía: botón de desplegar,
+   * botón principal y su lista de canales.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {Object} item - Elemento de `getGuideColumn`.
+   * @param {number} depth - Profundidad de la columna.
+   * @returns {HTMLElement} Contenedor de la fila.
+   */
+  function createGuideRow(groups, item, depth) {
+    const activeKey = getActiveFilterKey();
+    const wrapper = document.createElement("div");
+    wrapper.className = "youtube-groups__guide-group";
+
+    const row = document.createElement("div");
+    row.className = "youtube-groups__guide-row";
+
+    const list = document.createElement("div");
+    list.className = "youtube-groups__guide-channels";
+    list.hidden = !YouTubeGroupsGuide.isChannelListOpen(
+      guideChannelOverrides,
+      item,
+      depth,
+      activeKey,
+    );
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "youtube-groups__guide-toggle";
+    toggle.setAttribute("aria-expanded", String(!list.hidden));
+    toggle.setAttribute("aria-label", `Canales de ${item.name}`);
+    toggle.textContent = list.hidden ? "▸" : "▾";
+    toggle.hidden = item.channels.length === 0;
+    toggle.addEventListener("click", () => {
+      list.hidden = !list.hidden;
+      guideChannelOverrides.set(item.id, !list.hidden);
+      toggle.setAttribute("aria-expanded", String(!list.hidden));
+      toggle.textContent = list.hidden ? "▸" : "▾";
+    });
+
+    const main = createGuideButton(
+      `${item.name} (${item.channels.length})`,
+      activeKey === `group:${item.id}`,
+      createGroupMark(groups, item.id, 24),
+      () => selectFilter({ type: "group", id: item.id }),
+    );
+    row.append(toggle, main);
+
+    for (const channel of item.channels) {
+      const channelButton = createGuideButton(
+        channel.name,
+        activeKey === `channel:${channel.url}`,
+        null,
+        () =>
+          selectFilter({
+            type: "channel",
+            url: channel.url,
+            name: channel.name,
+          }),
+        "youtube-groups__guide-channel",
+      );
+      channelButton.title = channel.url;
+      list.append(channelButton);
+    }
+
+    wrapper.append(row, list);
+    return wrapper;
+  }
+
+  /**
+   * Índice de la sección tras la que se inserta la nuestra: la anterior a
+   * "Más de YouTube", o la primera si no se encuentra.
+   * @param {Element} container - Contenedor `#sections` de la guía.
+   * @returns {Element|null} Sección que debe quedar justo antes de la nuestra.
+   */
+  function findGuideAnchor(container) {
+    const sections = Array.from(
+      container.querySelectorAll(":scope > ytd-guide-section-renderer"),
+    );
+    const hrefs = sections.map((section) =>
+      Array.from(section.querySelectorAll("a[href]")).map((a) =>
+        a.getAttribute("href"),
+      ),
+    );
+    const index = YouTubeGroupsGuide.findGuideInsertionIndex(hrefs);
+    if (index > 0) {
+      return sections[index - 1];
+    }
+    if (index === 0) {
+      return null;
+    }
+    return sections[0] || null;
   }
 
   /**
@@ -1899,38 +2004,46 @@
       section = document.createElement("div");
       section.id = GUIDE_SECTION_ID;
       section.className = "youtube-groups__guide";
-      const firstSection = container.querySelector(
-        ":scope > ytd-guide-section-renderer",
-      );
-      if (firstSection) {
-        firstSection.after(section);
+    }
+    // Posición: antes de "Más de YouTube"; solo se mueve si no está ya
+    const anchor = findGuideAnchor(container);
+    const inPlace = anchor
+      ? section.parentElement === container &&
+        anchor.nextElementSibling === section
+      : section.parentElement === container &&
+        container.firstElementChild === section;
+    if (!inPlace) {
+      if (anchor) {
+        anchor.after(section);
       } else {
         container.prepend(section);
       }
-    } else if (!section.isConnected || section.parentElement !== container) {
-      container.prepend(section);
     }
+
+    guidePath = YouTubeGroupsGuide.normalizeGuidePath(groups, guidePath);
+    const column = YouTubeGroupsGuide.getGuideColumn(groups, guidePath);
 
     const title = document.createElement("h3");
     title.className = "youtube-groups__guide-title";
-    title.textContent = "Grupos";
-    const items = [
-      createGuideButton("Todos", getActiveFilterKey() === null, 0, null, () =>
-        setActiveFilter(YouTubeGroupsFilter.ALL_FILTER),
-      ),
-    ];
-    for (const { id, name, level } of YouTubeGroups.flattenGroups(groups)) {
-      items.push(
-        createGuideButton(
-          name,
-          getActiveFilterKey() === "group:" + id,
-          level,
-          createGroupMark(groups, id, 24),
-          () => setActiveFilter({ type: "group", id }),
-        ),
-      );
+    title.textContent = "YouTube Groups";
+
+    const create = document.createElement("button");
+    create.type = "button";
+    create.className = "youtube-groups__guide-create";
+    create.textContent = "+ Crear grupo";
+
+    const list = document.createElement("div");
+    list.className = "youtube-groups__guide-column";
+    if (column.items.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "youtube-groups__guide-empty";
+      empty.textContent = "Aún no hay grupos";
+      list.append(empty);
     }
-    section.replaceChildren(title, ...items);
+    for (const item of column.items) {
+      list.append(createGuideRow(groups, item, column.path.length));
+    }
+    section.replaceChildren(title, create, list);
   }
 
   /**
