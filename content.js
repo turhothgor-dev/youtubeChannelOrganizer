@@ -3535,6 +3535,10 @@
   const PLAYER_SELECTOR = "#movie_player";
   const PLAYER_CONTROL_CLASS = "youtube-groups__player-actions";
   let playerControlScheduled = false;
+  // Entre yt-navigate-start y yt-navigate-finish el control permanece oculto
+  let playerNavigating = false;
+  // Referencia al control, para que el observer no consulte el DOM en cada mutación
+  let playerControl = null;
 
   /**
    * Crea la columna de botones del reproductor, con el aspecto de las
@@ -3547,10 +3551,13 @@
       "youtube-groups__subscription-control youtube-groups__card-actions--overlay " +
       PLAYER_CONTROL_CLASS;
     shieldControlEvents(control);
-    // Espacio o Intro sobre un botón no deben llegar a los atajos del reproductor
-    control.addEventListener("keydown", (event) => {
-      event.stopPropagation();
-    });
+    // Espacio o Intro sobre un botón no deben llegar a los atajos del
+    // reproductor (Firefox activa el botón con Espacio en keyup)
+    for (const type of ["keydown", "keyup"]) {
+      control.addEventListener(type, (event) => {
+        event.stopPropagation();
+      });
+    }
 
     const addButton = document.createElement("button");
     addButton.className =
@@ -3603,7 +3610,7 @@
     const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
     const player =
       pageType === "watch" ? document.querySelector(PLAYER_SELECTOR) : null;
-    if (!player) {
+    if (!player || playerNavigating) {
       for (const existing of controls) {
         existing.hidden = true;
       }
@@ -3622,6 +3629,7 @@
     if (control.parentElement !== player) {
       player.appendChild(control);
     }
+    playerControl = control;
 
     const video = player.querySelector("video");
     control.hidden = !YouTubeGroupsPages.shouldShowPlayerControls({
@@ -3637,7 +3645,10 @@
     const addButton = control.querySelector(
       ".youtube-groups__subscription-add-button",
     );
-    if (getCurrentVideoChannel()) {
+    const rawId = getCurrentVideoId();
+    const videoId = rawId && isWatchPageInSync(rawId) ? rawId : null;
+    // Sin sincronizar, el canal podría ser el del vídeo anterior
+    if ((!rawId || videoId) && getCurrentVideoChannel()) {
       addButton.disabled = false;
       addButton.removeAttribute("title");
     } else {
@@ -3645,8 +3656,6 @@
       addButton.title = "No se pudo identificar el canal";
     }
 
-    const rawId = getCurrentVideoId();
-    const videoId = rawId && isWatchPageInSync(rawId) ? rawId : null;
     updateWatchedButton(
       control.querySelector(".youtube-groups__watched-button"),
       videoId,
@@ -3686,14 +3695,19 @@
     );
   }
   document.addEventListener("yt-navigate-start", () => {
-    // Evita enseñar los botones del vídeo anterior durante la carga
+    // Evita enseñar los botones del vídeo anterior durante la carga:
+    // syncPlayerControl los mantiene ocultos hasta yt-navigate-finish
+    playerNavigating = true;
     for (const existing of document.querySelectorAll(
       "." + PLAYER_CONTROL_CLASS,
     )) {
       existing.hidden = true;
     }
   });
-  document.addEventListener("yt-navigate-finish", schedulePlayerControlSync);
+  document.addEventListener("yt-navigate-finish", () => {
+    playerNavigating = false;
+    schedulePlayerControlSync();
+  });
   document.addEventListener("fullscreenchange", schedulePlayerControlSync);
   syncPlayerControl();
 
@@ -3703,7 +3717,14 @@
     }
     if (YouTubeGroupsPages.getPageType(window.location.pathname) === "watch") {
       const player = document.querySelector(PLAYER_SELECTOR);
-      if (player && !player.querySelector("." + PLAYER_CONTROL_CLASS)) {
+      if (
+        player &&
+        !(
+          playerControl &&
+          playerControl.isConnected &&
+          playerControl.parentElement === player
+        )
+      ) {
         schedulePlayerControlSync();
       }
     }

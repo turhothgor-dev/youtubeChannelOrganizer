@@ -196,6 +196,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-15 | T5 (corrección) | Marca de "navegando" entre `yt-navigate-start` y `yt-navigate-finish` que `syncPlayerControl` respeta (control oculto mientras dura); +G deshabilitado si hay `getCurrentVideoId()` y no pasa `isWatchPageInSync`; el observer comprueba una referencia guardada al control (`isConnected` y padre `#movie_player`) en lugar de `querySelector`; el escudo de teclado cubre también `keyup` | Revisión: durante la navegación SPA el control podía reaparecer con el canal del vídeo anterior (incumple V11); coste del observer; Espacio se activa en `keyup` en Firefox | Delegada por la persona (usar la opción recomendada) |
 
 ## Registro
 
@@ -208,3 +209,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T3 | `feat: decidir cuándo mostrar los botones del reproductor` | `shouldShowPlayerControls` en `modules/pages.js` con su test. |
 | 2026-11-15 | T4 | `refactor: extraer el escudo de eventos y el marcado de visto actual` | `shieldControlEvents` y `toggleCurrentVideoWatched` en `content.js`, sin cambio de comportamiento. V6 pendiente a mano. |
 | 2026-11-15 | T5 | `feat: mostrar los botones de grupo, visto y lista sobre el reproductor en pausa` | `createPlayerControl`, `syncPlayerControl` y programación en `content.js`, más CSS. V6-V12 pendientes a mano; el z-index 60 se ajusta en V7. |
+| 2026-11-15 | T5 (corrección) | `fix: ocultar los botones del reproductor durante la navegación y endurecer su sincronización` | Marca `playerNavigating` entre `yt-navigate-start` y `yt-navigate-finish`; +G deshabilitado si la página no está sincronizada; el observer usa la referencia `playerControl`; escudo también en `keyup`. V11 pendiente a mano. |
