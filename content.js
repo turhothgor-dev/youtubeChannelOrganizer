@@ -1784,8 +1784,34 @@
     return wrapper;
   }
 
-  /** Columna pintada por última vez (para vaciar el formulario al cambiar). */
-  let guideRenderedColumnKey = null;
+  /** Destino del formulario de crear pintado por última vez (para vaciarlo al cambiar). */
+  let guideRenderedTargetKey = null;
+
+  /** Destino actual del botón de crear (ver `getCreateTarget`). */
+  let guideCreateTarget = {
+    parentId: null,
+    parentName: null,
+    label: "+ Crear grupo",
+    ariaLabel: null,
+  };
+
+  /**
+   * Pasa a la columna del grupo padre tras crear un subgrupo, con animación,
+   * si no se estaba ya en ella.
+   * @param {string} parentId - Id del grupo padre.
+   */
+  async function showParentColumn(parentId) {
+    const groups = await getGroups();
+    const nextPath = YouTubeGroupsGuide.findGuidePath(groups, parentId);
+    if (
+      nextPath &&
+      nextPath.join("/") !==
+        YouTubeGroupsGuide.normalizeGuidePath(groups, guidePath).join("/")
+    ) {
+      guidePath = nextPath;
+      renderGuideSection(groups, "forward");
+    }
+  }
 
   /**
    * Oculta y vacía el formulario de crear de la guía.
@@ -1806,8 +1832,8 @@
 
   /**
    * Crea el formulario de crear grupo o subgrupo de la guía (oculto). Crea
-   * un grupo en la raíz y un subgrupo del último grupo de `guidePath` en las
-   * demás columnas.
+   * en el destino de `guideCreateTarget`: un grupo en la raíz o un subgrupo
+   * de su `parentId`.
    * @returns {HTMLFormElement} Formulario.
    */
   function createGuideCreateForm() {
@@ -1885,7 +1911,7 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       error.textContent = "";
-      const parentId = guidePath[guidePath.length - 1];
+      const parentId = guideCreateTarget.parentId;
       const kind = parentId ? "subgroup" : "group";
       const message = YouTubeGroups.validateGroupName(input.value, kind);
       if (message) {
@@ -1910,6 +1936,9 @@
             form.reset();
             form._resetAppearance();
             await renderGroupsPanel();
+            if (parentId) {
+              await showParentColumn(parentId);
+            }
             return;
           }
         }
@@ -1917,6 +1946,9 @@
         form._resetAppearance();
         form.hidden = true;
         await renderGroupsPanel();
+        if (parentId) {
+          await showParentColumn(parentId);
+        }
       } catch (exception) {
         error.textContent = exception.message;
       }
@@ -1996,10 +2028,15 @@
     }
     guideGroups = groups;
 
-    // Al cambiar de columna, el formulario se oculta y se vacía
-    const columnKey = column.path.join("/");
-    if (columnKey !== guideRenderedColumnKey) {
-      guideRenderedColumnKey = columnKey;
+    // Al cambiar el destino de crear, el formulario se oculta y se vacía
+    guideCreateTarget = YouTubeGroupsGuide.getCreateTarget(
+      groups,
+      guidePath,
+      activeSelection,
+    );
+    const targetKey = guideCreateTarget.parentId ?? "";
+    if (targetKey !== guideRenderedTargetKey) {
+      guideRenderedTargetKey = targetKey;
       resetGuideCreateForm(section);
     }
 
@@ -2008,14 +2045,11 @@
     const create = section.querySelector(".youtube-groups__guide-create");
     back.hidden = !column.parent;
     title.textContent = column.parent ? column.parent.name : "YouTube Groups";
-    if (column.parent) {
-      create.textContent = "+ Crear subgrupo";
-      create.setAttribute(
-        "aria-label",
-        `Crear subgrupo en ${column.parent.name}`,
-      );
+    create.textContent = guideCreateTarget.label;
+    create.title = guideCreateTarget.label;
+    if (guideCreateTarget.ariaLabel) {
+      create.setAttribute("aria-label", guideCreateTarget.ariaLabel);
     } else {
-      create.textContent = "+ Crear grupo";
       create.removeAttribute("aria-label");
     }
 
