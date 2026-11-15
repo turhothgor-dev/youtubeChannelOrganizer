@@ -151,7 +151,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make lint` (0 avisos) y `make
 se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) y a `MODULES` y al objeto devuelto de
 `tests/helpers/load-modules.js`.
 
-- [ ] T1 · `modules/filter.js` (ver **Decisiones**) · Ficheros: `modules/filter.js`, `tests/filter.test.js`,
+- [x] T1 · `modules/filter.js` (ver **Decisiones**) · Ficheros: `modules/filter.js`, `tests/filter.test.js`,
   `manifest.json`, `tests/helpers/load-modules.js` · Test: `normalizeFilter` acepta grupo y canal (normaliza
   `https://www.youtube.com/@x?a=1` a `.../@x`) y da "todos" con `null`, tipo desconocido, id vacío o URL de otro
   origen; `getFilterKey` de los tres tipos; `resolveFilterUrls` con grupo que tiene subgrupos (incluye sus canales),
@@ -281,3 +281,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `feat: módulo de filtro activo (todos, grupo o canal)` | `modules/filter.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
