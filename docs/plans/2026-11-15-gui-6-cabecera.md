@@ -1,6 +1,6 @@
 # Plan: guía fija con una sola cabecera (gui-6, cabecera del cajón)
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: hallazgo de la persona en Firefox (2026-11-15), sobre ADR 0010 y el plan `gui-6-correcciones`.
 
@@ -37,7 +37,7 @@ Reglas comunes: sin dependencias nuevas; todo el CSS nuevo bajo `html.youtube-gr
   de la guía fija, ~1323-1383): sustituir la regla `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` por
   `tp-yt-app-drawer#guide #guide-wrapper > #header { display: none !important; }` · Test: `make lint`, `make test` y a
   mano V1–V3.
-- [ ] T2 · Documentación y cierre · Ficheros: `docs/adr/0010-seccion-en-la-guia-de-youtube-fija.md` (punto 2: "la
+- [x] T2 · Documentación y cierre · Ficheros: `docs/adr/0010-seccion-en-la-guia-de-youtube-fija.md` (punto 2: "la
   cabecera propia del cajón (☰ y logo)" con su selector `tp-yt-app-drawer#guide #guide-wrapper > #header`, en lugar de
   `ytd-guide-renderer #guide-header`; **A vigilar**: añadir `#guide-wrapper > #header`), `docs/ARCHITECTURE.md`
   (flujo **Guía lateral**, línea ~112: "ocultan la mini-guía, el velo y la cabecera propia del cajón"), este plan
@@ -79,3 +79,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: ocultar la cabecera propia del cajón en la guía fija` | Regla `#guide-wrapper > #header` sustituye a `#guide-header`; lint y 182 tests en verde; V1–V3 pendientes a mano. |
+| 2026-11-15 | T2 | `docs: documentar la cabecera propia del cajón en la guía fija` | ADR 0010 (punto 2 y A vigilar) y ARCHITECTURE actualizados; plan en `hecho`. |

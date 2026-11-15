@@ -110,7 +110,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `syncGuidePin` pone o quita la clase `youtube-groups--guide-pinned` en `<html>` según `shouldPinGuide`, al arrancar,
   en `yt-navigate-start` (con la ruta de destino, `getNavigationPathname`), `yt-navigate-finish`, `popstate`, `fullscreenchange`, `resize` (una vez por frame) y si
   cambia `location.pathname` en el `MutationObserver`. Con la clase, reglas de `content.css` (todas bajo ella) ocultan
-  la mini-guía y el velo, dejan `tp-yt-app-drawer#guide` visible y fijo bajo el masthead y dan
+  la mini-guía, el velo y la cabecera propia del cajón, dejan `tp-yt-app-drawer#guide` visible y fijo bajo el masthead y dan
   `margin-left` a `ytd-page-manager#page-manager`; un `click` en captura neutraliza ☰ (`#guide-button`) mientras la
   clase está puesta. En `/watch` y por debajo de 792 px YouTube se comporta como siempre. La sección muestra una sola columna (`getGuideColumn`) que se desplaza con animación al entrar en cualquier
   grupo o subgrupo ("›" en todos; una subcolumna vacía dice "Sin subgrupos") o volver ("‹"), con un botón de crear

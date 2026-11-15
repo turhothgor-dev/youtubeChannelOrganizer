@@ -47,7 +47,8 @@ margen del contenido lo pone el CSS de YouTube en `ytd-page-manager#page-manager
    - `tp-yt-app-drawer#guide #contentContainer`: visible, sin `transform` ni sombra, `top: 0`, sin `padding` vertical
      y `pointer-events: auto` (la guía sí recibe clics).
    - `tp-yt-app-drawer#guide #guide-spacer` (`display: none`) y `#scrim` (oculto);
-     `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` (oculto).
+     la cabecera propia del cajón (☰ y logo), `tp-yt-app-drawer#guide #guide-wrapper > #header` (oculta; YouTube solo
+     la oculta en modo persistente y se vería duplicada con la del masthead).
    - **Desplazamiento vertical único en el host**: antes se sumaban el `top` del host, el de `#contentContainer` y
      `#guide-spacer` (~168 px). Se descarta dejar el host en `top: 0` y que `#guide-spacer` desplace: fuera del modo
      persistente el cajón tiene un `z-index` por encima del masthead y taparía el logo y la búsqueda; con el host bajo
@@ -98,7 +99,7 @@ margen del contenido lo pone el CSS de YouTube en `ytd-page-manager#page-manager
 - Se pierde: en `/watch` la sección vuelve a estar solo en el cajón de ☰ (aceptado por la persona); ☰ no hace nada en
   las páginas fijadas; por debajo de 792 px la sección solo está en el cajón.
 - A vigilar: dependemos de `tp-yt-app-drawer#guide`, `#contentContainer`, `#guide-spacer`, `#scrim`,
-  `ytd-mini-guide-renderer`, `ytd-page-manager#page-manager`, la variable `--ytd-mini-guide-width`, `#frosted-glass`,
+  `#guide-wrapper > #header`, `ytd-mini-guide-renderer`, `ytd-page-manager#page-manager`, la variable `--ytd-mini-guide-width`, `#frosted-glass`,
   la barra de chips (`ytd-feed-filter-chip-bar-renderer`, `#chips-wrapper`), `ytd-shorts`, `#guide-button`, de
   `overflow-x: clip` y `pointer-events` (soportados por Firefox) y de que `ytd-guide-renderer` tenga contenido sin haberse abierto.
   Si YouTube los cambia, la guía deja de forzarse (vuelve su comportamiento normal) o queda mal colocada; la sección
