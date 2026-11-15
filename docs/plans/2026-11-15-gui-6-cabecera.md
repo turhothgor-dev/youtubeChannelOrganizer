@@ -33,7 +33,7 @@ que es justo el hueco que no queremos).
 Reglas comunes: sin dependencias nuevas; todo el CSS nuevo bajo `html.youtube-groups--guide-pinned`; sin tests de DOM
 (fuera de alcance, como en `gui-6-1` y `gui-6-correcciones`).
 
-- [ ] T1 · Ocultar la cabecera propia del cajón y quitar la regla de `#guide-header` · Ficheros: `content.css` (bloque
+- [x] T1 · Ocultar la cabecera propia del cajón y quitar la regla de `#guide-header` · Ficheros: `content.css` (bloque
   de la guía fija, ~1323-1383): sustituir la regla `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` por
   `tp-yt-app-drawer#guide #guide-wrapper > #header { display: none !important; }` · Test: `make lint`, `make test` y a
   mano V1–V3.
@@ -78,3 +78,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `fix: ocultar la cabecera propia del cajón en la guía fija` | Regla `#guide-wrapper > #header` sustituye a `#guide-header`; lint y 182 tests en verde; V1–V3 pendientes a mano. |

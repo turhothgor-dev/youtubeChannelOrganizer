@@ -1357,8 +1357,8 @@ html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #scrim {
 
 html.youtube-groups--guide-pinned
   tp-yt-app-drawer#guide
-  ytd-guide-renderer
-  #guide-header {
+  #guide-wrapper
+  > #header {
   display: none !important;
 }
 
