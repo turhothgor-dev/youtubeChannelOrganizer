@@ -40,6 +40,64 @@
   }
 
   /**
+   * Crea el SVG de un icono de interfaz (UI_ICON_PATHS) sin usar innerHTML.
+   * @param {string} iconId - Id del icono de interfaz.
+   * @param {number} size - Lado en píxeles.
+   * @returns {SVGElement|null} null si el icono no existe.
+   */
+  function createUiIconSvg(iconId, size) {
+    const iconPath = YouTubeGroupsIcons.getUiIconPath(iconId);
+    if (!iconPath) {
+      return null;
+    }
+    const svgNs = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNs, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", String(size));
+    svg.setAttribute("height", String(size));
+    svg.setAttribute("fill", "currentColor");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS(svgNs, "path");
+    path.setAttribute("d", iconPath);
+    svg.append(path);
+    return svg;
+  }
+
+  /**
+   * Pinta un botón de tarjeta con glifo y etiqueta; `aria-label` lleva el texto completo.
+   * @param {HTMLButtonElement} button - Botón de la tarjeta.
+   * @param {string|null} glyph - Id de icono de interfaz, o texto si `isIcon` es false.
+   * @param {string} label - Texto completo.
+   * @param {boolean} [isIcon] - Si `glyph` es un id de icono (por defecto sí).
+   */
+  function setCardButtonContent(button, glyph, label, isIcon = true) {
+    let glyphEl = button.querySelector(".youtube-groups__card-glyph");
+    let labelEl = button.querySelector(".youtube-groups__card-label");
+    if (!glyphEl || !labelEl) {
+      button.textContent = "";
+      glyphEl = document.createElement("span");
+      glyphEl.className = "youtube-groups__card-glyph";
+      labelEl = document.createElement("span");
+      labelEl.className = "youtube-groups__card-label";
+      button.append(glyphEl, labelEl);
+    }
+    labelEl.textContent = label;
+    button.setAttribute("aria-label", label);
+    if (glyph === null) {
+      return;
+    }
+    glyphEl.textContent = "";
+    if (isIcon) {
+      const svg = createUiIconSvg(glyph, 16);
+      if (svg) {
+        glyphEl.append(svg);
+      }
+    } else {
+      glyphEl.textContent = glyph;
+    }
+  }
+
+  /**
    * Crea la marca de un grupo: su icono con el color resultante, o un punto
    * de color si solo hay color.
    * @param {Array<Object>} groups - Árbol de grupos.
@@ -324,10 +382,20 @@
    * @param {boolean} isWatched - Si el vídeo está visto.
    */
   function updateWatchedButton(button, videoId, isWatched) {
-    button.textContent = isWatched ? "✓ Visto" : "Marcar visto";
-    button.setAttribute("aria-pressed", String(isWatched));
-    button.disabled =
-      !videoId || watchedVideos === null || savingWatchedIds.has(videoId);
+    const state = YouTubeGroupsWatched.getWatchedButtonState({
+      videoId,
+      isWatched,
+      loaded: watchedVideos !== null,
+      saving: Boolean(videoId) && savingWatchedIds.has(videoId),
+    });
+    if (button.querySelector(".youtube-groups__card-label")) {
+      setCardButtonContent(button, state.glyph, state.label);
+    } else {
+      // Botón del panel: texto plano, como antes
+      button.textContent = isWatched ? "✓ Visto" : "Marcar visto";
+    }
+    button.setAttribute("aria-pressed", String(state.pressed));
+    button.disabled = state.disabled;
     if (watchedLoadError !== null) {
       button.title = "No se pudieron leer los vistos: " + watchedLoadError;
     }
@@ -2076,7 +2144,11 @@
     button.className =
       "youtube-groups__subscription-add-button action-button primary-button";
     button.type = "button";
-    button.textContent = "Añadir a grupo";
+    if (videoButtons) {
+      setCardButtonContent(button, "+G", "Añadir a grupo", false);
+    } else {
+      button.textContent = "Añadir a grupo";
+    }
     control.appendChild(button);
 
     // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
@@ -2110,6 +2182,7 @@
       "youtube-groups__watched-button action-button secondary-button";
     watchedButton.type = "button";
     const initialVideoId = findVideoId(card);
+    setCardButtonContent(watchedButton, null, "Marcar visto");
     updateWatchedButton(
       watchedButton,
       initialVideoId,
@@ -2130,7 +2203,7 @@
     playlistButton.className =
       "youtube-groups__playlist-button action-button secondary-button";
     playlistButton.type = "button";
-    playlistButton.textContent = "Lista";
+    setCardButtonContent(playlistButton, "playlist-add", "Lista");
     playlistButton.disabled = !initialVideoId;
     control.appendChild(playlistButton);
 

@@ -412,8 +412,28 @@ html[dark] .youtube-groups__subscription-control--compact button {
   color: #f1f1f1;
 }
 
+.youtube-groups__card-glyph {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.youtube-groups__card-glyph:empty {
+  display: none;
+}
+
+.youtube-groups__card-label {
+  white-space: nowrap;
+}
+
 .youtube-groups__watched-button {
   margin-left: 6px;
+}
+
+.youtube-groups__watched-button[aria-pressed="true"]
+  .youtube-groups__card-glyph {
+  color: #2e7d32;
 }
 
 .youtube-groups__watched-button:disabled {
