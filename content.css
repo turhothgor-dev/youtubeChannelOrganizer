@@ -967,10 +967,15 @@ html[dark] .youtube-groups__icon-picker-actions {
   border-top-color: #555;
 }
 
-/* Sección "Grupos" en la guía lateral de YouTube */
+/* Sección "YouTube Groups" dentro de la columna propia */
 .youtube-groups__guide {
-  padding: 12px;
-  border-bottom: 1px solid var(--yt-spec-10-percent-layer, #d8d8d8);
+  padding: 4px 8px 12px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.youtube-groups__guide-name {
+  min-width: 0;
 }
 
 .youtube-groups__guide-title {

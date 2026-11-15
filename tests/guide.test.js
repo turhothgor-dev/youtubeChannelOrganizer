@@ -136,25 +136,3 @@ test("isChannelListOpen aplica override, canal activo y profundidad", () => {
     false,
   );
 });
-
-test("findGuideInsertionIndex localiza la sección Más de YouTube", () => {
-  const { YouTubeGroupsGuide: G } = loadModules();
-  const sections = [
-    ["/", "/feed/subscriptions"],
-    ["/feed/history", "not a url ::", "/@x"],
-    [
-      "/feed/history",
-      "https://studio.youtube.com/",
-      "https://music.youtube.com/",
-    ],
-  ];
-  const before = JSON.stringify(sections);
-  assert.strictEqual(G.findGuideInsertionIndex(sections), 2);
-  assert.strictEqual(
-    G.findGuideInsertionIndex([["/"], ["https://music.youtube.com/"]]),
-    1,
-  );
-  assert.strictEqual(G.findGuideInsertionIndex(sections.slice(0, 2)), -1);
-  assert.strictEqual(G.findGuideInsertionIndex([]), -1);
-  assert.strictEqual(JSON.stringify(sections), before);
-});

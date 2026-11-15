@@ -1,12 +1,4 @@
 const YouTubeGroupsGuide = (() => {
-  const MORE_FROM_YOUTUBE_HOSTS = new Set([
-    "studio.youtube.com",
-    "music.youtube.com",
-    "youtubekids.com",
-    "www.youtubekids.com",
-    "tv.youtube.com",
-  ]);
-
   /**
    * @param {*} group Grupo a comprobar.
    * @returns {Array<Object>} Sus subgrupos (vacío si no tiene).
@@ -141,38 +133,11 @@ const YouTubeGroupsGuide = (() => {
     return depth > 0;
   }
 
-  /**
-   * Busca la sección "Más de YouTube" de la guía sin depender del idioma.
-   *
-   * @param {string[][]} sections Un array de href por sección de la guía.
-   * @returns {number} Índice de la primera sección que la identifica, o -1.
-   */
-  function findGuideInsertionIndex(sections) {
-    if (!Array.isArray(sections)) {
-      return -1;
-    }
-    for (let index = 0; index < sections.length; index += 1) {
-      const hrefs = Array.isArray(sections[index]) ? sections[index] : [];
-      for (const href of hrefs) {
-        try {
-          const url = new URL(href, "https://www.youtube.com");
-          if (MORE_FROM_YOUTUBE_HOSTS.has(url.hostname)) {
-            return index;
-          }
-        } catch {
-          // href no válido: se ignora.
-        }
-      }
-    }
-    return -1;
-  }
-
   return {
     normalizeGuidePath,
     getGuideColumn,
     enterGuideGroup,
     leaveGuideGroup,
     isChannelListOpen,
-    findGuideInsertionIndex,
   };
 })();

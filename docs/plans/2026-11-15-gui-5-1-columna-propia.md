@@ -77,7 +77,7 @@ verde; tema claro y oscuro.
   la guía o mini-guía de YouTube, pantalla completa y sincronización por `storage.onChanged` (ver **Decisiones**). La
   sección sigue aún en la guía de YouTube · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y
   a mano V1–V4.
-- [ ] T3 · Pintar la sección "YouTube Groups" dentro de la columna y quitarla de la guía de YouTube;
+- [x] T3 · Pintar la sección "YouTube Groups" dentro de la columna y quitarla de la guía de YouTube;
   `scheduleSidebarCheck`; quitar `GUIDE_SECTIONS_SELECTOR`, `findGuideAnchor` y `findGuideInsertionIndex` (con su
   test); ajustar el CSS de la sección al ancho de la columna (nombres con elipsis) · Ficheros: `content.js`,
   `content.css`, `modules/guide.js`, `tests/guide.test.js` · Test: `make test` (los demás tests de `guide.test.js`
@@ -142,3 +142,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: ajuste sidebarCollapsed (por defecto false) y ADR 0003 al día | Tests de ajustes y de copia de seguridad actualizados con el campo nuevo. |
 | 2026-11-15 | T2 | feat: columna propia YouTube Groups con botón de plegar que desplaza el contenido | Columna vacía, clases de `<html>`, CSS de posición y pantalla completa; V1–V4 pendientes a mano. |
+| 2026-11-15 | T3 | feat: pintar la sección YouTube Groups en la columna propia y quitarla de la guía de YouTube | `scheduleSidebarCheck`; eliminados `findGuideAnchor`, `findGuideInsertionIndex` y su test; V5–V6 pendientes a mano. |
