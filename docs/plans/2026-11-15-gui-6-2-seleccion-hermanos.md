@@ -61,7 +61,7 @@ verde. Cada commit deja la extensión funcionando.
   `parsePendingSelection` acepta `version: 3` y rechaza 1 y 2; `isChannelListOpen` abierta con la clave de su
   contenedor y cerrada con la del mismo canal en otro contenedor. Tests existentes con claves `channel:<url>` se
   adaptan (cambio intencionado). A mano V3, V4.
-- [ ] T2 · Regla de hermanos en `toggleSelection` (nueva firma) y en `resolveSelection`; `content.js` pasa los grupos
+- [x] T2 · Regla de hermanos en `toggleSelection` (nueva firma) y en `resolveSelection`; `content.js` pasa los grupos
   · Ficheros: `modules/filter.js`, `tests/filter.test.js`, `content.js` · Test (árbol A{A1{A1a}, A2}, B{B1}; canal x en
   A y en B): dos grupos raíz → `[A, B]`; A1 + A2 → ambos; A1 + B1 → solo B1; con `[A1, A2]` pulsar A → `[A]`; con `[A]`
   pulsar A1 → `[A1]`; desde `[x@A]` pulsar A → `[A]`; desde `[x@A1a]` pulsar A → `[A]`; con `[A, B]` pulsar `x@A` → `[x@A]`; `x@A` + otro canal de A → ambos; `x@A` + `x@B` → `[x@B]`; pulsar una
@@ -115,3 +115,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: claves de canal con contenedor y traspaso version 3 | `filter.js`, `guide.js` y `content.js`; tests adaptados. `make lint` y `make test-affected` en verde; V3, V4 a mano pendientes. |
+| 2026-11-15 | T2 | feat: la selección se limita a elementos hermanos | `toggleSelection(groups, selection, filter)` y `resolveSelection` con `areSiblings`; `content.js` pasa `guideGroups`; tests adaptados. `make lint` y `make test-affected` en verde; V1, V2, V5 a mano pendientes. |

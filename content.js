@@ -1509,7 +1509,11 @@
    */
   function toggleSelectionItem(filter) {
     const previous = activeSelection;
-    const next = YouTubeGroupsFilter.toggleSelection(previous, filter);
+    const next = YouTubeGroupsFilter.toggleSelection(
+      guideGroups,
+      previous,
+      filter,
+    );
     setActiveSelection(next);
 
     const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);

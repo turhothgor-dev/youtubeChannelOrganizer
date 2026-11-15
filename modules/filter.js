@@ -182,21 +182,76 @@ const YouTubeGroupsFilter = (() => {
   }
 
   /**
-   * Añade o quita un filtro de la selección (selección siempre múltiple).
+   * Busca la ruta de ids (de la raíz al grupo) de un grupo en cualquier nivel.
    *
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} id Id del grupo.
+   * @returns {string[]|null} La ruta, o null si el grupo no existe.
+   */
+  function findGroupPath(groups, id) {
+    if (!Array.isArray(groups)) {
+      return null;
+    }
+    for (const group of groups) {
+      if (!group) {
+        continue;
+      }
+      if (group.id === id) {
+        return [group.id];
+      }
+      const inner = findGroupPath(group.subgroups, id);
+      if (inner) {
+        return [group.id, ...inner];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Indica si dos claves de selección son hermanas: mismo tipo y mismo
+   * contenedor (mismo padre para grupos, mismo grupo para canales).
+   *
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} keyA Primera clave.
+   * @param {string} keyB Segunda clave.
+   * @returns {boolean}
+   */
+  function areSiblings(groups, keyA, keyB) {
+    const a = parseFilterKey(keyA);
+    const b = parseFilterKey(keyB);
+    if (!a || !b || a.type !== b.type) {
+      return false;
+    }
+    if (a.type === "channel") {
+      return a.containerId === b.containerId;
+    }
+    const pathA = findGroupPath(groups, a.id);
+    const pathB = findGroupPath(groups, b.id);
+    if (!pathA || !pathB || pathA.length !== pathB.length) {
+      return false;
+    }
+    return pathA.slice(0, -1).join("/") === pathB.slice(0, -1).join("/");
+  }
+
+  /**
+   * Añade o quita un filtro de la selección. Al añadir, solo se conservan los
+   * elementos hermanos del nuevo (ADR 0011).
+   *
+   * @param {Array<Object>} groups Grupos guardados.
    * @param {*} selection Selección actual.
    * @param {*} filter Filtro pulsado.
    * @returns {string[]} Selección nueva; la entrada no se modifica.
    */
-  function toggleSelection(selection, filter) {
+  function toggleSelection(groups, selection, filter) {
     const current = normalizeSelection(selection);
     const key = getFilterKey(filter);
     if (key === null) {
       return current;
     }
-    return current.includes(key)
-      ? current.filter((item) => item !== key)
-      : [...current, key];
+    if (current.includes(key)) {
+      return current.filter((item) => item !== key);
+    }
+    return [...current.filter((item) => areSiblings(groups, item, key)), key];
   }
 
   /**
@@ -217,15 +272,23 @@ const YouTubeGroupsFilter = (() => {
    *   existen y la unión de sus URL (null si no queda ninguna).
    */
   function resolveSelection(groups, selection) {
-    const kept = [];
-    const urls = new Set();
+    let kept = [];
+    const resolvedByKey = new Map();
     for (const key of normalizeSelection(selection)) {
       const resolved = resolveFilterUrls(groups, parseFilterKey(key));
       if (resolved.status === "ok") {
         kept.push(key);
-        for (const url of resolved.urls) {
-          urls.add(url);
-        }
+        resolvedByKey.set(key, resolved.urls);
+      }
+    }
+    if (kept.length > 1) {
+      const last = kept[kept.length - 1];
+      kept = kept.filter((key) => areSiblings(groups, key, last));
+    }
+    const urls = new Set();
+    for (const key of kept) {
+      for (const url of resolvedByKey.get(key)) {
+        urls.add(url);
       }
     }
     return { selection: kept, urls: kept.length > 0 ? urls : null };

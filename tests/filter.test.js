@@ -175,6 +175,24 @@ test("las constantes del filtro pendiente se conservan", () => {
   assert.strictEqual(F.PENDING_MAX_AGE_MS, 30000);
 });
 
+/** Árbol A{A1{A1a}, A2}, B{B1}; el canal x está en A y en B. */
+function siblingsTree() {
+  const leaf = (id) => ({ id, name: id, channels: [], subgroups: [] });
+  return [
+    {
+      id: "a",
+      name: "A",
+      channels: [{ name: "X", url: X }],
+      subgroups: [{ ...leaf("a1"), subgroups: [leaf("a1a")] }, leaf("a2")],
+    },
+    {
+      ...leaf("b"),
+      channels: [{ name: "X", url: X }],
+      subgroups: [leaf("b1")],
+    },
+  ];
+}
+
 const GA = { type: "group", id: "a" };
 const GB = { type: "group", id: "b" };
 const CX = { type: "channel", containerId: "a", url: X, name: "X" };
@@ -229,42 +247,51 @@ test("normalizeSelection quita repetidos e inválidos", () => {
 test("toggleSelection añade, quita y no muta", () => {
   const { YouTubeGroupsFilter: F } = loadModules();
 
-  assert.deepStrictEqual(plain(F.toggleSelection([], GA)), ["group:a"]);
-  assert.deepStrictEqual(plain(F.toggleSelection(["group:a"], GB)), [
-    "group:a",
-    "group:b",
+  const g = siblingsTree();
+  const t = (selection, filter) =>
+    plain(F.toggleSelection(g, selection, filter));
+  const grp = (id) => ({ type: "group", id });
+  const ch = (containerId, url = X) => ({
+    type: "channel",
+    containerId,
+    url,
+    name: "",
+  });
+  const W = "https://www.youtube.com/@w";
+
+  // Hermanos: se acumulan.
+  assert.deepStrictEqual(t([], GA), ["group:a"]);
+  assert.deepStrictEqual(t(["group:a"], GB), ["group:a", "group:b"]);
+  assert.deepStrictEqual(t(["group:a1"], grp("a2")), ["group:a1", "group:a2"]);
+  // No hermanos: solo queda el nuevo.
+  assert.deepStrictEqual(t(["group:a1"], grp("b1")), ["group:b1"]);
+  assert.deepStrictEqual(t(["group:a1", "group:a2"], GA), ["group:a"]);
+  assert.deepStrictEqual(t(["group:a"], grp("a1")), ["group:a1"]);
+  assert.deepStrictEqual(t([`channel:a:${X}`], GA), ["group:a"]);
+  assert.deepStrictEqual(t([`channel:a1a:${X}`], GA), ["group:a"]);
+  assert.deepStrictEqual(t(["group:a", "group:b"], ch("a")), [
+    `channel:a:${X}`,
   ]);
-  assert.deepStrictEqual(plain(F.toggleSelection(["group:a", "group:b"], GA)), [
-    "group:b",
+  // Canales: mismo contenedor se acumulan; otro contenedor sustituye.
+  assert.deepStrictEqual(t([`channel:a:${X}`], ch("a", W)), [
+    `channel:a:${X}`,
+    `channel:a:${W}`,
   ]);
-  assert.deepStrictEqual(plain(F.toggleSelection(["group:b"], GA)), [
-    "group:b",
-    "group:a",
-  ]);
+  assert.deepStrictEqual(t([`channel:a:${X}`], ch("b")), [`channel:b:${X}`]);
+  // Pulsar una seleccionada la quita sin tocar las demás.
+  assert.deepStrictEqual(t(["group:a", "group:b"], GA), ["group:b"]);
   assert.deepStrictEqual(
-    plain(
-      F.toggleSelection(["group:b", `channel:a:${X}`], {
-        type: "channel",
-        containerId: "a",
-        url: `${X}?a=1`,
-        name: "otro",
-      }),
-    ),
-    ["group:b"],
+    t([`channel:a:${X}`, `channel:a:${W}`], ch("a", `${X}?a=1`)),
+    [`channel:a:${W}`],
   );
-  assert.deepStrictEqual(
-    plain(F.toggleSelection(["group:https://www.youtube.com/@x"], CX)),
-    ["group:https://www.youtube.com/@x", `channel:a:${X}`],
-  );
-  assert.deepStrictEqual(plain(F.toggleSelection(["group:a"], null)), [
-    "group:a",
-  ]);
-  assert.deepStrictEqual(plain(F.toggleSelection(["group:a"], F.ALL_FILTER)), [
-    "group:a",
-  ]);
+  // Claves no válidas: selección normalizada sin cambios.
+  assert.deepStrictEqual(t(["group:a"], null), ["group:a"]);
+  assert.deepStrictEqual(t(["group:a"], F.ALL_FILTER), ["group:a"]);
+  // Un grupo inexistente no es hermano de nadie.
+  assert.deepStrictEqual(t(["group:a"], grp("nada")), ["group:nada"]);
 
   const input = ["group:a"];
-  F.toggleSelection(input, GB);
+  F.toggleSelection(g, input, GB);
   assert.deepStrictEqual(input, ["group:a"]);
 });
 
@@ -280,9 +307,14 @@ test("resolveSelection une las URL y descarta lo inexistente", () => {
   const groups = tree();
   groups[1].channels.push({ name: "Z", url: Z });
 
-  const union = F.resolveSelection(groups, ["group:a", `channel:b:${Z}`]);
-  assert.deepStrictEqual(plain(union.selection), ["group:a", `channel:b:${Z}`]);
+  const union = F.resolveSelection(groups, ["group:a", "group:b"]);
+  assert.deepStrictEqual(plain(union.selection), ["group:a", "group:b"]);
   assert.deepStrictEqual([...union.urls].sort(), [X, Y, Z].sort());
+
+  // No hermanos: quedan los hermanos del último.
+  const siblings = F.resolveSelection(groups, ["group:a", "group:a1"]);
+  assert.deepStrictEqual(plain(siblings.selection), ["group:a1"]);
+  assert.deepStrictEqual([...siblings.urls], [Y]);
 
   const partial = F.resolveSelection(groups, [
     "group:borrado",
