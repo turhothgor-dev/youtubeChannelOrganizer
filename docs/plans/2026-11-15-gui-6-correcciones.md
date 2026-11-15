@@ -56,7 +56,7 @@ Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make t
   0`, `pointer-events: auto` (`!important`), sin el `top` actual; `tp-yt-app-drawer#guide #guide-spacer` con
   `display: none !important`; `ytd-app` con `overflow-x: clip` en lugar de `hidden` · Test: `make lint`, `make test`
   y a mano V1, V2, V5.
-- [ ] T2 · Elementos fijos alineados con la guía entre 792 y 1312 px · Ficheros: `content.css` · Reglas:
+- [x] T2 · Elementos fijos alineados con la guía entre 792 y 1312 px · Ficheros: `content.css` · Reglas:
   `html.youtube-groups--guide-pinned ytd-app { --ytd-mini-guide-width: var(--app-drawer-width, 240px) }` y `left:
   var(--app-drawer-width, 240px) !important` en `#frosted-glass`, `ytd-rich-grid-renderer #header
   ytd-feed-filter-chip-bar-renderer`, `ytd-rich-grid-renderer #header #chips-wrapper` y `ytd-shorts` · Test: `make
@@ -142,3 +142,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: cajón de la guía fija con su ancho y sin capturar clics` | Host con ancho de guía, `pointer-events`, desplazamiento único y `overflow-x: clip`. Pendiente V1, V2, V5 a mano. |
+| 2026-11-15 | T2 | `fix: elementos fijos alineados con la guía fija` | Variable `--ytd-mini-guide-width` y `left` explícito en `#frosted-glass`, chips y `ytd-shorts`. Pendiente V3 a mano. |

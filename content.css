@@ -1368,4 +1368,15 @@ html.youtube-groups--guide-pinned ytd-page-manager#page-manager {
 
 html.youtube-groups--guide-pinned ytd-app {
   overflow-x: clip;
+  --ytd-mini-guide-width: var(--app-drawer-width, 240px);
+}
+
+html.youtube-groups--guide-pinned #frosted-glass,
+html.youtube-groups--guide-pinned
+  ytd-rich-grid-renderer
+  #header
+  ytd-feed-filter-chip-bar-renderer,
+html.youtube-groups--guide-pinned ytd-rich-grid-renderer #header #chips-wrapper,
+html.youtube-groups--guide-pinned ytd-shorts {
+  left: var(--app-drawer-width, 240px) !important;
 }
