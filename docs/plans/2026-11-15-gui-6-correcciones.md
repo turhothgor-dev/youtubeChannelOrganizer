@@ -62,7 +62,7 @@ Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make t
   ytd-feed-filter-chip-bar-renderer`, `ytd-rich-grid-renderer #header #chips-wrapper` y `ytd-shorts` · Test: `make
   lint` y a mano V3. Si en V3 alguno queda desplazado 240 px de más (doble desplazamiento por la variable y la regla),
   se quita su regla explícita y se anota en **Cambios aprobados**.
-- [ ] T3 · Caché del ancla de la sección en la guía · Ficheros: `content.js` · Cambios: estado `guideAnchorCache`
+- [x] T3 · Caché del ancla de la sección en la guía · Ficheros: `content.js` · Cambios: estado `guideAnchorCache`
   (`{ container, anchor }` o `null`) y `invalidateGuideAnchor()`; `getGuideAnchor(container)` devuelve la caché si es
   del mismo `container`, el ancla (si no es `null`) sigue siendo hija suya y no está invalidada; si no, llama a
   `findGuideAnchor` y guarda. `isGuideSectionInPlace` y `renderGuideSection` usan `getGuideAnchor`. En el
@@ -143,3 +143,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: cajón de la guía fija con su ancho y sin capturar clics` | Host con ancho de guía, `pointer-events`, desplazamiento único y `overflow-x: clip`. Pendiente V1, V2, V5 a mano. |
 | 2026-11-15 | T2 | `fix: elementos fijos alineados con la guía fija` | Variable `--ytd-mini-guide-width` y `left` explícito en `#frosted-glass`, chips y `ytd-shorts`. Pendiente V3 a mano. |
+| 2026-11-15 | T3 | `perf: caché del ancla de la sección en la guía` | `getGuideAnchor` con `guideAnchorCache`; el observer la invalida con mutaciones en `#sections` ajenas a nuestra sección. Pendiente V4 a mano. |

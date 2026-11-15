@@ -1901,6 +1901,34 @@
     return sections[0] || null;
   }
 
+  // Última ancla calculada (`{ container, anchor }`) o `null` si está invalidada.
+  let guideAnchorCache = null;
+
+  /** Invalida el ancla en caché: se recalculará en la próxima consulta. */
+  function invalidateGuideAnchor() {
+    guideAnchorCache = null;
+  }
+
+  /**
+   * Ancla de la sección con caché: solo recorre los enlaces de la guía si la
+   * caché está invalidada, es de otro contenedor o el ancla ya no es hija suya.
+   * @param {Element} container - Contenedor `#sections` de la guía.
+   * @returns {Element|null} Igual que `findGuideAnchor`.
+   */
+  function getGuideAnchor(container) {
+    if (
+      guideAnchorCache &&
+      guideAnchorCache.container === container &&
+      (guideAnchorCache.anchor === null ||
+        guideAnchorCache.anchor.parentElement === container)
+    ) {
+      return guideAnchorCache.anchor;
+    }
+    const anchor = findGuideAnchor(container);
+    guideAnchorCache = { container, anchor };
+    return anchor;
+  }
+
   /**
    * Indica si la sección está conectada y justo en su posición de la guía.
    * @param {Element} [container] - Contenedor `#sections` (se busca si falta).
@@ -1913,7 +1941,7 @@
     if (!section?.isConnected || !sections) {
       return false;
     }
-    const anchor = findGuideAnchor(sections);
+    const anchor = getGuideAnchor(sections);
     return anchor
       ? section.parentElement === sections &&
           anchor.nextElementSibling === section
@@ -1940,7 +1968,7 @@
       section.className = "youtube-groups__guide";
     }
     if (!isGuideSectionInPlace(container)) {
-      const anchor = findGuideAnchor(container);
+      const anchor = getGuideAnchor(container);
       if (anchor) {
         anchor.after(section);
       } else {
@@ -3471,6 +3499,21 @@
   const observer = new MutationObserver((mutations) => {
     if (window.location.pathname !== guidePinPath) {
       syncGuidePin();
+    }
+    // Si cambia algo de la guía que no sea nuestra sección, el ancla en caché
+    // puede haber dejado de valer (secciones nuevas o con enlaces tardíos).
+    const guideSections = document.querySelector(GUIDE_SECTIONS_SELECTOR);
+    if (guideSections) {
+      const ourSection = document.getElementById(GUIDE_SECTION_ID);
+      if (
+        mutations.some(
+          (mutation) =>
+            guideSections.contains(mutation.target) &&
+            !ourSection?.contains(mutation.target),
+        )
+      ) {
+        invalidateGuideAnchor();
+      }
     }
     for (const mutation of mutations) {
       if (mutation.target instanceof Element) {
