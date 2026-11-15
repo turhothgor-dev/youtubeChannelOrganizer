@@ -79,7 +79,7 @@ verde.
   `tests/filter.test.js`, `tests/visibility.test.js`, `tests/guide.test.js` · Test: `matchesGroupFilter` cubre los
   mismos casos que hoy con `hasFilter`; `isChannelListOpen` abierta en profundidad 0 si contiene un canal de la
   selección, cerrada con selección solo de grupos o vacía, override `false` gana; `make test` y a mano V1, V2, V4, V5.
-- [ ] T3 · Botón "Limpiar selección (N)" (ver **Decisiones**) · Ficheros: `content.js`, `content.css` · Test: `make
+- [x] T3 · Botón "Limpiar selección (N)" (ver **Decisiones**) · Ficheros: `content.js`, `content.css` · Test: `make
   lint`, `make test` y a mano V3.
 - [ ] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `filter.js` con las funciones nuevas, flujo **Filtro** con
   selección múltiple, unión y "Limpiar selección"; `matchesGroupFilter` con `hasFilter`; enlace al ADR 0009); ADR 0009
@@ -135,3 +135,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `feat: funciones de selección múltiple en filter.js` | Funciones nuevas y tests; las antiguas se quitan en T2. |
 | 2026-11-15 | T2 | `feat: content.js con selección múltiple y quitar el filtro único` | `content.js`, `matchesGroupFilter` (`hasFilter`) y `isChannelListOpen` (selección); funciones y tests antiguos fuera de `filter.js`. Pendiente V1, V2, V4, V5 a mano. |
+| 2026-11-15 | T3 | `feat: botón Limpiar selección en la guía` | Botón fijo bajo el formulario de crear, oculto sin selección; estilos claro/oscuro. Pendiente V3 a mano. |

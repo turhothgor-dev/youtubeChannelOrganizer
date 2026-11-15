@@ -1983,10 +1983,16 @@
         }
       });
 
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.className = "youtube-groups__guide-clear";
+      clear.hidden = true;
+      clear.addEventListener("click", () => setActiveSelection([]));
+
       viewport = document.createElement("div");
       viewport.className = "youtube-groups__guide-viewport";
 
-      section.replaceChildren(header, create, form, viewport);
+      section.replaceChildren(header, create, form, clear, viewport);
     }
     guideGroups = groups;
 
@@ -2012,6 +2018,10 @@
       create.textContent = "+ Crear grupo";
       create.removeAttribute("aria-label");
     }
+
+    const clear = section.querySelector(".youtube-groups__guide-clear");
+    clear.hidden = activeSelection.length === 0;
+    clear.textContent = `Limpiar selección (${activeSelection.length})`;
 
     const list = document.createElement("div");
     list.className = "youtube-groups__guide-column";
