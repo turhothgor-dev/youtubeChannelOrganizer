@@ -76,9 +76,46 @@ const YouTubeGroupsFilter = (() => {
       return urls ? { status: "ok", urls } : { status: "missing" };
     }
     if (normalized.type === "channel") {
-      return { status: "ok", urls: new Set([normalized.url]) };
+      return channelInGroups(groups, normalized.url)
+        ? { status: "ok", urls: new Set([normalized.url]) }
+        : { status: "missing" };
     }
     return { status: "all" };
+  }
+
+  /**
+   * Indica si un canal (URL normalizada) está en algún grupo o subgrupo.
+   *
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} url URL normalizada del canal.
+   * @returns {boolean}
+   */
+  function channelInGroups(groups, url) {
+    if (!Array.isArray(groups)) {
+      return false;
+    }
+    for (const group of groups) {
+      if (!group) {
+        continue;
+      }
+      const channels = Array.isArray(group.channels) ? group.channels : [];
+      for (const channel of channels) {
+        if (!channel || typeof channel.url !== "string") {
+          continue;
+        }
+        try {
+          if (YouTubeGroups.normalizeChannelUrl(channel.url) === url) {
+            return true;
+          }
+        } catch {
+          // URL no normalizable: no coincide
+        }
+      }
+      if (channelInGroups(group.subgroups, url)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

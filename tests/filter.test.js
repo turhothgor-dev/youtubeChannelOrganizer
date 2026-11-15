@@ -98,6 +98,34 @@ test("resolveFilterUrls resuelve todos, grupo, canal y grupo inexistente", () =>
   );
 });
 
+test("resolveFilterUrls con canal: subgrupo, huérfano y con parámetros", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+  const groups = tree();
+  const Y = "https://www.youtube.com/@y";
+
+  const nested = F.resolveFilterUrls(groups, { type: "channel", url: Y });
+  assert.strictEqual(nested.status, "ok");
+  assert.deepStrictEqual([...nested.urls], [Y]);
+
+  assert.deepStrictEqual(
+    plain(
+      F.resolveFilterUrls(groups, {
+        type: "channel",
+        url: "https://www.youtube.com/@z",
+      }),
+    ),
+    { status: "missing" },
+  );
+
+  const withParams = [
+    { id: "p", name: "P", channels: [{ name: "X", url: `${X}?a=1` }] },
+  ];
+  assert.strictEqual(
+    F.resolveFilterUrls(withParams, { type: "channel", url: X }).status,
+    "ok",
+  );
+});
+
 test("isFilterOnRemovedGroup solo es cierto para un grupo quitado", () => {
   const { YouTubeGroupsFilter: F } = loadModules();
 

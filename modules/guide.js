@@ -47,13 +47,24 @@ const YouTubeGroupsGuide = (() => {
   function toGuideItem(group) {
     const channels = (Array.isArray(group.channels) ? group.channels : [])
       .filter((channel) => channel && typeof channel.url === "string")
-      .map((channel) => ({
-        name:
-          typeof channel.name === "string" && channel.name !== ""
-            ? channel.name
-            : channel.url,
-        url: channel.url,
-      }));
+      .map((channel) => {
+        let url = null;
+        try {
+          url = YouTubeGroups.normalizeChannelUrl(channel.url);
+        } catch {
+          url = null;
+        }
+        return url
+          ? {
+              name:
+                typeof channel.name === "string" && channel.name !== ""
+                  ? channel.name
+                  : url,
+              url,
+            }
+          : null;
+      })
+      .filter(Boolean);
     return {
       id: group.id,
       name: group.name,

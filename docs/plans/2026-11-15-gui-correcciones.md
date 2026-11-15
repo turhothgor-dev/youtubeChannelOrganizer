@@ -1,6 +1,6 @@
 # Plan: correcciones de la revisión de los planes gui-*
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: revisión del diff `5e1206a..HEAD` (planes `2026-11-15-gui-*`)
 
@@ -37,7 +37,7 @@ recomendada en cada caso.
   (`hidePlaylistDropdown`) y el selector de iconos (`hideIconPicker`); `openPlaylistForm` oculta el formulario de grupos
   (extraer un `hideSubscriptionDropdown()` con lo que ya hace el escuchador de `mousedown` ~2346) y el selector de
   iconos · Ficheros: `content.js` · Test: verificación manual V2
-- [ ] T3 · Canal de filtro huérfano o no normalizable: (a) en `modules/filter.js`, `resolveFilterUrls` devuelve
+- [x] T3 · Canal de filtro huérfano o no normalizable: (a) en `modules/filter.js`, `resolveFilterUrls` devuelve
   `{status: "missing"}` para un filtro de canal cuya URL normalizada no está en ningún grupo ni subgrupo (recorrido
   local, normalizando cada URL con `try/catch`); ajustar el texto del `console.warn` de `refreshActiveFilter` a "Filtro
   activo no encontrado"; (b) en `modules/guide.js`, `toGuideItem` normaliza `channel.url` con
@@ -81,3 +81,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: marcar la miniatura anfitriona con atributo para no romper el filtro de duración` | Atributo `data-youtube-groups-thumb-host` en lugar de clase; pendiente V1 manual |
 | 2026-11-15 | T2 | `fix: cerrar los demás desplegables al abrir uno de grupos o de listas` | `hideSubscriptionDropdown()` extraído; pendiente V2 manual |
+| 2026-11-15 | T3 | `fix: resolver como inexistente el filtro de un canal huérfano y normalizar los canales de la guía` | `resolveFilterUrls` devuelve `missing` para canal en ningún grupo; la guía normaliza y omite URL no normalizables; corregido el Registro de T7 del plan gui-3 |

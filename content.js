@@ -3231,7 +3231,7 @@
       const resolved = YouTubeGroupsFilter.resolveFilterUrls(groups, filter);
       if (resolved.status === "missing") {
         console.warn(
-          "[YouTube Groups][FILTER] Grupo activo no encontrado",
+          "[YouTube Groups][FILTER] Filtro activo no encontrado",
           activeKey,
         );
         setActiveFilter(YouTubeGroupsFilter.ALL_FILTER);

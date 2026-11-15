@@ -29,6 +29,24 @@ function tree() {
   ];
 }
 
+test("getGuideColumn normaliza la URL de los canales y omite los no normalizables", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const groups = [
+    {
+      id: "g",
+      name: "G",
+      channels: [
+        { name: "X", url: `${X}?a=1` },
+        { name: "Malo", url: "https://example.com/@x" },
+      ],
+      subgroups: [],
+    },
+  ];
+
+  const column = plain(G.getGuideColumn(groups, []));
+  assert.deepStrictEqual(column.items[0].channels, [{ name: "X", url: X }]);
+});
+
 test("getGuideColumn da la raíz y la columna de un grupo", () => {
   const { YouTubeGroupsGuide: G } = loadModules();
   const groups = tree();
