@@ -1320,7 +1320,7 @@ html[dark] .youtube-groups__guide-item[aria-pressed="true"] {
   min-height: 14px;
 }
 
-/* Guía de YouTube forzada abierta y fija fuera de /watch (ADR 0010).
+/* Guía de YouTube forzada abierta y fija solo en suscripciones (ADR 0010 y 0012).
    Todas las reglas cuelgan de la clase que pone el content script. */
 html.youtube-groups--guide-pinned ytd-mini-guide-renderer {
   display: none !important;

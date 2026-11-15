@@ -72,7 +72,7 @@ cuando el vídeo **no** se reproduce (pausado o terminado) y nunca en pantalla c
 Reglas comunes: sin dependencias nuevas; sin tests de DOM (fuera de alcance, como en `gui-2` y `gui-6-*`); el DOM se
 verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en verde.
 
-- [ ] T1 · Guía fija solo en suscripciones · Ficheros: `modules/pages.js` (`shouldPinGuide`: `pageType ===
+- [x] T1 · Guía fija solo en suscripciones · Ficheros: `modules/pages.js` (`shouldPinGuide`: `pageType ===
   "subscriptions"` en lugar de `pageType !== "watch"`; JSDoc), `tests/pages.test.js` (el test "shouldPinGuide fija la
   guía fuera de watch…" pasa a: `subscriptions` → `true` a 792 y 1400 px; `false` a 791 px y con pantalla completa;
   `home`, `search`, `shorts`, `channel`, `other` y `watch` → `false` a 1400 px; se mantiene el caso de `/live/<id>`),
@@ -203,3 +203,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `feat: fijar la guía de YouTube solo en suscripciones` | `shouldPinGuide` exige `subscriptions`; test y comentarios actualizados. V1-V2 pendientes a mano. |

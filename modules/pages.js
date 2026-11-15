@@ -69,7 +69,8 @@ const YouTubeGroupsPages = (() => {
   }
 
   /**
-   * Indica si la guía de YouTube se fuerza abierta y fija en esa página.
+   * Indica si la guía de YouTube se fuerza abierta y fija en esa página: solo
+   * en suscripciones, con ancho suficiente y sin pantalla completa (ADR 0012).
    *
    * @param {string} pageType Valor devuelto por getPageType.
    * @param {number} width Ancho de la ventana (innerWidth).
@@ -78,7 +79,9 @@ const YouTubeGroupsPages = (() => {
    */
   function shouldPinGuide(pageType, width, isFullscreen) {
     return (
-      pageType !== "watch" && width >= PINNED_GUIDE_MIN_WIDTH && !isFullscreen
+      pageType === "subscriptions" &&
+      width >= PINNED_GUIDE_MIN_WIDTH &&
+      !isFullscreen
     );
   }
 

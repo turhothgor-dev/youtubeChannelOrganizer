@@ -3447,8 +3447,8 @@
   let guidePinScheduled = false;
 
   /**
-   * Pone o quita la clase que fuerza la guía de YouTube abierta y fija
-   * (ADR 0010). Es idempotente.
+   * Pone o quita la clase que fuerza la guía de YouTube abierta y fija, solo
+   * en suscripciones (ADR 0010 y 0012). Es idempotente.
    *
    * @param {string} [pathname] Ruta con la que decidir (por defecto, la
    *   actual; en yt-navigate-start, la de destino). La ruta que se recuerda

@@ -124,22 +124,22 @@ test("shouldShowCardControls es true solo en inicio, suscripciones, búsqueda y 
   }
 });
 
-test("shouldPinGuide fija la guía fuera de watch, con ancho suficiente y sin pantalla completa", () => {
+test("shouldPinGuide fija la guía solo en suscripciones, con ancho suficiente y sin pantalla completa", () => {
   const { YouTubeGroupsPages: P } = loadModules();
 
   assert.strictEqual(P.PINNED_GUIDE_MIN_WIDTH, 792);
+  assert.strictEqual(P.shouldPinGuide("subscriptions", 792, false), true);
+  assert.strictEqual(P.shouldPinGuide("subscriptions", 1400, false), true);
+  assert.strictEqual(P.shouldPinGuide("subscriptions", 791, false), false);
+  assert.strictEqual(P.shouldPinGuide("subscriptions", 1400, true), false);
   for (const type of [
     "home",
-    "subscriptions",
+    "search",
     "shorts",
     "channel",
-    "search",
     "other",
+    "watch",
   ]) {
-    assert.strictEqual(P.shouldPinGuide(type, 792, false), true, type);
-    assert.strictEqual(P.shouldPinGuide(type, 1400, false), true, type);
-    assert.strictEqual(P.shouldPinGuide(type, 791, false), false, type);
-    assert.strictEqual(P.shouldPinGuide(type, 1400, true), false, type);
+    assert.strictEqual(P.shouldPinGuide(type, 1400, false), false, type);
   }
-  assert.strictEqual(P.shouldPinGuide("watch", 1400, false), false);
 });
