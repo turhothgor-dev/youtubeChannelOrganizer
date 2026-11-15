@@ -1746,22 +1746,20 @@
     );
     row.append(toggle, main);
 
-    if (item.hasSubgroups) {
-      const enter = document.createElement("button");
-      enter.type = "button";
-      enter.className = "youtube-groups__guide-enter";
-      enter.setAttribute("aria-label", `Ver subgrupos de ${item.name}`);
-      enter.textContent = "›";
-      enter.addEventListener("click", () => {
-        guidePath = YouTubeGroupsGuide.enterGuideGroup(
-          groups,
-          guidePath,
-          item.id,
-        );
-        renderGuideSection(groups, "forward");
-      });
-      row.append(enter);
-    }
+    const enter = document.createElement("button");
+    enter.type = "button";
+    enter.className = "youtube-groups__guide-enter";
+    enter.setAttribute("aria-label", `Ver subgrupos de ${item.name}`);
+    enter.textContent = "›";
+    enter.addEventListener("click", () => {
+      guidePath = YouTubeGroupsGuide.enterGuideGroup(
+        groups,
+        guidePath,
+        item.id,
+      );
+      renderGuideSection(groups, "forward");
+    });
+    row.append(enter);
 
     for (const channel of item.channels) {
       const channelButton = createGuideButton(
@@ -2062,7 +2060,7 @@
     if (column.items.length === 0) {
       const empty = document.createElement("p");
       empty.className = "youtube-groups__guide-empty";
-      empty.textContent = "Aún no hay grupos";
+      empty.textContent = column.parent ? "Sin subgrupos" : "Aún no hay grupos";
       list.append(empty);
     }
     for (const item of column.items) {
