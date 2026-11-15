@@ -2051,6 +2051,94 @@
     return wrapper;
   }
 
+  /** Columna pintada por última vez (para vaciar el formulario al cambiar). */
+  let guideRenderedColumnKey = null;
+
+  /**
+   * Oculta y vacía el formulario de crear de la guía.
+   * @param {Element} section - Sección de la guía.
+   */
+  function resetGuideCreateForm(section) {
+    const form = section.querySelector(".youtube-groups__guide-form");
+    if (!form) {
+      return;
+    }
+    form.reset();
+    form.hidden = true;
+    form.querySelector(".youtube-groups__guide-form-error").textContent = "";
+  }
+
+  /**
+   * Crea el formulario de crear grupo o subgrupo de la guía (oculto). Crea
+   * un grupo en la raíz y un subgrupo del último grupo de `guidePath` en las
+   * demás columnas.
+   * @returns {HTMLFormElement} Formulario.
+   */
+  function createGuideCreateForm() {
+    const form = document.createElement("form");
+    form.className = "youtube-groups__guide-form";
+    form.hidden = true;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 80;
+    input.className = "youtube-groups__guide-form-input";
+    input.setAttribute("aria-label", "Nombre");
+    // Evita que salten los atajos de teclado de YouTube
+    input.addEventListener("keydown", (event) => event.stopPropagation());
+
+    const actions = document.createElement("div");
+    actions.className = "youtube-groups__guide-form-actions";
+
+    const save = document.createElement("button");
+    save.type = "submit";
+    save.className = "youtube-groups__guide-form-save";
+    save.textContent = "Guardar";
+
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "youtube-groups__guide-form-cancel";
+    cancel.textContent = "Cancelar";
+    cancel.addEventListener("click", () => {
+      form.reset();
+      form.hidden = true;
+      error.textContent = "";
+    });
+
+    actions.append(save, cancel);
+
+    const error = document.createElement("p");
+    error.className = "youtube-groups__guide-form-error";
+    error.setAttribute("aria-live", "polite");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      error.textContent = "";
+      const parentId = guidePath[guidePath.length - 1];
+      const kind = parentId ? "subgroup" : "group";
+      const message = YouTubeGroups.validateGroupName(input.value, kind);
+      if (message) {
+        error.textContent = message;
+        return;
+      }
+      try {
+        if (parentId) {
+          await createSubGroup(parentId, input.value);
+        } else {
+          await createGroup(input.value);
+        }
+        form.reset();
+        form.hidden = true;
+        await renderGroupsPanel();
+      } catch (exception) {
+        error.textContent = exception.message;
+      }
+    });
+
+    form.append(input, actions, error);
+    return form;
+  }
+
   /**
    * Índice de la sección tras la que se inserta la nuestra: la anterior a
    * "Más de YouTube", o la primera si no se encuentra.
@@ -2135,12 +2223,27 @@
       create.type = "button";
       create.className = "youtube-groups__guide-create";
 
+      const form = createGuideCreateForm();
+      create.addEventListener("click", () => {
+        form.hidden = !form.hidden;
+        if (!form.hidden) {
+          form.querySelector("input").focus();
+        }
+      });
+
       viewport = document.createElement("div");
       viewport.className = "youtube-groups__guide-viewport";
 
-      section.replaceChildren(header, create, viewport);
+      section.replaceChildren(header, create, form, viewport);
     }
     guideGroups = groups;
+
+    // Al cambiar de columna, el formulario se oculta y se vacía
+    const columnKey = column.path.join("/");
+    if (columnKey !== guideRenderedColumnKey) {
+      guideRenderedColumnKey = columnKey;
+      resetGuideCreateForm(section);
+    }
 
     const back = section.querySelector(".youtube-groups__guide-back");
     const title = section.querySelector(".youtube-groups__guide-title");
