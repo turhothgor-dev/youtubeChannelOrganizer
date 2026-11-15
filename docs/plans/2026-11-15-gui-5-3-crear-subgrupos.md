@@ -1,6 +1,6 @@
 # Plan: GUI 5 (3/3) · Crear subgrupos según la selección y "›" en todos los grupos
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-*` en Firefox (2026-11-15), punto 3.
 
@@ -66,7 +66,7 @@ verde.
   `make test` y a mano V1, V2, V4.
 - [x] T3 · "›" en todos los grupos y subgrupos y "Sin subgrupos" en la subcolumna vacía · Ficheros: `content.js` ·
   Test: `make lint`, `make test` y a mano V3.
-- [ ] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `guide.js` con `getCreateTarget` y `findGuidePath`; flujo de la
+- [x] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `guide.js` con `getCreateTarget` y `findGuidePath`; flujo de la
   columna: botón de crear según la selección y "›" en todos). Estado de este plan a `hecho` · Ficheros:
   `docs/ARCHITECTURE.md`, este plan · Test: `make lint` y `make test`.
 
@@ -111,3 +111,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | `feat: getCreateTarget y findGuidePath en guide.js` | Rutas y entrada válidas en grupos sin subgrupos; tests actualizados. |
 | 2026-11-15 | T2 | `feat: botón de crear según la selección y paso a la columna del padre` | Destino de `getCreateTarget`, reinicio del formulario por destino, elipsis en el botón; V1, V2 y V4 pendientes a mano. |
 | 2026-11-15 | T3 | `feat: flecha › en todos los grupos y "Sin subgrupos"` | "›" siempre visible; subcolumna vacía con "Sin subgrupos"; V3 pendiente a mano. |
+| 2026-11-15 | T4 | `docs: cerrar plan gui-5-3 con ARCHITECTURE al día` | Fila de `guide.js` y flujo de la columna actualizados; plan a hecho. |

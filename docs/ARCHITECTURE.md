@@ -27,7 +27,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
 | `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch`, `shorts`, `channel`, `other`) y `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas. Se carga tras `metadata.js` |
 | `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo como selección múltiple (ADR 0007 y 0009): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `parseFilterKey`, `normalizeSelection`, `toggleSelection` (añade o quita una clave), `clearSelection`, `resolveSelection` (descarta claves inexistentes y da la unión de URL), `shouldNavigateOnSelect` (solo navega al añadir fuera de suscripciones) y el traspaso por `sessionStorage` (`serializePendingSelection`, `parsePendingSelection`, `version: 2`). Se carga tras `pages.js` |
-| `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la columna lateral: `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup` e `isChannelListOpen`. Se carga tras `filter.js` |
+| `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la columna lateral: `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup`, `getCreateTarget`, `findGuidePath` e `isChannelListOpen`. Se carga tras `filter.js` |
 | `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), columna lateral propia "YouTube Groups" (ADR 0008), botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
 | `tests/` | `node:test` + `node:vm` | Tests de `modules/` con un `browser.storage.local` simulado; excluidos del paquete por `web-ext-config.mjs` |
@@ -107,8 +107,11 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `--sidebar-collapsed`, `--fullscreen`, sincronizadas por `applySidebarState`; en pantalla completa se oculta). Un
   botón "«"/"»" la pliega a una tira y guarda `sidebarCollapsed`, que se aplica al leer los ajustes y en
   `storage.onChanged`. `renderGuideSection` (al final de `renderGroupsPanel`) pinta en ella la sección "YouTube
-  Groups". Muestra una sola columna (`getGuideColumn`) que se desplaza con animación al entrar en los
-  subgrupos ("›") o volver ("‹"), con un botón de crear grupo o subgrupo (formulario con icono y color opcionales,
+  Groups". Muestra una sola columna (`getGuideColumn`) que se desplaza con animación al entrar en cualquier
+  grupo o subgrupo ("›" en todos; una subcolumna vacía dice "Sin subgrupos") o volver ("‹"), con un botón de crear
+  que depende de la selección (`getCreateTarget`: "+ Crear grupo" en la raíz, subgrupo del grupo seleccionado o,
+  con varios, del último pulsado; sin selección en una subcolumna, del padre de la columna; tras crear un subgrupo
+  se pasa a la columna del padre con `findGuidePath`) (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
   (`isChannelListOpen`, abierta si contiene un canal seleccionado). No hay elemento "Todos": grupos y canales alternan con `toggleSelectionItem`. No edita ni borra
   grupos. La columna es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
