@@ -1395,3 +1395,21 @@ html.youtube-groups--guide-pinned ytd-rich-grid-renderer #header #chips-wrapper,
 html.youtube-groups--guide-pinned ytd-shorts {
   left: var(--app-drawer-width, 240px) !important;
 }
+
+/* Pantalla completa: se oculta el panel y los desplegables flotantes.
+   Dos reglas: la primera cubre html o body en pantalla completa (`:has()` solo
+   mira descendientes); la segunda, cualquier otro elemento. Separadas para que,
+   si un navegador no entiende `:has()`, la primera siga valiendo. */
+:fullscreen #youtube-groups-panel,
+:fullscreen .youtube-groups__subscription-dropdown,
+:fullscreen .youtube-groups__playlist-dropdown,
+:fullscreen .youtube-groups__icon-picker {
+  display: none !important;
+}
+
+html:has(:fullscreen) #youtube-groups-panel,
+html:has(:fullscreen) .youtube-groups__subscription-dropdown,
+html:has(:fullscreen) .youtube-groups__playlist-dropdown,
+html:has(:fullscreen) .youtube-groups__icon-picker {
+  display: none !important;
+}
