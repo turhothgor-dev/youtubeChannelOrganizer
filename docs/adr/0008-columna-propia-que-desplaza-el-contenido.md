@@ -1,6 +1,6 @@
 # 0008 · Columna propia fija a la izquierda que desplaza el contenido de YouTube
 
-- Estado: aceptada
+- Estado: sustituida por [0010](0010-seccion-en-la-guia-de-youtube-fija.md)
 - Fecha: 2026-11-15
 
 ## Contexto

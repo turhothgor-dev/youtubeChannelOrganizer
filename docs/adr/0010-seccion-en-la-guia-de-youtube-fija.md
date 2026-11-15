@@ -1,6 +1,6 @@
 # 0010 · Sección en la guía de YouTube, con la guía forzada abierta y fija fuera de /watch
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 - Sustituye a: [0008](0008-columna-propia-que-desplaza-el-contenido.md)
 
@@ -37,8 +37,13 @@ margen del contenido lo pone el CSS de YouTube en `ytd-page-manager#page-manager
      haya desbordamiento horizontal ni elementos fijos de la página (barra de chips, `#frosted-glass`, Shorts) mal
      alineados.
 
-   Los selectores exactos se fijan al implementar inspeccionando el DOM, siempre bajo esa clase, y se anotan aquí al
-   aceptar el ADR.
+   Selectores finales (todos bajo `html.youtube-groups--guide-pinned`): `ytd-mini-guide-renderer` (`display: none`),
+   `tp-yt-app-drawer#guide` y `tp-yt-app-drawer#guide #contentContainer` (visibles, sin `transform` ni sombra,
+   `top: var(--ytd-masthead-height, 56px)`), `tp-yt-app-drawer#guide #scrim` (oculto),
+   `tp-yt-app-drawer#guide ytd-guide-renderer #guide-header` (oculto), `ytd-page-manager#page-manager`
+   (`margin-left: var(--app-drawer-width, 240px)`) y `ytd-app` (`overflow-x: hidden`). Se escribieron a partir del
+   conocimiento del DOM de YouTube, sin inspección en vivo; los ajustes que salgan de la verificación manual (V2–V4,
+   V6) se anotarán aquí.
 3. **Cuándo se recalcula** (`syncGuidePin`, idempotente): al arrancar, en `yt-navigate-start`, `yt-navigate-finish`,
    `popstate`, `fullscreenchange`, `resize` (como mucho una vez por frame) y desde el `MutationObserver` si
    `location.pathname` ha cambiado desde la última vez. Así, al ir a `/watch` la clase se quita al vuelo y YouTube

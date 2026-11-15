@@ -1,6 +1,6 @@
 # Plan: GUI 6 (1/3) · Sección de vuelta en la guía de YouTube, forzada abierta y fija fuera de /watch
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-5-*` en Firefox (2026-11-15), punto 1.
 
@@ -70,7 +70,7 @@ verde; tema claro y oscuro. Los botones sobre la miniatura y el panel flotante n
   `watchedMode: "hide"`; `updateSettings({ sidebarCollapsed: true })` lanza; importar una copia con
   `sidebarCollapsed` funciona y los ajustes guardados no lo incluyen. Los tests que lo esperaban se cambian (cambio
   intencionado).
-- [ ] T5 · Cerrar: `docs/ARCHITECTURE.md` (fila de `pages.js` con `shouldPinGuide`, `guide.js` con
+- [x] T5 · Cerrar: `docs/ARCHITECTURE.md` (fila de `pages.js` con `shouldPinGuide`, `guide.js` con
   `findGuideInsertionIndex`, `settings.js` sin `sidebarCollapsed`, `content.js`; flujo **Columna lateral** pasa a
   **Guía lateral** con la sección en `ytd-guide-renderer` y la guía fija del ADR 0010; enlaces a ADR); ADR 0010 a
   `aceptada` con los selectores finales; ADR 0008 a "sustituida por 0010". Estado de este plan a `hecho` · Ficheros:
@@ -129,3 +129,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T2 | feat: sección YouTube Groups de vuelta en la guía de YouTube y fuera la columna propia | `make lint` y `make test-affected` en verde; V1 y V5 pendientes a mano. |
 | 2026-11-15 | T3 | feat: guía de YouTube forzada abierta y fija fuera de /watch | `make lint` y `make test-affected` en verde; CSS escrito sin inspeccionar el DOM real, selectores por confirmar en V2–V4 y V6 a mano. |
 | 2026-11-15 | T4 | feat: retirar sidebarCollapsed de los ajustes (ADR 0003 al día) | Con tests; `make test-affected` y `make lint` en verde. |
+| 2026-11-15 | T5 | docs: ARCHITECTURE al día, ADR 0010 aceptada y ADR 0008 sustituida | Selectores del ADR 0010 tal como están en el CSS (sin inspección en vivo); V1–V6 pendientes a mano. |
