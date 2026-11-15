@@ -145,8 +145,24 @@ const YouTubeGroupsWatched = (() => {
     return armedId;
   }
 
+  /**
+   * Calcula el aspecto del botón de "visto" de una tarjeta.
+   *
+   * @param {{videoId: (string|null), isWatched: boolean, loaded: boolean, saving: boolean}} state
+   * @returns {{label: string, glyph: string, pressed: boolean, disabled: boolean}}
+   */
+  function getWatchedButtonState({ videoId, isWatched, loaded, saving }) {
+    return {
+      label: isWatched ? "Visto" : "Marcar visto",
+      glyph: isWatched ? "check" : "eye",
+      pressed: Boolean(isWatched),
+      disabled: !videoId || !loaded || Boolean(saving),
+    };
+  }
+
   return {
     isValidVideoId,
+    getWatchedButtonState,
     extractVideoId,
     shouldAutoMark,
     updateAutoMarkArm,

@@ -76,7 +76,7 @@ Decisiones:
 
 Reglas comunes: sin `innerHTML` con datos; JSDoc; `make lint` (0 avisos) y `make test` en verde.
 
-- [ ] T1 · `UI_ICON_PATHS`/`getUiIconPath` en `modules/icons.js` y `getWatchedButtonState` en `modules/watched.js` ·
+- [x] T1 · `UI_ICON_PATHS`/`getUiIconPath` en `modules/icons.js` y `getWatchedButtonState` en `modules/watched.js` ·
   Ficheros: `modules/icons.js`, `modules/watched.js`, `tests/icons.test.js`, `tests/watched.test.js` · Test:
   `getUiIconPath("eye")`, `"check"` y `"playlist-add"` dan una cadena no vacía; `getUiIconPath("x")` da `null`;
   `isValidIconId("eye")` sigue siendo `false` y `ICON_SET` no cambia de tamaño; `getWatchedButtonState` da
@@ -146,3 +146,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | feat: iconos de interfaz y estado del botón de visto | `getUiIconPath` en `icons.js` y `getWatchedButtonState` en `watched.js`, con tests. |

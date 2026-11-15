@@ -149,6 +149,34 @@ test("updateAutoMarkArm arma el ID solo con currentTime < 1", () => {
   assert.strictEqual(W.updateAutoMarkArm(ID2, ID, Infinity), ID2);
 });
 
+test("getWatchedButtonState describe el botón según el estado", () => {
+  const { YouTubeGroupsWatched: W } = loadModules();
+  const base = { videoId: ID, isWatched: false, loaded: true, saving: false };
+
+  assert.deepStrictEqual(plain(W.getWatchedButtonState(base)), {
+    label: "Marcar visto",
+    glyph: "eye",
+    pressed: false,
+    disabled: false,
+  });
+  assert.deepStrictEqual(
+    plain(W.getWatchedButtonState({ ...base, isWatched: true })),
+    { label: "Visto", glyph: "check", pressed: true, disabled: false },
+  );
+  assert.strictEqual(
+    W.getWatchedButtonState({ ...base, videoId: null }).disabled,
+    true,
+  );
+  assert.strictEqual(
+    W.getWatchedButtonState({ ...base, loaded: false }).disabled,
+    true,
+  );
+  assert.strictEqual(
+    W.getWatchedButtonState({ ...base, saving: true }).disabled,
+    true,
+  );
+});
+
 test("marcar dos vídeos a la vez conserva los dos", async () => {
   const { YouTubeGroupsWatched: W, store } = loadModules({}, { latencyMs: 5 });
 
