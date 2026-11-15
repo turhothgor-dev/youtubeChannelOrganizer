@@ -39,6 +39,7 @@ function sample() {
       outsideMode: "dim",
       autoMarkPercent: 95,
       panelCollapsed: false,
+      sidebarCollapsed: true,
     },
     playlists: [
       {
@@ -180,6 +181,7 @@ test("parseBackup descarta vistos inválidos y normaliza ajustes", () => {
     outsideMode: "hide",
     autoMarkPercent: 50,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
 });
 

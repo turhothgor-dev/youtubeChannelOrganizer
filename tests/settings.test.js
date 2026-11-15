@@ -9,6 +9,7 @@ const DEFAULTS = {
   outsideMode: "hide",
   autoMarkPercent: 80,
   panelCollapsed: true,
+  sidebarCollapsed: false,
 };
 
 test("normalizeSettings devuelve los valores por defecto con entradas no válidas", () => {
@@ -29,6 +30,7 @@ test("normalizeSettings conserva valores válidos", () => {
     outsideMode: "dim",
     autoMarkPercent: 95,
     panelCollapsed: true,
+    sidebarCollapsed: true,
   };
 
   assert.deepStrictEqual(
@@ -67,6 +69,7 @@ test("normalizeSettings sustituye solo el campo inválido", () => {
     outsideMode: "dim",
     autoMarkPercent: 80,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
 });
 
@@ -115,6 +118,7 @@ test("normalizeSettings descarta campos desconocidos y no muta la entrada", () =
     outsideMode: "hide",
     autoMarkPercent: 80,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
   assert.deepStrictEqual(raw, { watchedMode: "show", foo: 1 });
   assert.notStrictEqual(result, raw);
@@ -141,6 +145,7 @@ test("updateSettings escribe una vez y no repite si no cambia", async () => {
     outsideMode: "hide",
     autoMarkPercent: 80,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
   assert.strictEqual(calls.set, 1);
   assert.strictEqual(store.youtubeSettings.version, 1);
@@ -169,6 +174,7 @@ test("updateSettings conserva el otro campo", async () => {
     outsideMode: "dim",
     autoMarkPercent: 80,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
 });
 
@@ -190,6 +196,52 @@ test("updateSettings con panelCollapsed escribe una vez y conserva los demás ca
     outsideMode: "dim",
     autoMarkPercent: 80,
     panelCollapsed: false,
+    sidebarCollapsed: false,
+  });
+  assert.strictEqual(calls.set, 1);
+});
+
+test("normalizeSettings sustituye sidebarCollapsed no booleano por false", () => {
+  const { YouTubeGroupsSettings } = loadModules();
+
+  for (const bad of ["sí", 1, null, undefined]) {
+    assert.strictEqual(
+      YouTubeGroupsSettings.normalizeSettings({ sidebarCollapsed: bad })
+        .sidebarCollapsed,
+      false,
+    );
+  }
+});
+
+test("normalizeSettings conserva sidebarCollapsed true", () => {
+  const { YouTubeGroupsSettings } = loadModules();
+
+  assert.strictEqual(
+    YouTubeGroupsSettings.normalizeSettings({ sidebarCollapsed: true })
+      .sidebarCollapsed,
+    true,
+  );
+});
+
+test("updateSettings con sidebarCollapsed escribe una vez y conserva los demás campos", async () => {
+  const { YouTubeGroupsSettings, calls } = loadModules({
+    youtubeSettings: {
+      version: 1,
+      settings: { watchedMode: "show", outsideMode: "dim" },
+    },
+  });
+
+  const result = await YouTubeGroupsSettings.updateSettings({
+    sidebarCollapsed: true,
+  });
+
+  assert.strictEqual(result.changed, true);
+  assert.deepStrictEqual(plain(result.settings), {
+    watchedMode: "show",
+    outsideMode: "dim",
+    autoMarkPercent: 80,
+    panelCollapsed: true,
+    sidebarCollapsed: true,
   });
   assert.strictEqual(calls.set, 1);
 });
@@ -212,6 +264,7 @@ test("updateSettings con autoMarkPercent 0 escribe y conserva los otros campos",
     outsideMode: "dim",
     autoMarkPercent: 0,
     panelCollapsed: true,
+    sidebarCollapsed: false,
   });
   assert.strictEqual(calls.set, 1);
 });
@@ -223,6 +276,7 @@ test("updateSettings rechaza claves y valores inválidos sin leer ni escribir", 
     { autoMarkPercent: 70 },
     { autoMarkPercent: "80" },
     { panelCollapsed: 1 },
+    { sidebarCollapsed: 1 },
   ]) {
     const { YouTubeGroupsSettings, calls } = loadModules();
 

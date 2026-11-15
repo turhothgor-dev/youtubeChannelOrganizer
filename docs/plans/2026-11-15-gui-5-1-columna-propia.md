@@ -66,7 +66,7 @@ subcolumnas, crear con icono y color, sin editar ni eliminar. Los botones sobre 
 Reglas comunes: sin `innerHTML` con datos; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en
 verde; tema claro y oscuro.
 
-- [ ] T1 · Ajuste `sidebarCollapsed` (por defecto `false`) y ADR 0003 al día (campo nuevo, "lo introduce el plan
+- [x] T1 · Ajuste `sidebarCollapsed` (por defecto `false`) y ADR 0003 al día (campo nuevo, "lo introduce el plan
   `2026-11-15-gui-5-1-columna-propia`") · Ficheros: `modules/settings.js`, `tests/settings.test.js`,
   `docs/adr/0003-formato-almacenamiento-ajustes.md` (y `tests/backup.test.js` solo si compara el objeto de ajustes
   completo) · Test: `getSettings()` sin datos da `sidebarCollapsed: false`; `normalizeSettings({ sidebarCollapsed:
@@ -140,3 +140,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | feat: ajuste sidebarCollapsed (por defecto false) y ADR 0003 al día | Tests de ajustes y de copia de seguridad actualizados con el campo nuevo. |
