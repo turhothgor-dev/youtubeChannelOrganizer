@@ -49,7 +49,7 @@ aceptan. Se corrige todo dentro de la técnica del ADR 0010 (solo CSS bajo `html
 Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make test` en verde; todo el CSS nuevo bajo
 `html.youtube-groups--guide-pinned`. Sin tests de DOM de `content.js` (fuera de alcance, como en `gui-6-1`).
 
-- [ ] T1 · Cajón de la guía con su ancho, sin capturar clics fuera de la guía, un solo desplazamiento vertical y
+- [x] T1 · Cajón de la guía con su ancho, sin capturar clics fuera de la guía, un solo desplazamiento vertical y
   `overflow-x: clip` · Ficheros: `content.css` · Reglas: host `tp-yt-app-drawer#guide` con `top:
   var(--ytd-masthead-height, 56px)`, `bottom: 0`, `right: auto`, `width: var(--app-drawer-width, 240px)`,
   `pointer-events: none` (todas `!important`); `#contentContainer` con `top: 0`, `padding-top: 0`, `padding-bottom:
@@ -141,3 +141,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `fix: cajón de la guía fija con su ancho y sin capturar clics` | Host con ancho de guía, `pointer-events`, desplazamiento único y `overflow-x: clip`. Pendiente V1, V2, V5 a mano. |

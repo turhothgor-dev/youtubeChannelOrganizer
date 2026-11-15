@@ -1329,6 +1329,10 @@ html.youtube-groups--guide-pinned ytd-mini-guide-renderer {
 html.youtube-groups--guide-pinned tp-yt-app-drawer#guide {
   visibility: visible !important;
   top: var(--ytd-masthead-height, 56px) !important;
+  bottom: 0 !important;
+  right: auto !important;
+  width: var(--app-drawer-width, 240px) !important;
+  pointer-events: none !important;
   transform: none !important;
   box-shadow: none !important;
 }
@@ -1337,7 +1341,14 @@ html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #contentContainer {
   visibility: visible !important;
   transform: none !important;
   box-shadow: none !important;
-  top: var(--ytd-masthead-height, 56px) !important;
+  top: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: auto !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #guide-spacer {
+  display: none !important;
 }
 
 html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #scrim {
@@ -1356,5 +1367,5 @@ html.youtube-groups--guide-pinned ytd-page-manager#page-manager {
 }
 
 html.youtube-groups--guide-pinned ytd-app {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
