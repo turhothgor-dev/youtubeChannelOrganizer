@@ -2152,13 +2152,27 @@
     control.appendChild(button);
 
     // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
-    control.addEventListener("mousedown", (event) => {
-      event.stopPropagation();
-    });
-
-    control.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
+    // El control puede ir dentro del enlace de la miniatura: ningún evento debe
+    // llegar a él. Los botones deshabilitados dejan caer el clic aquí.
+    for (const type of ["click", "auxclick"]) {
+      control.addEventListener(type, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    }
+    for (const type of [
+      "mousedown",
+      "mouseup",
+      "pointerdown",
+      "pointerup",
+      "touchstart",
+      "touchend",
+      "dblclick",
+    ]) {
+      control.addEventListener(type, (event) => {
+        event.stopPropagation();
+      });
+    }
 
     button.addEventListener("click", (event) => {
       event.preventDefault();
@@ -2740,10 +2754,21 @@
       return;
     }
 
+    const thumbHost = card.querySelector(
+      "ytd-thumbnail, yt-thumbnail-view-model",
+    );
     const existing = card.querySelector(
       ".youtube-groups__subscription-control",
     );
     if (existing) {
+      // Si la miniatura apareció después, el control pasa a ella
+      if (
+        thumbHost &&
+        !existing.classList.contains("youtube-groups__card-actions--overlay") &&
+        existing.querySelector(".youtube-groups__watched-button")
+      ) {
+        placeControlOnThumbnail(thumbHost, existing);
+      }
       // El canal puede identificarse después de crear el control
       const addButton = existing.querySelector(
         ".youtube-groups__subscription-add-button",
@@ -2759,7 +2784,9 @@
       const compact = createSubscriptionChannelControl(card, {
         compact: true,
       });
-      if (channelLink) {
+      if (thumbHost) {
+        placeControlOnThumbnail(thumbHost, compact);
+      } else if (channelLink) {
         channelLink.insertAdjacentElement("afterend", compact);
       } else {
         (
@@ -2773,15 +2800,29 @@
       return;
     }
 
-    // En búsqueda el control va tras el nombre del canal completo, en línea propia.
+    const control = createSubscriptionChannelControl(card);
+    if (thumbHost) {
+      placeControlOnThumbnail(thumbHost, control);
+      return;
+    }
+
+    // Respaldo sin miniatura: tras el nombre del canal, en línea propia.
     const anchor =
       (pageType === "search" && channelLink.closest("ytd-channel-name")) ||
       channelLink;
 
-    anchor.insertAdjacentElement(
-      "afterend",
-      createSubscriptionChannelControl(card),
-    );
+    anchor.insertAdjacentElement("afterend", control);
+  }
+
+  /**
+   * Coloca el control como columna superpuesta a la miniatura.
+   * @param {Element} thumbHost Miniatura anfitriona.
+   * @param {HTMLElement} control Control de la tarjeta.
+   */
+  function placeControlOnThumbnail(thumbHost, control) {
+    thumbHost.classList.add("youtube-groups__thumb-host");
+    control.classList.add("youtube-groups__card-actions--overlay");
+    thumbHost.appendChild(control);
   }
 
   const CHANNEL_RESULT_SELECTOR = "ytd-channel-renderer";

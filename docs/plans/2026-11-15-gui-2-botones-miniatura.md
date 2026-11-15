@@ -86,7 +86,7 @@ Reglas comunes: sin `innerHTML` con datos; JSDoc; `make lint` (0 avisos) y `make
   `createSubscriptionChannelControl` crea la estructura; `updateWatchedButton` usa `getWatchedButtonState` y respeta
   el botón del panel · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1 (las
   tarjetas se ven y funcionan como hoy, con icono delante del texto).
-- [ ] T3 · Columna superpuesta arriba a la izquierda de la miniatura, colapsada, con despliegue solo del botón bajo el
+- [x] T3 · Columna superpuesta arriba a la izquierda de la miniatura, colapsada, con despliegue solo del botón bajo el
   cursor o enfocado, escudo de eventos,
   respaldo y traslado al anfitrión; estilos claro/oscuro y `--compact` · Ficheros: `content.js`, `content.css` · Test:
   `make lint`, `make test` y a mano V1–V7.
@@ -148,3 +148,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: iconos de interfaz y estado del botón de visto | `getUiIconPath` en `icons.js` y `getWatchedButtonState` en `watched.js`, con tests. |
 | 2026-11-15 | T2 | feat: botones de tarjeta con glifo y etiqueta | `setCardButtonContent` y `createUiIconSvg` en `content.js`; `updateWatchedButton` usa `getWatchedButtonState`; estilos de glifo/etiqueta. V1 pendiente a mano. |
+| 2026-11-15 | T3 | feat: botones de tarjeta superpuestos a la miniatura | `placeControlOnThumbnail`, traslado al anfitrión y escudo de eventos en `content.js`; columna colapsada con despliegue por hover/focus-visible en `content.css`. V1–V7 pendientes a mano. |
