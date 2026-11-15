@@ -230,7 +230,7 @@ const YouTubeGroupsFilter = (() => {
     if (!pathA || !pathB || pathA.length !== pathB.length) {
       return false;
     }
-    return pathA.slice(0, -1).join("/") === pathB.slice(0, -1).join("/");
+    return pathA.slice(0, -1).every((id, index) => id === pathB[index]);
   }
 
   /**

@@ -80,7 +80,7 @@ Reglas comunes: sin dependencias nuevas; JSDoc; `make lint` (0 avisos) y `make t
   `"/live/abc/"` dan `"watch"`, `"/live"` da `"other"` y `"/@canal/live"` sigue dando `"channel"`;
   `shouldPinGuide(getPageType("/live/abc"), 1400, false)` es `false`; `getNavigationPathname` con
   `"/watch?v=x"`, `"https://www.youtube.com/feed/subscriptions"`, `undefined`, `123` y `"http://["`.
-- [ ] T5 · `areSiblings` compara rutas elemento a elemento · Ficheros: `modules/filter.js`, `tests/filter.test.js` ·
+- [x] T5 · `areSiblings` compara rutas elemento a elemento · Ficheros: `modules/filter.js`, `tests/filter.test.js` ·
   Test: con grupos `"a" > "b/c" > "x"` y `"a/b" > "c" > "y"` (rutas de padre `["a","b/c"]` y `["a/b","c"]`, que con
   `join("/")` coincidían), `toggleSelection` con `x` seleccionado y pulsando `y` deja solo `y`; los hermanos reales se
   siguen conservando como antes.
@@ -145,3 +145,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T2 | `fix: elementos fijos alineados con la guía fija` | Variable `--ytd-mini-guide-width` y `left` explícito en `#frosted-glass`, chips y `ytd-shorts`. Pendiente V3 a mano. |
 | 2026-11-15 | T3 | `perf: caché del ancla de la sección en la guía` | `getGuideAnchor` con `guideAnchorCache`; el observer la invalida con mutaciones en `#sections` ajenas a nuestra sección. Pendiente V4 a mano. |
 | 2026-11-15 | T4 | `fix: /live como watch y guía según la ruta de destino` | `getPageType` con `/live/<id>`, `getNavigationPathname` y `syncGuidePin(pathname)`; `yt-navigate-start` usa el destino. Pendiente V5 a mano. |
+| 2026-11-15 | T5 | `fix: hermanos comparados por ruta elemento a elemento` | `areSiblings` sin `join("/")`; test con ids que contienen `/`. Pendiente V6 a mano. |

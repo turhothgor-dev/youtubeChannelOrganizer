@@ -295,6 +295,30 @@ test("toggleSelection añade, quita y no muta", () => {
   assert.deepStrictEqual(input, ["group:a"]);
 });
 
+test("toggleSelection no confunde hermanos cuyos ids contienen /", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+
+  const leaf = (id, subgroups = []) => ({
+    id,
+    name: id,
+    channels: [],
+    subgroups,
+  });
+  const g = [
+    leaf("a", [leaf("b/c", [leaf("x")])]),
+    leaf("a/b", [leaf("c", [leaf("y")])]),
+  ];
+  const grp = (id) => ({ type: "group", id });
+
+  assert.deepStrictEqual(plain(F.toggleSelection(g, ["group:x"], grp("y"))), [
+    "group:y",
+  ]);
+  assert.deepStrictEqual(plain(F.toggleSelection(g, ["group:a"], grp("a/b"))), [
+    "group:a",
+    "group:a/b",
+  ]);
+});
+
 test("clearSelection devuelve una selección vacía", () => {
   const { YouTubeGroupsFilter: F } = loadModules();
   assert.deepStrictEqual(plain(F.clearSelection()), []);
