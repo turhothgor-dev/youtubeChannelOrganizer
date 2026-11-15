@@ -1,6 +1,6 @@
 # Plan: GUI (3/4) · Grupos, subgrupos y canales en la guía lateral, con filtro de canal único
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: revisión de usabilidad de la GUI pedida por la persona (2026-11-15), puntos 4.1, 4.2 y 5.
 
@@ -195,7 +195,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
   iconos al crear**), botón "Icono" con vista previa en el formulario de la guía y `setGroupAppearance` tras crear; el
   botón "Icono" del panel pasa a la nueva firma sin cambiar su comportamiento · Ficheros: `content.js`, `content.css`
   · Test: `make lint`, `make test` y a mano V8.
-- [ ] T10 · Cerrar: `docs/ARCHITECTURE.md` (filas de `filter.js` y `guide.js`, `validateGroupName` en `groups.js`,
+- [x] T10 · Cerrar: `docs/ARCHITECTURE.md` (filas de `filter.js` y `guide.js`, `validateGroupName` en `groups.js`,
   orden de carga, flujos **Filtro** y **Guía lateral** reescritos, selector de iconos con `onSave`, enlace al ADR
   0007); ADR 0007 a `aceptada`. Estado de este plan a `hecho` · Ficheros: `docs/ARCHITECTURE.md`,
   `docs/adr/0007-filtro-activo-y-paso-a-suscripciones.md`, este plan · Test: `make lint` y `make test`.
@@ -290,3 +290,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T7 | `feat: paso a suscripciones al elegir filtro desde la guía` | `selectFilter` navega con el filtro resultante; traspaso por `sessionStorage` (guardar, consumir al arrancar, borrar en `yt-navigate-finish`). V5 manual pendiente. |
 | 2026-11-15 | T8 | `feat: crear grupos y subgrupos desde la guía lateral` | Formulario oculto bajo el botón de crear (grupo en la raíz, subgrupo en las demás columnas) con `validateGroupName`; se oculta y vacía al cambiar de columna. Sin icono todavía. V6 manual pendiente. |
 | 2026-11-15 | T9 | `feat: elegir icono y color al crear grupos desde la guía` | `openIconPicker(initial, anchor, onSave)`; botón "Icono" con vista previa en el formulario de la guía y `setGroupAppearance` tras crear; el panel usa la nueva firma. V8 manual pendiente. |
+| 2026-11-15 | T10 | `docs: cerrar plan de la guía lateral y aceptar ADR 0007` | `ARCHITECTURE.md` actualizado (filter, guide, validateGroupName, flujos Filtro y Guía lateral); ADR 0007 aceptada; plan a `hecho`. |

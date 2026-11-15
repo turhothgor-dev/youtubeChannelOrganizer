@@ -1,6 +1,6 @@
 # 0007 · Filtro activo (todos, grupo o canal) y paso a /feed/subscriptions
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 
 ## Contexto
