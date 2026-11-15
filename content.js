@@ -631,6 +631,19 @@
 
   document.addEventListener("timeupdate", handleVideoProgress, true);
 
+  /**
+   * Alterna visto/no visto del vídeo actual y evita que el marcado automático
+   * lo revierta.
+   * @param {HTMLElement} button Botón que lanza la acción.
+   */
+  function toggleCurrentVideoWatched(button) {
+    const videoId = getCurrentVideoId();
+    if (videoId) {
+      autoMarkHandledIds.add(videoId);
+    }
+    toggleVideoWatched(videoId, button);
+  }
+
   YouTubeGroupsStorage.getWatchedVideos()
     .then((videos) => {
       watchedVideos = videos;
@@ -945,11 +958,7 @@
     panel
       .querySelector(".youtube-groups__current-video-button")
       .addEventListener("click", (event) => {
-        const videoId = getCurrentVideoId();
-        if (videoId) {
-          autoMarkHandledIds.add(videoId);
-        }
-        toggleVideoWatched(videoId, event.currentTarget);
+        toggleCurrentVideoWatched(event.currentTarget);
       });
 
     const playVisibleMessage = panel.querySelector(
@@ -2313,6 +2322,35 @@
   }
 
   /**
+   * Impide que los eventos de un control lleguen a YouTube (enlace, atajos).
+   * @param {HTMLElement} control Control sobre el que se instala el escudo.
+   */
+  function shieldControlEvents(control) {
+    // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
+    // El control puede ir dentro del enlace de la miniatura: ningún evento debe
+    // llegar a él. Los botones deshabilitados dejan caer el clic aquí.
+    for (const type of ["click", "auxclick"]) {
+      control.addEventListener(type, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    }
+    for (const type of [
+      "mousedown",
+      "mouseup",
+      "pointerdown",
+      "pointerup",
+      "touchstart",
+      "touchend",
+      "dblclick",
+    ]) {
+      control.addEventListener(type, (event) => {
+        event.stopPropagation();
+      });
+    }
+  }
+
+  /**
    * Crea el control de una tarjeta.
    * @param {Element} card Tarjeta sobre la que va el control.
    * @param {{videoButtons?: boolean, channel?: {name: string, url: string}}} [options]
@@ -2339,28 +2377,7 @@
     }
     control.appendChild(button);
 
-    // Evitar que los clics sobre el control naveguen o abran otros menús de YouTube
-    // El control puede ir dentro del enlace de la miniatura: ningún evento debe
-    // llegar a él. Los botones deshabilitados dejan caer el clic aquí.
-    for (const type of ["click", "auxclick"]) {
-      control.addEventListener(type, (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      });
-    }
-    for (const type of [
-      "mousedown",
-      "mouseup",
-      "pointerdown",
-      "pointerup",
-      "touchstart",
-      "touchend",
-      "dblclick",
-    ]) {
-      control.addEventListener(type, (event) => {
-        event.stopPropagation();
-      });
-    }
+    shieldControlEvents(control);
 
     button.addEventListener("click", (event) => {
       event.preventDefault();

@@ -88,7 +88,7 @@ verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en ver
   `tests/pages.test.js`: `watch` + pausado → `true`; reproduciendo → `false`; pantalla completa → `false`; anuncio →
   `false`; `home`, `subscriptions`, `shorts`, `search`, `channel`, `other` pausados → `false`; `paused` no booleano
   (`undefined`) o argumento ausente/`null` → `false` sin lanzar.
-- [ ] T4 · Refactor sin cambio de comportamiento para reutilizar en el reproductor · Ficheros: `content.js`: extraer
+- [x] T4 · Refactor sin cambio de comportamiento para reutilizar en el reproductor · Ficheros: `content.js`: extraer
   de `createSubscriptionChannelControl` (~2342-2363) el escudo de eventos a `shieldControlEvents(control)` (mismos
   tipos y mismas llamadas) y usarlo allí; extraer el manejador del botón "Marcar visto" del panel (~945-953) a
   `toggleCurrentVideoWatched(button)` (añade el ID a `autoMarkHandledIds` y llama a `toggleVideoWatched`) y usarlo allí
@@ -206,3 +206,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | `feat: fijar la guía de YouTube solo en suscripciones` | `shouldPinGuide` exige `subscriptions`; test y comentarios actualizados. V1-V2 pendientes a mano. |
 | 2026-11-15 | T2 | `docs: documentar la guía fija solo en suscripciones` | ADR 0012 aceptada, 0010 enlazado como modificado y ARCHITECTURE actualizada. |
 | 2026-11-15 | T3 | `feat: decidir cuándo mostrar los botones del reproductor` | `shouldShowPlayerControls` en `modules/pages.js` con su test. |
+| 2026-11-15 | T4 | `refactor: extraer el escudo de eventos y el marcado de visto actual` | `shieldControlEvents` y `toggleCurrentVideoWatched` en `content.js`, sin cambio de comportamiento. V6 pendiente a mano. |
