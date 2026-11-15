@@ -1319,3 +1319,42 @@ html[dark] .youtube-groups__guide-item[aria-pressed="true"] {
   margin: 0;
   min-height: 14px;
 }
+
+/* Guía de YouTube forzada abierta y fija fuera de /watch (ADR 0010).
+   Todas las reglas cuelgan de la clase que pone el content script. */
+html.youtube-groups--guide-pinned ytd-mini-guide-renderer {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide {
+  visibility: visible !important;
+  top: var(--ytd-masthead-height, 56px) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #contentContainer {
+  visibility: visible !important;
+  transform: none !important;
+  box-shadow: none !important;
+  top: var(--ytd-masthead-height, 56px) !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #scrim {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned
+  tp-yt-app-drawer#guide
+  ytd-guide-renderer
+  #guide-header {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned ytd-page-manager#page-manager {
+  margin-left: var(--app-drawer-width, 240px) !important;
+}
+
+html.youtube-groups--guide-pinned ytd-app {
+  overflow-x: hidden;
+}

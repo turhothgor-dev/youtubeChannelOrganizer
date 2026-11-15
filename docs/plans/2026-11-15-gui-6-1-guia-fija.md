@@ -59,7 +59,7 @@ verde; tema claro y oscuro. Los botones sobre la miniatura y el panel flotante n
   válidos, da `-1` sin ellas y no muta la entrada.
 - [x] T2 · Sección de vuelta en la guía de YouTube y eliminación de la columna propia (ver **Decisiones**) · Ficheros:
   `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1, V5.
-- [ ] T3 · Guía forzada abierta y fija fuera de `/watch`: `syncGuidePin`, reglas CSS bajo
+- [x] T3 · Guía forzada abierta y fija fuera de `/watch`: `syncGuidePin`, reglas CSS bajo
   `html.youtube-groups--guide-pinned` y ☰ neutralizado · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y a mano V2–V4, V6. Si la guía forzada aparece vacía (sin contenido hasta abrir ☰) o el CSS no basta,
   **parar** y proponer en **Cambios aprobados** la alternativa de reserva del ADR 0010.
@@ -127,3 +127,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: shouldPinGuide y findGuideInsertionIndex puras | Con tests; `make test-affected` y `make lint` en verde. |
 | 2026-11-15 | T2 | feat: sección YouTube Groups de vuelta en la guía de YouTube y fuera la columna propia | `make lint` y `make test-affected` en verde; V1 y V5 pendientes a mano. |
+| 2026-11-15 | T3 | feat: guía de YouTube forzada abierta y fija fuera de /watch | `make lint` y `make test-affected` en verde; CSS escrito sin inspeccionar el DOM real, selectores por confirmar en V2–V4 y V6 a mano. |

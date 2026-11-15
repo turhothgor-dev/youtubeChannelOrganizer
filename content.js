@@ -3406,7 +3406,65 @@
     });
   }
 
+  const GUIDE_PINNED_CLASS = "youtube-groups--guide-pinned";
+  const GUIDE_BUTTON_SELECTOR = "ytd-masthead #guide-button";
+  let guidePinPath = null;
+  let guidePinScheduled = false;
+
+  /**
+   * Pone o quita la clase que fuerza la guía de YouTube abierta y fija
+   * (ADR 0010). Es idempotente.
+   */
+  function syncGuidePin() {
+    guidePinPath = window.location.pathname;
+    const pinned = YouTubeGroupsPages.shouldPinGuide(
+      YouTubeGroupsPages.getPageType(window.location.pathname),
+      window.innerWidth,
+      document.fullscreenElement !== null,
+    );
+    document.documentElement.classList.toggle(GUIDE_PINNED_CLASS, pinned);
+  }
+
+  /** Recalcula la guía fija como mucho una vez por frame. */
+  function scheduleGuidePinSync() {
+    if (guidePinScheduled) {
+      return;
+    }
+    guidePinScheduled = true;
+    requestAnimationFrame(() => {
+      guidePinScheduled = false;
+      syncGuidePin();
+    });
+  }
+
+  // Con la guía fija, ☰ no hace nada: se detiene el clic antes de que
+  // YouTube cambie su estado interno.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (
+        document.documentElement.classList.contains(GUIDE_PINNED_CLASS) &&
+        event.target instanceof Element &&
+        event.target.closest(GUIDE_BUTTON_SELECTOR)
+      ) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    },
+    true,
+  );
+
+  document.addEventListener("yt-navigate-start", syncGuidePin);
+  document.addEventListener("yt-navigate-finish", syncGuidePin);
+  window.addEventListener("popstate", syncGuidePin);
+  document.addEventListener("fullscreenchange", syncGuidePin);
+  window.addEventListener("resize", scheduleGuidePinSync);
+  syncGuidePin();
+
   const observer = new MutationObserver((mutations) => {
+    if (window.location.pathname !== guidePinPath) {
+      syncGuidePin();
+    }
     for (const mutation of mutations) {
       if (mutation.target instanceof Element) {
         scheduleContainingCard(mutation.target);
