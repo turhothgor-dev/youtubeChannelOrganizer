@@ -1,6 +1,8 @@
 const YouTubeGroupsPages = (() => {
   const CHANNEL_PREFIX_RE = /^\/(?:@[^/]+|(?:channel|c|user)\/[^/]+)(?:\/.*)?$/;
   const SHORTS_RE = /^\/shorts\/[^/]+/;
+  /** Ancho mínimo de ventana (px) con el que la guía se fuerza fija. */
+  const PINNED_GUIDE_MIN_WIDTH = 792;
   const CARD_CONTROL_PAGES = new Set([
     "home",
     "subscriptions",
@@ -65,5 +67,25 @@ const YouTubeGroupsPages = (() => {
     return match ? `${origin}/${match[1]}` : null;
   }
 
-  return { getPageType, shouldShowCardControls, getChannelUrlFromPath };
+  /**
+   * Indica si la guía de YouTube se fuerza abierta y fija en esa página.
+   *
+   * @param {string} pageType Valor devuelto por getPageType.
+   * @param {number} width Ancho de la ventana (innerWidth).
+   * @param {boolean} isFullscreen Si hay un elemento a pantalla completa.
+   * @returns {boolean}
+   */
+  function shouldPinGuide(pageType, width, isFullscreen) {
+    return (
+      pageType !== "watch" && width >= PINNED_GUIDE_MIN_WIDTH && !isFullscreen
+    );
+  }
+
+  return {
+    PINNED_GUIDE_MIN_WIDTH,
+    getPageType,
+    shouldShowCardControls,
+    getChannelUrlFromPath,
+    shouldPinGuide,
+  };
 })();

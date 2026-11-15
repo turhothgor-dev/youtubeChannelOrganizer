@@ -51,7 +51,7 @@ páginas **salvo `/watch`**, que queda como en YouTube. Técnica (ADR 0010): sol
 Reglas comunes: sin `innerHTML` con datos; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en
 verde; tema claro y oscuro. Los botones sobre la miniatura y el panel flotante no se tocan.
 
-- [ ] T1 · `shouldPinGuide` y `PINNED_GUIDE_MIN_WIDTH` en `pages.js`; `findGuideInsertionIndex` en `guide.js` ·
+- [x] T1 · `shouldPinGuide` y `PINNED_GUIDE_MIN_WIDTH` en `pages.js`; `findGuideInsertionIndex` en `guide.js` ·
   Ficheros: `modules/pages.js`, `tests/pages.test.js`, `modules/guide.js`, `tests/guide.test.js` · Test:
   `shouldPinGuide` da `true` en `home`, `subscriptions`, `shorts`, `channel`, `search`, `other` con 792 y 1400; `false`
   en `watch`, con 791 y con pantalla completa; `findGuideInsertionIndex` encuentra la sección con
@@ -125,3 +125,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | feat: shouldPinGuide y findGuideInsertionIndex puras | Con tests; `make test-affected` y `make lint` en verde. |
