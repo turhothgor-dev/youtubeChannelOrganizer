@@ -29,7 +29,7 @@ recomendada en cada caso.
 
 ## Tareas
 
-- [ ] T1 · Marcar el anfitrión de la miniatura con `data-youtube-groups-thumb-host` en lugar de la clase
+- [x] T1 · Marcar el anfitrión de la miniatura con `data-youtube-groups-thumb-host` en lugar de la clase
   `youtube-groups__thumb-host`; el CSS pasa a `[data-youtube-groups-thumb-host]`; actualizar la mención en
   `docs/ARCHITECTURE.md` · Ficheros: `content.js`, `content.css`, `docs/ARCHITECTURE.md` · Test: `make test` sin
   regresiones + verificación manual V1
@@ -79,3 +79,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `fix: marcar la miniatura anfitriona con atributo para no romper el filtro de duración` | Atributo `data-youtube-groups-thumb-host` en lugar de clase; pendiente V1 manual |

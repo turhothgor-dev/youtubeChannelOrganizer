@@ -384,7 +384,7 @@ html[dark] .youtube-groups__subscription-control--compact button {
 
 /* Columna de botones sobre la miniatura, colapsada: solo el botón con el
    cursor o el foco de teclado muestra su texto. */
-.youtube-groups__thumb-host {
+[data-youtube-groups-thumb-host] {
   position: relative;
 }
 

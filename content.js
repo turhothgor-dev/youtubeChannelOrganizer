@@ -2915,7 +2915,7 @@
    * @param {HTMLElement} control Control de la tarjeta.
    */
   function placeControlOnThumbnail(thumbHost, control) {
-    thumbHost.classList.add("youtube-groups__thumb-host");
+    thumbHost.setAttribute("data-youtube-groups-thumb-host", "");
     control.classList.add("youtube-groups__card-actions--overlay");
     thumbHost.appendChild(control);
   }

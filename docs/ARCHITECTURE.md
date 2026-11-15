@@ -39,7 +39,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
   de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`). En las tarjetas de vídeo el
   control es una columna superpuesta arriba a la izquierda de la miniatura (`ytd-thumbnail` o
-  `yt-thumbnail-view-model`, clase `youtube-groups__thumb-host`), con los botones colapsados (glifo) que muestran su
+  `yt-thumbnail-view-model`, atributo `data-youtube-groups-thumb-host`, no una clase para no excluir la duración en `getCardTexts`), con los botones colapsados (glifo) que muestran su
   texto con el cursor o el foco, y con un escudo de eventos para que pulsarlos no abra el vídeo; si aún no hay
   miniatura, va tras el canal con los textos visibles y se mueve a la miniatura en un procesado posterior;
   en búsqueda, los resultados de canal (`ytd-channel-renderer`) reciben solo "Añadir a grupo". Las recomendaciones de
