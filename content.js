@@ -1859,6 +1859,8 @@
   /** Estado en memoria de la guía: columna actual y listas de canales. */
   let guidePath = [];
   const guideChannelOverrides = new Map();
+  /** Últimos grupos pintados en la guía (para los botones de navegación). */
+  let guideGroups = [];
 
   /**
    * Elige un filtro desde la guía: alterna (clic sobre lo elegido lo quita).
@@ -1943,6 +1945,23 @@
     );
     row.append(toggle, main);
 
+    if (item.hasSubgroups) {
+      const enter = document.createElement("button");
+      enter.type = "button";
+      enter.className = "youtube-groups__guide-enter";
+      enter.setAttribute("aria-label", `Ver subgrupos de ${item.name}`);
+      enter.textContent = "›";
+      enter.addEventListener("click", () => {
+        guidePath = YouTubeGroupsGuide.enterGuideGroup(
+          groups,
+          guidePath,
+          item.id,
+        );
+        renderGuideSection(groups, "forward");
+      });
+      row.append(enter);
+    }
+
     for (const channel of item.channels) {
       const channelButton = createGuideButton(
         channel.name,
@@ -1994,7 +2013,7 @@
    * existe, no hace nada; si la sección ya existe, la reutiliza.
    * @param {Array<Object>} groups - Árbol de grupos.
    */
-  function renderGuideSection(groups) {
+  function renderGuideSection(groups, direction) {
     const container = document.querySelector(GUIDE_SECTIONS_SELECTOR);
     if (!container) {
       return;
@@ -2023,14 +2042,53 @@
     guidePath = YouTubeGroupsGuide.normalizeGuidePath(groups, guidePath);
     const column = YouTubeGroupsGuide.getGuideColumn(groups, guidePath);
 
-    const title = document.createElement("h3");
-    title.className = "youtube-groups__guide-title";
-    title.textContent = "YouTube Groups";
+    // Cabecera, botón de crear y contenedor: se crean una vez con la sección
+    let viewport = section.querySelector(".youtube-groups__guide-viewport");
+    if (!viewport) {
+      const header = document.createElement("div");
+      header.className = "youtube-groups__guide-header";
 
-    const create = document.createElement("button");
-    create.type = "button";
-    create.className = "youtube-groups__guide-create";
-    create.textContent = "+ Crear grupo";
+      const back = document.createElement("button");
+      back.type = "button";
+      back.className = "youtube-groups__guide-back";
+      back.setAttribute("aria-label", "Volver");
+      back.textContent = "‹";
+      back.addEventListener("click", () => {
+        guidePath = YouTubeGroupsGuide.leaveGuideGroup(guidePath);
+        renderGuideSection(guideGroups, "back");
+      });
+
+      const title = document.createElement("h3");
+      title.className = "youtube-groups__guide-title";
+
+      header.append(back, title);
+
+      const create = document.createElement("button");
+      create.type = "button";
+      create.className = "youtube-groups__guide-create";
+
+      viewport = document.createElement("div");
+      viewport.className = "youtube-groups__guide-viewport";
+
+      section.replaceChildren(header, create, viewport);
+    }
+    guideGroups = groups;
+
+    const back = section.querySelector(".youtube-groups__guide-back");
+    const title = section.querySelector(".youtube-groups__guide-title");
+    const create = section.querySelector(".youtube-groups__guide-create");
+    back.hidden = !column.parent;
+    title.textContent = column.parent ? column.parent.name : "YouTube Groups";
+    if (column.parent) {
+      create.textContent = "+ Crear subgrupo";
+      create.setAttribute(
+        "aria-label",
+        `Crear subgrupo en ${column.parent.name}`,
+      );
+    } else {
+      create.textContent = "+ Crear grupo";
+      create.removeAttribute("aria-label");
+    }
 
     const list = document.createElement("div");
     list.className = "youtube-groups__guide-column";
@@ -2043,7 +2101,35 @@
     for (const item of column.items) {
       list.append(createGuideRow(groups, item, column.path.length));
     }
-    section.replaceChildren(title, create, list);
+
+    const previous = viewport.lastElementChild;
+    const animate =
+      direction &&
+      previous &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!animate) {
+      viewport.replaceChildren(list);
+      return;
+    }
+    // Deja solo la última columna como saliente y desliza las dos
+    while (viewport.firstElementChild !== previous) {
+      viewport.firstElementChild.remove();
+    }
+    const forward = direction === "forward";
+    previous.classList.add(
+      forward
+        ? "youtube-groups__guide-column--out-left"
+        : "youtube-groups__guide-column--out-right",
+    );
+    list.classList.add(
+      forward
+        ? "youtube-groups__guide-column--in-right"
+        : "youtube-groups__guide-column--in-left",
+    );
+    viewport.append(list);
+    const removePrevious = () => previous.remove();
+    previous.addEventListener("animationend", removePrevious, { once: true });
+    setTimeout(removePrevious, 300);
   }
 
   /**

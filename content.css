@@ -1098,6 +1098,104 @@ html[dark] .youtube-groups__icon-picker-actions {
   font-weight: 700;
 }
 
+.youtube-groups__guide-header {
+  display: flex;
+  align-items: center;
+}
+
+.youtube-groups__guide-header .youtube-groups__guide-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.youtube-groups__guide-back,
+.youtube-groups__guide-enter {
+  flex: none;
+  width: 28px;
+  height: 36px;
+  color: var(--yt-spec-text-secondary, #606060);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+}
+
+.youtube-groups__guide-back[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.youtube-groups__guide-column--out-left,
+.youtube-groups__guide-column--out-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.youtube-groups__guide-column--in-right {
+  animation: youtube-groups-in-right 200ms ease both;
+}
+
+.youtube-groups__guide-column--in-left {
+  animation: youtube-groups-in-left 200ms ease both;
+}
+
+.youtube-groups__guide-column--out-left {
+  animation: youtube-groups-out-left 200ms ease both;
+}
+
+.youtube-groups__guide-column--out-right {
+  animation: youtube-groups-out-right 200ms ease both;
+}
+
+@keyframes youtube-groups-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes youtube-groups-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes youtube-groups-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes youtube-groups-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .youtube-groups__guide-column--in-right,
+  .youtube-groups__guide-column--in-left,
+  .youtube-groups__guide-column--out-left,
+  .youtube-groups__guide-column--out-right {
+    animation: none;
+  }
+}
+
 .youtube-groups__guide-create {
   display: block;
   width: 100%;
@@ -1204,6 +1302,8 @@ html[dark] .youtube-groups__guide-create {
 
 html[dark] .youtube-groups__guide-empty,
 html[dark] .youtube-groups__guide-toggle,
+html[dark] .youtube-groups__guide-back,
+html[dark] .youtube-groups__guide-enter,
 html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {
   color: var(--yt-spec-text-secondary, #aaa);
 }

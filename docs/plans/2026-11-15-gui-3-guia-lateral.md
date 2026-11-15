@@ -184,7 +184,7 @@ se añaden a `manifest.json` (tras `modules/pages.js`: `filter.js`, `guide.js`) 
   selección que alterna por grupo y por canal (`selectFilter` con `toggleFilter`, sin navegar todavía); estilos
   claro/oscuro. Sustituye la sección "Grupos" actual · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y a mano V2, V3.
-- [ ] T6 · Columnas de subgrupos: "›", "‹", título del padre no pulsable, botón de crear con el texto "+ Crear
+- [x] T6 · Columnas de subgrupos: "›", "‹", título del padre no pulsable, botón de crear con el texto "+ Crear
   subgrupo" (aún sin función), canales desplegados por defecto, varios niveles y animación (sin animación con
   `prefers-reduced-motion`) · Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V4.
 - [ ] T7 · Paso a `/feed/subscriptions` en `selectFilter` (solo con filtro resultante distinto de "todos") y traspaso
@@ -286,3 +286,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T3 | `feat: módulo puro de la columna de la guía lateral` | `modules/guide.js` con tests; añadido a `manifest.json` y a `load-modules.js`. |
 | 2026-11-15 | T4 | `feat: YouTubeGroups.validateGroupName` | Validación de nombre de grupo/subgrupo en `modules/groups.js` con tests. |
 | 2026-11-15 | T5 | `feat: sección YouTube Groups en la guía lateral con filtro que alterna` | Sección sobre "Más de YouTube", columna raíz con canales plegables y selección alternante; "+ Crear grupo" aún sin función. V2 y V3 manuales pendientes. |
+| 2026-11-15 | T6 | `feat: columnas de subgrupos con animación en la guía lateral` | Botones "›" y "‹", título del padre no pulsable, "+ Crear subgrupo" sin función, animación de 200 ms (sin ella con `prefers-reduced-motion`). V4 manual pendiente. |
