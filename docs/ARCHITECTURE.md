@@ -22,13 +22,13 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/watched.js` | JS clásico (`YouTubeGroupsWatched`), sin DOM | ID de vídeo desde una URL, marcar y desmarcar vídeos como vistos, `shouldAutoMark` (umbral del marcado automático) y `getWatchedButtonState` (etiqueta, glifo, pulsado y deshabilitado del botón de visto) |
 | `modules/playlists.js` | JS clásico (`YouTubeGroupsPlaylists`), sin DOM | Listas de vídeos propias: crear, renombrar y borrar listas, guardar y quitar vídeos, ids de listas de un vídeo y URLs de reproducción (`buildPlayAllUrl`, `buildVideoUrl`, `buildWatchVideosUrl`) y `selectQueueIds` (IDs de la cola de lo visible) |
 | `modules/backup.js` | JS clásico (`YouTubeGroupsBackup`), sin DOM | Copia de seguridad (ADR 0006): `buildBackup`, `parseBackup` (valida y descarta entradas no válidas contando `dropped`), `exportBackup` e `importBackup` (escribe ajustes, grupos, listas y vistos con `withLock`). Se carga tras `playlists.js` |
-| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`, `panelCollapsed`), normalizarlos, leerlos y actualizarlos con validación |
+| `modules/settings.js` | JS clásico (`YouTubeGroupsSettings`), sin DOM | Ajustes por defecto (`watchedMode`, `outsideMode`, `autoMarkPercent`, `panelCollapsed`, este último `true` por defecto), normalizarlos, leerlos y actualizarlos con validación |
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
 | `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch`, `shorts`, `channel`, `other`) y `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas. Se carga tras `metadata.js` |
 | `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo (ADR 0007): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `isFilterOnRemovedGroup`, `toggleFilter` (selección que alterna), `shouldNavigateToSubscriptions` y el traspaso por `sessionStorage` (`serializePendingFilter`, `parsePendingFilter`). Se carga tras `pages.js` |
 | `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la guía lateral: `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup`, `isChannelListOpen` y `findGuideInsertionIndex`. Se carga tras `filter.js` |
-| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel de grupos, sección "YouTube Groups" de la guía, botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
+| `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), sección "YouTube Groups" de la guía, botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
 | `tests/` | `node:test` + `node:vm` | Tests de `modules/` con un `browser.storage.local` simulado; excluidos del paquete por `web-ext-config.mjs` |
 
@@ -54,7 +54,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   (`withLock`, ADR 0005), de modo que dos operaciones solapadas sobre los grupos no se pisan.
 - **Filtro** (ADR 0007): `content.js` guarda un `activeFilter` en memoria (`ALL_FILTER`, grupo o canal, de
   `YouTubeGroupsFilter`). Se elige en la guía lateral (`selectFilter`, que alterna con `toggleFilter`: pulsar lo
-  elegido lo deselecciona) o, hasta `gui-4-panel`, en el panel. Si el filtro resultante no es "todos" y la página no es
+  elegido lo deselecciona) (el panel ya no tiene lista de grupos). Si el filtro resultante no es "todos" y la página no es
   `/feed/subscriptions`, se navega a suscripciones pulsando el enlace de la guía (o `location.assign`), con el filtro
   guardado en `sessionStorage` por si la carga es completa. Las tarjetas cuyo canal no pertenece al grupo elegido ni
   a sus descendientes, o no es el canal elegido, se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro". La regla es
@@ -102,10 +102,14 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   subgrupos ("›") o volver ("‹"), con un botón de crear grupo o subgrupo (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
   (`isChannelListOpen`). No hay elemento "Todos": grupos y canales alternan con `selectFilter`. No edita ni borra
-  grupos. Si la guía aparece tarde, el `MutationObserver` llama a `scheduleGuideCheck` (como mucho una
-  comprobación por frame). Si el contenedor no existe, no se pinta nada y el panel sigue funcionando. El panel se
-  puede minimizar con el botón de su cabecera; el estado se guarda en el ajuste `panelCollapsed` y se aplica al leer
-  los ajustes y en `storage.onChanged`.
+  grupos. La guía es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
+  (solo "Canal actual" con sus casillas). Si la guía aparece tarde, el `MutationObserver` llama a `scheduleGuideCheck`
+  (como mucho una comprobación por frame). Si el contenedor no existe, no se pinta nada y no se puede filtrar hasta
+  corregir el selector. El panel aparece minimizado por defecto y se puede desplegar con el botón de su cabecera; el
+  estado se guarda en el ajuste `panelCollapsed` y se aplica al leer los ajustes y en `storage.onChanged`. Quedan
+  sin enlazar, para la futura pantalla de edición de grupos (`ROADMAP.md`), `promptRenameGroup` y
+  `confirmDeleteGroup` en `content.js` y `renameGroup`, `deleteGroup`, `deleteSubGroup`, `setGroupAppearance` y
+  `removeChannelFromGroup` en `modules/groups.js`.
 - **Limpieza**: la sección "Limpieza" del panel (`<details>`) analiza el árbol con `YouTubeGroups.analyzeGroups`:
   canales repetidos en un mismo grupo (misma `getChannelKey`, se conserva el primero), URL no válidas (las
   recuperables, con `normalizeChannelUrl` no nulo, se corrigen y conservan sus campos; solo se quitan las
