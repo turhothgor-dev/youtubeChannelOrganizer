@@ -1,6 +1,6 @@
 # Plan: GUI 5 (2/3) · Selección siempre múltiple y "Limpiar selección"
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-*` en Firefox (2026-11-15), punto 2.
 
@@ -81,7 +81,7 @@ verde.
   selección, cerrada con selección solo de grupos o vacía, override `false` gana; `make test` y a mano V1, V2, V4, V5.
 - [x] T3 · Botón "Limpiar selección (N)" (ver **Decisiones**) · Ficheros: `content.js`, `content.css` · Test: `make
   lint`, `make test` y a mano V3.
-- [ ] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `filter.js` con las funciones nuevas, flujo **Filtro** con
+- [x] T4 · Cerrar: `docs/ARCHITECTURE.md` (fila de `filter.js` con las funciones nuevas, flujo **Filtro** con
   selección múltiple, unión y "Limpiar selección"; `matchesGroupFilter` con `hasFilter`; enlace al ADR 0009); ADR 0009
   a `aceptada` y ADR 0007 a "Estado: aceptada; puntos 1, 2, 4 y 5 sustituidos por 0009". Estado de este plan a `hecho`
   · Ficheros: `docs/ARCHITECTURE.md`, `docs/adr/0009-seleccion-multiple-como-filtro.md`,
@@ -136,3 +136,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T1 | `feat: funciones de selección múltiple en filter.js` | Funciones nuevas y tests; las antiguas se quitan en T2. |
 | 2026-11-15 | T2 | `feat: content.js con selección múltiple y quitar el filtro único` | `content.js`, `matchesGroupFilter` (`hasFilter`) y `isChannelListOpen` (selección); funciones y tests antiguos fuera de `filter.js`. Pendiente V1, V2, V4, V5 a mano. |
 | 2026-11-15 | T3 | `feat: botón Limpiar selección en la guía` | Botón fijo bajo el formulario de crear, oculto sin selección; estilos claro/oscuro. Pendiente V3 a mano. |
+| 2026-11-15 | T4 | `docs: cerrar plan gui-5-2 con ARCHITECTURE al día y ADR 0009 aceptada` | ARCHITECTURE (filter.js, flujo Filtro, guía), ADR 0009 aceptada y ADR 0007 con puntos sustituidos. |

@@ -1,6 +1,6 @@
 # 0009 · Selección múltiple como filtro activo
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-15
 - Sustituye en parte a: [0007](0007-filtro-activo-y-paso-a-suscripciones.md) (puntos 1, 2, 4 y 5)
 

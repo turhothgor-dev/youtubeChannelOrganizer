@@ -26,7 +26,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `modules/visibility.js` | JS clásico (`YouTubeGroupsVisibility`), sin DOM | `getCardVisibility`: decide si una tarjeta es `visible`, `dimmed` o `hidden` según filtro, visto y ajustes |
 | `modules/metadata.js` | JS clásico (`YouTubeGroupsMetadata`), sin DOM | Interpretar duración, visualizaciones y antigüedad desde el texto de una tarjeta (español e inglés), `FILTER_OPTIONS`, `matchesAdvancedFilters` y `hasActiveFilters` |
 | `modules/pages.js` | JS clásico (`YouTubeGroupsPages`), sin DOM | `getPageType(pathname)` clasifica la página (`home`, `subscriptions`, `search`, `watch`, `shorts`, `channel`, `other`) y `shouldShowCardControls(pageType)` indica dónde se ponen botones en las tarjetas. Se carga tras `metadata.js` |
-| `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo (ADR 0007): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `isFilterOnRemovedGroup`, `toggleFilter` (selección que alterna), `shouldNavigateToSubscriptions` y el traspaso por `sessionStorage` (`serializePendingFilter`, `parsePendingFilter`). Se carga tras `pages.js` |
+| `modules/filter.js` | JS clásico (`YouTubeGroupsFilter`), sin DOM | Filtro activo como selección múltiple (ADR 0007 y 0009): `ALL_FILTER`, `normalizeFilter`, `getFilterKey`, `resolveFilterUrls`, `parseFilterKey`, `normalizeSelection`, `toggleSelection` (añade o quita una clave), `clearSelection`, `resolveSelection` (descarta claves inexistentes y da la unión de URL), `shouldNavigateOnSelect` (solo navega al añadir fuera de suscripciones) y el traspaso por `sessionStorage` (`serializePendingSelection`, `parsePendingSelection`, `version: 2`). Se carga tras `pages.js` |
 | `modules/guide.js` | JS clásico (`YouTubeGroupsGuide`), sin DOM | Columnas de la columna lateral: `normalizeGuidePath`, `getGuideColumn`, `enterGuideGroup`, `leaveGuideGroup` e `isChannelListOpen`. Se carga tras `filter.js` |
 | `content.js` | JS clásico (IIFE) | Detectar tarjetas y su canal, panel flotante (minimizado por defecto y sin grupos: Listas, Limpieza, Filtros y Ajustes), columna lateral propia "YouTube Groups" (ADR 0008), botones por vídeo (grupo y visto), filtro, filtros avanzados, sección de ajustes y selector de iconos (`openIconPicker(initial, anchorButton, onSave)`) |
 | `content.css` | CSS | Estilos de lo que añade la extensión (claro y `html[dark]`) |
@@ -52,13 +52,16 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   por tarjeta) o desde la sección "Canal actual" del panel en `/watch`. Ambos usan el mismo selector de casillas
   y `YouTubeGroups.setChannelGroups`, que lee el árbol, calcula la nueva pertenencia y lo escribe una vez. La operación se encola por clave
   (`withLock`, ADR 0005), de modo que dos operaciones solapadas sobre los grupos no se pisan.
-- **Filtro** (ADR 0007): `content.js` guarda un `activeFilter` en memoria (`ALL_FILTER`, grupo o canal, de
-  `YouTubeGroupsFilter`). Se elige en la columna lateral (`selectFilter`, que alterna con `toggleFilter`: pulsar lo
-  elegido lo deselecciona) (el panel ya no tiene lista de grupos). Si el filtro resultante no es "todos" y la página no es
-  `/feed/subscriptions`, se navega a suscripciones pulsando el enlace de suscripciones de la guía de YouTube (o `location.assign`), con el filtro
-  guardado en `sessionStorage` por si la carga es completa. Las tarjetas cuyo canal no pertenece al grupo elegido ni
-  a sus descendientes, o no es el canal elegido, se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro". La regla es
-  `YouTubeGroupsVisibility.matchesGroupFilter`: sin grupo activo o con los canales aún cargando, pasa; con canal,
+- **Filtro** (ADR 0007 y [0009](adr/0009-seleccion-multiple-como-filtro.md)): `content.js` guarda una
+  `activeSelection` en memoria, un array de claves (`group:<id>`, `channel:<url>`) en orden de adición; `[]` es "todos".
+  Cada clic en la columna lateral sobre un grupo, subgrupo o canal lo añade o lo quita (`toggleSelectionItem`, con
+  `toggleSelection`); el filtro muestra la unión de sus canales (`resolveSelection`, `activeSelectionUrls`). El botón
+  "Limpiar selección (N)", visible solo con selección, la vacía sin navegar. Los elementos borrados salen de la
+  selección (`refreshActiveSelection`). Si se añade un elemento y la página no es `/feed/subscriptions`
+  (`shouldNavigateOnSelect`), se navega a suscripciones pulsando el enlace de suscripciones de la guía de YouTube (o
+  `location.assign`), con la selección guardada en `sessionStorage` por si la carga es completa; quitar nunca navega.
+  Las tarjetas cuyo canal no está en la unión se ocultan o se atenúan, según el ajuste "Vídeos fuera del filtro". La regla es
+  `YouTubeGroupsVisibility.matchesGroupFilter(…, hasFilter)`: sin selección o con los canales aún cargando, pasa; con canal,
   según pertenezca; sin canal identificado pero con ID de vídeo, no pasa (mixes, colaboraciones); sin canal ni ID
   (tarjeta aún sin pintar), pasa.
 - **Filtros avanzados**: la sección "Filtros" del panel filtra por duración, fecha y visualizaciones (opciones
@@ -107,7 +110,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   Groups". Muestra una sola columna (`getGuideColumn`) que se desplaza con animación al entrar en los
   subgrupos ("›") o volver ("‹"), con un botón de crear grupo o subgrupo (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
-  (`isChannelListOpen`). No hay elemento "Todos": grupos y canales alternan con `selectFilter`. No edita ni borra
+  (`isChannelListOpen`, abierta si contiene un canal seleccionado). No hay elemento "Todos": grupos y canales alternan con `toggleSelectionItem`. No edita ni borra
   grupos. La columna es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
   (solo "Canal actual" con sus casillas). El `MutationObserver` llama a `scheduleSidebarCheck` (como mucho una
   comprobación por frame). Como la columna no depende de la guía de YouTube, se puede filtrar aunque esta no exista. El panel aparece minimizado por defecto y se puede desplegar con el botón de su cabecera; el
@@ -130,4 +133,5 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 
 Las decisiones relevantes están en `docs/adr/`. El filtro activo y el paso a suscripciones:
 [ADR 0007](adr/0007-filtro-activo-y-paso-a-suscripciones.md). La columna lateral propia que desplaza el contenido:
-[ADR 0008](adr/0008-columna-propia-que-desplaza-el-contenido.md).
+[ADR 0008](adr/0008-columna-propia-que-desplaza-el-contenido.md). La selección múltiple como filtro (sustituye en
+parte al 0007): [ADR 0009](adr/0009-seleccion-multiple-como-filtro.md).
