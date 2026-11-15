@@ -57,7 +57,7 @@ verde; tema claro y oscuro. Los botones sobre la miniatura y el panel flotante n
   en `watch`, con 791 y con pantalla completa; `findGuideInsertionIndex` encuentra la sección con
   `https://studio.youtube.com/` o `https://music.youtube.com/` aunque haya `/feed/history` y hrefs relativos o no
   válidos, da `-1` sin ellas y no muta la entrada.
-- [ ] T2 · Sección de vuelta en la guía de YouTube y eliminación de la columna propia (ver **Decisiones**) · Ficheros:
+- [x] T2 · Sección de vuelta en la guía de YouTube y eliminación de la columna propia (ver **Decisiones**) · Ficheros:
   `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1, V5.
 - [ ] T3 · Guía forzada abierta y fija fuera de `/watch`: `syncGuidePin`, reglas CSS bajo
   `html.youtube-groups--guide-pinned` y ☰ neutralizado · Ficheros: `content.js`, `content.css` · Test: `make lint`,
@@ -126,3 +126,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | feat: shouldPinGuide y findGuideInsertionIndex puras | Con tests; `make test-affected` y `make lint` en verde. |
+| 2026-11-15 | T2 | feat: sección YouTube Groups de vuelta en la guía de YouTube y fuera la columna propia | `make lint` y `make test-affected` en verde; V1 y V5 pendientes a mano. |

@@ -275,109 +275,16 @@
       active > 0 ? `Filtros (${active})` : "Filtros";
   }
 
-  /** ID de la columna propia "YouTube Groups" (ADR 0008). */
-  const SIDEBAR_ID = "youtube-groups-sidebar";
-
-  /** Si ya se intentó leer los ajustes (con éxito o no): la columna puede crearse. */
-  let settingsReady = false;
-
-  /**
-   * Sincroniza la columna y las clases de `<html>` con `settings` y con la
-   * pantalla completa. Sin columna creada no hace nada.
-   */
-  function applySidebarState() {
-    const sidebar = document.getElementById(SIDEBAR_ID);
-    if (!sidebar) {
-      return;
-    }
-    const root = document.documentElement;
-    const collapsed = settings.sidebarCollapsed;
-    root.classList.add("youtube-groups--sidebar");
-    root.classList.toggle("youtube-groups--sidebar-collapsed", collapsed);
-    root.classList.toggle(
-      "youtube-groups--fullscreen",
-      document.fullscreenElement !== null,
-    );
-    sidebar.classList.toggle("youtube-groups__sidebar--collapsed", collapsed);
-    const button = sidebar.querySelector(".youtube-groups__sidebar-toggle");
-    button.textContent = collapsed ? "»" : "«";
-    button.title = collapsed
-      ? "Mostrar YouTube Groups"
-      : "Plegar YouTube Groups";
-    button.setAttribute(
-      "aria-label",
-      collapsed ? "Mostrar YouTube Groups" : "Plegar YouTube Groups",
-    );
-    button.setAttribute("aria-expanded", String(!collapsed));
-  }
-
-  /**
-   * Guarda el plegado de la columna. Si falla, repinta el estado guardado.
-   * @param {HTMLButtonElement} button - Botón de plegar.
-   * @returns {Promise<void>}
-   */
-  async function toggleSidebar(button) {
-    button.disabled = true;
-    settingsWriteSeq += 1;
-    const seq = settingsWriteSeq;
-    try {
-      const result = await YouTubeGroupsSettings.updateSettings({
-        sidebarCollapsed: !settings.sidebarCollapsed,
-      });
-      if (seq > settingsAppliedSeq) {
-        settingsAppliedSeq = seq;
-        settings = result.settings;
-      }
-    } catch (error) {
-      console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
-    } finally {
-      button.disabled = false;
-      applySidebarState();
-    }
-  }
-
-  /**
-   * Crea la columna propia si hay ajustes leídos, existe `ytd-app` y la
-   * columna no está ya conectada.
-   */
-  function ensureSidebar() {
-    if (
-      !settingsReady ||
-      document.getElementById(SIDEBAR_ID)?.isConnected ||
-      !document.querySelector("ytd-app")
-    ) {
-      return;
-    }
-    const sidebar = document.createElement("aside");
-    sidebar.id = SIDEBAR_ID;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "youtube-groups__sidebar-toggle";
-    button.addEventListener("click", () => {
-      toggleSidebar(button);
-    });
-    sidebar.append(button);
-    document.body.append(sidebar);
-    applySidebarState();
-    paintSidebarSection();
-  }
-
-  document.addEventListener("fullscreenchange", applySidebarState);
-
   YouTubeGroupsSettings.getSettings()
     .then((loaded) => {
       settings = loaded;
       settingsLoaded = true;
-      settingsReady = true;
       applyVisibilityToAllCards();
       syncSettingsControls();
-      ensureSidebar();
     })
     .catch((error) => {
       settingsLoadError = error.message;
-      settingsReady = true;
       syncSettingsControls();
-      ensureSidebar();
       console.error("[YouTube Groups] No se pudieron leer los ajustes", error);
     });
 
@@ -1584,10 +1491,11 @@
     renderGuideSection(groups);
   }
 
+  const GUIDE_SECTIONS_SELECTOR = "ytd-guide-renderer #sections";
   const GUIDE_SECTION_ID = "youtube-groups-guide";
 
-  /** Si ya hay una comprobación de la columna programada para el próximo frame. */
-  let sidebarCheckScheduled = false;
+  /** Si ya hay una comprobación de la guía programada para el próximo frame. */
+  let guideCheckScheduled = false;
 
   /** Estado en memoria de la guía: columna actual y listas de canales. */
   let guidePath = [];
@@ -1957,13 +1865,60 @@
   }
 
   /**
-   * Pinta la sección "YouTube Groups" en la columna propia. Si la columna no
-   * existe, no hace nada; si la sección ya existe, la reutiliza.
+   * Sección de la guía tras la que va la nuestra: la anterior a "Más de
+   * YouTube", o la primera si no se encuentra.
+   * @param {Element} container - Contenedor `#sections` de la guía.
+   * @returns {Element|null} Sección que debe quedar justo antes de la nuestra
+   *   (`null` si la nuestra debe ir la primera).
+   */
+  function findGuideAnchor(container) {
+    const sections = Array.from(
+      container.querySelectorAll(":scope > ytd-guide-section-renderer"),
+    );
+    const hrefs = sections.map((section) =>
+      Array.from(section.querySelectorAll("a[href]")).map((a) =>
+        a.getAttribute("href"),
+      ),
+    );
+    const index = YouTubeGroupsGuide.findGuideInsertionIndex(hrefs);
+    if (index > 0) {
+      return sections[index - 1];
+    }
+    if (index === 0) {
+      return null;
+    }
+    return sections[0] || null;
+  }
+
+  /**
+   * Indica si la sección está conectada y justo en su posición de la guía.
+   * @param {Element} [container] - Contenedor `#sections` (se busca si falta).
+   * @returns {boolean} `true` si no hace falta pintarla ni moverla.
+   */
+  function isGuideSectionInPlace(container) {
+    const section = document.getElementById(GUIDE_SECTION_ID);
+    const sections =
+      container || document.querySelector(GUIDE_SECTIONS_SELECTOR);
+    if (!section?.isConnected || !sections) {
+      return false;
+    }
+    const anchor = findGuideAnchor(sections);
+    return anchor
+      ? section.parentElement === sections &&
+          anchor.nextElementSibling === section
+      : section.parentElement === sections &&
+          sections.firstElementChild === section;
+  }
+
+  /**
+   * Pinta la sección "YouTube Groups" en la guía de YouTube, antes de "Más de
+   * YouTube". Si la guía no existe, no hace nada; si la sección ya existe, la
+   * reutiliza y solo la mueve si no está en su sitio.
    * @param {Array<Object>} groups - Árbol de grupos.
    * @param {string} [direction] - "forward" o "back" para animar el cambio de columna.
    */
   function renderGuideSection(groups, direction) {
-    const container = document.getElementById(SIDEBAR_ID);
+    const container = document.querySelector(GUIDE_SECTIONS_SELECTOR);
     if (!container) {
       return;
     }
@@ -1973,8 +1928,13 @@
       section.id = GUIDE_SECTION_ID;
       section.className = "youtube-groups__guide";
     }
-    if (section.parentElement !== container) {
-      container.append(section);
+    if (!isGuideSectionInPlace(container)) {
+      const anchor = findGuideAnchor(container);
+      if (anchor) {
+        anchor.after(section);
+      } else {
+        container.prepend(section);
+      }
     }
 
     guidePath = YouTubeGroupsGuide.normalizeGuidePath(groups, guidePath);
@@ -2098,43 +2058,37 @@
   }
 
   /**
-   * Lee los grupos y pinta la sección en la columna propia.
+   * Lee los grupos y pinta la sección en la guía de YouTube.
    */
-  function paintSidebarSection() {
+  function paintGuideSection() {
     getGroups()
       .then((groups) => renderGuideSection(groups))
       .catch((error) => {
         console.error(
-          "[YouTube Groups] No se pudo pintar la columna lateral",
+          "[YouTube Groups] No se pudo pintar la guía lateral",
           error,
         );
       });
   }
 
   /**
-   * Programa, como mucho una vez por frame, la recreación de la columna si
-   * YouTube la ha quitado. Sin ajustes leídos o sin `ytd-app` no hace nada.
+   * Programa, como mucho una vez por frame, el pintado de la sección de la
+   * guía cuando falta o no está en su sitio. Solo lee los grupos si hay guía.
    */
-  function scheduleSidebarCheck() {
-    if (sidebarCheckScheduled) {
+  function scheduleGuideCheck() {
+    if (guideCheckScheduled) {
       return;
     }
-    sidebarCheckScheduled = true;
+    guideCheckScheduled = true;
     requestAnimationFrame(() => {
-      sidebarCheckScheduled = false;
+      guideCheckScheduled = false;
       if (
-        !settingsReady ||
-        !document.querySelector("ytd-app") ||
-        (document.getElementById(SIDEBAR_ID)?.isConnected &&
-          document.getElementById(GUIDE_SECTION_ID)?.isConnected)
+        !document.querySelector(GUIDE_SECTIONS_SELECTOR) ||
+        isGuideSectionInPlace()
       ) {
         return;
       }
-      if (document.getElementById(SIDEBAR_ID)?.isConnected) {
-        paintSidebarSection();
-      } else {
-        ensureSidebar();
-      }
+      paintGuideSection();
     });
   }
 
@@ -3471,11 +3425,8 @@
         }
       }
     }
-    if (
-      !document.getElementById(SIDEBAR_ID)?.isConnected ||
-      !document.getElementById(GUIDE_SECTION_ID)?.isConnected
-    ) {
-      scheduleSidebarCheck();
+    if (!isGuideSectionInPlace()) {
+      scheduleGuideCheck();
     }
   });
 
@@ -3796,7 +3747,6 @@
           settingsLoadError = null;
           settingsAppliedSeq = settingsWriteSeq;
           syncSettingsControls();
-          applySidebarState();
           applyVisibilityToAllCards();
         } else if (name === "groups") {
           refreshActiveSelection().catch((error) => {
