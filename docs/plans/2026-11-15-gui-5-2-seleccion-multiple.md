@@ -62,7 +62,7 @@ navega a `/feed/subscriptions`; quitar no navega. Se descarta una tecla modifica
 Reglas comunes: sin `innerHTML` con datos; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en
 verde.
 
-- [ ] T1 · Funciones de selección en `modules/filter.js` (ver **Decisiones**), sin quitar aún las antiguas · Ficheros:
+- [x] T1 · Funciones de selección en `modules/filter.js` (ver **Decisiones**), sin quitar aún las antiguas · Ficheros:
   `modules/filter.js`, `tests/filter.test.js` · Test: `parseFilterKey` con grupo, canal con parámetros (sale
   normalizado), prefijo desconocido, id vacío y no cadena; `normalizeSelection` quita repetidos e inválidos y da `[]`
   con no-array; `toggleSelection`: desde `[]` añade A; `[A]`+B → `[A, B]`; `[A, B]`+A → `[B]`; `[B]`+A → `[B, A]`;
@@ -133,3 +133,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `feat: funciones de selección múltiple en filter.js` | Funciones nuevas y tests; las antiguas se quitan en T2. |
