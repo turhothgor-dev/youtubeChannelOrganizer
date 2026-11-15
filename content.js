@@ -454,6 +454,7 @@
       }
     }
     renderCurrentVideoSection();
+    schedulePlayerControlSync();
   }
 
   /**
@@ -3441,6 +3442,8 @@
     currentChannelUpdateScheduled = true;
     requestAnimationFrame(() => {
       currentChannelUpdateScheduled = false;
+      // El canal del vídeo llega tarde: el control del reproductor lo recalcula
+      syncPlayerControl();
       const channel = getCurrentVideoChannel();
       const channelUrl = channel ? channel.url : null;
       if (channelUrl === renderedCurrentChannelUrl) {
@@ -3528,9 +3531,181 @@
   window.addEventListener("resize", scheduleGuidePinSync);
   syncGuidePin();
 
+  // --- Botones sobre el reproductor de /watch (solo con el vídeo parado) ---
+  const PLAYER_SELECTOR = "#movie_player";
+  const PLAYER_CONTROL_CLASS = "youtube-groups__player-actions";
+  let playerControlScheduled = false;
+
+  /**
+   * Crea la columna de botones del reproductor, con el aspecto de las
+   * miniaturas. Actúa siempre sobre el vídeo y el canal actuales.
+   * @returns {HTMLElement} Control con los botones +G, visto y lista.
+   */
+  function createPlayerControl() {
+    const control = document.createElement("span");
+    control.className =
+      "youtube-groups__subscription-control youtube-groups__card-actions--overlay " +
+      PLAYER_CONTROL_CLASS;
+    shieldControlEvents(control);
+    // Espacio o Intro sobre un botón no deben llegar a los atajos del reproductor
+    control.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+    });
+
+    const addButton = document.createElement("button");
+    addButton.className =
+      "youtube-groups__subscription-add-button action-button primary-button";
+    addButton.type = "button";
+    setCardButtonContent(addButton, "+G", "Añadir a grupo", false);
+    addButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openSubscriptionGroupsForm(getCurrentVideoChannel(), addButton);
+    });
+    control.appendChild(addButton);
+
+    const watchedButton = document.createElement("button");
+    watchedButton.className =
+      "youtube-groups__watched-button action-button secondary-button";
+    watchedButton.type = "button";
+    setCardButtonContent(watchedButton, null, "Marcar visto");
+    watchedButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleCurrentVideoWatched(watchedButton);
+    });
+    control.appendChild(watchedButton);
+
+    const playlistButton = document.createElement("button");
+    playlistButton.className =
+      "youtube-groups__playlist-button action-button secondary-button";
+    playlistButton.type = "button";
+    setCardButtonContent(playlistButton, "playlist-add", "Lista");
+    playlistButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openPlaylistForm(getCurrentWatchVideoData(), playlistButton);
+    });
+    control.appendChild(playlistButton);
+
+    return control;
+  }
+
+  /**
+   * Muestra, oculta o actualiza el control sobre `#movie_player`. Es
+   * idempotente: reutiliza un único control, lo reubica si YouTube recrea el
+   * reproductor y borra los duplicados.
+   */
+  function syncPlayerControl() {
+    const controls = Array.from(
+      document.querySelectorAll("." + PLAYER_CONTROL_CLASS),
+    );
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    const player =
+      pageType === "watch" ? document.querySelector(PLAYER_SELECTOR) : null;
+    if (!player) {
+      for (const existing of controls) {
+        existing.hidden = true;
+      }
+      return;
+    }
+
+    let control = controls.find((existing) => player.contains(existing));
+    if (!control) {
+      control = controls[0] ?? createPlayerControl();
+    }
+    for (const existing of controls) {
+      if (existing !== control) {
+        existing.remove();
+      }
+    }
+    if (control.parentElement !== player) {
+      player.appendChild(control);
+    }
+
+    const video = player.querySelector("video");
+    control.hidden = !YouTubeGroupsPages.shouldShowPlayerControls({
+      pageType,
+      paused: video ? video.paused : true,
+      fullscreen: document.fullscreenElement !== null,
+      adShowing: player.classList.contains("ad-showing"),
+    });
+    if (control.hidden) {
+      return;
+    }
+
+    const addButton = control.querySelector(
+      ".youtube-groups__subscription-add-button",
+    );
+    if (getCurrentVideoChannel()) {
+      addButton.disabled = false;
+      addButton.removeAttribute("title");
+    } else {
+      addButton.disabled = true;
+      addButton.title = "No se pudo identificar el canal";
+    }
+
+    const rawId = getCurrentVideoId();
+    const videoId = rawId && isWatchPageInSync(rawId) ? rawId : null;
+    updateWatchedButton(
+      control.querySelector(".youtube-groups__watched-button"),
+      videoId,
+      Boolean(videoId) &&
+        watchedVideos !== null &&
+        YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId),
+    );
+    control.querySelector(".youtube-groups__playlist-button").disabled =
+      !videoId;
+  }
+
+  /** Recalcula el control del reproductor como mucho una vez por frame. */
+  function schedulePlayerControlSync() {
+    if (playerControlScheduled) {
+      return;
+    }
+    playerControlScheduled = true;
+    requestAnimationFrame(() => {
+      playerControlScheduled = false;
+      syncPlayerControl();
+    });
+  }
+
+  // Los eventos de medios no burbujean: se escuchan en captura sobre document
+  for (const type of ["play", "pause", "ended"]) {
+    document.addEventListener(
+      type,
+      (event) => {
+        if (
+          event.target instanceof HTMLVideoElement &&
+          event.target.closest(PLAYER_SELECTOR)
+        ) {
+          schedulePlayerControlSync();
+        }
+      },
+      true,
+    );
+  }
+  document.addEventListener("yt-navigate-start", () => {
+    // Evita enseñar los botones del vídeo anterior durante la carga
+    for (const existing of document.querySelectorAll(
+      "." + PLAYER_CONTROL_CLASS,
+    )) {
+      existing.hidden = true;
+    }
+  });
+  document.addEventListener("yt-navigate-finish", schedulePlayerControlSync);
+  document.addEventListener("fullscreenchange", schedulePlayerControlSync);
+  syncPlayerControl();
+
   const observer = new MutationObserver((mutations) => {
     if (window.location.pathname !== guidePinPath) {
       syncGuidePin();
+    }
+    if (YouTubeGroupsPages.getPageType(window.location.pathname) === "watch") {
+      const player = document.querySelector(PLAYER_SELECTOR);
+      if (player && !player.querySelector("." + PLAYER_CONTROL_CLASS)) {
+        schedulePlayerControlSync();
+      }
     }
     // Si cambia algo de la guía que no sea nuestra sección, el ancla en caché
     // puede haber dejado de valer (secciones nuevas o con enlaces tardíos).

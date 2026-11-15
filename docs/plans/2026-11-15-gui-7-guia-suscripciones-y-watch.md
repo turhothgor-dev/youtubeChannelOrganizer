@@ -93,7 +93,7 @@ verifica a mano (V*). Una tarea por commit, con `make lint` y `make test` en ver
   tipos y mismas llamadas) y usarlo allí; extraer el manejador del botón "Marcar visto" del panel (~945-953) a
   `toggleCurrentVideoWatched(button)` (añade el ID a `autoMarkHandledIds` y llama a `toggleVideoWatched`) y usarlo allí
   · Test: `make test`; a mano, V6 (los botones de miniatura y "Vídeo actual" funcionan igual).
-- [ ] T5 · Botones sobre el reproductor en `/watch` · Ficheros: `content.js`, `content.css` · Test: `make lint`,
+- [x] T5 · Botones sobre el reproductor en `/watch` · Ficheros: `content.js`, `content.css` · Test: `make lint`,
   `make test` y V6–V12. Contenido:
   - `createPlayerControl()`: `<span>` con clases `youtube-groups__subscription-control
     youtube-groups__card-actions--overlay youtube-groups__player-actions` (las dos primeras dan el estilo de las
@@ -207,3 +207,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-15 | T2 | `docs: documentar la guía fija solo en suscripciones` | ADR 0012 aceptada, 0010 enlazado como modificado y ARCHITECTURE actualizada. |
 | 2026-11-15 | T3 | `feat: decidir cuándo mostrar los botones del reproductor` | `shouldShowPlayerControls` en `modules/pages.js` con su test. |
 | 2026-11-15 | T4 | `refactor: extraer el escudo de eventos y el marcado de visto actual` | `shieldControlEvents` y `toggleCurrentVideoWatched` en `content.js`, sin cambio de comportamiento. V6 pendiente a mano. |
+| 2026-11-15 | T5 | `feat: mostrar los botones de grupo, visto y lista sobre el reproductor en pausa` | `createPlayerControl`, `syncPlayerControl` y programación en `content.js`, más CSS. V6-V12 pendientes a mano; el z-index 60 se ajusta en V7. |
