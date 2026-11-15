@@ -39,7 +39,6 @@ function sample() {
       outsideMode: "dim",
       autoMarkPercent: 95,
       panelCollapsed: false,
-      sidebarCollapsed: true,
     },
     playlists: [
       {
@@ -181,7 +180,6 @@ test("parseBackup descarta vistos inválidos y normaliza ajustes", () => {
     outsideMode: "hide",
     autoMarkPercent: 50,
     panelCollapsed: true,
-    sidebarCollapsed: false,
   });
 });
 
@@ -228,6 +226,22 @@ test("exportBackup e importBackup copian las cuatro claves a otro contexto", asy
 
   assert.strictEqual(result.dropped, 0);
   assert.deepStrictEqual(plain(target.store), fullStore());
+});
+
+test("importBackup con una copia que trae sidebarCollapsed la acepta y no lo guarda", async () => {
+  const data = sample();
+  const text = envelope({
+    settings: { ...data.settings, sidebarCollapsed: true },
+  });
+  const target = loadModules();
+
+  const result = await target.YouTubeGroupsBackup.importBackup(text);
+
+  assert.strictEqual(result.dropped, 0);
+  assert.deepStrictEqual(
+    plain(target.store.youtubeSettings.settings),
+    data.settings,
+  );
 });
 
 test("importBackup con una copia no válida no escribe nada", async () => {

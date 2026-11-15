@@ -39,9 +39,9 @@ Los ajustes se guardan en una clave propia, `youtubeSettings`:
 - `panelCollapsed`: `false` o `true`; por defecto `true`. Indica si el panel flotante está minimizado. Lo
   introduce el plan `2026-11-14-fase4-3-sidebar`; el valor por defecto (antes `false`) lo cambia el plan
   `2026-11-15-gui-4-panel`. Es un cambio de valor por defecto de un campo opcional: no sube `version`.
-- `sidebarCollapsed`: `false` o `true`; por defecto `false`. Indica si la columna propia "YouTube Groups" está
-  plegada a una tira estrecha. Lo introduce el plan `2026-11-15-gui-5-1-columna-propia`. Es un campo opcional
-  nuevo: no sube `version`.
+- `sidebarCollapsed`: **retirado** por el plan `2026-11-15-gui-6-1-guia-fija` (ADR 0010). Lo introdujo
+  `2026-11-15-gui-5-1-columna-propia` para plegar la columna propia, que ya no existe. No sube `version`: un valor
+  guardado o presente en una copia de seguridad se ignora sin error y no se vuelve a guardar.
 - Todos los campos son opcionales al leer: si falta uno o su valor no es válido, se usa su valor por defecto. Leer
   sin datos devuelve los valores por defecto y no escribe nada.
 - La normalización conserva solo los campos conocidos.
