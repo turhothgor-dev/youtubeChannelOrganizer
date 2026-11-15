@@ -1357,6 +1357,10 @@ html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #scrim {
 
 html.youtube-groups--guide-pinned
   tp-yt-app-drawer#guide
+  #guide-content
+  > #header,
+html.youtube-groups--guide-pinned
+  tp-yt-app-drawer#guide
   #guide-wrapper
   > #header {
   display: none !important;

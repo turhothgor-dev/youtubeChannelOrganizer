@@ -71,6 +71,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-15 | T1 | Ocultar también `tp-yt-app-drawer#guide #guide-content > #header` (se mantiene la regla de `#guide-wrapper > #header`) y anotarlo en el ADR 0010 | V1 falló en Firefox: la cabecera duplicada es hija de `#guide-content`, no de `#guide-wrapper` | La persona (hallazgo en Firefox) |
 
 ## Registro
 
@@ -80,3 +81,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `fix: ocultar la cabecera propia del cajón en la guía fija` | Regla `#guide-wrapper > #header` sustituye a `#guide-header`; lint y 182 tests en verde; V1–V3 pendientes a mano. |
 | 2026-11-15 | T2 | `docs: documentar la cabecera propia del cajón en la guía fija` | ADR 0010 (punto 2 y A vigilar) y ARCHITECTURE actualizados; plan en `hecho`. |
+| 2026-11-15 | T1 (corrección) | `fix: ocultar la cabecera del cajón dentro de guide-content` | Selector `#guide-content > #header` añadido tras fallar V1; ADR 0010 actualizado. |
