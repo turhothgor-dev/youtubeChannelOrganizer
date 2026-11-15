@@ -3,7 +3,7 @@ const YouTubeGroupsSettings = (() => {
     watchedMode: "dim",
     outsideMode: "hide",
     autoMarkPercent: 80,
-    panelCollapsed: false,
+    panelCollapsed: true,
   });
   const WATCHED_MODES = Object.freeze(["show", "dim", "hide"]);
   const OUTSIDE_MODES = Object.freeze(["hide", "dim"]);

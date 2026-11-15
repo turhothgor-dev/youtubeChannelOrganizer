@@ -179,7 +179,7 @@ test("parseBackup descarta vistos inválidos y normaliza ajustes", () => {
     watchedMode: "dim",
     outsideMode: "hide",
     autoMarkPercent: 50,
-    panelCollapsed: false,
+    panelCollapsed: true,
   });
 });
 
