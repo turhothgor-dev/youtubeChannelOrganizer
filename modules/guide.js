@@ -22,7 +22,7 @@ const YouTubeGroupsGuide = (() => {
     let level = groups;
     for (const id of path) {
       const found = level.find((group) => group && group.id === id);
-      if (!found || getSubgroups(found).length === 0) {
+      if (!found) {
         break;
       }
       result.push(id);
@@ -97,10 +97,96 @@ const YouTubeGroupsGuide = (() => {
   function enterGuideGroup(groups, path, id) {
     const column = getGuideColumn(groups, path);
     const item = column.items.find((candidate) => candidate.id === id);
-    if (item && item.hasSubgroups) {
+    if (item) {
       return [...column.path, id];
     }
     return column.path;
+  }
+
+  /**
+   * Busca un grupo en cualquier nivel y devuelve su ruta.
+   *
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} id Id del grupo.
+   * @returns {(string[]|null)} Ids desde el primer nivel hasta `id`, o null.
+   */
+  function findGuidePath(groups, id) {
+    if (!Array.isArray(groups)) {
+      return null;
+    }
+    for (const group of groups) {
+      if (!group) {
+        continue;
+      }
+      if (group.id === id) {
+        return [id];
+      }
+      const inner = findGuidePath(getSubgroups(group), id);
+      if (inner) {
+        return [group.id, ...inner];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {string} id Id del grupo.
+   * @returns {(Object|null)} El grupo, o null si no existe.
+   */
+  function findGroup(groups, id) {
+    const path = findGuidePath(groups, id);
+    if (!path) {
+      return null;
+    }
+    let level = groups;
+    let found = null;
+    for (const step of path) {
+      found = level.find((group) => group && group.id === step);
+      level = getSubgroups(found);
+    }
+    return found;
+  }
+
+  /**
+   * Decide dónde crea el botón de crear según la selección y la columna.
+   *
+   * @param {Array<Object>} groups Grupos guardados.
+   * @param {*} path Ruta actual de la guía.
+   * @param {*} selection Claves de la selección activa.
+   * @returns {{parentId: (string|null), parentName: (string|null),
+   *   label: string, ariaLabel: (string|null)}}
+   */
+  function getCreateTarget(groups, path, selection) {
+    const anchors = (Array.isArray(selection) ? selection : [])
+      .filter((key) => typeof key === "string" && key.startsWith("group:"))
+      .map((key) => findGroup(groups, key.slice("group:".length)))
+      .filter(Boolean);
+    if (anchors.length > 0) {
+      const anchor = anchors[anchors.length - 1];
+      const suffix = anchors.length > 1 ? " (último seleccionado)" : "";
+      return {
+        parentId: anchor.id,
+        parentName: anchor.name,
+        label: `+ Crear subgrupo en «${anchor.name}»${suffix}`,
+        ariaLabel: `Crear subgrupo en ${anchor.name}`,
+      };
+    }
+    const column = getGuideColumn(groups, path);
+    if (column.parent) {
+      return {
+        parentId: column.parent.id,
+        parentName: column.parent.name,
+        label: `+ Crear subgrupo en «${column.parent.name}»`,
+        ariaLabel: `Crear subgrupo en ${column.parent.name}`,
+      };
+    }
+    return {
+      parentId: null,
+      parentName: null,
+      label: "+ Crear grupo",
+      ariaLabel: null,
+    };
   }
 
   /**
@@ -140,6 +226,8 @@ const YouTubeGroupsGuide = (() => {
     getGuideColumn,
     enterGuideGroup,
     leaveGuideGroup,
+    findGuidePath,
+    getCreateTarget,
     isChannelListOpen,
   };
 })();

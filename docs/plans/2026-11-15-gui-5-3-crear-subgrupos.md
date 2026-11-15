@@ -53,7 +53,7 @@ grupo padre, para que se vea el nuevo subgrupo; si ya se estaba en ella, no camb
 Reglas comunes: sin `innerHTML` con datos; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en
 verde.
 
-- [ ] T1 · `getCreateTarget`, `findGuidePath` y `normalizeGuidePath`/`enterGuideGroup` sin exigir subgrupos (ver
+- [x] T1 · `getCreateTarget`, `findGuidePath` y `normalizeGuidePath`/`enterGuideGroup` sin exigir subgrupos (ver
   **Decisiones**) · Ficheros: `modules/guide.js`, `tests/guide.test.js` · Test: `getCreateTarget` en la raíz sin
   selección → "+ Crear grupo"; en la columna de A sin selección → subgrupo de A; con `[group:B]` estando en la columna
   de A → B; con `[group:A, channel:x, group:A1]` → A1 con "(último seleccionado)"; solo canales → como sin selección;
@@ -108,3 +108,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `feat: getCreateTarget y findGuidePath en guide.js` | Rutas y entrada válidas en grupos sin subgrupos; tests actualizados. |

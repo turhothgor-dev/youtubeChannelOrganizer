@@ -90,10 +90,14 @@ test("normalizeGuidePath recorta rutas inválidas", () => {
     "a",
   ]);
   assert.deepStrictEqual(plain(G.normalizeGuidePath(groups, ["a1a"])), []);
-  assert.deepStrictEqual(plain(G.normalizeGuidePath(groups, ["b"])), []);
+  assert.deepStrictEqual(plain(G.normalizeGuidePath(groups, ["b"])), ["b"]);
   assert.deepStrictEqual(
     plain(G.normalizeGuidePath(groups, ["a", "a1", "a1a"])),
-    ["a", "a1"],
+    ["a", "a1", "a1a"],
+  );
+  assert.deepStrictEqual(
+    plain(G.normalizeGuidePath(groups, ["a", "a1", "a1a", "zzz"])),
+    ["a", "a1", "a1a"],
   );
   assert.deepStrictEqual(plain(G.normalizeGuidePath(groups, "a")), []);
   assert.deepStrictEqual(plain(G.normalizeGuidePath(groups, null)), []);
@@ -108,10 +112,72 @@ test("enterGuideGroup y leaveGuideGroup", () => {
     "a1",
   ]);
   assert.deepStrictEqual(plain(G.enterGuideGroup(groups, [], "a1")), []);
-  assert.deepStrictEqual(plain(G.enterGuideGroup(groups, [], "b")), []);
+  assert.deepStrictEqual(plain(G.enterGuideGroup(groups, [], "b")), ["b"]);
   assert.deepStrictEqual(plain(G.enterGuideGroup(groups, ["a"], "a1a")), ["a"]);
+  assert.deepStrictEqual(plain(G.enterGuideGroup(groups, ["a", "a1"], "a1a")), [
+    "a",
+    "a1",
+    "a1a",
+  ]);
   assert.deepStrictEqual(plain(G.leaveGuideGroup(["a", "a1"])), ["a"]);
   assert.deepStrictEqual(plain(G.leaveGuideGroup([])), []);
+});
+
+test("findGuidePath da la ruta hasta un grupo o null", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const groups = tree();
+  assert.deepStrictEqual(plain(G.findGuidePath(groups, "a1a")), [
+    "a",
+    "a1",
+    "a1a",
+  ]);
+  assert.deepStrictEqual(plain(G.findGuidePath(groups, "b")), ["b"]);
+  assert.strictEqual(G.findGuidePath(groups, "zzz"), null);
+  assert.strictEqual(G.findGuidePath(null, "a"), null);
+});
+
+test("getCreateTarget decide dónde se crea según selección y columna", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const groups = tree();
+
+  assert.deepStrictEqual(plain(G.getCreateTarget(groups, [], [])), {
+    parentId: null,
+    parentName: null,
+    label: "+ Crear grupo",
+    ariaLabel: null,
+  });
+  assert.deepStrictEqual(plain(G.getCreateTarget(groups, ["a"], [])), {
+    parentId: "a",
+    parentName: "A",
+    label: "+ Crear subgrupo en «A»",
+    ariaLabel: "Crear subgrupo en A",
+  });
+  assert.strictEqual(
+    G.getCreateTarget(groups, ["a"], ["group:b"]).parentId,
+    "b",
+  );
+  const multi = plain(
+    G.getCreateTarget(groups, [], ["group:a", `channel:${X}`, "group:a1"]),
+  );
+  assert.strictEqual(multi.parentId, "a1");
+  assert.strictEqual(
+    multi.label,
+    "+ Crear subgrupo en «A1» (último seleccionado)",
+  );
+  assert.strictEqual(multi.ariaLabel, "Crear subgrupo en A1");
+  assert.strictEqual(
+    G.getCreateTarget(groups, [], ["group:a", "group:zzz"]).label,
+    "+ Crear subgrupo en «A»",
+  );
+  assert.strictEqual(
+    G.getCreateTarget(groups, [], [`channel:${X}`]).label,
+    "+ Crear grupo",
+  );
+  assert.strictEqual(
+    G.getCreateTarget(groups, ["a"], [`channel:${X}`]).parentId,
+    "a",
+  );
+  assert.strictEqual(G.getCreateTarget(groups, [], null).parentId, null);
 });
 
 test("isChannelListOpen aplica override, selección y profundidad", () => {
