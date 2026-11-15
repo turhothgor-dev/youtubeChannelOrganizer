@@ -3213,35 +3213,30 @@
       iconPickerListenersAdded = true;
       document.addEventListener("mousedown", (event) => {
         if (iconPicker && !iconPicker.contains(event.target)) {
-          const form = iconPicker.querySelector(
-            ".youtube-groups__icon-picker-form",
-          );
-          if (form) {
-            form.hidden = true;
-          }
+          hideIconPicker();
         }
       });
-      window.addEventListener(
-        "scroll",
-        () => {
-          if (iconPicker) {
-            const form = iconPicker.querySelector(
-              ".youtube-groups__icon-picker-form",
-            );
-            if (form) {
-              form.hidden = true;
-            }
-          }
-        },
-        { passive: true },
-      );
+      window.addEventListener("scroll", hideIconPicker, { passive: true });
     }
     return iconPicker;
+  }
+
+  /** Oculta del todo el selector de iconos (contenedor y formulario). */
+  function hideIconPicker() {
+    if (!iconPicker) {
+      return;
+    }
+    iconPicker.hidden = true;
+    const form = iconPicker.querySelector(".youtube-groups__icon-picker-form");
+    if (form) {
+      form.hidden = true;
+    }
   }
 
   function createIconPicker() {
     const container = document.createElement("div");
     container.className = "youtube-groups__icon-picker";
+    container.hidden = true;
     container.innerHTML =
       '<form class="youtube-groups__icon-picker-form" hidden>' +
       '<div class="youtube-groups__icon-picker-preview"></div>' +
@@ -3389,7 +3384,7 @@
       .addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        form.hidden = true;
+        hideIconPicker();
         error.textContent = "";
       });
     form.addEventListener("submit", async (event) => {
@@ -3407,7 +3402,7 @@
           selectedIconId,
           selectedColorHex,
         );
-        form.hidden = true;
+        hideIconPicker();
         renderGroupsPanel().catch((err) => {
           console.error("[YouTube Groups] Error re-renderizando panel", err);
         });
@@ -3451,6 +3446,7 @@
     picker._renderIconGrid(group.icon || "");
     picker._renderColorGrid(group.color || "");
     picker._updatePreview();
+    picker.hidden = false;
     form.hidden = false;
   }
 

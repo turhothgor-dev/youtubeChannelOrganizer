@@ -851,6 +851,11 @@ html[dark] .youtube-groups__icon-picker {
   gap: 10px;
 }
 
+.youtube-groups__icon-picker[hidden],
+.youtube-groups__icon-picker-form[hidden] {
+  display: none;
+}
+
 .youtube-groups__icon-picker-preview {
   display: flex;
   align-items: center;

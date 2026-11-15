@@ -1,6 +1,6 @@
 # Plan: GUI (1/4) · El selector de iconos se cierra del todo
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: revisión de usabilidad de la GUI pedida por la persona (2026-11-15), punto 1.
 
@@ -49,7 +49,7 @@ selector y no en quien lo abre):
 
 ## Tareas
 
-- [ ] T1 · `hideIconPicker()` y reglas `[hidden]` (ver **Contexto y decisión**) · Ficheros: `content.js`,
+- [x] T1 · `hideIconPicker()` y reglas `[hidden]` (ver **Contexto y decisión**) · Ficheros: `content.js`,
   `content.css` · Test: `make lint` (0 avisos), `make test` y a mano V1–V2.
 
 ### Verificación manual (Firefox con sesión iniciada, extensión cargada en `about:debugging`)
@@ -83,3 +83,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | fix: ocultar del todo el selector de iconos | `hideIconPicker()` y reglas `[hidden]`; lint y tests en verde; V1–V2 pendientes a mano |
