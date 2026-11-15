@@ -848,8 +848,6 @@
             <h2 class="youtube-groups__title">YouTube Groups</h2>
             <button class="youtube-groups__collapse-button" type="button" aria-expanded="true" title="Minimizar panel" disabled>−</button>
           </div>
-          <button class="youtube-groups__play-visible action-button secondary-button" type="button">Reproducir lo visible</button>
-          <p class="youtube-groups__play-visible-message" aria-live="polite"></p>
           <section class="youtube-groups__current-channel" hidden>
             <h3 class="youtube-groups__section-title">Canal actual</h3>
             <p class="youtube-groups__channel-name"></p>
@@ -870,6 +868,8 @@
           </section>
           <details class="youtube-groups__playlists">
             <summary>Listas</summary>
+            <button class="youtube-groups__play-visible action-button secondary-button" type="button">Reproducir lo visible</button>
+            <p class="youtube-groups__play-visible-message" aria-live="polite"></p>
             <form class="youtube-groups__playlist-form">
               <input class="youtube-groups__playlist-input" type="text" name="playlistName" placeholder="Nueva lista" maxlength="80" required>
               <button class="youtube-groups__playlist-create-button action-button primary-button" type="submit">Crear</button>
