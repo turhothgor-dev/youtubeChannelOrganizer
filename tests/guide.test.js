@@ -143,14 +143,14 @@ test("getCreateTarget decide dónde se crea según selección y columna", () => 
   assert.deepStrictEqual(plain(G.getCreateTarget(groups, [], [])), {
     parentId: null,
     parentName: null,
-    label: "+ Crear grupo",
-    ariaLabel: null,
+    label: "+ Grupo",
+    title: "Crear grupo",
   });
   assert.deepStrictEqual(plain(G.getCreateTarget(groups, ["a"], [])), {
     parentId: "a",
     parentName: "A",
-    label: "+ Crear subgrupo en «A»",
-    ariaLabel: "Crear subgrupo en A",
+    label: "+ Subgrupo",
+    title: "Crear subgrupo en «A»",
   });
   assert.strictEqual(
     G.getCreateTarget(groups, ["a"], ["group:b"]).parentId,
@@ -160,18 +160,20 @@ test("getCreateTarget decide dónde se crea según selección y columna", () => 
     G.getCreateTarget(groups, [], ["group:a", `channel:${X}`, "group:a1"]),
   );
   assert.strictEqual(multi.parentId, "a1");
+  assert.strictEqual(multi.label, "+ Subgrupo");
   assert.strictEqual(
-    multi.label,
-    "+ Crear subgrupo en «A1» (último seleccionado)",
+    multi.title,
+    "Crear subgrupo en «A1» (último seleccionado)",
   );
-  assert.strictEqual(multi.ariaLabel, "Crear subgrupo en A1");
+  const stale = G.getCreateTarget(groups, [], ["group:a", "group:zzz"]);
+  assert.strictEqual(stale.label, "+ Subgrupo");
+  assert.strictEqual(stale.title, "Crear subgrupo en «A»");
+  const onlyChannels = G.getCreateTarget(groups, [], [`channel:${X}`]);
+  assert.strictEqual(onlyChannels.label, "+ Grupo");
+  assert.strictEqual(onlyChannels.title, "Crear grupo");
   assert.strictEqual(
-    G.getCreateTarget(groups, [], ["group:a", "group:zzz"]).label,
-    "+ Crear subgrupo en «A»",
-  );
-  assert.strictEqual(
-    G.getCreateTarget(groups, [], [`channel:${X}`]).label,
-    "+ Crear grupo",
+    G.getCreateTarget(groups, ["a"], [`channel:${X}`]).label,
+    "+ Subgrupo",
   );
   assert.strictEqual(
     G.getCreateTarget(groups, ["a"], [`channel:${X}`]).parentId,

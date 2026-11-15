@@ -163,7 +163,7 @@ const YouTubeGroupsGuide = (() => {
    * @param {*} path Ruta actual de la guía.
    * @param {*} selection Claves de la selección activa.
    * @returns {{parentId: (string|null), parentName: (string|null),
-   *   label: string, ariaLabel: (string|null)}}
+   *   label: string, title: string}}
    */
   function getCreateTarget(groups, path, selection) {
     const anchors = (Array.isArray(selection) ? selection : [])
@@ -176,8 +176,8 @@ const YouTubeGroupsGuide = (() => {
       return {
         parentId: anchor.id,
         parentName: anchor.name,
-        label: `+ Crear subgrupo en «${anchor.name}»${suffix}`,
-        ariaLabel: `Crear subgrupo en ${anchor.name}`,
+        label: "+ Subgrupo",
+        title: `Crear subgrupo en «${anchor.name}»${suffix}`,
       };
     }
     const column = getGuideColumn(groups, path);
@@ -185,15 +185,15 @@ const YouTubeGroupsGuide = (() => {
       return {
         parentId: column.parent.id,
         parentName: column.parent.name,
-        label: `+ Crear subgrupo en «${column.parent.name}»`,
-        ariaLabel: `Crear subgrupo en ${column.parent.name}`,
+        label: "+ Subgrupo",
+        title: `Crear subgrupo en «${column.parent.name}»`,
       };
     }
     return {
       parentId: null,
       parentName: null,
-      label: "+ Crear grupo",
-      ariaLabel: null,
+      label: "+ Grupo",
+      title: "Crear grupo",
     };
   }
 

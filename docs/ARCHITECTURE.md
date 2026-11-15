@@ -112,8 +112,8 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   `margin-left` a `ytd-page-manager#page-manager`; un `click` en captura neutraliza ☰ (`#guide-button`) mientras la
   clase está puesta. En `/watch` y por debajo de 792 px YouTube se comporta como siempre. La sección muestra una sola columna (`getGuideColumn`) que se desplaza con animación al entrar en cualquier
   grupo o subgrupo ("›" en todos; una subcolumna vacía dice "Sin subgrupos") o volver ("‹"), con un botón de crear
-  que depende de la selección (`getCreateTarget`: "+ Crear grupo" en la raíz, subgrupo del grupo seleccionado o,
-  con varios, del último pulsado; sin selección en una subcolumna, del padre de la columna; tras crear un subgrupo
+  que depende de la selección (`getCreateTarget`, etiqueta "+ Grupo" o "+ Subgrupo" y destino completo en `title` y `aria-label`:
+  grupo en la raíz, subgrupo del grupo seleccionado o, con varios, del último pulsado; sin selección en una subcolumna, del padre de la columna; tras crear un subgrupo
   se pasa a la columna del padre con `findGuidePath`) (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
   (`isChannelListOpen`, abierta si contiene un canal seleccionado). No hay elemento "Todos": grupos y canales alternan con `toggleSelectionItem`. No edita ni borra

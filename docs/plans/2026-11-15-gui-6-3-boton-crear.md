@@ -1,6 +1,6 @@
 # Plan: GUI 6 (3/3) · Texto corto en el botón de crear
 
-**Estado:** aprobado (2026-11-15)
+**Estado:** hecho
 
 Issue: feedback de la persona tras probar la serie `2026-11-15-gui-5-*` en Firefox (2026-11-15), punto 3.
 
@@ -31,7 +31,7 @@ columna del padre) no cambia.
 
 ## Tareas
 
-- [ ] T1 · Textos nuevos en `getCreateTarget`, su uso en `content.js` y `docs/ARCHITECTURE.md` al día (flujo de la guía:
+- [x] T1 · Textos nuevos en `getCreateTarget`, su uso en `content.js` y `docs/ARCHITECTURE.md` al día (flujo de la guía:
   "+ Grupo"/"+ Subgrupo" con el destino en `title`); estado de este plan a `hecho` · Ficheros: `modules/guide.js`,
   `tests/guide.test.js`, `content.js`, `docs/ARCHITECTURE.md`, este plan · Test: los casos de la tabla (incluido que
   solo canales seleccionados da "+ Grupo" en la raíz y "+ Subgrupo" del padre en una subcolumna, y que un ancla
@@ -65,3 +65,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-15 | T1 | `feat: texto corto en el botón de crear` | Etiqueta "+ Grupo"/"+ Subgrupo"; destino en `title` y `aria-label`. V1 manual pendiente. |

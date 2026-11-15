@@ -1708,8 +1708,8 @@
   let guideCreateTarget = {
     parentId: null,
     parentName: null,
-    label: "+ Crear grupo",
-    ariaLabel: null,
+    label: "+ Grupo",
+    title: "Crear grupo",
   };
 
   /**
@@ -2015,12 +2015,8 @@
     back.hidden = !column.parent;
     title.textContent = column.parent ? column.parent.name : "YouTube Groups";
     create.textContent = guideCreateTarget.label;
-    create.title = guideCreateTarget.label;
-    if (guideCreateTarget.ariaLabel) {
-      create.setAttribute("aria-label", guideCreateTarget.ariaLabel);
-    } else {
-      create.removeAttribute("aria-label");
-    }
+    create.title = guideCreateTarget.title;
+    create.setAttribute("aria-label", guideCreateTarget.title);
 
     const clear = section.querySelector(".youtube-groups__guide-clear");
     clear.hidden = activeSelection.length === 0;
