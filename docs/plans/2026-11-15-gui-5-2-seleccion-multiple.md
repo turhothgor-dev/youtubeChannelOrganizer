@@ -73,7 +73,7 @@ verde.
   `watch` → `true`, en `subscriptions` → `false`, quitar o igual → `false`;
   `parsePendingSelection(serializePendingSelection(s, t), t + 1000)` devuelve `s`; `null` con `t + 31000`, futuro,
   JSON roto, `version: 1`, selección vacía.
-- [ ] T2 · `content.js` con selección múltiple (ver **Decisiones**), `matchesGroupFilter` con `hasFilter`,
+- [x] T2 · `content.js` con selección múltiple (ver **Decisiones**), `matchesGroupFilter` con `hasFilter`,
   `isChannelListOpen` con la selección, y quitar de `filter.js` las funciones antiguas con sus tests (cambio
   intencionado) · Ficheros: `content.js`, `modules/filter.js`, `modules/visibility.js`, `modules/guide.js`,
   `tests/filter.test.js`, `tests/visibility.test.js`, `tests/guide.test.js` · Test: `matchesGroupFilter` cubre los
@@ -134,3 +134,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-15 | T1 | `feat: funciones de selección múltiple en filter.js` | Funciones nuevas y tests; las antiguas se quitan en T2. |
+| 2026-11-15 | T2 | `feat: content.js con selección múltiple y quitar el filtro único` | `content.js`, `matchesGroupFilter` (`hasFilter`) y `isChannelListOpen` (selección); funciones y tests antiguos fuera de `filter.js`. Pendiente V1, V2, V4, V5 a mano. |

@@ -126,118 +126,11 @@ test("resolveFilterUrls con canal: subgrupo, huérfano y con parámetros", () =>
   );
 });
 
-test("isFilterOnRemovedGroup solo es cierto para un grupo quitado", () => {
+test("las constantes del filtro pendiente se conservan", () => {
   const { YouTubeGroupsFilter: F } = loadModules();
 
-  assert.strictEqual(
-    F.isFilterOnRemovedGroup({ type: "group", id: "a" }, ["a", "b"]),
-    true,
-  );
-  assert.strictEqual(
-    F.isFilterOnRemovedGroup({ type: "group", id: "a" }, new Set(["b"])),
-    false,
-  );
-  assert.strictEqual(
-    F.isFilterOnRemovedGroup({ type: "channel", url: X }, ["a"]),
-    false,
-  );
-  assert.strictEqual(F.isFilterOnRemovedGroup(F.ALL_FILTER, ["a"]), false);
-});
-
-test("toggleFilter alterna con selección única", () => {
-  const { YouTubeGroupsFilter: F } = loadModules();
-  const a = { type: "group", id: "a" };
-  const b = { type: "group", id: "b" };
-  const channel = { type: "channel", url: X, name: "X" };
-
-  assert.deepStrictEqual(plain(F.toggleFilter(F.ALL_FILTER, a)), a);
-  assert.deepStrictEqual(plain(F.toggleFilter(a, a)), { type: "all" });
-  assert.deepStrictEqual(plain(F.toggleFilter(a, b)), b);
-  assert.deepStrictEqual(plain(F.toggleFilter(a, channel)), channel);
-  assert.deepStrictEqual(
-    plain(F.toggleFilter(channel, { type: "channel", url: `${X}?a=1` })),
-    { type: "all" },
-  );
-  assert.deepStrictEqual(
-    plain(F.toggleFilter(channel, { type: "group", id: X })),
-    { type: "group", id: X },
-  );
-  assert.deepStrictEqual(plain(F.toggleFilter(a, { type: "nope" })), {
-    type: "all",
-  });
-  assert.deepStrictEqual(plain(F.toggleFilter(a, null)), { type: "all" });
-});
-
-test("toggleFilter no muta el filtro actual", () => {
-  const { YouTubeGroupsFilter: F } = loadModules();
-  const current = { type: "group", id: "a" };
-  const before = structuredClone(current);
-
-  F.toggleFilter(current, { type: "group", id: "b" });
-  F.toggleFilter(current, current);
-
-  assert.deepStrictEqual(current, before);
-});
-
-test("shouldNavigateToSubscriptions solo navega con filtro fuera de suscripciones", () => {
-  const { YouTubeGroupsFilter: F } = loadModules();
-  const group = { type: "group", id: "a" };
-  const channel = { type: "channel", url: X };
-
-  for (const filter of [group, channel]) {
-    assert.strictEqual(F.shouldNavigateToSubscriptions("home", filter), true);
-    assert.strictEqual(F.shouldNavigateToSubscriptions("watch", filter), true);
-    assert.strictEqual(
-      F.shouldNavigateToSubscriptions("subscriptions", filter),
-      false,
-    );
-  }
-  for (const page of ["home", "watch", "subscriptions"]) {
-    assert.strictEqual(
-      F.shouldNavigateToSubscriptions(page, F.ALL_FILTER),
-      false,
-    );
-  }
-});
-
-test("el filtro pendiente sobrevive a serializar y parsear", () => {
-  const { YouTubeGroupsFilter: F } = loadModules();
-  const t = 1763200000000;
-
-  for (const filter of [
-    { type: "group", id: "a" },
-    { type: "channel", url: X, name: "X" },
-  ]) {
-    const text = F.serializePendingFilter(filter, t);
-    assert.deepStrictEqual(plain(F.parsePendingFilter(text, t + 1000)), filter);
-  }
   assert.strictEqual(F.PENDING_FILTER_KEY, "youtubeGroupsPendingFilter");
   assert.strictEqual(F.PENDING_MAX_AGE_MS, 30000);
-});
-
-test("parsePendingFilter rechaza lo caducado, futuro o inválido", () => {
-  const { YouTubeGroupsFilter: F } = loadModules();
-  const t = 1763200000000;
-  const text = F.serializePendingFilter({ type: "group", id: "a" }, t);
-
-  assert.strictEqual(F.parsePendingFilter(text, t + 31000), null);
-  assert.strictEqual(F.parsePendingFilter(text, t - 1), null);
-  assert.strictEqual(F.parsePendingFilter("{no json", t), null);
-  assert.strictEqual(
-    F.parsePendingFilter(
-      JSON.stringify({
-        version: 2,
-        filter: { type: "group", id: "a" },
-        createdAt: t,
-      }),
-      t,
-    ),
-    null,
-  );
-  assert.strictEqual(
-    F.parsePendingFilter(F.serializePendingFilter(F.ALL_FILTER, t), t),
-    null,
-  );
 });
 
 const GA = { type: "group", id: "a" };

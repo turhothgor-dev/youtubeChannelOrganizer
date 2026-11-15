@@ -54,7 +54,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   // Sin grupo activo, todo pasa
   assert.strictEqual(
     match({
-      activeGroupId: null,
+      hasFilter: false,
       channelUrls: urls,
       channelUrl: "x",
       hasVideoId: true,
@@ -64,7 +64,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   // Canales cargando, todo pasa
   assert.strictEqual(
     match({
-      activeGroupId: "g",
+      hasFilter: true,
       channelUrls: null,
       channelUrl: "x",
       hasVideoId: true,
@@ -74,7 +74,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   // Con canal, depende de la pertenencia
   assert.strictEqual(
     match({
-      activeGroupId: "g",
+      hasFilter: true,
       channelUrls: urls,
       channelUrl: "https://www.youtube.com/@a",
       hasVideoId: true,
@@ -83,7 +83,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   );
   assert.strictEqual(
     match({
-      activeGroupId: "g",
+      hasFilter: true,
       channelUrls: urls,
       channelUrl: "https://www.youtube.com/@b",
       hasVideoId: true,
@@ -93,7 +93,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   // Sin canal: con ID de vídeo no pasa; sin ID pasa
   assert.strictEqual(
     match({
-      activeGroupId: "g",
+      hasFilter: true,
       channelUrls: urls,
       channelUrl: "",
       hasVideoId: true,
@@ -102,7 +102,7 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   );
   assert.strictEqual(
     match({
-      activeGroupId: "g",
+      hasFilter: true,
       channelUrls: urls,
       channelUrl: null,
       hasVideoId: false,

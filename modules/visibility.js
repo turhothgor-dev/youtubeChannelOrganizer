@@ -23,20 +23,20 @@ const YouTubeGroupsVisibility = (() => {
   }
 
   /**
-   * Indica si una tarjeta pasa el filtro de grupo. Sin grupo activo o con los
-   * canales aún cargando, pasa. Con canal, depende de su pertenencia. Sin
+   * Indica si una tarjeta pasa el filtro de la selección. Sin selección o con
+   * los canales aún cargando, pasa. Con canal, depende de su pertenencia. Sin
    * canal, no pasa si la tarjeta ya tiene ID de vídeo (ya está pintada).
    *
-   * @param {{activeGroupId: (string|null), channelUrls: (Set<string>|null), channelUrl: (string|null|undefined), hasVideoId: boolean}} state - Estado.
+   * @param {{hasFilter: boolean, channelUrls: (Set<string>|null), channelUrl: (string|null|undefined), hasVideoId: boolean}} state - Estado.
    * @returns {boolean}
    */
   function matchesGroupFilter({
-    activeGroupId,
+    hasFilter,
     channelUrls,
     channelUrl,
     hasVideoId,
   }) {
-    if (activeGroupId === null || channelUrls === null) {
+    if (!hasFilter || channelUrls === null) {
       return true;
     }
     if (channelUrl) {

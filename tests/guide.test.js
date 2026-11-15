@@ -114,25 +114,32 @@ test("enterGuideGroup y leaveGuideGroup", () => {
   assert.deepStrictEqual(plain(G.leaveGuideGroup([])), []);
 });
 
-test("isChannelListOpen aplica override, canal activo y profundidad", () => {
+test("isChannelListOpen aplica override, selección y profundidad", () => {
   const { YouTubeGroupsGuide: G } = loadModules();
   const item = { id: "a", channels: [{ name: "X", url: X }] };
   const none = new Map();
 
-  assert.strictEqual(G.isChannelListOpen(none, item, 0, null), false);
-  assert.strictEqual(G.isChannelListOpen(none, item, 1, null), true);
+  assert.strictEqual(G.isChannelListOpen(none, item, 0, []), false);
+  assert.strictEqual(G.isChannelListOpen(none, item, 1, []), true);
   assert.strictEqual(
-    G.isChannelListOpen(new Map([["a", true]]), item, 0, null),
+    G.isChannelListOpen(new Map([["a", true]]), item, 0, []),
     true,
   );
   assert.strictEqual(
-    G.isChannelListOpen(new Map([["a", false]]), item, 1, null),
+    G.isChannelListOpen(new Map([["a", false]]), item, 1, []),
     false,
   );
-  assert.strictEqual(G.isChannelListOpen(none, item, 0, `channel:${X}`), true);
-  assert.strictEqual(G.isChannelListOpen(none, item, 0, "group:a"), false);
   assert.strictEqual(
-    G.isChannelListOpen(new Map([["a", false]]), item, 0, `channel:${X}`),
+    G.isChannelListOpen(none, item, 0, [`channel:${X}`]),
+    true,
+  );
+  assert.strictEqual(
+    G.isChannelListOpen(none, item, 0, ["group:b", `channel:${X}`]),
+    true,
+  );
+  assert.strictEqual(G.isChannelListOpen(none, item, 0, ["group:a"]), false);
+  assert.strictEqual(
+    G.isChannelListOpen(new Map([["a", false]]), item, 0, [`channel:${X}`]),
     false,
   );
 });

@@ -117,16 +117,18 @@ const YouTubeGroupsGuide = (() => {
    * @param {Map<string, boolean>} overrides Elección manual por id.
    * @param {{id: string, channels: Array<{url: string}>}} item Elemento.
    * @param {number} depth Profundidad de la columna (0 en la raíz).
-   * @param {string|null} activeKey Clave del filtro activo.
+   * @param {string[]} selection Claves de la selección activa.
    * @returns {boolean}
    */
-  function isChannelListOpen(overrides, item, depth, activeKey) {
+  function isChannelListOpen(overrides, item, depth, selection) {
     if (overrides && overrides.has(item.id)) {
       return Boolean(overrides.get(item.id));
     }
     if (
-      activeKey &&
-      item.channels.some((channel) => `channel:${channel.url}` === activeKey)
+      Array.isArray(selection) &&
+      item.channels.some((channel) =>
+        selection.includes(`channel:${channel.url}`),
+      )
     ) {
       return true;
     }

@@ -119,97 +119,6 @@ const YouTubeGroupsFilter = (() => {
   }
 
   /**
-   * Indica si el filtro es de un grupo que se ha quitado.
-   *
-   * @param {*} filter Filtro activo.
-   * @param {Iterable<string>} removedIds Ids de los grupos quitados.
-   * @returns {boolean}
-   */
-  function isFilterOnRemovedGroup(filter, removedIds) {
-    const normalized = normalizeFilter(filter);
-    if (normalized.type !== "group" || !removedIds) {
-      return false;
-    }
-    for (const id of removedIds) {
-      if (id === normalized.id) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Selección única que alterna: pulsar lo elegido lo deselecciona.
-   *
-   * @param {*} current Filtro actual.
-   * @param {*} next Filtro pulsado.
-   * @returns {Object} El filtro resultante (ALL_FILTER si se deselecciona).
-   */
-  function toggleFilter(current, next) {
-    const normalizedNext = normalizeFilter(next);
-    const nextKey = getFilterKey(normalizedNext);
-    if (nextKey === null || nextKey === getFilterKey(current)) {
-      return ALL_FILTER;
-    }
-    return normalizedNext;
-  }
-
-  /**
-   * Indica si hay que pasar a /feed/subscriptions para aplicar el filtro.
-   *
-   * @param {string} pageType Tipo de página (YouTubeGroupsPages.getPageType).
-   * @param {*} filter Filtro resultante.
-   * @returns {boolean}
-   */
-  function shouldNavigateToSubscriptions(pageType, filter) {
-    return getFilterKey(filter) !== null && pageType !== "subscriptions";
-  }
-
-  /**
-   * Serializa el filtro pendiente para sessionStorage (ADR 0007).
-   *
-   * @param {*} filter Filtro a traspasar.
-   * @param {number} now Marca de tiempo actual (ms).
-   * @returns {string} Texto JSON.
-   */
-  function serializePendingFilter(filter, now) {
-    return JSON.stringify({
-      version: 1,
-      filter: normalizeFilter(filter),
-      createdAt: now,
-    });
-  }
-
-  /**
-   * Lee el filtro pendiente guardado en sessionStorage.
-   *
-   * @param {string} text Texto guardado.
-   * @param {number} now Marca de tiempo actual (ms).
-   * @returns {Object|null} El filtro normalizado, o null si no es válido,
-   *   es "todos" o ha caducado.
-   */
-  function parsePendingFilter(text, now) {
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return null;
-    }
-    if (!data || typeof data !== "object" || data.version !== 1) {
-      return null;
-    }
-    if (typeof data.createdAt !== "number") {
-      return null;
-    }
-    const age = now - data.createdAt;
-    if (!(age >= 0 && age <= PENDING_MAX_AGE_MS)) {
-      return null;
-    }
-    const filter = normalizeFilter(data.filter);
-    return filter.type === "all" ? null : filter;
-  }
-
-  /**
    * Convierte una clave de selección en un filtro normalizado.
    *
    * @param {*} key Clave "group:<id>" o "channel:<url>".
@@ -374,10 +283,5 @@ const YouTubeGroupsFilter = (() => {
     normalizeFilter,
     getFilterKey,
     resolveFilterUrls,
-    isFilterOnRemovedGroup,
-    toggleFilter,
-    shouldNavigateToSubscriptions,
-    serializePendingFilter,
-    parsePendingFilter,
   };
 })();

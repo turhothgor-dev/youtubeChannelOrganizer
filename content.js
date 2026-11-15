@@ -742,35 +742,33 @@
     });
 
   const GROUPS_PANEL_ID = "youtube-groups-panel";
-  let activeFilter = YouTubeGroupsFilter.ALL_FILTER;
-  let activeGroupChannelUrls = null;
+  /** Claves de la selección activa (`[]` es "todos"). */
+  let activeSelection = [];
+  /** Unión de los canales de la selección (`null` sin selección o cargando). */
+  let activeSelectionUrls = null;
   let filterUpdateVersion = 0;
 
   /**
-   * Clave del filtro activo (`null` si es "todos").
-   * @returns {string|null}
+   * Cambia la selección activa y la aplica. No hace nada si es igual,
+   * elemento a elemento.
+   * @param {unknown} selection - Selección (se normaliza).
    */
-  function getActiveFilterKey() {
-    return YouTubeGroupsFilter.getFilterKey(activeFilter);
-  }
-
-  /**
-   * Cambia el filtro activo y lo aplica. No hace nada si la clave no cambia.
-   * @param {unknown} filter - Filtro (se normaliza).
-   */
-  function setActiveFilter(filter) {
-    const next = YouTubeGroupsFilter.normalizeFilter(filter);
-    if (YouTubeGroupsFilter.getFilterKey(next) === getActiveFilterKey()) {
+  function setActiveSelection(selection) {
+    const next = YouTubeGroupsFilter.normalizeSelection(selection);
+    if (
+      next.length === activeSelection.length &&
+      next.every((key, index) => key === activeSelection[index])
+    ) {
       return;
     }
 
-    activeFilter = next;
-    // Sin filtro, no quedan URLs de un filtro anterior
-    if (next.type === "all") {
-      activeGroupChannelUrls = null;
+    activeSelection = next;
+    // Sin selección, no quedan URLs de una selección anterior
+    if (next.length === 0) {
+      activeSelectionUrls = null;
     }
 
-    refreshActiveFilter();
+    refreshActiveSelection();
 
     renderGroupsPanel().catch((error) => {
       console.error(
@@ -781,17 +779,12 @@
   }
 
   /**
-   * Reacciona a que se hayan quitado grupos: si el filtro estaba en uno de
-   * ellos vuelve a "todos"; si no, reaplica el filtro.
-   * @param {string[]} removedIds - Ids de los grupos quitados.
+   * Reacciona a que se hayan quitado grupos: reaplica la selección, que
+   * descarta los elementos que ya no existen.
    * @returns {Promise<void>}
    */
-  async function handleGroupsRemoved(removedIds) {
-    if (YouTubeGroupsFilter.isFilterOnRemovedGroup(activeFilter, removedIds)) {
-      setActiveFilter(YouTubeGroupsFilter.ALL_FILTER);
-    } else {
-      await refreshActiveFilter();
-    }
+  async function handleGroupsRemoved() {
+    await refreshActiveSelection();
   }
 
   /**
@@ -909,9 +902,8 @@
       }
       applyButton.disabled = true;
       try {
-        const { removedGroupIds } =
-          await YouTubeGroups.cleanupGroups(getChosen());
-        await handleGroupsRemoved(removedGroupIds);
+        await YouTubeGroups.cleanupGroups(getChosen());
+        await handleGroupsRemoved();
         await renderGroupsPanel();
         await analyze();
         message.textContent = "Limpieza hecha.";
@@ -1296,7 +1288,7 @@
       try {
         await setChannelGroups(channel, selectedGroupIds);
         await renderGroupsPanel();
-        await refreshActiveFilter();
+        await refreshActiveSelection();
 
         currentChannelError.textContent = "Canales asignados correctamente";
         setTimeout(() => {
@@ -1570,8 +1562,8 @@
       return;
     }
     try {
-      const removedIds = await deleteGroup(group.id);
-      await handleGroupsRemoved(removedIds);
+      await deleteGroup(group.id);
+      await handleGroupsRemoved();
       await renderGroupsPanel();
     } catch (exception) {
       alert(exception.message);
@@ -1604,33 +1596,34 @@
   let guideGroups = [];
 
   /**
-   * Elige un filtro desde la guía: alterna (clic sobre lo elegido lo quita).
+   * Añade o quita un elemento de la selección desde la guía.
    * @param {Object} filter - Filtro pulsado.
    */
-  function selectFilter(filter) {
-    const next = YouTubeGroupsFilter.toggleFilter(activeFilter, filter);
-    setActiveFilter(next);
+  function toggleSelectionItem(filter) {
+    const previous = activeSelection;
+    const next = YouTubeGroupsFilter.toggleSelection(previous, filter);
+    setActiveSelection(next);
 
     const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
-    if (YouTubeGroupsFilter.shouldNavigateToSubscriptions(pageType, next)) {
+    if (YouTubeGroupsFilter.shouldNavigateOnSelect(pageType, previous, next)) {
       navigateToSubscriptions(next);
     }
   }
 
   /**
-   * Lleva a `/feed/subscriptions` conservando el filtro por si la página se
-   * recarga entera (ADR 0007).
-   * @param {Object} filter - Filtro ya elegido.
+   * Lleva a `/feed/subscriptions` conservando la selección por si la página
+   * se recarga entera (ADR 0009).
+   * @param {string[]} selection - Selección ya elegida.
    */
-  function navigateToSubscriptions(filter) {
+  function navigateToSubscriptions(selection) {
     try {
       sessionStorage.setItem(
         YouTubeGroupsFilter.PENDING_FILTER_KEY,
-        YouTubeGroupsFilter.serializePendingFilter(filter, Date.now()),
+        YouTubeGroupsFilter.serializePendingSelection(selection, Date.now()),
       );
     } catch (error) {
       console.warn(
-        "[YouTube Groups] No se pudo guardar el filtro pendiente",
+        "[YouTube Groups] No se pudo guardar la selección pendiente",
         error,
       );
     }
@@ -1664,9 +1657,9 @@
       return;
     }
 
-    const pending = YouTubeGroupsFilter.parsePendingFilter(text, Date.now());
+    const pending = YouTubeGroupsFilter.parsePendingSelection(text, Date.now());
     if (pending) {
-      setActiveFilter(pending);
+      setActiveSelection(pending);
     }
   }
 
@@ -1716,7 +1709,6 @@
    * @returns {HTMLElement} Contenedor de la fila.
    */
   function createGuideRow(groups, item, depth) {
-    const activeKey = getActiveFilterKey();
     const wrapper = document.createElement("div");
     wrapper.className = "youtube-groups__guide-group";
 
@@ -1729,7 +1721,7 @@
       guideChannelOverrides,
       item,
       depth,
-      activeKey,
+      activeSelection,
     );
 
     const toggle = document.createElement("button");
@@ -1748,9 +1740,9 @@
 
     const main = createGuideButton(
       `${item.name} (${item.channels.length})`,
-      activeKey === `group:${item.id}`,
+      activeSelection.includes(`group:${item.id}`),
       createGroupMark(groups, item.id, 24),
-      () => selectFilter({ type: "group", id: item.id }),
+      () => toggleSelectionItem({ type: "group", id: item.id }),
     );
     row.append(toggle, main);
 
@@ -1774,10 +1766,10 @@
     for (const channel of item.channels) {
       const channelButton = createGuideButton(
         channel.name,
-        activeKey === `channel:${channel.url}`,
+        activeSelection.includes(`channel:${channel.url}`),
         null,
         () =>
-          selectFilter({
+          toggleSelectionItem({
             type: "channel",
             url: channel.url,
             name: channel.name,
@@ -2581,7 +2573,7 @@
       try {
         await setChannelGroups(channel, selectedGroupIds);
         await renderGroupsPanel();
-        await refreshActiveFilter();
+        await refreshActiveSelection();
         if (submitOpenId === subscriptionDropdownOpenCount) {
           form.hidden = true;
         }
@@ -3157,8 +3149,8 @@
    */
   function cardMatchesFilter(card) {
     return YouTubeGroupsVisibility.matchesGroupFilter({
-      activeGroupId: getActiveFilterKey(),
-      channelUrls: activeGroupChannelUrls,
+      hasFilter: activeSelection.length > 0,
+      channelUrls: activeSelectionUrls,
       channelUrl: card.dataset.youtubeGroupsChannelUrl,
       hasVideoId: card.hasAttribute(VIDEO_ID_ATTRIBUTE),
     });
@@ -3274,41 +3266,42 @@
     applyVisibilityToAllCards();
   }
 
-  async function refreshActiveFilter() {
+  async function refreshActiveSelection() {
     const updateVersion = ++filterUpdateVersion;
-    const filter = activeFilter;
-    const activeKey = getActiveFilterKey();
+    const selection = activeSelection;
 
-    // Sin filtro activo no hay URLs que aplicar
-    if (activeKey === null) {
-      activeGroupChannelUrls = null;
+    // Sin selección no hay URLs que aplicar
+    if (selection.length === 0) {
+      activeSelectionUrls = null;
       showAllVideoCards();
       return;
     }
 
-    // Con grupo activo no se toca el filtro actual hasta tener los grupos,
+    // Con selección no se toca el filtro actual hasta tener los grupos,
     // para no mostrar todas las tarjetas mientras tanto.
     try {
       const groups = await getGroups();
       if (
         updateVersion !== filterUpdateVersion ||
-        activeKey !== getActiveFilterKey()
+        selection !== activeSelection
       ) {
         return;
       }
 
-      // Canales del grupo (y descendientes) o del canal activo
-      const resolved = YouTubeGroupsFilter.resolveFilterUrls(groups, filter);
-      if (resolved.status === "missing") {
+      // Unión de los canales de lo seleccionado que sigue existiendo
+      const resolved = YouTubeGroupsFilter.resolveSelection(groups, selection);
+      if (resolved.selection.length !== selection.length) {
         console.warn(
-          "[YouTube Groups][FILTER] Filtro activo no encontrado",
-          activeKey,
+          "[YouTube Groups][FILTER] Elementos del filtro no encontrados",
+          selection.filter((key) => !resolved.selection.includes(key)),
         );
-        setActiveFilter(YouTubeGroupsFilter.ALL_FILTER);
+        // El cambio de selección dispara su propio refresco (con lo que
+        // queda, o mostrando todo si no queda nada).
+        setActiveSelection(resolved.selection);
         return;
       }
 
-      activeGroupChannelUrls = resolved.status === "ok" ? resolved.urls : null;
+      activeSelectionUrls = resolved.urls;
       filterAllDetectedCards();
     } catch (error) {
       console.error(
@@ -3456,7 +3449,7 @@
     clearPendingFilter();
     detectedCards = new WeakMap();
     scanDocument();
-    refreshActiveFilter();
+    refreshActiveSelection();
     renderGroupsPanel().catch((error) => {
       console.error(
         "[YouTube Groups] No se pudo actualizar el panel de grupos",
@@ -3467,7 +3460,7 @@
 
   scanDocument();
   consumePendingFilter();
-  refreshActiveFilter();
+  refreshActiveSelection();
   renderGroupsPanel().catch((error) => {
     console.error(
       "[YouTube Groups] No se pudo cargar el panel de grupos",
@@ -3764,7 +3757,7 @@
           applySidebarState();
           applyVisibilityToAllCards();
         } else if (name === "groups") {
-          refreshActiveFilter().catch((error) => {
+          refreshActiveSelection().catch((error) => {
             console.error(
               "[YouTube Groups] No se pudo refrescar el filtro",
               error,
