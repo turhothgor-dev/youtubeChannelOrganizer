@@ -1867,7 +1867,75 @@
    * @param {Object} filter - Filtro pulsado.
    */
   function selectFilter(filter) {
-    setActiveFilter(YouTubeGroupsFilter.toggleFilter(activeFilter, filter));
+    const next = YouTubeGroupsFilter.toggleFilter(activeFilter, filter);
+    setActiveFilter(next);
+
+    const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
+    if (YouTubeGroupsFilter.shouldNavigateToSubscriptions(pageType, next)) {
+      navigateToSubscriptions(next);
+    }
+  }
+
+  /**
+   * Lleva a `/feed/subscriptions` conservando el filtro por si la página se
+   * recarga entera (ADR 0007).
+   * @param {Object} filter - Filtro ya elegido.
+   */
+  function navigateToSubscriptions(filter) {
+    try {
+      sessionStorage.setItem(
+        YouTubeGroupsFilter.PENDING_FILTER_KEY,
+        YouTubeGroupsFilter.serializePendingFilter(filter, Date.now()),
+      );
+    } catch (error) {
+      console.warn(
+        "[YouTube Groups] No se pudo guardar el filtro pendiente",
+        error,
+      );
+    }
+
+    const link = document.querySelector(
+      'ytd-guide-renderer a[href="/feed/subscriptions"], ytd-mini-guide-renderer a[href="/feed/subscriptions"]',
+    );
+    if (link) {
+      link.click();
+    } else {
+      window.location.assign("/feed/subscriptions");
+    }
+  }
+
+  /**
+   * Lee y borra el filtro pendiente; lo aplica si estamos en suscripciones.
+   */
+  function consumePendingFilter() {
+    let text = null;
+    try {
+      text = sessionStorage.getItem(YouTubeGroupsFilter.PENDING_FILTER_KEY);
+      sessionStorage.removeItem(YouTubeGroupsFilter.PENDING_FILTER_KEY);
+    } catch (error) {
+      return;
+    }
+
+    if (
+      YouTubeGroupsPages.getPageType(window.location.pathname) !==
+      "subscriptions"
+    ) {
+      return;
+    }
+
+    const pending = YouTubeGroupsFilter.parsePendingFilter(text, Date.now());
+    if (pending) {
+      setActiveFilter(pending);
+    }
+  }
+
+  /** Borra el filtro pendiente de `sessionStorage`. */
+  function clearPendingFilter() {
+    try {
+      sessionStorage.removeItem(YouTubeGroupsFilter.PENDING_FILTER_KEY);
+    } catch (error) {
+      // sessionStorage no disponible: nada que borrar
+    }
   }
 
   /**
@@ -3509,6 +3577,7 @@
 
   // YouTube is a SPA: cards can be reutilizadas entre navegaciones internas.
   document.addEventListener("yt-navigate-finish", () => {
+    clearPendingFilter();
     detectedCards = new WeakMap();
     scanDocument();
     refreshActiveFilter();
@@ -3521,6 +3590,7 @@
   });
 
   scanDocument();
+  consumePendingFilter();
   refreshActiveFilter();
   renderGroupsPanel().catch((error) => {
     console.error(
