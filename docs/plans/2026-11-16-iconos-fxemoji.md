@@ -113,7 +113,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   `tests/icons.test.js`, más uno nuevo: "los ids guardados por la versión anterior siguen siendo válidos" (los 12
   ids escritos a mano: `isValidIconId` verdadero y `getIconGraphic` no nulo), y en `tests/groups.test.js` que
   `getGroupAppearance` de un grupo guardado con `icon: "tech"` y color sigue devolviendo `{ icon: "tech", color }`.
-- [ ] T4 · Color como aro con icono (decisión 3): `createGroupMark` y `updatePreview` del selector ponen el color
+- [x] T4 · Color como aro con icono (decisión 3): `createGroupMark` y `updatePreview` del selector ponen el color
   resultante en una propiedad CSS (`--yg-group-color`) en lugar de `style.color`; `content.css` dibuja el aro
   (`.youtube-groups__icon--ringed`), redondea el chip y, en `html[dark]`, le da un fondo claro tenue para que los
   emoji con tonos oscuros (p. ej. el mando de `gaming`) se distingan. El botón "Heredar" del selector no cambia ·
@@ -168,6 +168,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 | 2026-11-16 | T1 | `art` pasa de `u1F3A8-artistpalette` a `u1F58C-lowerleftpaintbrush` (🖌️) y `default` de `u1F3F7-label` (y su alternativa `u1F4C1-filefolder`) a `u1F5C0-folder` (🗀). Los tres traen `<style>`, fuentes embebidas o `<text>`, fuera de la lista blanca (decisión 4). Las tablas de T2/T3 usan estos ficheros. | Regla del plan: si el SVG elegido trae elementos fuera de la lista blanca, se elige otro emoji. | Persona (instrucciones de la tarea) |
 | 2026-11-16 | T1 | Los SVG de `vendor/fxemoji/` se guardan con fin de línea LF (los originales traen CRLF); el resto del contenido es idéntico. | Regla del proyecto: ficheros de texto con LF (`.gitattributes`). El test de T2 compara formas y atributos, no saltos de línea. | Persona (reglas de `AGENTS.md`) |
 | 2026-11-16 | T1 (corrección) y siguientes | La carpeta de los SVG pasa de `vendor/fxemoji/` a `third_party/fxemoji/` en todo el plan, el ADR 0013, `THIRD_PARTY_NOTICES.md`, `README.md` y `ignoreFiles` de `web-ext-config.mjs` (`third_party` en lugar de `vendor`). | `.gitignore` del kit ignora `vendor/` (regla de Composer) y los SVG no entraban en el commit de T1; se evita tocar un fichero del kit. | Delegada por la persona ("ejecuta el plan") |
+| 2026-11-16 | T4 | `paintAppearance` (vista previa del formulario de crear grupo de la guía) también pasa de `style.color` a `--yg-group-color` y `youtube-groups__icon--ringed`. | Usaba `style.color`, que ya no tiñe los emoji; sin el cambio el color no se vería en esa vista previa. | Delegada por la persona ("ejecuta el plan") |
 
 ## Registro
 
@@ -179,3 +180,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-16 | T1 (corrección) | `chore: mover los SVG de fxemoji a third_party/ para que git los siga` | `vendor/` está en `.gitignore`; carpeta renombrada a `third_party/` en SVG, plan, ADR 0013, avisos y `ignoreFiles`. |
 | 2026-11-16 | T2 | `chore: añadir los datos de fxemoji y el test que los compara con los SVG` | `modules/fxemoji-data.js` (12 iconos, congelados, con ficheros de los cambios aprobados), `tests/helpers/svg-shapes.js`, `tests/fxemoji.test.js`, carga en `manifest.json` y `load-modules.js`. `make test-affected` (189) y `make lint` correctos. |
 | 2026-11-16 | T3 | `feat: pintar los iconos de grupo con fxemoji` | `ICON_SET` con `codepoint`, `getIconGraphic` en lugar de `getIconPath`, `createIconSvg` con formas multicolor; tests de icons y groups actualizados. |
+| 2026-11-16 | T4 | `feat: mostrar el color del grupo como aro alrededor del icono` | `createGroupMark`, `updatePreview` y la vista previa del formulario de la guía usan `--yg-group-color` y `.youtube-groups__icon--ringed`; CSS con aro y fondo tenue en oscuro. `make lint` y `make test` (191) correctos; V1–V4 pendientes a mano. |

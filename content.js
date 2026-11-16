@@ -119,7 +119,8 @@
       const chip = document.createElement("span");
       chip.className = "youtube-groups__icon";
       if (appearance.color) {
-        chip.style.color = appearance.color;
+        chip.classList.add("youtube-groups__icon--ringed");
+        chip.style.setProperty("--yg-group-color", appearance.color);
       }
       chip.title = YouTubeGroupsIcons.getIconLabel(appearance.icon);
       chip.append(svg);
@@ -1794,7 +1795,15 @@
 
     function paintAppearance() {
       iconPreview.replaceChildren();
-      iconPreview.style.color = appearance.colorHex || "";
+      iconPreview.classList.toggle(
+        "youtube-groups__icon--ringed",
+        Boolean(appearance.iconId && appearance.colorHex),
+      );
+      if (appearance.colorHex) {
+        iconPreview.style.setProperty("--yg-group-color", appearance.colorHex);
+      } else {
+        iconPreview.style.removeProperty("--yg-group-color");
+      }
       const svg = appearance.iconId
         ? createIconSvg(appearance.iconId, 18)
         : null;
@@ -3982,7 +3991,8 @@
       const chip = document.createElement("span");
       chip.className = "youtube-groups__icon";
       if (selectedColorHex) {
-        chip.style.color = selectedColorHex;
+        chip.classList.add("youtube-groups__icon--ringed");
+        chip.style.setProperty("--yg-group-color", selectedColorHex);
       }
       chip.append(previewSvg);
       preview.appendChild(chip);

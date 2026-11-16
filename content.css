@@ -805,6 +805,16 @@ html[dark] .noaction-button {
   display: block;
 }
 
+/* El color del grupo no tiñe el emoji (multicolor): se muestra como aro */
+.youtube-groups__icon--ringed {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--yg-group-color, transparent);
+}
+
+html[dark] .youtube-groups__icon--ringed {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .youtube-groups__color-dot {
   display: inline-block;
   width: 10px;
