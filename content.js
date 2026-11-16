@@ -101,6 +101,15 @@
     }
   }
 
+  /** Lado en píxeles de los iconos de grupo según el sitio donde se pintan. */
+  const GROUP_ICON_SIZES = {
+    guide: 29,
+    choice: 19,
+    pickerGrid: 24,
+    pickerPreview: 29,
+    formPreview: 22,
+  };
+
   /**
    * Crea la marca de un grupo: el chip con su icono.
    * @param {Array<Object>} groups - Árbol de grupos.
@@ -1671,7 +1680,7 @@
     const main = createGuideButton(
       `${item.name} (${item.channels.length})`,
       activeSelection.includes(`group:${item.id}`),
-      createGroupMark(groups, item.id, 24),
+      createGroupMark(groups, item.id, GROUP_ICON_SIZES.guide),
       () => toggleSelectionItem({ type: "group", id: item.id }),
     );
     row.append(toggle, main);
@@ -1802,7 +1811,7 @@
       iconPreview.replaceChildren();
       setGroupBand(iconButton, appearance.colorHex);
       const svg = appearance.iconId
-        ? createIconSvg(appearance.iconId, 18)
+        ? createIconSvg(appearance.iconId, GROUP_ICON_SIZES.formPreview)
         : null;
       if (svg) {
         iconPreview.append(svg);
@@ -2243,7 +2252,7 @@
         );
         setGroupBand(label, labelAppearance ? labelAppearance.color : null);
 
-        const mark = createGroupMark(groups, group.id, 16);
+        const mark = createGroupMark(groups, group.id, GROUP_ICON_SIZES.choice);
         if (mark) {
           label.append(checkbox, mark, groupName);
         } else {
@@ -3911,7 +3920,7 @@
           "youtube-groups__icon-picker-option" +
           (selectedIconId === icon.id ? " selected" : "");
         btn.title = icon.label;
-        const iconSvg = createIconSvg(icon.id, 20);
+        const iconSvg = createIconSvg(icon.id, GROUP_ICON_SIZES.pickerGrid);
         if (iconSvg) {
           btn.append(iconSvg);
         }
@@ -3990,7 +3999,10 @@
         preview.appendChild(span);
         return;
       }
-      const previewSvg = createIconSvg(selectedIconId, 24);
+      const previewSvg = createIconSvg(
+        selectedIconId,
+        GROUP_ICON_SIZES.pickerPreview,
+      );
       if (!previewSvg) return;
       const chip = document.createElement("span");
       chip.className = "youtube-groups__icon";

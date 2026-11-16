@@ -84,7 +84,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   `.youtube-groups__group-band` · Ficheros: `content.js`, `content.css` · Test: `make lint` y `make test` en verde
   sin cambiar tests (la lógica de color de `modules/` no cambia); búsqueda sin resultados de `ringed` y `color-dot`
   en `content.js` y `content.css`; a mano V1–V4.
-- [ ] T2 · Iconos un 20 % más grandes (decisión 4): constante `GROUP_ICON_SIZES` en `content.js` usada en las cinco
+- [x] T2 · Iconos un 20 % más grandes (decisión 4): constante `GROUP_ICON_SIZES` en `content.js` usada en las cinco
   llamadas de la tabla; `.youtube-groups__icon` sin `width`/`height` fijos y
   `.youtube-groups__guide-form-icon-preview` a 22 px · Ficheros: `content.js`, `content.css` · Test: `make lint` y
   `make test`; a mano V5.
@@ -155,3 +155,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-16 | T1 | `feat: pintar el color del grupo como banda lateral y quitar aro, fondo y punto` | `setGroupBand` en guía, casillas, selector y formulario; sin tocar tests. V1–V4 pendientes a mano. |
+| 2026-11-16 | T2 | `feat: agrandar un 20 % los iconos de grupo` | `GROUP_ICON_SIZES` en las cinco llamadas; chip sin tamaño fijo; vista previa del formulario a 22 px. V5 pendiente a mano. |
