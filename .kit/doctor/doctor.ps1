@@ -72,7 +72,7 @@ if ($wslMatch.Success -and -not $NoDelegate) {
 # -----------------------------------------------------------------------------
 # Módulos → checks (alineado con manifest/kit.yaml; versión Windows)
 # -----------------------------------------------------------------------------
-$AllModules = @("core","kit-dev","adapter-claude-code","adapter-cline","adapter-continue","adapter-phpstorm","compose-base","devcontainer","ci-bitbucket","ci-github","mcp-atlassian","mcp-docs","mcp-db-local","mcp-playwright","gcloud-fixtures","subagents","provider-scaleway","preset-php-mysql-react","lang-python","lang-node","lang-php","frontend-react","frontend-qt6","svc-mysql","env-devcontainer","env-docker-only","env-native")
+$AllModules = @("core","kit-dev","adapter-claude-code","adapter-cline","adapter-continue","adapter-phpstorm","compose-base","devcontainer","ci-bitbucket","ci-github","mcp-atlassian","mcp-docs","mcp-db-local","mcp-playwright","gcloud-fixtures","subagents","provider-scaleway","preset-php-mysql-react","preset-webext","lang-python","lang-node","lang-php","frontend-react","frontend-qt6","svc-mysql","env-devcontainer","env-docker-only","env-native")
 
 $ModuleChecks = @{
   "core"                   = @("git","git-line-endings","copier","python3","markdownlint","pre-commit","disk-space")
@@ -90,6 +90,7 @@ $ModuleChecks = @{
   "gcloud-fixtures"        = @("gcloud-cli","gcloud-auth")
   "provider-scaleway"      = @("scaleway-key","scaleway-models")
   "preset-php-mysql-react" = @("wsl2","docker-cli","docker-desktop-wsl","compose-v2","node","node-version","ports-free")
+  "preset-webext"          = @("node","node-version","firefox")
   "ci-bitbucket" = @(); "ci-github" = @(); "subagents" = @()
   # Nuevos módulos modulares
   "lang-python"            = @("python-version")
@@ -480,6 +481,15 @@ function Check-phpstorm {
 function Check-node {
   if (Have node) { Record "node" "ok" ("Node " + (node -v)) }
   else { Record "node" "fail" "Node no está instalado. Recomendado un gestor de versiones (fnm) para respetar .nvmrc" "winget install --id Schniz.fnm -e" "medio" }
+}
+
+function Check-firefox {
+  $found = (Have firefox) -or
+           (Test-Path (Join-Path $env:ProgramFiles "Mozilla Firefox\firefox.exe")) -or
+           (Test-Path (Join-Path ${env:ProgramFiles(x86)} "Mozilla Firefox\firefox.exe")) -or
+           ($env:LOCALAPPDATA -and (Test-Path (Join-Path $env:LOCALAPPDATA "Mozilla Firefox\firefox.exe")))
+  if ($found) { Record "firefox" "ok" "Firefox detectado" }
+  else { Record "firefox" "warn" "Firefox no detectado: make up (web-ext run) lo necesita; lint, test y build no. Descárgalo en https://www.mozilla.org/firefox/new/" "" "manual" }
 }
 
 function Check-node-version {
