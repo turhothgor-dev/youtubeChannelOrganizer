@@ -14,6 +14,7 @@ export default {
     "ai",
     "docs",
     "tests",
+    "vendor",
     "web-ext-artifacts",
   ],
   build: {

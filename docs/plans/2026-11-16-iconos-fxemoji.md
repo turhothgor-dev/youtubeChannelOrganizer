@@ -1,6 +1,6 @@
 # Plan: iconos de grupo con Mozilla fxemoji
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-16)
 
 Issue: feature menor pedida por la persona (2026-11-16): usar los iconos de Mozilla fxemoji
 (<https://github.com/mozilla/fxemoji>) para los grupos en lugar de los actuales.
@@ -90,7 +90,7 @@ propuesto en `docs/adr/0013-iconos-fxemoji-empaquetados.md`.
 
 Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que la valida.
 
-- [ ] T1 · Copiar los 12 SVG de `svgs/FirefoxEmoji/` (rama `gh-pages`, sin modificarlos, con su nombre original)
+- [x] T1 · Copiar los 12 SVG de `svgs/FirefoxEmoji/` (rama `gh-pages`, sin modificarlos, con su nombre original)
   a `vendor/fxemoji/`; crear `THIRD_PARTY_NOTICES.md` (decisión 5) y la sección "Créditos" de `README.md`; añadir
   `vendor` a `ignoreFiles` de `web-ext-config.mjs` (`THIRD_PARTY_NOTICES.md` **no** se ignora) · Ficheros:
   `vendor/fxemoji/*.svg`, `THIRD_PARTY_NOTICES.md`, `README.md`, `web-ext-config.mjs` · Test: `make lint` y
@@ -165,6 +165,8 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-16 | T1 | `art` pasa de `u1F3A8-artistpalette` a `u1F58C-lowerleftpaintbrush` (🖌️) y `default` de `u1F3F7-label` (y su alternativa `u1F4C1-filefolder`) a `u1F5C0-folder` (🗀). Los tres traen `<style>`, fuentes embebidas o `<text>`, fuera de la lista blanca (decisión 4). Las tablas de T2/T3 usan estos ficheros. | Regla del plan: si el SVG elegido trae elementos fuera de la lista blanca, se elige otro emoji. | Persona (instrucciones de la tarea) |
+| 2026-11-16 | T1 | Los SVG de `vendor/fxemoji/` se guardan con fin de línea LF (los originales traen CRLF); el resto del contenido es idéntico. | Regla del proyecto: ficheros de texto con LF (`.gitattributes`). El test de T2 compara formas y atributos, no saltos de línea. | Persona (reglas de `AGENTS.md`) |
 
 ## Registro
 
@@ -172,3 +174,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-16 | T1 | `chore: copiar los SVG de fxemoji y añadir el aviso de licencia CC BY 4.0` | 12 SVG en `vendor/fxemoji/`, `THIRD_PARTY_NOTICES.md`, créditos en el README y `vendor` fuera del paquete. `make lint` y `make build` correctos; el paquete incluye el aviso y no `vendor/`. |
