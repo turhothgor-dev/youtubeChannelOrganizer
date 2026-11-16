@@ -1,6 +1,6 @@
 # Plan: color del grupo como banda lateral e iconos más grandes
 
-**Estado:** aprobado (2026-11-16)
+**Estado:** hecho
 
 Issue: opinión de la persona tras probar en Firefox la rama `iconos-fxemoji` (2026-11-16). Continúa el plan
 `docs/plans/2026-11-16-iconos-fxemoji.md` (rama `iconos-fxemoji`).
@@ -88,7 +88,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   llamadas de la tabla; `.youtube-groups__icon` sin `width`/`height` fijos y
   `.youtube-groups__guide-form-icon-preview` a 22 px · Ficheros: `content.js`, `content.css` · Test: `make lint` y
   `make test`; a mano V5.
-- [ ] T3 · Documentación: en `docs/adr/0013-iconos-fxemoji-empaquetados.md`, cambiar "se muestra como un aro" por
+- [x] T3 · Documentación: en `docs/adr/0013-iconos-fxemoji-empaquetados.md`, cambiar "se muestra como un aro" por
   "se muestra como una banda vertical en el borde derecho de la fila del grupo" y añadir al final una sección
   "Actualización (2026-11-16)" que diga que el aro y el fondo claro en oscuro se sustituyeron por la banda (plan
   `2026-11-16-iconos-banda-color`) y que el punto de color de los grupos sin icono desaparece; plan a `hecho` ·
@@ -156,3 +156,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-16 | T1 | `feat: pintar el color del grupo como banda lateral y quitar aro, fondo y punto` | `setGroupBand` en guía, casillas, selector y formulario; sin tocar tests. V1–V4 pendientes a mano. |
 | 2026-11-16 | T2 | `feat: agrandar un 20 % los iconos de grupo` | `GROUP_ICON_SIZES` en las cinco llamadas; chip sin tamaño fijo; vista previa del formulario a 22 px. V5 pendiente a mano. |
+| 2026-11-16 | T3 | `docs: actualizar el ADR 0013 con la banda de color` | ADR 0013 con banda en lugar de aro y sección de actualización. Plan a `hecho`; V1–V5 pendientes a mano. |

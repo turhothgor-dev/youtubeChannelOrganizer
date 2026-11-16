@@ -16,8 +16,8 @@ ficheros. El grupo guarda solo el id del icono (ADR 0001).
 Los SVG originales se copian sin modificar a `third_party/fxemoji/` (fuera del paquete) y su contenido se transcribe a
 un script clásico empaquetado, `modules/fxemoji-data.js`, como listas de formas `{ tag, attrs }` con una lista
 blanca de etiquetas y atributos; un test comprueba que los datos coinciden con los SVG de `third_party/`. Los ids de
-icono no cambian, así que no hay migración de datos. El color del grupo deja de teñir el icono y se muestra como un
-aro. `THIRD_PARTY_NOTICES.md`, incluido en el paquete, cumple la atribución de CC BY 4.0.
+icono no cambian, así que no hay migración de datos. El color del grupo deja de teñir el icono y se muestra como una
+banda vertical en el borde derecho de la fila del grupo. `THIRD_PARTY_NOTICES.md`, incluido en el paquete, cumple la atribución de CC BY 4.0.
 
 ## Alternativas descartadas
 
@@ -35,3 +35,8 @@ aro. `THIRD_PARTY_NOTICES.md`, incluido en el paquete, cumple la atribución de 
 - A vigilar: al añadir iconos, copiar el SVG a `third_party/`, transcribirlo y que el test pase; si un SVG necesita
   degradados o `transform`, elegir otro antes de ampliar la lista blanca. Mantener `THIRD_PARTY_NOTICES.md` en el
   paquete.
+
+## Actualización (2026-11-16)
+
+El aro y el fondo claro en tema oscuro se sustituyeron por la banda lateral (plan `2026-11-16-iconos-banda-color`).
+El punto de color de los grupos sin icono desaparece, porque la banda ya muestra el color.
