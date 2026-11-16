@@ -4,7 +4,8 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { loadModules } = require("./helpers/load-modules");
 
-const { YouTubeGroupsIcons: Icons } = loadModules();
+const { YouTubeGroupsIcons: Icons, YouTubeGroupsFxemoji: Fxemoji } =
+  loadModules();
 
 test("los ids de ICON_SET y COLOR_SET son únicos y las etiquetas no están vacías", () => {
   const iconIds = Icons.ICON_SET.map((icon) => icon.id);
@@ -22,6 +23,14 @@ test("todo id de ICON_SET tiene gráfico", () => {
     assert.ok(graphic, `${icon.id} sin gráfico`);
     assert.ok(graphic.viewBox.length > 0, `${icon.id} sin viewBox`);
     assert.ok(graphic.shapes.length > 0, `${icon.id} sin formas`);
+  }
+});
+
+test("el codepoint de cada entrada de ICON_SET coincide con el de YouTubeGroupsFxemoji.ICONS", () => {
+  for (const icon of Icons.ICON_SET) {
+    const data = Fxemoji.ICONS[icon.id];
+    assert.ok(data, `${icon.id} sin datos de fxemoji`);
+    assert.equal(icon.codepoint, data.codepoint, icon.id);
   }
 });
 

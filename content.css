@@ -811,7 +811,13 @@ html[dark] .noaction-button {
   box-shadow: 0 0 0 2px var(--yg-group-color, transparent);
 }
 
-html[dark] .youtube-groups__icon--ringed {
+/* En oscuro, todo icono de grupo (con o sin aro, también en la rejilla del
+   selector y en la vista previa del formulario) lleva un fondo claro tenue
+   para que los emoji con tonos oscuros se distingan */
+html[dark] .youtube-groups__icon,
+html[dark] .youtube-groups__icon-picker-option svg,
+html[dark] .youtube-groups__guide-form-icon-preview {
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
 }
 

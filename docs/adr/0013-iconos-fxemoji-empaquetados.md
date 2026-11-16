@@ -1,6 +1,6 @@
 # 0013 · Iconos de grupo de fxemoji empaquetados como datos JavaScript
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-16
 
 ## Contexto
