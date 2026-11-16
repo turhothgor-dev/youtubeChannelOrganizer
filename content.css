@@ -805,30 +805,11 @@ html[dark] .noaction-button {
   display: block;
 }
 
-/* El color del grupo no tiñe el emoji (multicolor): se muestra como aro */
-.youtube-groups__icon--ringed {
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--yg-group-color, transparent);
-}
-
-/* En oscuro, todo icono de grupo (con o sin aro, también en la rejilla del
-   selector y en la vista previa del formulario) lleva un fondo claro tenue
-   para que los emoji con tonos oscuros se distingan */
-html[dark] .youtube-groups__icon,
-html[dark] .youtube-groups__icon-picker-option svg,
-html[dark] .youtube-groups__guide-form-icon-preview {
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.youtube-groups__color-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-  margin: 0 8px 0 5px;
-  border-radius: 50%;
-  vertical-align: middle;
+/* El color del grupo no tiñe el emoji (multicolor): se muestra como banda
+   vertical en el borde derecho; inset no cambia el tamaño del elemento */
+.youtube-groups__group-band {
+  box-shadow: inset -4px 0 0 var(--yg-group-color);
+  padding-right: 8px;
 }
 
 /* New styles for icon picker */

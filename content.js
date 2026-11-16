@@ -102,37 +102,40 @@
   }
 
   /**
-   * Crea la marca de un grupo: su icono con el color resultante, o un punto
-   * de color si solo hay color.
+   * Crea la marca de un grupo: el chip con su icono.
    * @param {Array<Object>} groups - Árbol de grupos.
    * @param {string} groupId - Id del grupo o subgrupo.
    * @param {number} size - Lado del icono en píxeles.
-   * @returns {HTMLElement|null} null si no hay icono ni color.
+   * @returns {HTMLElement|null} null si no hay icono.
    */
   function createGroupMark(groups, groupId, size) {
     const appearance = YouTubeGroups.getGroupAppearance(groups, groupId);
-    if (!appearance) {
+    if (!appearance || !appearance.icon) {
       return null;
     }
-    const svg = appearance.icon ? createIconSvg(appearance.icon, size) : null;
-    if (svg) {
-      const chip = document.createElement("span");
-      chip.className = "youtube-groups__icon";
-      if (appearance.color) {
-        chip.classList.add("youtube-groups__icon--ringed");
-        chip.style.setProperty("--yg-group-color", appearance.color);
-      }
-      chip.title = YouTubeGroupsIcons.getIconLabel(appearance.icon);
-      chip.append(svg);
-      return chip;
+    const svg = createIconSvg(appearance.icon, size);
+    if (!svg) {
+      return null;
     }
-    if (appearance.color) {
-      const dot = document.createElement("span");
-      dot.className = "youtube-groups__color-dot";
-      dot.style.backgroundColor = appearance.color;
-      return dot;
+    const chip = document.createElement("span");
+    chip.className = "youtube-groups__icon";
+    chip.title = YouTubeGroupsIcons.getIconLabel(appearance.icon);
+    chip.append(svg);
+    return chip;
+  }
+
+  /**
+   * Pinta o quita la banda de color en el borde derecho de un elemento.
+   * @param {HTMLElement} element - Fila o caja del grupo.
+   * @param {string|null} color - Color CSS; vacío o null quita la banda.
+   */
+  function setGroupBand(element, color) {
+    element.classList.toggle("youtube-groups__group-band", Boolean(color));
+    if (color) {
+      element.style.setProperty("--yg-group-color", color);
+    } else {
+      element.style.removeProperty("--yg-group-color");
     }
-    return null;
   }
 
   const VIDEO_CARD_SELECTOR = [
@@ -1672,6 +1675,8 @@
       () => toggleSelectionItem({ type: "group", id: item.id }),
     );
     row.append(toggle, main);
+    const rowAppearance = YouTubeGroups.getGroupAppearance(groups, item.id);
+    setGroupBand(row, rowAppearance ? rowAppearance.color : null);
 
     const enter = document.createElement("button");
     enter.type = "button";
@@ -1795,15 +1800,7 @@
 
     function paintAppearance() {
       iconPreview.replaceChildren();
-      iconPreview.classList.toggle(
-        "youtube-groups__icon--ringed",
-        Boolean(appearance.iconId && appearance.colorHex),
-      );
-      if (appearance.colorHex) {
-        iconPreview.style.setProperty("--yg-group-color", appearance.colorHex);
-      } else {
-        iconPreview.style.removeProperty("--yg-group-color");
-      }
+      setGroupBand(iconButton, appearance.colorHex);
       const svg = appearance.iconId
         ? createIconSvg(appearance.iconId, 18)
         : null;
@@ -2239,6 +2236,12 @@
         if (level > 0) {
           groupName.style.marginLeft = `${level * 12}px`;
         }
+
+        const labelAppearance = YouTubeGroups.getGroupAppearance(
+          groups,
+          group.id,
+        );
+        setGroupBand(label, labelAppearance ? labelAppearance.color : null);
 
         const mark = createGroupMark(groups, group.id, 16);
         if (mark) {
@@ -3979,6 +3982,7 @@
     }
     function updatePreview() {
       preview.replaceChildren();
+      setGroupBand(preview, selectedColorHex);
       if (!selectedIconId) {
         const span = document.createElement("span");
         span.className = "youtube-groups__icon-picker-preview-empty";
@@ -3990,10 +3994,6 @@
       if (!previewSvg) return;
       const chip = document.createElement("span");
       chip.className = "youtube-groups__icon";
-      if (selectedColorHex) {
-        chip.classList.add("youtube-groups__icon--ringed");
-        chip.style.setProperty("--yg-group-color", selectedColorHex);
-      }
       chip.append(previewSvg);
       preview.appendChild(chip);
     }
