@@ -148,6 +148,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
 | 2026-11-17 | T2 | Iconos un 5 % menores que tras T2, redondeado: guía y vista previa del selector 28, casillas 18, rejilla 23, formulario 21 (`GROUP_ICON_SIZES` y `.youtube-groups__guide-form-icon-preview`). | La persona los prefiere algo más pequeños tras probarlos en Firefox. | La persona (2026-11-17) |
+| 2026-11-17 | T2 | Otro 5 % menos, redondeado: guía y vista previa del selector 27, casillas 17, rejilla 22, formulario 20. | La persona pide reducir otro 5 %. | La persona (2026-11-17) |
 
 ## Registro
 
@@ -159,3 +160,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-16 | T2 | `feat: agrandar un 20 % los iconos de grupo` | `GROUP_ICON_SIZES` en las cinco llamadas; chip sin tamaño fijo; vista previa del formulario a 22 px. V5 pendiente a mano. |
 | 2026-11-16 | T3 | `docs: actualizar el ADR 0013 con la banda de color` | ADR 0013 con banda en lugar de aro y sección de actualización. Plan a `hecho`; V1–V5 pendientes a mano. |
 | 2026-11-17 | T2 (ajuste) | `fix: reducir un 5 % los iconos de grupo` | Tamaños 28/18/23/28/21 según **Cambios aprobados**. |
+| 2026-11-17 | T2 (ajuste 2) | `fix: reducir otro 5 % los iconos de grupo` | Tamaños 27/17/22/27/20 según **Cambios aprobados**. |
