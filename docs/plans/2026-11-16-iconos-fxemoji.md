@@ -40,7 +40,7 @@ selector de iconos; el plan `2026-11-14-fase2-iconos-vistos` los terminó. Hoy:
 ### Decisiones
 
 1. **Empaquetados como datos JS, no como ficheros cargados en tiempo de ejecución.** Los SVG originales se copian
-   sin modificar en `vendor/fxemoji/` (fuera del `.xpi`, como referencia y para el test). Lo que se empaqueta es un
+   sin modificar en `third_party/fxemoji/` (fuera del `.xpi`, como referencia y para el test). Lo que se empaqueta es un
    script clásico nuevo, `modules/fxemoji-data.js` (`YouTubeGroupsFxemoji`), con cada icono como
    `{ codepoint, file, viewBox, shapes: [{ tag, attrs }] }`. `createIconSvg` construye las formas con
    `createElementNS` y `setAttribute` (sin `innerHTML`, como hoy). La extensión sigue sin hacer peticiones de red.
@@ -50,7 +50,7 @@ selector de iconos; el plan `2026-11-14-fase2-iconos-vistos` los terminó. Hoy:
      casillas) y también necesita los recursos accesibles.
    - Se descarta un script generador que escriba `fxemoji-data.js`: las reglas del proyecto no permiten scripts que
      escriban ficheros. El módulo se escribe con la herramienta de edición y un **test** comprueba que coincide con
-     los SVG de `vendor/` (ver T2).
+     los SVG de `third_party/` (ver T2).
 2. **Mismos ids, sin migración de almacenamiento.** Los 12 ids actuales se conservan y cada uno pasa a pintarse con
    un emoji de fxemoji. Los grupos guardados, las copias de seguridad exportadas y el formato del ADR 0001 no cambian;
    no sube `version`. Los ids desconocidos ya se tratan como "sin icono". Correspondencia (el implementador confirma
@@ -91,17 +91,17 @@ propuesto en `docs/adr/0013-iconos-fxemoji-empaquetados.md`.
 Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que la valida.
 
 - [x] T1 · Copiar los 12 SVG de `svgs/FirefoxEmoji/` (rama `gh-pages`, sin modificarlos, con su nombre original)
-  a `vendor/fxemoji/`; crear `THIRD_PARTY_NOTICES.md` (decisión 5) y la sección "Créditos" de `README.md`; añadir
-  `vendor` a `ignoreFiles` de `web-ext-config.mjs` (`THIRD_PARTY_NOTICES.md` **no** se ignora) · Ficheros:
-  `vendor/fxemoji/*.svg`, `THIRD_PARTY_NOTICES.md`, `README.md`, `web-ext-config.mjs` · Test: `make lint` y
-  `make build`; la lista del `.xpi` contiene `THIRD_PARTY_NOTICES.md` y no contiene `vendor/`.
+  a `third_party/fxemoji/`; crear `THIRD_PARTY_NOTICES.md` (decisión 5) y la sección "Créditos" de `README.md`; añadir
+  `third_party` a `ignoreFiles` de `web-ext-config.mjs` (`THIRD_PARTY_NOTICES.md` **no** se ignora) · Ficheros:
+  `third_party/fxemoji/*.svg`, `THIRD_PARTY_NOTICES.md`, `README.md`, `web-ext-config.mjs` · Test: `make lint` y
+  `make build`; la lista del `.xpi` contiene `THIRD_PARTY_NOTICES.md` y no contiene `third_party/`.
 - [ ] T2 · Módulo de datos y test de coincidencia: `tests/helpers/svg-shapes.js` (función pura
   `parseSvgShapes(text)` → `{ viewBox, shapes }`, aplana `<g>`, ignora prólogo, DOCTYPE y comentarios, falla con
   etiquetas o atributos fuera de la lista blanca); `modules/fxemoji-data.js` con `YouTubeGroupsFxemoji.ICONS`
   (objeto congelado indexado por id de icono, decisión 2) y la cabecera de atribución; cargarlo **antes** de
   `modules/icons.js` en `manifest.json` y en `tests/helpers/load-modules.js` · Ficheros: los citados y
   `tests/fxemoji.test.js` · Test: `tests/fxemoji.test.js`: (a) cada entrada coincide en `viewBox` y `shapes` con
-  `parseSvgShapes` de `vendor/fxemoji/<file>`; (b) solo etiquetas y atributos de la lista blanca, `fill` en
+  `parseSvgShapes` de `third_party/fxemoji/<file>`; (b) solo etiquetas y atributos de la lista blanca, `fill` en
   `#rrggbb` o `none`; (c) hay una entrada por cada id de la tabla de la decisión 2.
 - [ ] T3 · `icons.js` y `createIconSvg` con fxemoji: `ICON_SET` pasa a `{ id, label, codepoint }` (sin `path`);
   `getIconPath` se sustituye por `getIconGraphic(id)` → `{ viewBox, shapes }` o `null` (lee de
@@ -119,7 +119,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   emoji con tonos oscuros (p. ej. el mando de `gaming`) se distingan. El botón "Heredar" del selector no cambia ·
   Ficheros: `content.js`, `content.css` · Test: `make lint`, `make test` y a mano V1–V4.
 - [ ] T5 · Documentación: ADR 0013 a `aceptada`; `docs/ARCHITECTURE.md` (fila de `modules/fxemoji-data.js`, fila
-  de `modules/icons.js` con `getIconGraphic`, orden de carga, `vendor/` y `THIRD_PARTY_NOTICES.md`); plan a
+  de `modules/icons.js` con `getIconGraphic`, orden de carga, `third_party/` y `THIRD_PARTY_NOTICES.md`); plan a
   `hecho` · Ficheros: `docs/adr/0013-iconos-fxemoji-empaquetados.md`, `docs/ARCHITECTURE.md`, este plan · Test:
   `make lint` (incluye formato Markdown).
 
@@ -167,6 +167,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 | --- | --- | --- | --- | --- |
 | 2026-11-16 | T1 | `art` pasa de `u1F3A8-artistpalette` a `u1F58C-lowerleftpaintbrush` (🖌️) y `default` de `u1F3F7-label` (y su alternativa `u1F4C1-filefolder`) a `u1F5C0-folder` (🗀). Los tres traen `<style>`, fuentes embebidas o `<text>`, fuera de la lista blanca (decisión 4). Las tablas de T2/T3 usan estos ficheros. | Regla del plan: si el SVG elegido trae elementos fuera de la lista blanca, se elige otro emoji. | Persona (instrucciones de la tarea) |
 | 2026-11-16 | T1 | Los SVG de `vendor/fxemoji/` se guardan con fin de línea LF (los originales traen CRLF); el resto del contenido es idéntico. | Regla del proyecto: ficheros de texto con LF (`.gitattributes`). El test de T2 compara formas y atributos, no saltos de línea. | Persona (reglas de `AGENTS.md`) |
+| 2026-11-16 | T1 (corrección) y siguientes | La carpeta de los SVG pasa de `vendor/fxemoji/` a `third_party/fxemoji/` en todo el plan, el ADR 0013, `THIRD_PARTY_NOTICES.md`, `README.md` y `ignoreFiles` de `web-ext-config.mjs` (`third_party` en lugar de `vendor`). | `.gitignore` del kit ignora `vendor/` (regla de Composer) y los SVG no entraban en el commit de T1; se evita tocar un fichero del kit. | Delegada por la persona ("ejecuta el plan") |
 
 ## Registro
 
@@ -175,3 +176,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-16 | T1 | `chore: copiar los SVG de fxemoji y añadir el aviso de licencia CC BY 4.0` | 12 SVG en `vendor/fxemoji/`, `THIRD_PARTY_NOTICES.md`, créditos en el README y `vendor` fuera del paquete. `make lint` y `make build` correctos; el paquete incluye el aviso y no `vendor/`. |
+| 2026-11-16 | T1 (corrección) | `chore: mover los SVG de fxemoji a third_party/ para que git los siga` | `vendor/` está en `.gitignore`; carpeta renombrada a `third_party/` en SVG, plan, ADR 0013, avisos y `ignoreFiles`. |

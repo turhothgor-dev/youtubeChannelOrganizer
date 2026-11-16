@@ -13,9 +13,9 @@ ficheros. El grupo guarda solo el id del icono (ADR 0001).
 
 ## Decisión
 
-Los SVG originales se copian sin modificar a `vendor/fxemoji/` (fuera del paquete) y su contenido se transcribe a
+Los SVG originales se copian sin modificar a `third_party/fxemoji/` (fuera del paquete) y su contenido se transcribe a
 un script clásico empaquetado, `modules/fxemoji-data.js`, como listas de formas `{ tag, attrs }` con una lista
-blanca de etiquetas y atributos; un test comprueba que los datos coinciden con los SVG de `vendor/`. Los ids de
+blanca de etiquetas y atributos; un test comprueba que los datos coinciden con los SVG de `third_party/`. Los ids de
 icono no cambian, así que no hay migración de datos. El color del grupo deja de teñir el icono y se muestra como un
 aro. `THIRD_PARTY_NOTICES.md`, incluido en el paquete, cumple la atribución de CC BY 4.0.
 
@@ -32,6 +32,6 @@ aro. `THIRD_PARTY_NOTICES.md`, incluido en el paquete, cumple la atribución de 
 
 - Se gana: iconos multicolor reconocibles, sin red ni recursos expuestos, sin migración y con origen trazable.
 - Se pierde: el color ya no tiñe el icono; el módulo de datos pesa unos KB por icono.
-- A vigilar: al añadir iconos, copiar el SVG a `vendor/`, transcribirlo y que el test pase; si un SVG necesita
+- A vigilar: al añadir iconos, copiar el SVG a `third_party/`, transcribirlo y que el test pase; si un SVG necesita
   degradados o `transform`, elegir otro antes de ampliar la lista blanca. Mantener `THIRD_PARTY_NOTICES.md` en el
   paquete.

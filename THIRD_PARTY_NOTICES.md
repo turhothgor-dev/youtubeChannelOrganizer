@@ -10,5 +10,5 @@ Los iconos de los grupos son emoji del proyecto **Firefox Emoji (fxemoji)**.
   <https://creativecommons.org/licenses/by/4.0/>
 
 Cambios: los SVG originales se han convertido a datos JavaScript (`modules/fxemoji-data.js`) sin cambiar el
-dibujo. Se conservan sin modificar en `vendor/fxemoji/` (solo en el repositorio, no en el paquete de la
+dibujo. Se conservan sin modificar en `third_party/fxemoji/` (solo en el repositorio, no en el paquete de la
 extensión).
