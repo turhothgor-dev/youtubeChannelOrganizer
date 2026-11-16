@@ -16,10 +16,33 @@ test("los ids de ICON_SET y COLOR_SET son únicos y las etiquetas no están vac�
   assert.equal(new Set(colorIds).size, colorIds.length);
 });
 
-test("toda ruta de ICON_SET es una ruta SVG con cierre", () => {
+test("todo id de ICON_SET tiene gráfico", () => {
   for (const icon of Icons.ICON_SET) {
-    assert.match(icon.path, /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/, icon.id);
-    assert.match(icon.path, /[zZ]/, `${icon.id} sin cierre`);
+    const graphic = Icons.getIconGraphic(icon.id);
+    assert.ok(graphic, `${icon.id} sin gráfico`);
+    assert.ok(graphic.viewBox.length > 0, `${icon.id} sin viewBox`);
+    assert.ok(graphic.shapes.length > 0, `${icon.id} sin formas`);
+  }
+});
+
+test("los ids guardados por la versión anterior siguen siendo válidos", () => {
+  const storedIds = [
+    "tech",
+    "music",
+    "news",
+    "gaming",
+    "sports",
+    "education",
+    "food",
+    "travel",
+    "art",
+    "science",
+    "movie",
+    "default",
+  ];
+  for (const id of storedIds) {
+    assert.equal(Icons.isValidIconId(id), true, id);
+    assert.notEqual(Icons.getIconGraphic(id), null, id);
   }
 });
 
@@ -38,11 +61,11 @@ test("todos los colores de COLOR_SET son válidos", () => {
   }
 });
 
-test("isValidIconId y getIconPath", () => {
+test("isValidIconId y getIconGraphic", () => {
   assert.equal(Icons.isValidIconId(""), true);
   assert.equal(Icons.isValidIconId("tech"), true);
   assert.equal(Icons.isValidIconId("nope"), false);
-  assert.equal(Icons.getIconPath("nope"), null);
+  assert.equal(Icons.getIconGraphic("nope"), null);
 });
 
 test("getUiIconPath devuelve rutas de interfaz sin mezclarlas con ICON_SET", () => {
@@ -51,7 +74,7 @@ test("getUiIconPath devuelve rutas de interfaz sin mezclarlas con ICON_SET", () 
     assert.equal(typeof path, "string", id);
     assert.ok(path.length > 0, id);
     assert.equal(Icons.isValidIconId(id), false, id);
-    assert.equal(Icons.getIconPath(id), null, id);
+    assert.equal(Icons.getIconGraphic(id), null, id);
   }
   assert.equal(Icons.getUiIconPath("x"), null);
   assert.equal(Icons.ICON_SET.length, 12);

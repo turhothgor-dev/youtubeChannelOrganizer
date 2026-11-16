@@ -23,19 +23,23 @@
    * @returns {SVGElement|null} null si el icono no existe.
    */
   function createIconSvg(iconId, size) {
-    const iconPath = YouTubeGroupsIcons.getIconPath(iconId);
-    if (!iconPath) {
+    const graphic = YouTubeGroupsIcons.getIconGraphic(iconId);
+    if (!graphic) {
       return null;
     }
     const svgNs = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNs, "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("viewBox", graphic.viewBox);
     svg.setAttribute("width", String(size));
     svg.setAttribute("height", String(size));
-    svg.setAttribute("fill", "currentColor");
-    const path = document.createElementNS(svgNs, "path");
-    path.setAttribute("d", iconPath);
-    svg.append(path);
+    svg.setAttribute("aria-hidden", "true");
+    for (const shape of graphic.shapes) {
+      const element = document.createElementNS(svgNs, shape.tag);
+      for (const [name, value] of Object.entries(shape.attrs)) {
+        element.setAttribute(name, value);
+      }
+      svg.append(element);
+    }
     return svg;
   }
 

@@ -353,6 +353,18 @@ test("getGroupAppearance devuelve icono y color propios", () => {
   );
 });
 
+test("getGroupAppearance conserva el icono guardado por la versión anterior", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = nestedGroups();
+  groups[0].icon = "tech";
+  groups[0].color = "#2196F3";
+
+  assert.deepStrictEqual(
+    plain(YouTubeGroups.getGroupAppearance(groups, "g1")),
+    { icon: "tech", color: "#2196F3" },
+  );
+});
+
 test("getGroupAppearance hereda el color del antecesor más cercano", () => {
   const { YouTubeGroups } = loadModules();
   const groups = nestedGroups();

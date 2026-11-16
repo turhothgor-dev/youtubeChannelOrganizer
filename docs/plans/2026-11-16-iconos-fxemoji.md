@@ -103,7 +103,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   `tests/fxemoji.test.js` · Test: `tests/fxemoji.test.js`: (a) cada entrada coincide en `viewBox` y `shapes` con
   `parseSvgShapes` de `third_party/fxemoji/<file>`; (b) solo etiquetas y atributos de la lista blanca, `fill` en
   `#rrggbb` o `none`; (c) hay una entrada por cada id de la tabla de la decisión 2.
-- [ ] T3 · `icons.js` y `createIconSvg` con fxemoji: `ICON_SET` pasa a `{ id, label, codepoint }` (sin `path`);
+- [x] T3 · `icons.js` y `createIconSvg` con fxemoji: `ICON_SET` pasa a `{ id, label, codepoint }` (sin `path`);
   `getIconPath` se sustituye por `getIconGraphic(id)` → `{ viewBox, shapes }` o `null` (lee de
   `YouTubeGroupsFxemoji`); `createIconSvg` (`content.js`) crea una forma por entrada, con `aria-hidden="true"` y sin
   `fill="currentColor"`. `UI_ICON_PATHS` y `createUiIconSvg` no cambian. En `tests/icons.test.js` el test "toda
@@ -178,3 +178,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-16 | T1 | `chore: copiar los SVG de fxemoji y añadir el aviso de licencia CC BY 4.0` | 12 SVG en `vendor/fxemoji/`, `THIRD_PARTY_NOTICES.md`, créditos en el README y `vendor` fuera del paquete. `make lint` y `make build` correctos; el paquete incluye el aviso y no `vendor/`. |
 | 2026-11-16 | T1 (corrección) | `chore: mover los SVG de fxemoji a third_party/ para que git los siga` | `vendor/` está en `.gitignore`; carpeta renombrada a `third_party/` en SVG, plan, ADR 0013, avisos y `ignoreFiles`. |
 | 2026-11-16 | T2 | `chore: añadir los datos de fxemoji y el test que los compara con los SVG` | `modules/fxemoji-data.js` (12 iconos, congelados, con ficheros de los cambios aprobados), `tests/helpers/svg-shapes.js`, `tests/fxemoji.test.js`, carga en `manifest.json` y `load-modules.js`. `make test-affected` (189) y `make lint` correctos. |
+| 2026-11-16 | T3 | `feat: pintar los iconos de grupo con fxemoji` | `ICON_SET` con `codepoint`, `getIconGraphic` en lugar de `getIconPath`, `createIconSvg` con formas multicolor; tests de icons y groups actualizados. |
