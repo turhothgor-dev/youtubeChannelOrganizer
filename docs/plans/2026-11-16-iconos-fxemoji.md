@@ -95,7 +95,7 @@ Cada tarea es del tamaño de un commit, toca pocos ficheros y tiene un test que 
   `third_party` a `ignoreFiles` de `web-ext-config.mjs` (`THIRD_PARTY_NOTICES.md` **no** se ignora) · Ficheros:
   `third_party/fxemoji/*.svg`, `THIRD_PARTY_NOTICES.md`, `README.md`, `web-ext-config.mjs` · Test: `make lint` y
   `make build`; la lista del `.xpi` contiene `THIRD_PARTY_NOTICES.md` y no contiene `third_party/`.
-- [ ] T2 · Módulo de datos y test de coincidencia: `tests/helpers/svg-shapes.js` (función pura
+- [x] T2 · Módulo de datos y test de coincidencia: `tests/helpers/svg-shapes.js` (función pura
   `parseSvgShapes(text)` → `{ viewBox, shapes }`, aplana `<g>`, ignora prólogo, DOCTYPE y comentarios, falla con
   etiquetas o atributos fuera de la lista blanca); `modules/fxemoji-data.js` con `YouTubeGroupsFxemoji.ICONS`
   (objeto congelado indexado por id de icono, decisión 2) y la cabecera de atribución; cargarlo **antes** de
@@ -177,3 +177,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-16 | T1 | `chore: copiar los SVG de fxemoji y añadir el aviso de licencia CC BY 4.0` | 12 SVG en `vendor/fxemoji/`, `THIRD_PARTY_NOTICES.md`, créditos en el README y `vendor` fuera del paquete. `make lint` y `make build` correctos; el paquete incluye el aviso y no `vendor/`. |
 | 2026-11-16 | T1 (corrección) | `chore: mover los SVG de fxemoji a third_party/ para que git los siga` | `vendor/` está en `.gitignore`; carpeta renombrada a `third_party/` en SVG, plan, ADR 0013, avisos y `ignoreFiles`. |
+| 2026-11-16 | T2 | `chore: añadir los datos de fxemoji y el test que los compara con los SVG` | `modules/fxemoji-data.js` (12 iconos, congelados, con ficheros de los cambios aprobados), `tests/helpers/svg-shapes.js`, `tests/fxemoji.test.js`, carga en `manifest.json` y `load-modules.js`. `make test-affected` (189) y `make lint` correctos. |

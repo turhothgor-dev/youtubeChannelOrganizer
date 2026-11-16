@@ -18,6 +18,7 @@
       "css": ["content.css"],
       "js": [
         "modules/storage.js",
+        "modules/fxemoji-data.js",
         "modules/icons.js",
         "modules/groups.js",
         "modules/watched.js",

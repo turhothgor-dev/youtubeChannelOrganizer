@@ -7,6 +7,7 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "..", "..");
 const MODULES = [
   "storage.js",
+  "fxemoji-data.js",
   "icons.js",
   "groups.js",
   "watched.js",
@@ -66,6 +67,7 @@ function loadModules(initialStore = {}, { latencyMs = 0 } = {}) {
     store,
     calls,
     YouTubeGroups: vm.runInContext("YouTubeGroups", context),
+    YouTubeGroupsFxemoji: vm.runInContext("YouTubeGroupsFxemoji", context),
     YouTubeGroupsIcons: vm.runInContext("YouTubeGroupsIcons", context),
     YouTubeGroupsStorage: vm.runInContext("YouTubeGroupsStorage", context),
     YouTubeGroupsWatched: vm.runInContext("YouTubeGroupsWatched", context),
