@@ -103,11 +103,11 @@
 
   /** Lado en píxeles de los iconos de grupo según el sitio donde se pintan. */
   const GROUP_ICON_SIZES = {
-    guide: 29,
-    choice: 19,
-    pickerGrid: 24,
-    pickerPreview: 29,
-    formPreview: 22,
+    guide: 28,
+    choice: 18,
+    pickerGrid: 23,
+    pickerPreview: 28,
+    formPreview: 21,
   };
 
   /**
