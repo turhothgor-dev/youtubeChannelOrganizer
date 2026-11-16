@@ -12,7 +12,7 @@
 
 kit:
   name: ai-kit
-  version: 0.14.0 # única versión del kit; debe coincidir con el tag de git al publicar
+  version: 0.15.0 # única versión del kit; debe coincidir con el tag de git al publicar
   min_versions:          # versión mínima soportada por los adaptadores
     claude-code: "2.0"
     cline: "3.36"        # hooks
@@ -201,6 +201,9 @@ modules:
     depends_on: [compose-base]
     requires: [node, node-version, ports-free]
     ports: { web: 8080, mysql: 3306, vite: 5173 }
+  preset-webext:
+    requires: [node, node-version, firefox]
+    notes: "Extensión de Firefox MV3 en JavaScript; sin env-native (sus checks son de Python)"
   ci-bitbucket:
     generates: [bitbucket-pipelines.yml]
     requires: []
@@ -269,6 +272,7 @@ checks:
   qt6:                { desc: "PyQt6 o PySide6 instalado (solo nativo)" }
   venv:               { desc: "venv disponible (solo nativo)" }
   uv:                 { desc: "uv disponible (solo nativo)" }
+  firefox:            { desc: "Firefox instalado (aviso: make up de la extensión lo necesita)", os: [linux, wsl, windows, macos] }
 
 # -----------------------------------------------------------------------------
 # Revisión previa del proyecto (audit). Nada es bloqueante.

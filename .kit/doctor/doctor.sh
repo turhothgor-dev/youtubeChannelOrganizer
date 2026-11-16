@@ -48,7 +48,7 @@ done
 # -----------------------------------------------------------------------------
 # Módulos → checks (alineado con manifest/kit.yaml, incluidas dependencias)
 # -----------------------------------------------------------------------------
-ALL_MODULES="core kit-dev adapter-claude-code adapter-cline adapter-continue adapter-phpstorm compose-base devcontainer ci-bitbucket ci-github mcp-atlassian mcp-docs mcp-db-local mcp-playwright gcloud-fixtures subagents provider-scaleway preset-php-mysql-react lang-python lang-node lang-php frontend-react frontend-qt6 svc-mysql env-devcontainer env-docker-only env-native"
+ALL_MODULES="core kit-dev adapter-claude-code adapter-cline adapter-continue adapter-phpstorm compose-base devcontainer ci-bitbucket ci-github mcp-atlassian mcp-docs mcp-db-local mcp-playwright gcloud-fixtures subagents provider-scaleway preset-php-mysql-react preset-webext lang-python lang-node lang-php frontend-react frontend-qt6 svc-mysql env-devcontainer env-docker-only env-native"
 
 module_checks() {
   case "$1" in
@@ -66,6 +66,7 @@ module_checks() {
     gcloud-fixtures)        echo "gcloud-cli gcloud-auth" ;;
     provider-scaleway)      echo "scaleway-key scaleway-models" ;;
     preset-php-mysql-react) echo "docker-cli docker-real docker-daemon docker-permissions compose-v2 node node-version ports-free" ;;
+    preset-webext)          echo "node node-version firefox" ;;
     ci-bitbucket|ci-github|subagents) echo "" ;;
     # Nuevos módulos modulares
     lang-python)            echo "python-version" ;;
@@ -515,6 +516,14 @@ check_phpstorm() {
 check_node() {
   if have node; then record node ok "Node $(node -v)"
   else record node fail "Node no está instalado. Recomendado: un gestor de versiones (fnm, nvm o mise) para respetar .nvmrc" "" manual; fi
+}
+
+check_firefox() {
+  local url="https://www.mozilla.org/firefox/new/"
+  if have firefox || have firefox-esr; then record firefox ok "Firefox detectado en el PATH"
+  elif have flatpak && flatpak info org.mozilla.firefox >/dev/null 2>&1; then record firefox ok "Firefox (Flatpak) detectado"
+  elif [ -d /Applications/Firefox.app ] || [ -d "$HOME/Applications/Firefox.app" ]; then record firefox ok "Firefox detectado en Applications"
+  else record firefox warn "Firefox no detectado: make up (web-ext run) lo necesita; lint, test y build no. Descárgalo en $url" "" manual; fi
 }
 
 check_node_version() {

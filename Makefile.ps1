@@ -59,6 +59,22 @@ function Invoke-Python {
 function Get-GitStatus { return @(& git status --porcelain | Where-Object { $_ }) }
 
 
+# Mismas herramientas que el Makefile: web-ext y Prettier locales (npx --no-install).
+$extFiles = '**/*.{js,mjs,css,html,json}'
+
+function Invoke-WebExt { param([string[]]$WebExtArgs = @()); Invoke-Cmd 'npx' (@('--no-install', 'web-ext') + $WebExtArgs) }
+
+function Invoke-Prettier { param([string[]]$PrettierArgs = @()); Invoke-Cmd 'npx' (@('--no-install', 'prettier') + $PrettierArgs) }
+
+function Invoke-Markdownlint {
+    param([string[]]$Flags = @())
+    if (-not (Get-Command markdownlint-cli2 -ErrorAction SilentlyContinue)) {
+        Stop-Make "Instala markdownlint-cli2: npm install -g markdownlint-cli2"
+    }
+    Invoke-Cmd 'markdownlint-cli2' ($Flags + @('**/*.md', '#node_modules', '#.git'))
+}
+
+
 $targets = New-Object System.Collections.ArrayList
 function Add-Target { param([string]$Name, [string]$Desc); [void]$script:targets.Add(@($Name, $Desc)) }
 
@@ -68,16 +84,19 @@ Add-Target 'ai-sync' 'Regenera los ficheros de las herramientas de IA desde ai/s
 Add-Target 'ai-models' 'Muestra qué modelo usa cada rol y cómo configurarlo en cada herramienta'
 Add-Target 'kit-update' 'Actualiza a la última versión de ai-kit y deja los cambios en su propio commit'
 
-Add-Target 'setup' 'Instala dependencias'
-Add-Target 'up' 'Levanta los servicios'
-Add-Target 'down' 'Para los servicios'
-Add-Target 'logs' 'Logs de los servicios'
-Add-Target 'test' 'Todos los tests'
+Add-Target 'setup' 'Instala dependencias (web-ext y Prettier)'
+Add-Target 'up' 'Abre Firefox con la extensión cargada y recarga automática (web-ext run)'
+Add-Target 'down' 'Para Firefox: ciérralo o pulsa Ctrl+C en la terminal de make up'
+Add-Target 'logs' 'La consola de la extensión está en Firefox'
+Add-Target 'test' 'Todos los tests (node --test)'
 Add-Target 'test-affected' 'Tests de lo cambiado'
-Add-Target 'lint' 'Comprobaciones estáticas'
-Add-Target 'format' 'Formato'
+Add-Target 'lint' 'web-ext lint y formato con Prettier'
+Add-Target 'format' 'Formatea con Prettier'
 Add-Target 'typecheck' 'Comprobación de tipos'
-Add-Target 'check-file' 'Comprueba un fichero: .\Makefile.ps1 check-file FILE=ruta'
+Add-Target 'build' 'Empaqueta la extensión en web-ext-artifacts/ (zip)'
+Add-Target 'check-file' 'Comprueba y formatea un fichero: .\Makefile.ps1 check-file FILE=ruta'
+Add-Target 'lint-md' 'Lint de Markdown (markdownlint-cli2)'
+Add-Target 'format-md' 'Formatea Markdown (markdownlint-cli2 --fix)'
 
 
 function Show-Help {
@@ -140,17 +159,24 @@ function Invoke-Target {
             Write-Host "Commit creado: chore: actualizar ai-kit a v$ver (revísalo con git show --stat)"
         }
 
-        # Preset genérico: sustituye cada TODO por el comando real del proyecto.
-        'setup' { Write-Host "TODO: define 'setup' en Makefile.ps1 (y en el Makefile)" }
-        'up' { Write-Host "TODO: define 'up' en Makefile.ps1 (y en el Makefile)" }
-        'down' { Write-Host "TODO: define 'down' en Makefile.ps1 (y en el Makefile)" }
-        'logs' { Write-Host "TODO: define 'logs' en Makefile.ps1 (y en el Makefile)" }
-        'test' { Write-Host "TODO: define 'test' en Makefile.ps1 (y en el Makefile)" }
+        'setup' { Invoke-Cmd 'npm' @('install', '--no-fund', '--no-audit') }
+        'up' { Invoke-WebExt (@('run') + $extra) }
+        'down' { Write-Host "Cierra Firefox o pulsa Ctrl+C en la terminal donde corre '.\Makefile.ps1 up'." }
+        'logs' { Write-Host "Consola de la extensión: F12 en la página, o about:debugging#/runtime/this-firefox (Inspeccionar)." }
+        'test' { Invoke-Cmd 'node' @('--test') }
         'test-affected' { Invoke-Target 'test' }
-        'lint' { Write-Host "TODO: define 'lint' en Makefile.ps1 (y en el Makefile)" }
-        'format' { Write-Host "TODO: define 'format' en Makefile.ps1 (y en el Makefile)" }
-        'typecheck' { Write-Host "TODO: define 'typecheck' en Makefile.ps1 (y en el Makefile)" }
-        'check-file' { }   # igual que el Makefile: sin comprobaciones en el preset genérico
+        'lint' { Invoke-WebExt @('lint'); Invoke-Prettier @('--check', $extFiles) }
+        'format' { Invoke-Prettier @('--write', $extFiles) }
+        'typecheck' { Write-Host "Sin TypeScript: no hay comprobación de tipos." }
+        'build' { Invoke-WebExt @('build') }
+        'check-file' {
+            if ($FILE -match '\.(js|mjs)$') { Invoke-Cmd 'node' @('--check', $FILE) }
+            if (($FILE -match '\.(js|mjs|css|html|json)$') -and (Test-Path 'node_modules/prettier/package.json')) {
+                Invoke-Prettier @('--write', '--log-level', 'warn', $FILE)
+            }
+        }
+        'lint-md' { Invoke-Markdownlint }
+        'format-md' { Invoke-Markdownlint @('--fix') }
 
         default {
             Write-Host "  ERROR: Objetivo '$Name' no encontrado." -ForegroundColor Red
