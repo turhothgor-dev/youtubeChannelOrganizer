@@ -159,7 +159,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   `title` del botón no cambian; escribir en `youtubeAvatars` (onChanged) repinta y la segunda fila gana su `img`.
 - [x] T6 · Avatares en el panel "Canales" del editor · Ficheros: `options/options.js`, `options/options.css` · Test:
   `make lint`, `make test` y a mano V3.
-- [ ] T7 · Recolector `ui/avatars.js` y enganches · Ficheros: `ui/avatars.js`, `ui/cards.js`, `content.js`,
+- [x] T7 · Recolector `ui/avatars.js` y enganches · Ficheros: `ui/avatars.js`, `ui/cards.js`, `content.js`,
   `manifest.json` (tras `ui/icon-picker.js`), `tests/manifest.test.js` (orden de `ui/*.js` con `ui/avatars.js`, cambio
   de requisito), `tests/ui-avatars.test.js`, `tests/helpers/youtube-fixtures.js` si hace falta una tarjeta con avatar ·
   Test (jsdom, con `ctx.avatars.flushPending()` en lugar de esperar 2 s): una tarjeta de un canal agrupado con un
@@ -230,3 +230,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T4 | `feat: createChannelAvatar y estilos de avatar` | `AVATAR_SIZES` y `createChannelAvatar` en `icons-dom.js`, CSS en `icons.css` y tests jsdom. |
 | 2026-11-17 | T5 | `feat: avatares de canal en la guía` | `ctx.state.avatars`, lectura en `renderGroupsPanel`/`paintGuideSection`, `createChannelAvatar` en las filas de canal, repintado con `"avatars"` y test jsdom. `ctx.avatars` queda para T7. |
 | 2026-11-17 | T6 | `feat: avatares en el panel Canales del editor` | `currentAvatars` en `options.js` (lectura en `render()` y `onChanged`, que solo repinta el panel si cambia `avatars`), avatar de 24 px en cada fila y margen en CSS. |
+| 2026-11-17 | T7 | `feat: recolector de avatares de canal` | `ui/avatars.js` (`ctx.avatars`), enganches en `cards.js` (`getChannelResultUrl`, `noteCard` con `?.` para que los tests de tarjetas sin avatares sigan valiendo) y `content.js` (`setGroupedChannels`/`scheduleScan` en `renderGroupsPanel` y en el `MutationObserver`), manifest y tests jsdom. |

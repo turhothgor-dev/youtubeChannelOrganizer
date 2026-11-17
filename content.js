@@ -57,6 +57,7 @@
     renderGroupsPanel,
     navigateToSubscriptions,
   };
+  ctx.avatars = YouTubeGroupsAvatarsUi.create(ctx);
   ctx.cards = YouTubeGroupsCards.create(ctx);
   ctx.watched = YouTubeGroupsWatchedUi.create(ctx);
   ctx.dropdowns = YouTubeGroupsDropdowns.create(ctx);
@@ -135,6 +136,8 @@
 
     const [groups, avatars] = await Promise.all([getGroups(), getAvatars()]);
     ctx.state.avatars = avatars;
+    ctx.avatars.setGroupedChannels(groups);
+    ctx.avatars.scheduleScan();
     ctx.cards.refreshChannelNameIndex(groups);
 
     ctx.panel.renderCurrentChannelSection(groups);
@@ -275,6 +278,7 @@
       }
     }
     ctx.guide.checkPlacement();
+    ctx.avatars.scheduleScan();
   });
 
   observer.observe(document.documentElement, {

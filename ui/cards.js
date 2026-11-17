@@ -334,6 +334,17 @@ const YouTubeGroupsCards = (() => {
 
     const CHANNEL_RESULT_SELECTOR = "ytd-channel-renderer";
 
+    // URL del primer enlace de canal de un resultado de canal (o null)
+    function getChannelResultUrl(card) {
+      for (const link of card.querySelectorAll("a[href]")) {
+        const url = normalizeChannelUrl(link.href);
+        if (url) {
+          return url;
+        }
+      }
+      return null;
+    }
+
     // Control "Añadir a grupo" en un resultado de canal de la búsqueda;
     // idempotente por el mismo motivo que ensureChannelControl.
     function ensureChannelResultControl(card) {
@@ -346,13 +357,7 @@ const YouTubeGroupsCards = (() => {
         return;
       }
 
-      let url = null;
-      for (const link of card.querySelectorAll("a[href]")) {
-        url = normalizeChannelUrl(link.href);
-        if (url) {
-          break;
-        }
-      }
+      const url = getChannelResultUrl(card);
 
       const nameElement =
         card.querySelector("ytd-channel-name #text") ||
@@ -638,6 +643,8 @@ const YouTubeGroupsCards = (() => {
       processingScheduled = false;
       for (const card of pendingCards) {
         if (card.matches(CHANNEL_RESULT_SELECTOR)) {
+          // `?.`: los tests de tarjetas crean el componente sin avatares
+          ctx.avatars?.noteCard(card, getChannelResultUrl(card));
           ensureChannelResultControl(card);
           continue;
         }
@@ -645,6 +652,7 @@ const YouTubeGroupsCards = (() => {
         // Primero el ID de vídeo: el filtro de detectCard lo necesita al día
         ctx.watched.applyWatchedToCard(card);
         detectCard(card);
+        ctx.avatars?.noteCard(card, card.dataset.youtubeGroupsChannelUrl);
         ensureChannelControl(card);
       }
 

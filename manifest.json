@@ -49,6 +49,7 @@
         "modules/backup.js",
         "ui/icons-dom.js",
         "ui/icon-picker.js",
+        "ui/avatars.js",
         "ui/dropdowns.js",
         "ui/player.js",
         "ui/watched.js",
