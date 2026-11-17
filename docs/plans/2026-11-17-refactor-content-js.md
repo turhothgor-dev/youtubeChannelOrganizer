@@ -172,7 +172,7 @@ final) con la extensión recargada y **sin errores nuevos en la consola**.
   un cambio de `watched` desde `onChanged` actualiza la tarjeta. **player**: en `/watch` con el vídeo pausado hay un
   único `.youtube-groups__player-actions` visible dentro de `#movie_player`; un `play` (sin pausa) y `flush` lo ocultan;
   `yt-navigate-start` lo oculta.
-- [ ] T3 · Tests de humo, contra el `content.js` actual, de la guía, el selector de iconos y los iconos · Ficheros:
+- [x] T3 · Tests de humo, contra el `content.js` actual, de la guía, el selector de iconos y los iconos · Ficheros:
   `tests/ui-guide-section.test.js`, `tests/ui-icon-picker.test.js`, `tests/ui-icons-dom.test.js` · Test:
   **guide**: un único `#youtube-groups-guide` justo antes de la sección "Más de YouTube"; añadir un nodo a
   `#sections` y `flush` no lo duplica ni lo mueve; con A (subgrupo A1) la fila muestra "A (n)"; "›" entra en A y "‹"
@@ -306,3 +306,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `test: jsdom y ayudante de DOM con tests de humo del panel` | Con `jsdom` (cambio aprobado arriba) `location` es el real y `location.assign` no se puede sustituir: el ayudante cuenta las navegaciones no implementadas en `navigations.count` en lugar de `location.assigned` (a confirmar por la persona; afecta a T2 si un test necesita la URL). Comprobado: `make test` (199 en verde), `make lint` y el `.zip` de `make build` (20 ficheros) sin `node_modules/`, `tests/` ni `jsdom`. |
 | 2026-11-17 | T2 | `test: tests de humo de tarjetas, desplegables, vistos y reproductor` | 4 ficheros `ui-*.test.js` (13 tests) y ampliación de `youtube-fixtures.js` (ID de 11 caracteres, `ytd-guide-renderer`, host de YouTube Music en la guía, `makeGroup`, `groupsStore`, `flushLoose`). Hallazgo, sin corregir (fuera de alcance): con una tarjeta con botones, `setCardButtonContent` reescribe el texto de la etiqueta en cada procesado, eso muta la tarjeta y la reprograma en cada frame sin parar; por eso los tests usan `flushLoose` (tolera el límite de vueltas de `flush`). Comprobado: `make test` (213 en verde) y `make lint`. |
+| 2026-11-17 | T3 | `test: tests de humo de la guía, el selector de iconos y los iconos` | 3 ficheros `ui-*.test.js` (11 tests). Notas para T10-T12: durante la animación de columna la saliente sigue en el DOM (el test mira la última del `viewport`); jsdom no tiene `document.fullscreenElement` (cuenta como pantalla completa), así que el test de guía fija lo define a `null` y despacha `fullscreenchange`. Comprobado: `make test` (224 en verde) y `make lint`. |
