@@ -141,3 +141,12 @@ test("F2 sobre la fila abre renombrar", async () => {
   await dom.flush();
   assert.ok(dom.document.querySelector(".options__editor input"));
 });
+
+test("el nombre del grupo lleva el nombre completo en el title", async () => {
+  const longName = "Ciencia y tecnología divulgativa";
+  const store = groupsStore([makeGroup("c", { name: longName })]);
+  const dom = loadOptionsDom({ store });
+  await dom.flush();
+  const name = dom.document.querySelector(".options__name");
+  assert.strictEqual(name.getAttribute("title"), longName);
+});

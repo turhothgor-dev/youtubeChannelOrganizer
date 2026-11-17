@@ -1181,6 +1181,7 @@
       row.append(buildEditor());
     } else {
       const name = el("span", "options__name", group.name);
+      name.title = group.name;
       name.addEventListener("click", () => selectGroup(group.id));
       name.addEventListener("dblclick", () =>
         startEdit("rename", group.id, null, group.name),

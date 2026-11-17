@@ -38,6 +38,7 @@ html[dark] body {
 
 .options__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.25rem 0.5rem;
@@ -92,17 +93,23 @@ html[dark] .options__row--drop-inside {
 }
 
 .options__name {
-  flex: 1;
-  overflow-wrap: anywhere;
+  flex: 1 1 12rem;
+  min-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .options__count {
+  flex: none;
+  white-space: nowrap;
   font-size: 0.85rem;
   opacity: 0.7;
 }
 
 .options__editor {
-  flex: 1;
+  flex: 1 1 12rem;
+  min-width: 8rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -128,6 +135,8 @@ html[dark] .options__field-error {
 
 .options__actions {
   display: flex;
+  flex: none;
+  white-space: nowrap;
   gap: 0.25rem;
 }
 
@@ -161,6 +170,7 @@ html[dark] .options__field-error {
 }
 
 .options__move {
+  flex-basis: 100%;
   display: flex;
   gap: 0.25rem;
   align-items: center;

@@ -53,7 +53,7 @@ Decisión:
   almacenamiento; "Renombrar" abre el campo con el nombre; "Añadir subgrupo" abre un campo de creación dentro de A;
   "Eliminar" quita A y muestra el aviso con "Deshacer"; con búsqueda "a1" la fila de A1 no tiene Subir, Bajar ni Mover
   a…; F2 sobre la fila sigue abriendo renombrar.
-- [ ] T3 · Nombre con espacio flexible y elipsis · Ficheros: `options/options.js`, `options/options.css`,
+- [x] T3 · Nombre con espacio flexible y elipsis · Ficheros: `options/options.js`, `options/options.css`,
   `tests/ui-options.test.js` · Test (jsdom): `.options__name` de un grupo "Ciencia y tecnología divulgativa" tiene
   `title` igual a su nombre; el resto es CSS (V1 y V2).
 - [ ] T4 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `options/` y flujo "Editor de grupos": acciones de icono;
@@ -98,3 +98,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `test: ayudante loadOptionsDom y test del árbol del editor` | `optionsPage()` y `loadOptionsDom()` en `tests/helpers/load-dom.js`; test inicial en `tests/ui-options.test.js`. |
 | 2026-11-17 | T2 | `feat: acciones de fila del editor solo con icono y nuevo orden` | `iconButton` en `options.js`, estilos `.options__action--icon` y 7 tests de DOM. |
+| 2026-11-17 | T3 | `feat: nombre de grupo con espacio flexible y elipsis en el editor` | `title` en `.options__name`; CSS con fila `flex-wrap`, nombre con elipsis y "Mover a…" en línea propia; 1 test. |
