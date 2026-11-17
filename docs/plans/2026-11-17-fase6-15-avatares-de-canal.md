@@ -126,7 +126,7 @@ foco). Cada `li.options__channel` lleva el avatar (`AVATAR_SIZES.editor`) entre 
 Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni `fetch`; `make lint` (incluye
 `web-ext lint`, 0 avisos) y `make test` en verde.
 
-- [ ] T1 · Clave `youtubeAvatars` en el almacenamiento · Ficheros: `modules/storage.js`, `tests/storage.test.js` ·
+- [x] T1 · Clave `youtubeAvatars` en el almacenamiento · Ficheros: `modules/storage.js`, `tests/storage.test.js` ·
   Test: `KEYS` tiene cinco claves (el test "cuatro claves" se actualiza porque el requisito cambia, no para que pase),
   `avatars: "youtubeAvatars"` y sigue congelado; `readAvatarsValue` con `undefined`, array, `{ avatars: [] }` y uno
   válido; `getAvatars` sin datos → `{}` sin llamar a `set`; `saveAvatars` guarda `{ version: 1, avatars }` y lanza con
@@ -224,3 +224,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `feat: clave youtubeAvatars en el almacenamiento` | `KEYS.avatars`, `readAvatarsValue`, `getAvatars`, `saveAvatars` y tests. |

@@ -5,11 +5,13 @@ const YouTubeGroupsStorage = (() => {
     watched: "youtubeWatched",
     settings: "youtubeSettings",
     playlists: "youtubePlaylists",
+    avatars: "youtubeAvatars",
   });
   const STORAGE_KEY = KEYS.groups;
   const WATCHED_KEY = KEYS.watched;
   const SETTINGS_KEY = KEYS.settings;
   const PLAYLISTS_KEY = KEYS.playlists;
+  const AVATARS_KEY = KEYS.avatars;
   let groupsInitializationPromise = null;
   const lockQueues = new Map();
 
@@ -72,6 +74,15 @@ const YouTubeGroupsStorage = (() => {
    */
   function readPlaylistsValue(data) {
     return data && Array.isArray(data.playlists) ? data.playlists : [];
+  }
+
+  /**
+   * Extrae el mapa de avatares de un valor guardado (ADR 0016).
+   * @param {*} data Valor guardado bajo la clave de avatares.
+   * @returns {Object} Mapa clave de canal -> URL de imagen, o {} si el formato no es válido.
+   */
+  function readAvatarsValue(data) {
+    return data && isPlainObject(data.avatars) ? data.avatars : {};
   }
 
   /**
@@ -207,6 +218,33 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee los avatares de canal (ADR 0016). Sin datos válidos devuelve {} y no escribe.
+   * @returns {Promise<Object>} Mapa clave de canal -> URL de imagen.
+   */
+  async function getAvatars() {
+    const stored = await browser.storage.local.get(AVATARS_KEY);
+
+    return readAvatarsValue(stored[AVATARS_KEY]);
+  }
+
+  /**
+   * Guarda los avatares de canal con el formato versión 1 (ADR 0016).
+   * @param {Object} avatars Mapa clave de canal -> URL de imagen.
+   */
+  async function saveAvatars(avatars) {
+    if (!isPlainObject(avatars)) {
+      throw new TypeError("Los avatares deben ser un objeto.");
+    }
+
+    await browser.storage.local.set({
+      [AVATARS_KEY]: {
+        version: 1,
+        avatars,
+      },
+    });
+  }
+
   function isPlainObject(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
@@ -218,6 +256,7 @@ const YouTubeGroupsStorage = (() => {
     readWatchedValue,
     readSettingsValue,
     readPlaylistsValue,
+    readAvatarsValue,
     getChangedKeys,
     getGroups,
     saveGroups,
@@ -227,5 +266,7 @@ const YouTubeGroupsStorage = (() => {
     saveSettings,
     getPlaylists,
     savePlaylists,
+    getAvatars,
+    saveAvatars,
   };
 })();

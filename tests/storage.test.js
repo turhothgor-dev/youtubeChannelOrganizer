@@ -214,7 +214,7 @@ test("guardar listas no cambia grupos, vistos ni ajustes", async () => {
   );
 });
 
-test("KEYS tiene las cuatro claves con sus nombres reales", () => {
+test("KEYS tiene las cinco claves con sus nombres reales", () => {
   const { YouTubeGroupsStorage } = loadModules();
 
   assert.deepStrictEqual(plain(YouTubeGroupsStorage.KEYS), {
@@ -222,6 +222,7 @@ test("KEYS tiene las cuatro claves con sus nombres reales", () => {
     watched: "youtubeWatched",
     settings: "youtubeSettings",
     playlists: "youtubePlaylists",
+    avatars: "youtubeAvatars",
   });
   assert.ok(Object.isFrozen(YouTubeGroupsStorage.KEYS));
 });
@@ -362,4 +363,68 @@ test("getChangedKeys devuelve los nombres lógicos en el orden de KEYS", () => {
     plain(S.getChangedKeys({ otraClave: {} }, "local")),
     [],
   );
+});
+
+test("getChangedKeys con youtubeAvatars devuelve avatars y respeta el orden de KEYS", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(
+    plain(S.getChangedKeys({ youtubeAvatars: {} }, "local")),
+    ["avatars"],
+  );
+  assert.deepStrictEqual(
+    plain(
+      S.getChangedKeys(
+        { youtubeAvatars: {}, youtubePlaylists: {}, youtubeGroups: {} },
+        "local",
+      ),
+    ),
+    ["groups", "playlists", "avatars"],
+  );
+});
+
+test("readAvatarsValue devuelve el objeto o {}", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(plain(S.readAvatarsValue(undefined)), {});
+  assert.deepStrictEqual(plain(S.readAvatarsValue([])), {});
+  assert.deepStrictEqual(plain(S.readAvatarsValue({ avatars: [] })), {});
+  assert.deepStrictEqual(
+    plain(S.readAvatarsValue({ version: 1, avatars: { a: "b" } })),
+    { a: "b" },
+  );
+});
+
+test("getAvatars sin datos devuelve {} y no escribe", async () => {
+  const { YouTubeGroupsStorage, calls } = loadModules();
+
+  const avatars = await YouTubeGroupsStorage.getAvatars();
+
+  assert.deepStrictEqual(plain(avatars), {});
+  assert.strictEqual(calls.set, 0);
+});
+
+test("saveAvatars y getAvatars conservan el mapa con version 1", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  const map = { "https://www.youtube.com/@foo": "https://yt3.ggpht.com/a" };
+
+  await YouTubeGroupsStorage.saveAvatars(map);
+  const loaded = await YouTubeGroupsStorage.getAvatars();
+
+  assert.deepStrictEqual(plain(loaded), map);
+  assert.deepStrictEqual(plain(store.youtubeAvatars), {
+    version: 1,
+    avatars: map,
+  });
+});
+
+test("saveAvatars con algo que no es un objeto plano lanza TypeError", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  for (const invalid of [[], null, 5]) {
+    await assert.rejects(
+      () => YouTubeGroupsStorage.saveAvatars(invalid),
+      (error) => error.name === "TypeError",
+    );
+  }
 });
