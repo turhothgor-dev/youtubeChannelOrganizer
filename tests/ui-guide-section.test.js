@@ -176,6 +176,37 @@ test("crear y editar son iconos a la derecha del título, dentro de la cabecera"
   assert.strictEqual(after.title, "Crear subgrupo en «A»");
 });
 
+test("el pie de la guía tiene Limpiar selección de icono, deshabilitado sin selección", async () => {
+  const dom = await loadWithGuide();
+  const guide = dom.document.querySelector(GUIDE);
+  const footer = guide.querySelector(".youtube-groups__guide-footer");
+  assert.strictEqual(guide.lastElementChild, footer);
+  assert.strictEqual(
+    footer.previousElementSibling.className,
+    "youtube-groups__guide-viewport",
+  );
+  const clear = footer.querySelector(".youtube-groups__guide-clear");
+  const badge = clear.querySelector(".youtube-groups__guide-badge");
+  assert.strictEqual(clear.hidden, false);
+  assert.strictEqual(clear.disabled, true);
+  assert.strictEqual(clear.getAttribute("aria-label"), "Limpiar selección");
+  assert.strictEqual(clear.title, "Limpiar selección");
+  assert.strictEqual(badge.hidden, true);
+
+  dom.document.querySelector(".youtube-groups__guide-item").click();
+  await dom.flush();
+  assert.strictEqual(clear.disabled, false);
+  assert.strictEqual(clear.getAttribute("aria-label"), "Limpiar selección (1)");
+  assert.strictEqual(badge.hidden, false);
+  assert.strictEqual(badge.textContent, "1");
+
+  clear.click();
+  await dom.flush();
+  assert.strictEqual(clear.disabled, true);
+  assert.strictEqual(badge.hidden, true);
+  assert.strictEqual(clear.getAttribute("aria-label"), "Limpiar selección");
+});
+
 test('"+ Grupo" con un nombre crea el grupo en el almacenamiento y aparece la fila', async () => {
   const dom = await loadWithGuide();
   dom.document.querySelector(".youtube-groups__guide-create").click();

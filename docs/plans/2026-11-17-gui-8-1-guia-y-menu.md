@@ -97,7 +97,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
   `left = right + 8` y `top = anchor.top`; sin hueco a la derecha → pegado al borde derecho menos 8; ancla cerca del
   borde inferior → sube hasta caber; menú más alto que la ventana → `top = 8`; ventana más estrecha que el menú →
   `left = 8`; devuelve enteros.
-- [ ] T5 · Pie de la guía con "Limpiar selección" de icono · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`,
+- [x] T5 · Pie de la guía con "Limpiar selección" de icono · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`,
   `tests/ui-guide-section.test.js` · Test (jsdom): `.youtube-groups__guide-footer` es el último hijo de
   `#youtube-groups-guide` (tras el `viewport`) y contiene `.youtube-groups__guide-clear`; sin selección está
   visible, deshabilitado, con `aria-label` "Limpiar selección" y la insignia oculta; al pulsar un grupo se habilita,
@@ -197,3 +197,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T2 | feat: banda de color en el botón principal del grupo de la guía | `setGroupBand` pasa de la fila al botón; padding derecho de 12 px con banda. Se actualiza `tests/ui-icons-dom.test.js` (comprobaba la banda en la fila) porque el requisito cambia. |
 | 2026-11-17 | T3 | feat: crear y editar como iconos a la derecha del título de la guía | (+) y lápiz son solo icono (`add`, `edit`) dentro de la cabecera, tras el título; `label` ya no se pinta. El formulario queda entre la cabecera y "Limpiar selección" hasta T5. |
 | 2026-11-17 | T4 | feat: función pura getMenuPosition para colocar el menú de opciones | Añadida a `modules/guide.js` y expuesta; 6 tests en `tests/guide.test.js` (derecha, borde, abajo, más alto, más estrecho, enteros). |
+| 2026-11-17 | T5 | feat: pie de la guía con Limpiar selección de icono | Pie `.youtube-groups__guide-footer` tras el viewport con reciclaje (deshabilitado sin selección, `aria-label`/`title` con N e insignia). El formulario sigue entre cabecera y columna. El engranaje llega en T6. |

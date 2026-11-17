@@ -512,13 +512,21 @@ const YouTubeGroupsGuideSection = (() => {
         const clear = document.createElement("button");
         clear.type = "button";
         clear.className = "youtube-groups__guide-clear";
-        clear.hidden = true;
+        clear.append(createUiIconSvg("recycle", 20));
+        const badge = document.createElement("span");
+        badge.className = "youtube-groups__guide-badge";
+        badge.hidden = true;
+        clear.append(badge);
         clear.addEventListener("click", () => ctx.setActiveSelection([]));
+
+        const footer = document.createElement("div");
+        footer.className = "youtube-groups__guide-footer";
+        footer.append(clear);
 
         viewport = document.createElement("div");
         viewport.className = "youtube-groups__guide-viewport";
 
-        section.replaceChildren(header, form, clear, viewport);
+        section.replaceChildren(header, form, viewport, footer);
       }
       guideGroups = groups;
 
@@ -543,8 +551,17 @@ const YouTubeGroupsGuideSection = (() => {
       create.setAttribute("aria-label", guideCreateTarget.title);
 
       const clear = section.querySelector(".youtube-groups__guide-clear");
-      clear.hidden = ctx.state.activeSelection.length === 0;
-      clear.textContent = `Limpiar selección (${ctx.state.activeSelection.length})`;
+      const selectedCount = ctx.state.activeSelection.length;
+      const clearLabel =
+        selectedCount === 0
+          ? "Limpiar selección"
+          : `Limpiar selección (${selectedCount})`;
+      clear.disabled = selectedCount === 0;
+      clear.title = clearLabel;
+      clear.setAttribute("aria-label", clearLabel);
+      const badge = clear.querySelector(".youtube-groups__guide-badge");
+      badge.hidden = selectedCount === 0;
+      badge.textContent = selectedCount === 0 ? "" : String(selectedCount);
 
       const list = document.createElement("div");
       list.className = "youtube-groups__guide-column";
