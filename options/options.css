@@ -70,6 +70,51 @@ html[dark] body {
   opacity: 0.7;
 }
 
+.options__editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.options__input {
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid rgba(128, 128, 128, 0.6);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+}
+
+.options__field-error {
+  font-size: 0.85rem;
+  color: #c00;
+}
+
+html[dark] .options__field-error {
+  color: #ff8a80;
+}
+
+.options__actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.options__action {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.options__action:hover {
+  background: rgba(128, 128, 128, 0.2);
+}
+
 #options-error {
   color: #c00;
 }

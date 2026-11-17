@@ -155,7 +155,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
 - [x] T7 · Árbol en la página: filas, plegar y desplegar, apariencia, número de canales, estado vacío y repintado por
   `storage.onChanged` conservando el estado · Ficheros: `options/options.js`, `options/options.css` · Test: `make
   lint`, `make test` y a mano V2.
-- [ ] T8 · Renombrar en línea, "Icono y color" y crear grupo y subgrupo · Ficheros: `options/options.js`,
+- [x] T8 · Renombrar en línea, "Icono y color" y crear grupo y subgrupo · Ficheros: `options/options.js`,
   `options/options.css` · Test: `make lint`, `make test` y a mano V3.
 - [ ] T9 · Eliminar con aviso y "Deshacer" · Ficheros: `options/options.js`, `options/options.css` · Test: `make
   lint`, `make test` y a mano V4.
@@ -228,3 +228,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T4 | `feat: página de opciones y script de fondo del editor de grupos` | `options_ui`, `background.js` y esqueleto de `options/` con tema, error y recuento; 267 tests y lint en verde. |
 | 2026-11-17 | T5 | `feat: botón Editar grupos en el panel y en la guía` | Botón "✎" en `ui/panel.js` y `ui/guide-section.js` que envía `youtube-groups:open-editor`; pendiente V1 a mano. |
 | 2026-11-17 | T7 | `feat: árbol de grupos en la página de opciones` | Filas con plegado, icono, banda, nº de canales, estado vacío y repintado por `storage.onChanged`; pendiente V2 a mano. |
+| 2026-11-17 | T8 | `feat: renombrar en línea, icono y color y crear grupos en el editor` | Campo en línea (Intro, blur, Escape, F2, doble clic), selector de icono, "+ Grupo" y "+ Subgrupo"; añade el botón en `options.html`; pendiente V3 a mano. |
