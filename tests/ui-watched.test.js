@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   VIDEO_ID,
   flushLoose,
@@ -11,6 +11,27 @@ const {
 } = require("./helpers/youtube-fixtures");
 
 const WATCHED_CLASS = "youtube-groups--watched";
+
+test("YouTubeGroupsWatchedUi.create no toca el DOM ni registra timeupdate hasta start()", () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML, scripts });
+  const before = dom.document.body.innerHTML;
+  const registered = [];
+  const original = dom.document.addEventListener.bind(dom.document);
+  dom.document.addEventListener = (type, ...rest) => {
+    registered.push(type);
+    return original(type, ...rest);
+  };
+  const WatchedUi = dom.global("YouTubeGroupsWatchedUi");
+
+  assert.strictEqual(typeof WatchedUi.create, "function");
+  const watched = WatchedUi.create({ state: {} });
+
+  assert.strictEqual(dom.document.body.innerHTML, before);
+  assert.ok(!registered.includes("timeupdate"));
+  assert.strictEqual(typeof watched.start, "function");
+  assert.strictEqual(typeof watched.toggleVideoWatched, "function");
+});
 
 test("Marcar visto guarda el ID y marca la tarjeta", async () => {
   const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML });

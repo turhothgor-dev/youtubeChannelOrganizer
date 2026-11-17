@@ -34,6 +34,7 @@
         "ui/icon-picker.js",
         "ui/dropdowns.js",
         "ui/player.js",
+        "ui/watched.js",
         "content.js"
       ],
       "run_at": "document_idle"
