@@ -46,7 +46,7 @@ Decisión:
   sus `<script src>` (relativas a la raíz, como el test de `manifest.test.js`), y llama a `loadDom` con una URL
   `https:` (con un origen opaco como `moz-extension:` jsdom lanza al leer `sessionStorage`). · Test (jsdom): con A
   (subgrupo A1) y B, el árbol pinta tres filas `[role="treeitem"]` con los nombres A, A1, B y el resumen "3 grupos".
-- [ ] T2 · Acciones de fila solo icono y nuevo orden · Ficheros: `options/options.js`, `options/options.css`,
+- [x] T2 · Acciones de fila solo icono y nuevo orden · Ficheros: `options/options.js`, `options/options.css`,
   `tests/ui-options.test.js` · Test (jsdom): en la fila de A, los `aria-label` de `.options__actions button` son, en
   orden, "Subir", "Bajar", "Renombrar", "Icono y color", "Eliminar", "Mover a…", "Añadir subgrupo"; cada botón tiene
   `title` igual, un `svg` y ningún texto; "Subir" de A está deshabilitado y "Bajar" de A mueve A tras B en el
@@ -97,3 +97,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `test: ayudante loadOptionsDom y test del árbol del editor` | `optionsPage()` y `loadOptionsDom()` en `tests/helpers/load-dom.js`; test inicial en `tests/ui-options.test.js`. |
+| 2026-11-17 | T2 | `feat: acciones de fila del editor solo con icono y nuevo orden` | `iconButton` en `options.js`, estilos `.options__action--icon` y 7 tests de DOM. |

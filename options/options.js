@@ -253,6 +253,26 @@
   }
 
   /**
+   * Crea un botón de acción de fila que solo muestra un icono.
+   * @param {string} iconId - Id del icono de `UI_ICON_PATHS`.
+   * @param {string} label - Nombre accesible y `title`.
+   * @param {function(HTMLButtonElement): void} onClick - Acción.
+   * @returns {HTMLButtonElement} Botón.
+   */
+  function iconButton(iconId, label, onClick) {
+    const button = el("button", "options__action options__action--icon");
+    button.type = "button";
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    const svg = YouTubeGroupsIconsDom.createUiIconSvg(iconId, 18);
+    if (svg) {
+      button.append(svg);
+    }
+    button.addEventListener("click", () => onClick(button));
+    return button;
+  }
+
+  /**
    * Abre el selector de icono y color de un grupo.
    * @param {Object} group - Grupo.
    * @param {HTMLButtonElement} button - Botón al que se ancla el selector.
@@ -1186,33 +1206,42 @@
       ),
     );
     const actions = el("span", "options__actions");
-    const upButton = actionButton("Subir", () => moveSibling(group, -1));
-    upButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
-      groups,
-      group.id,
-      -1,
-    );
-    const downButton = actionButton("Bajar", () => moveSibling(group, 1));
-    downButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
-      groups,
-      group.id,
-      1,
-    );
+    if (!searching) {
+      const upButton = iconButton("arrow-up", "Subir", () =>
+        moveSibling(group, -1),
+      );
+      upButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
+        groups,
+        group.id,
+        -1,
+      );
+      const downButton = iconButton("arrow-down", "Bajar", () =>
+        moveSibling(group, 1),
+      );
+      downButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
+        groups,
+        group.id,
+        1,
+      );
+      actions.append(upButton, downButton);
+    }
     actions.append(
-      actionButton("Renombrar", () =>
+      iconButton("edit", "Renombrar", () =>
         startEdit("rename", group.id, null, group.name),
       ),
-      actionButton("Icono y color", (button) => editAppearance(group, button)),
-      actionButton("+ Subgrupo", () => startEdit("create", null, group.id, "")),
+      iconButton("palette", "Icono y color", (button) =>
+        editAppearance(group, button),
+      ),
+      iconButton("delete", "Eliminar", () => deleteGroup(group)),
     );
     if (!searching) {
-      actions.append(
-        upButton,
-        downButton,
-        actionButton("Mover a…", () => startMove(group)),
-      );
+      actions.append(iconButton("swap", "Mover a…", () => startMove(group)));
     }
-    actions.append(actionButton("Eliminar", () => deleteGroup(group)));
+    actions.append(
+      iconButton("add", "Añadir subgrupo", () =>
+        startEdit("create", null, group.id, ""),
+      ),
+    );
     row.append(actions);
     if (moving && moving.groupId === group.id) {
       const control = buildMoveControl(group);

@@ -142,6 +142,19 @@ html[dark] .options__field-error {
   cursor: pointer;
 }
 
+.options__action--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.options__action--icon svg {
+  fill: currentColor;
+}
+
 .options__action:disabled {
   opacity: 0.4;
   cursor: default;
