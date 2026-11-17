@@ -137,7 +137,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   incluye el grupo ni sus descendientes y marca el padre actual; `getDropPosition` `"before"`/`"after"`/`"inside"` en
   el mismo nivel y en otro, con el arrastrado antes del destino en la misma lista (índice corregido) y `null` sobre un
   descendiente; `moveGroupAndSave` sin cambios no llama a `set` y dos movimientos solapados no se pisan.
-- [ ] T3 · `summarizeSubtree`, `removeGroupWithSnapshot`, `restoreGroup`, `deleteGroupAndSnapshot` y
+- [x] T3 · `summarizeSubtree`, `removeGroupWithSnapshot`, `restoreGroup`, `deleteGroupAndSnapshot` y
   `restoreGroupAndSave` · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js` · Test: resumen de un grupo
   con dos subgrupos y un canal repetido (`/@Foo` y `/@foo`) cuenta 1 canal; borrar y restaurar deja el árbol igual
   (mismo orden e índices); restaurar dos veces → `restored: false` sin escribir; restaurar con el padre borrado → al
@@ -223,3 +223,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `fix: normalizeChannelUrl con origen fijo y renameGroup con validateGroupName` | ADR 0014 a `aceptada`; opción `origin` en `loadModules`; 249 tests y lint en verde. |
 | 2026-11-17 | T2 | `feat: group-editor con moveGroup, getSiblingMove, getMoveTargets, getDropPosition y moveGroupAndSave` | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
+| 2026-11-17 | T3 | `feat: group-editor con summarizeSubtree, removeGroupWithSnapshot, restoreGroup y borrado con deshacer` | Añade `deleteGroupAndSnapshot` y `restoreGroupAndSave`; 265 tests y lint en verde. |

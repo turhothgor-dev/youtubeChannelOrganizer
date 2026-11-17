@@ -258,6 +258,121 @@ test("moveGroupAndSave guarda el movimiento y no escribe si no hay cambios", asy
   assert.deepStrictEqual(ids(saved[0].subgroups), ["B", "A1", "A2"]);
 });
 
+function treeWithChannels() {
+  const tree = sampleTree();
+  tree[0].channels = [{ name: "Foo", url: "https://www.youtube.com/@Foo" }];
+  tree[0].subgroups[0].channels = [
+    { name: "foo", url: "https://www.youtube.com/@foo" },
+    { name: "Bar", url: "https://www.youtube.com/@Bar" },
+  ];
+  return tree;
+}
+
+test("summarizeSubtree cuenta descendientes y canales distintos", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithChannels();
+
+  assert.deepStrictEqual(
+    plain(YouTubeGroupsEditor.summarizeSubtree(tree, "A")),
+    { subgroups: 3, channels: 2 },
+  );
+  assert.deepStrictEqual(
+    plain(YouTubeGroupsEditor.summarizeSubtree(tree, "B")),
+    { subgroups: 0, channels: 0 },
+  );
+  assert.strictEqual(YouTubeGroupsEditor.summarizeSubtree(tree, "X"), null);
+});
+
+test("removeGroupWithSnapshot y restoreGroup dejan el árbol igual", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithChannels();
+  const before = structuredClone(tree);
+
+  for (const id of ["A", "A1", "A1a", "B", "C"]) {
+    const removed = YouTubeGroupsEditor.removeGroupWithSnapshot(tree, id);
+    assert.ok(!JSON.stringify(removed.groups).includes(`"id":"${id}"`));
+    const back = YouTubeGroupsEditor.restoreGroup(
+      removed.groups,
+      removed.snapshot,
+    );
+    assert.strictEqual(back.restored, true);
+    assert.strictEqual(back.atRoot, false);
+    assert.deepStrictEqual(plain(back.groups), plain(before));
+  }
+  assert.deepStrictEqual(plain(tree), plain(before));
+
+  const removed = YouTubeGroupsEditor.removeGroupWithSnapshot(tree, "A");
+  assert.deepStrictEqual(plain(removed.removedIds), ["A", "A1", "A1a", "A2"]);
+  assert.throws(() => YouTubeGroupsEditor.removeGroupWithSnapshot(tree, "X"));
+});
+
+test("restoreGroup: dos veces no cambia; sin padre va al final del primer nivel; índice acotado", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = sampleTree();
+
+  const removed = YouTubeGroupsEditor.removeGroupWithSnapshot(tree, "A1");
+  const once = YouTubeGroupsEditor.restoreGroup(
+    removed.groups,
+    removed.snapshot,
+  );
+  const twice = YouTubeGroupsEditor.restoreGroup(once.groups, removed.snapshot);
+  assert.strictEqual(twice.restored, false);
+
+  // Padre borrado
+  const noParent = YouTubeGroupsEditor.removeGroupWithSnapshot(
+    removed.groups,
+    "A",
+  );
+  const orphan = YouTubeGroupsEditor.restoreGroup(
+    noParent.groups,
+    removed.snapshot,
+  );
+  assert.strictEqual(orphan.restored, true);
+  assert.strictEqual(orphan.atRoot, true);
+  assert.deepStrictEqual(ids(orphan.groups), ["B", "C", "A1"]);
+  const placed = orphan.groups[2];
+  assert.strictEqual(placed.type, "group");
+  assert.ok(!("parentId" in placed));
+  assert.deepStrictEqual(ids(placed.subgroups), ["A1a"]);
+
+  // Índice acotado tras cambiar los hermanos: A1 estaba en el índice 0
+  const sibling = removed.groups;
+  sibling[0].subgroups = [];
+  const clamped = YouTubeGroupsEditor.restoreGroup(sibling, {
+    ...removed.snapshot,
+    index: 5,
+  });
+  assert.deepStrictEqual(ids(clamped.groups[0].subgroups), ["A1"]);
+  assert.strictEqual(clamped.groups[0].subgroups[0].parentId, "A");
+});
+
+test("deleteGroupAndSnapshot y restoreGroupAndSave guardan y no escriben de más", async () => {
+  const { YouTubeGroupsEditor, store, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: treeWithChannels() },
+  });
+  const before = structuredClone(store.youtubeGroups.groups);
+
+  const deleted = await YouTubeGroupsEditor.deleteGroupAndSnapshot("A");
+  assert.strictEqual(calls.set, 1);
+  assert.deepStrictEqual(plain(deleted.removedIds), ["A", "A1", "A1a", "A2"]);
+  assert.deepStrictEqual(plain(deleted.summary), { subgroups: 3, channels: 2 });
+  assert.deepStrictEqual(ids(store.youtubeGroups.groups), ["B", "C"]);
+
+  const restored = await YouTubeGroupsEditor.restoreGroupAndSave(
+    deleted.snapshot,
+  );
+  assert.deepStrictEqual(plain(restored), { restored: true, atRoot: false });
+  assert.strictEqual(calls.set, 2);
+  assert.deepStrictEqual(plain(store.youtubeGroups.groups), plain(before));
+
+  const again = await YouTubeGroupsEditor.restoreGroupAndSave(deleted.snapshot);
+  assert.strictEqual(again.restored, false);
+  assert.strictEqual(calls.set, 2);
+
+  await assert.rejects(YouTubeGroupsEditor.deleteGroupAndSnapshot("X"));
+  assert.strictEqual(calls.set, 2);
+});
+
 test("moveGroupAndSave: dos movimientos solapados no se pisan", async () => {
   const { YouTubeGroupsEditor, store } = loadModules(
     { youtubeGroups: { version: 1, groups: sampleTree() } },

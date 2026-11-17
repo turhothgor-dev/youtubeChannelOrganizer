@@ -249,6 +249,168 @@ const YouTubeGroupsEditor = (() => {
     );
   }
 
+  /**
+   * Cuenta los subgrupos y los canales distintos de un subárbol.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} id - Id del grupo raíz del subárbol.
+   * @returns {{subgroups: number, channels: number}|null} `subgroups` son los
+   *   descendientes (sin el propio grupo) y `channels` los canales distintos
+   *   de todo el subárbol; `null` si el grupo no existe.
+   */
+  function summarizeSubtree(groups, id) {
+    const found = locate(groups, id);
+    if (!found) {
+      return null;
+    }
+    const keys = new Set();
+    let subgroups = 0;
+    const visit = (group, isRoot) => {
+      if (!isRoot) {
+        subgroups += 1;
+      }
+      for (const channel of Array.isArray(group.channels)
+        ? group.channels
+        : []) {
+        keys.add(YouTubeGroups.getChannelKey(channel.url));
+      }
+      for (const child of childrenOf(group)) {
+        visit(child, false);
+      }
+    };
+    visit(found.group, true);
+    return { subgroups, channels: keys.size };
+  }
+
+  /**
+   * Recoge los ids de un subárbol.
+   * @param {Object} group - Raíz del subárbol.
+   * @returns {Array<string>} Ids en preorden.
+   */
+  function collectIds(group) {
+    return [group.id, ...childrenOf(group).flatMap(collectIds)];
+  }
+
+  /**
+   * Quita un grupo con todo su subárbol y devuelve una instantánea para
+   * restaurarlo, sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} id - Id del grupo a borrar.
+   * @returns {{groups: Array<Object>, removedIds: Array<string>,
+   *   snapshot: {group: Object, parentId: string|null, index: number}}}
+   * @throws {Error} Si el grupo no existe.
+   */
+  function removeGroupWithSnapshot(groups, id) {
+    const found = locate(groups, id);
+    if (!found) {
+      throw new Error("No existe el grupo indicado.");
+    }
+    const snapshot = {
+      group: structuredClone(found.group),
+      parentId: found.parentId,
+      index: found.index,
+    };
+    const result = structuredClone(groups);
+    const target = locate(result, id);
+    target.list.splice(target.index, 1);
+    return { groups: result, removedIds: collectIds(found.group), snapshot };
+  }
+
+  /**
+   * Devuelve a su sitio un subárbol borrado, sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos actual.
+   * @param {{group: Object, parentId: string|null, index: number}} snapshot -
+   *   Instantánea de `removeGroupWithSnapshot`.
+   * @returns {{groups: Array<Object>, restored: boolean, atRoot: boolean}}
+   *   `restored` es `false` si algún id ya existe; `atRoot` es `true` si el
+   *   padre ya no existe y se añade al final del primer nivel.
+   */
+  function restoreGroup(groups, snapshot) {
+    const restoredGroup = structuredClone(snapshot.group);
+    if (collectIds(restoredGroup).some((id) => locate(groups, id))) {
+      return {
+        groups: structuredClone(groups),
+        restored: false,
+        atRoot: false,
+      };
+    }
+
+    const result = structuredClone(groups);
+    const parent =
+      snapshot.parentId === null ? null : locate(result, snapshot.parentId);
+
+    if (snapshot.parentId !== null && parent) {
+      if (!Array.isArray(parent.group.subgroups)) {
+        parent.group.subgroups = [];
+      }
+      const list = parent.group.subgroups;
+      restoredGroup.type = "subgroup";
+      restoredGroup.parentId = snapshot.parentId;
+      list.splice(
+        Math.min(Math.max(snapshot.index, 0), list.length),
+        0,
+        restoredGroup,
+      );
+      return { groups: result, restored: true, atRoot: false };
+    }
+
+    restoredGroup.type = "group";
+    delete restoredGroup.parentId;
+    if (snapshot.parentId === null) {
+      result.splice(
+        Math.min(Math.max(snapshot.index, 0), result.length),
+        0,
+        restoredGroup,
+      );
+      return { groups: result, restored: true, atRoot: false };
+    }
+    result.push(restoredGroup);
+    return { groups: result, restored: true, atRoot: true };
+  }
+
+  /**
+   * Borra un grupo y guarda: una lectura y una escritura.
+   * @param {string} id - Id del grupo a borrar.
+   * @returns {Promise<{removedIds: Array<string>, snapshot: Object,
+   *   summary: {subgroups: number, channels: number}}>}
+   * @throws {Error} Si el grupo no existe (no escribe).
+   */
+  async function deleteGroupAndSnapshot(id) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const summary = summarizeSubtree(groups, id);
+        const result = removeGroupWithSnapshot(groups, id);
+        await YouTubeGroupsStorage.saveGroups(result.groups);
+        return {
+          removedIds: result.removedIds,
+          snapshot: result.snapshot,
+          summary,
+        };
+      },
+    );
+  }
+
+  /**
+   * Restaura un grupo borrado y guarda; no escribe si ya estaba restaurado.
+   * @param {{group: Object, parentId: string|null, index: number}} snapshot -
+   *   Instantánea de `deleteGroupAndSnapshot`.
+   * @returns {Promise<{restored: boolean, atRoot: boolean}>}
+   */
+  async function restoreGroupAndSave(snapshot) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const result = restoreGroup(groups, snapshot);
+        if (result.restored) {
+          await YouTubeGroupsStorage.saveGroups(result.groups);
+        }
+        return { restored: result.restored, atRoot: result.atRoot };
+      },
+    );
+  }
+
   return {
     findGroupLocation,
     moveGroup,
@@ -256,5 +418,10 @@ const YouTubeGroupsEditor = (() => {
     getMoveTargets,
     getDropPosition,
     moveGroupAndSave,
+    summarizeSubtree,
+    removeGroupWithSnapshot,
+    restoreGroup,
+    deleteGroupAndSnapshot,
+    restoreGroupAndSave,
   };
 })();
