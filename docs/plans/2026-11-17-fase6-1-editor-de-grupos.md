@@ -128,7 +128,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   `"https://www.youtube.com/channel/UC1/"` → sin barra final; `"https://evil.com/@a"` → `null`;
   `removeChannelFromGroup` funciona con ese origen; `renameGroup` con "a" o 81 caracteres rechaza sin escribir (mensaje
   "del subgrupo" para un subgrupo) y con " Nuevo " guarda "Nuevo". Los tests existentes siguen pasando.
-- [ ] T2 · `modules/group-editor.js` con `findGroupLocation`, `moveGroup`, `getSiblingMove`, `getMoveTargets`,
+- [x] T2 · `modules/group-editor.js` con `findGroupLocation`, `moveGroup`, `getSiblingMove`, `getMoveTargets`,
   `getDropPosition` y `moveGroupAndSave` · Ficheros: `modules/group-editor.js`, `tests/helpers/load-modules.js`
   (añadir el módulo y exponer `YouTubeGroupsEditor`), `tests/group-editor.test.js` · Test: subir el primero → `null`;
   bajar A en `[A,B,C]` → `[B,A,C]`; mover un subgrupo al primer nivel → `type: "group"` sin `parentId`; mover un grupo
@@ -222,3 +222,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `fix: normalizeChannelUrl con origen fijo y renameGroup con validateGroupName` | ADR 0014 a `aceptada`; opción `origin` en `loadModules`; 249 tests y lint en verde. |
+| 2026-11-17 | T2 | `feat: group-editor con moveGroup, getSiblingMove, getMoveTargets, getDropPosition y moveGroupAndSave` | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
