@@ -1,6 +1,6 @@
 # Plan: Fase 6 · Hoja de ruta (organización y mantenimiento)
 
-**Estado:** borrador
+**Estado:** hecho
 
 Issue: petición de la persona (2026-11-17): ampliar `ROADMAP.md` con una Fase 6 priorizada a partir de lo pendiente y
 de una búsqueda de extensiones similares (PocketTube, SubTube, Groupify, TubeZenify, YouTube Subscription Organizer).
@@ -85,7 +85,7 @@ observación del feed de 6-5.
 
 ## Tareas
 
-- [ ] T1 · Sustituir la sección "Pendiente" de `ROADMAP.md` por la sección **Fase 6** con este texto exacto (mismo
+- [x] T1 · Sustituir la sección "Pendiente" de `ROADMAP.md` por la sección **Fase 6** con este texto exacto (mismo
   estilo que las fases anteriores; "⬜" = pendiente, se cambia por "✅" al terminar cada plan):
 
   ```markdown
@@ -137,6 +137,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | T1 | Se añade a la Fase 6 "Avatares de canal (alta, 6-15)", detrás de 6-2: la Fase 6 pasa a 15 funcionalidades. | Petición de la persona: que los canales de grupos y subgrupos muestren el icono del canal. | La persona (2026-11-17) |
 
 ## Registro
 
@@ -144,3 +145,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `docs: fase 6 en el ROADMAP` | Sección "Pendiente" sustituida por la Fase 6 (15 funcionalidades con 6-15, avatares de canal); plan a `hecho`. |

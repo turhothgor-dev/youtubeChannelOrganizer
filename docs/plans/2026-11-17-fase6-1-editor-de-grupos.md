@@ -1,6 +1,6 @@
 # Plan: Fase 6 (1/2 del editor) · Editor de grupos en la página de opciones: árbol
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-17)
 
 Issue: `ROADMAP.md`, Fase 6: "Editor de grupos en una página propia" (antes "Pendiente": pantalla para editar grupos
 y subgrupos). Hoja de ruta: `docs/plans/2026-11-17-fase6-hoja-de-ruta.md`. ADR:
