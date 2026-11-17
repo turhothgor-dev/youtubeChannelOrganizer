@@ -36,9 +36,10 @@ about:debugging#/runtime/this-firefox
 
 La extensión tendrá aproximadamente estas partes:
 
-### content.js
+### content.js y ui/*.js
 
-Se ejecutará en YouTube.
+Se ejecutan en YouTube. `content.js` es el orquestador (estado compartido, `MutationObserver`, eventos) y la
+interfaz está en componentes de `ui/` (ver `docs/ARCHITECTURE.md`).
 
 Responsabilidades:
 
@@ -51,9 +52,9 @@ Responsabilidades:
 - Gestionar contenido cargado dinámicamente.
 - Usar MutationObserver cuando sea necesario.
 
-### content.css
+### ui/*.css
 
-Contendrá los estilos de los elementos añadidos por nuestra extensión.
+Contienen los estilos de los elementos añadidos por nuestra extensión, un fichero por componente.
 
 ### background.js
 

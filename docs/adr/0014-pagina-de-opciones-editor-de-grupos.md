@@ -1,6 +1,6 @@
 # 0014 · Editor de grupos en la página de opciones, abierta con un script de fondo mínimo
 
-- Estado: propuesta
+- Estado: propuesta (punto 3 modificado por el [ADR 0015](0015-componentes-de-interfaz-en-ui.md))
 - Fecha: 2026-11-17
 
 ## Contexto
@@ -20,17 +20,19 @@ página de la extensión es `moz-extension://…`.
 
 1. **Página de opciones** (`options_ui` con `open_in_tab: true`, `options/options.html`): el editor de grupos vive en
    una pestaña propia de la extensión. Carga con `<script src>` los mismos scripts clásicos de `modules/` que necesita
-   (en el mismo orden relativo que `manifest.json`), más `ui/group-ui.js` y `options/options.js`. También se abre desde
+   (en el mismo orden relativo que `manifest.json`), más `ui/icons-dom.js`, `ui/icon-picker.js` y `options/options.js`. También se abre desde
    `about:addons` → Preferencias.
 2. **Script de fondo mínimo** (`background.js`, `"background": { "scripts": [...] }`, página de eventos no persistente):
    solo escucha `runtime.onMessage` con `{ type: "youtube-groups:open-editor" }` y llama a
    `browser.runtime.openOptionsPage()`. El panel flotante y la sección de la guía envían ese mensaje. No guarda estado
    ni escribe en el almacenamiento.
-3. **Código de interfaz compartido** en `ui/group-ui.js` (`YouTubeGroupsUi`, con DOM): SVG de iconos, banda de color,
-   tamaños de icono y selector de icono y color, que hoy están dentro de `content.js`. Lo cargan los content scripts
-   (antes de `content.js`) y la página de opciones. La página enlaza `content.css` para reutilizar los estilos del
-   selector y pone o quita el atributo `dark` en `<html>` según `prefers-color-scheme`, para que valgan las reglas
-   `html[dark]`.
+3. **Código de interfaz compartido** en `ui/icons-dom.js` (`YouTubeGroupsIconsDom`) y `ui/icon-picker.js`
+   (`YouTubeGroupsIconPicker`), con DOM: SVG de iconos, banda de color, tamaños de icono y selector de icono y color,
+   que estaban dentro de `content.js`. Los cargan los content scripts (antes de `content.js`) y la página de opciones.
+   La página enlaza `ui/buttons.css`, `ui/icons.css` y `ui/icon-picker.css` para reutilizar los estilos del selector y
+   pone o quita el atributo `dark` en `<html>` según `prefers-color-scheme`, para que valgan las reglas
+   `html[dark]`. (Modificado por el [ADR 0015](0015-componentes-de-interfaz-en-ui.md): antes `ui/group-ui.js` y
+   `content.css`.)
 4. **Lógica pura del editor** en `modules/group-editor.js` (`YouTubeGroupsEditor`, sin DOM, con tests `node --test`):
    mover, destinos válidos, posición al soltar, borrar con instantánea y restaurar, operaciones de canales en bloque y
    búsqueda. Las operaciones que escriben usan `withLock` de la clave de grupos (ADR 0005).

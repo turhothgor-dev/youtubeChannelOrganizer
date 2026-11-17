@@ -32,4 +32,4 @@
 
 ## Pendiente:
 - Pantalla propia para editar grupos y subgrupos: renombrar, eliminar, cambiar icono y color, quitar canales (el
-  código está en `modules/groups.js` y en `promptRenameGroup`/`confirmDeleteGroup` de `content.js`)
+  código está en `modules/groups.js` y en `promptRenameGroup`/`confirmDeleteGroup` de `ui/panel.js`)

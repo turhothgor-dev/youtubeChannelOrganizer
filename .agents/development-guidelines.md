@@ -26,11 +26,13 @@ This is a YouTube Groups Firefox browser extension built with JavaScript that al
 - Follow the existing code style and formatting patterns
 
 ## File Structure
-- `content.js` - Main extension logic running in YouTube context
+
+- `content.js` - Orchestrator running in YouTube context (creates `ctx` and the `ui/` components)
 - `manifest.json` - Extension metadata and permissions
 - `modules/` - Supporting modules and utilities
+- `ui/*.js` - Interface components (cards, panel, guide section, dropdowns, player, watched, icons)
+- `ui/*.css` - Extension styling, one file per component
 - `path/` - Path-related utilities
-- `content.css` - Extension styling
 
 ## Development Process
 1. Always examine the existing codebase before implementing new features

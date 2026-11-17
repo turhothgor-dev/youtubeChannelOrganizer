@@ -1,6 +1,6 @@
 # 0015 · Interfaz de `content.js` dividida en componentes de `ui/`, con contexto explícito y tests de DOM
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-17
 
 ## Contexto
@@ -34,10 +34,11 @@ sin dependencias en el paquete, sin cambiar el comportamiento visible ni el form
    `MutationObserver`, los eventos de navegación y `storage.onChanged`.
 5. **CSS por componente** en `ui/*.css`, listados en `manifest.json` en un orden que conserva la cascada de
    `content.css`, que desaparece.
-6. **Tests de DOM con `linkedom`** como `devDependency` (solo tests; no entra en el `.xpi`): un ayudante
-   `tests/helpers/load-dom.js` carga los scripts de `manifest.json` en un documento de linkedom con `browser`
-   simulado, y cada componente tiene tests de humo (se crea, responde a un clic, no se duplica). Si linkedom no basta
-   para esos tests con unos pocos sustitutos de APIs de maquetación y del navegador, se usa `jsdom`.
+6. **Tests de DOM con `jsdom`** como `devDependency` (solo tests; no entra en el `.xpi`): un ayudante
+   `tests/helpers/load-dom.js` carga los scripts de `manifest.json` en un documento de jsdom con `browser`
+   simulado, y cada componente tiene tests de humo (se crea, responde a un clic, no se duplica). Se previó `linkedom`
+   y se pasó a `jsdom` en la T1 del plan: en `linkedom`, `HTMLSelectElement.value` solo tiene getter y
+   `syncSettingsControls` fallaba al crear el panel (el criterio de paso a `jsdom` que fijaba el plan).
 7. Modifica el punto 3 del ADR 0014: en lugar de `ui/group-ui.js`, la página de opciones carga `ui/icons-dom.js` y
    `ui/icon-picker.js` y enlaza sus CSS en lugar de `content.css`.
 
@@ -52,8 +53,9 @@ sin dependencias en el paquete, sin cambiar el comportamiento visible ni el form
   comportamiento.
 - **Refactor parcial (solo lo que necesita el editor)**: deja un `content.js` de 3800 líneas y obliga a repetir el
   trabajo en los siguientes planes de la Fase 6.
-- **`jsdom` como primera opción**: muchas más dependencias y más lento de arrancar; `linkedom` es pequeño y basta para
-  crear elementos, seleccionar, despachar eventos y observar mutaciones.
+- **`linkedom` como herramienta de tests**: se probó primero (pequeño y rápido), pero su DOM no implementa partes
+  que usa el código (p. ej. el setter de `HTMLSelectElement.value`); se usa `jsdom`, con más dependencias y arranque
+  más lento.
 - **Tests de extremo a extremo en Firefox** (Playwright, Selenium): pesados para un proyecto sin CI de navegador; se
   mantiene la verificación manual en Firefox.
 
@@ -62,7 +64,7 @@ sin dependencias en el paquete, sin cambiar el comportamiento visible ni el form
 - Se gana: ficheros de 150 a 1000 líneas con su API explícita, código de iconos reutilizable por la página de
   opciones, y una red de tests de DOM para la interfaz que se mantiene en los siguientes planes.
 - Se pierde: más ficheros y un orden de carga que hay que respetar en `manifest.json`; `ctx` añade un nivel de
-  indirección; una `devDependency` nueva.
+  indirección; una `devDependency` nueva (`jsdom`).
 - A vigilar: un componente que acceda a otro al cargar (y no en la llamada) depende del orden del manifiesto; el
   orden de los escuchadores del mismo evento (`yt-navigate-start`, `yt-navigate-finish`) debe seguir siendo el de hoy;
   el orden de los `ui/*.css` en el manifiesto es parte de la cascada; los tests de DOM no ven maquetación (posiciones,

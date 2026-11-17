@@ -15,15 +15,14 @@ Requisito: ninguno; conviene haber hecho antes la T1 de la hoja de ruta (secció
 ## Contexto y decisión
 
 Hoy no se puede renombrar, borrar, cambiar el icono o el color, ni mover un grupo o subgrupo después de crearlo: la
-sección de la guía solo filtra y crea, y `promptRenameGroup`/`confirmDeleteGroup` (`content.js`) y `renameGroup`,
+sección de la guía solo filtra y crea, y `promptRenameGroup`/`confirmDeleteGroup` (`ui/panel.js`) y `renameGroup`,
 `deleteGroup`, `deleteSubGroup`, `setGroupAppearance` (`modules/groups.js`) están sin enlazar. Decidido con la persona
 ("usa lo recomendado", 2026-11-17), con el detalle en el ADR 0014:
 
 - El editor es la **página de opciones** de la extensión, en una pestaña propia. Se abre con un botón "Editar grupos"
   en la cabecera del panel flotante y en la cabecera de la sección de la guía (mensaje a un `background.js` mínimo que
   llama a `runtime.openOptionsPage()`), y desde `about:addons`.
-- Muestra el **árbol de grupos** con: renombrar en línea, icono y color con el selector existente (extraído a
-  `ui/group-ui.js`), crear grupo y subgrupo, **mover y reordenar** (arrastrar y soltar, con alternativa de botones
+- Muestra el **árbol de grupos** con: renombrar en línea, icono y color con el selector existente (`ui/icon-picker.js`), crear grupo y subgrupo, **mover y reordenar** (arrastrar y soltar, con alternativa de botones
   "Subir", "Bajar", "Mover a…" y teclado) y **borrar** con aviso del número de subgrupos y canales y "Deshacer"
   durante 10 s, sin `confirm`.
 - Borrar un grupo con subgrupos borra todo su subárbol (como hoy `removeGroupById`).
@@ -73,15 +72,16 @@ borrar: "Deshacer" protege igual y no interrumpe. Trasladar Ajustes y copias de 
 **Infraestructura** (ADR 0014):
 
 - `manifest.json`: `"options_ui": { "page": "options/options.html", "open_in_tab": true }`,
-  `"background": { "scripts": ["background.js"] }` y `ui/group-ui.js` en `content_scripts.js` justo antes de
-  `content.js`. Sin permisos nuevos.
+  `"background": { "scripts": ["background.js"] }`. Sin permisos nuevos. (`ui/icons-dom.js` y `ui/icon-picker.js` ya
+  están en `content_scripts.js` desde el plan `2026-11-17-refactor-content-js.md`.)
 - `background.js`: solo `runtime.onMessage` → si `message?.type === "youtube-groups:open-editor"`, devuelve
   `browser.runtime.openOptionsPage()`.
-- `options/options.html` (sin scripts en línea): enlaza `/content.css` y `options.css`; carga `storage.js`,
-  `fxemoji-data.js`, `icons.js`, `groups.js`, `group-editor.js`, `/ui/group-ui.js` y `options.js`, en ese orden.
-- `ui/group-ui.js` (`YouTubeGroupsUi`): se mueven tal cual desde `content.js` `GROUP_ICON_SIZES`, `createIconSvg`,
-  `setGroupBand`, `openIconPicker`, `hideIconPicker` y lo que necesitan (`getOrCreateIconPicker`,
-  `createIconPicker`). `content.js` los usa desde el global; mismo DOM, clases y comportamiento.
+- `options/options.html` (sin scripts en línea): enlaza `/ui/buttons.css`, `/ui/icons.css`, `/ui/icon-picker.css` y
+  `options.css`; carga `storage.js`, `fxemoji-data.js`, `icons.js`, `groups.js`, `group-editor.js`,
+  `/ui/icons-dom.js`, `/ui/icon-picker.js` y `options.js`, en ese orden.
+- `ui/icons-dom.js` (`YouTubeGroupsIconsDom`) y `ui/icon-picker.js` (`YouTubeGroupsIconPicker`) ya existen (plan
+  `2026-11-17-refactor-content-js.md`, ADR 0015): `createIconSvg`, `setGroupBand`, `GROUP_ICON_SIZES`,
+  `openIconPicker` y `hideIconPicker`. La página los usa desde sus globales.
 
 **Interfaz de `options/options.js`** (sin `innerHTML`; textos con `textContent`):
 
@@ -112,7 +112,7 @@ borrar: "Deshacer" protege igual y no interrumpe. Trasladar Ajustes y copias de 
   conservando nodos plegados, fila con el foco y un renombrado en curso (texto y foco); si el grupo que se renombra o
   se mueve con "Mover a…" desaparece, se cancela.
 
-**`content.js`**: botón "Editar grupos" (glifo "✎", `title` y `aria-label` "Editar grupos") en la cabecera del panel
+**`ui/panel.js` y `ui/guide-section.js`**: botón "Editar grupos" (glifo "✎", `title` y `aria-label` "Editar grupos") en la cabecera del panel
 (junto al botón de minimizar, visible también minimizado) y en la cabecera de la sección de la guía (tras el título).
 Envía `browser.runtime.sendMessage({ type: "youtube-groups:open-editor" })`; si falla, `console.error`.
 
@@ -146,17 +146,12 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
 - [ ] T4 · Página de opciones y script de fondo: `manifest.json` (`options_ui`, `background`), `background.js` y
   esqueleto de `options/` (cabecera, tema, carga de módulos, mensaje de error y "N grupos" leídos con `getGroups`) ·
   Ficheros: `manifest.json`, `background.js`, `options/options.html`, `options/options.js`, `options/options.css`,
-  `tests/manifest.test.js` · Test: `tests/manifest.test.js` comprueba `options_ui.page` existente con `open_in_tab`,
+  `tests/manifest.test.js` (ya existe, se amplía) · Test: `tests/manifest.test.js` comprueba `options_ui.page` existente con `open_in_tab`,
   `background.scripts` = `["background.js"]` y el fichero existe, `permissions` sigue siendo `["storage"]`, y que
   `options.html` carga solo ficheros que existen, sin scripts en línea, con los módulos compartidos en el mismo orden
   relativo que en `content_scripts` y `options/options.js` el último. `make lint` sin avisos (web-ext lint incluido).
-- [ ] T5 · Botón "Editar grupos" en el panel y en la guía · Ficheros: `content.js`, `content.css` · Test: `make lint`,
-  `make test` y a mano V1.
-- [ ] T6 · Extraer el selector de icono y color y sus ayudantes a `ui/group-ui.js` (`YouTubeGroupsUi`), sin cambiar
-  su comportamiento, y cargarlo en `manifest.json` (antes de `content.js`) y en `options.html` · Ficheros:
-  `ui/group-ui.js`, `content.js`, `manifest.json`, `options/options.html`, `tests/manifest.test.js` · Test: el test de
-  manifiesto comprueba `ui/group-ui.js` justo antes de `content.js` y en `options.html` tras los módulos; a mano V7
-  (regresión).
+- [ ] T5 · Botón "Editar grupos" en el panel y en la guía · Ficheros: `ui/panel.js`, `ui/guide-section.js`,
+  `ui/panel.css`, `ui/guide-section.css` · Test: `make lint`, `make test` y a mano V1.
 - [ ] T7 · Árbol en la página: filas, plegar y desplegar, apariencia, número de canales, estado vacío y repintado por
   `storage.onChanged` conservando el estado · Ficheros: `options/options.js`, `options/options.css` · Test: `make
   lint`, `make test` y a mano V2.
@@ -169,10 +164,10 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
 - [ ] T11 · Arrastrar y soltar con indicador de posición · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V6.
 - [ ] T12 · Cerrar: quitar `promptRenameGroup`, `confirmDeleteGroup` y los nombres que queden sin uso en la
-  desestructuración de `YouTubeGroups` en `content.js`; `docs/ARCHITECTURE.md` (contexto: página de opciones y script
-  de fondo; filas de `manifest.json`, `background.js`, `options/`, `ui/group-ui.js` y `modules/group-editor.js`; flujo
+  desestructuración de `YouTubeGroups` en `ui/panel.js`; `docs/ARCHITECTURE.md` (contexto: página de opciones y script
+  de fondo; filas de `manifest.json`, `background.js`, `options/` y `modules/group-editor.js`; flujo
   "Editor de grupos"; quitar "Quedan sin enlazar…"; ADR 0014 en Decisiones); en `ROADMAP.md`, "⬜" → "✅" en "Editor
-  de grupos en una página propia"; este plan a `hecho` · Ficheros: `content.js`, `docs/ARCHITECTURE.md`,
+  de grupos en una página propia"; este plan a `hecho` · Ficheros: `ui/panel.js`, `docs/ARCHITECTURE.md`,
   `ROADMAP.md`, este plan · Test: `make lint`, `make test` y V7.
 
 ### Verificación manual (Firefox con la extensión recargada; grupos A con A1 y A2, A1 con A1a, B y C, con canales)
@@ -211,7 +206,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
 - Ajustes y copias de seguridad en la página de opciones (6-11).
 - Deshacer después de cerrar la página o de más de un borrado.
 - Abrir el editor en un grupo concreto desde YouTube.
-- Tests de DOM de `options.js` y `content.js`.
+- Tests de DOM de `options.js` (los de `ui/` ya existen desde el plan `2026-11-17-refactor-content-js.md`).
 
 ## Cambios aprobados
 
