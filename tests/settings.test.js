@@ -8,7 +8,6 @@ const DEFAULTS = {
   watchedMode: "dim",
   outsideMode: "hide",
   autoMarkPercent: 80,
-  panelCollapsed: true,
 };
 
 test("normalizeSettings devuelve los valores por defecto con entradas no válidas", () => {
@@ -28,7 +27,6 @@ test("normalizeSettings conserva valores válidos", () => {
     watchedMode: "hide",
     outsideMode: "dim",
     autoMarkPercent: 95,
-    panelCollapsed: true,
   };
 
   assert.deepStrictEqual(
@@ -66,42 +64,25 @@ test("normalizeSettings sustituye solo el campo inválido", () => {
     watchedMode: "dim",
     outsideMode: "dim",
     autoMarkPercent: 80,
-    panelCollapsed: true,
   });
 });
 
-test("normalizeSettings sustituye panelCollapsed no booleano por true", () => {
+test("normalizeSettings no devuelve panelCollapsed", () => {
   const { YouTubeGroupsSettings } = loadModules();
 
-  for (const bad of ["sí", 1, null, undefined]) {
-    assert.strictEqual(
-      YouTubeGroupsSettings.normalizeSettings({ panelCollapsed: bad })
-        .panelCollapsed,
-      true,
-    );
-  }
-});
-
-test("normalizeSettings conserva panelCollapsed false", () => {
-  const { YouTubeGroupsSettings } = loadModules();
-
-  assert.strictEqual(
-    YouTubeGroupsSettings.normalizeSettings({ panelCollapsed: false })
-      .panelCollapsed,
-    false,
+  assert.deepStrictEqual(
+    plain(YouTubeGroupsSettings.normalizeSettings({ panelCollapsed: false })),
+    DEFAULTS,
   );
 });
 
-test("updateSettings con panelCollapsed false escribe una vez desde el valor por defecto", async () => {
-  const { YouTubeGroupsSettings, calls } = loadModules();
+test("DEFAULT_SETTINGS no incluye panelCollapsed", () => {
+  const { YouTubeGroupsSettings } = loadModules();
 
-  const result = await YouTubeGroupsSettings.updateSettings({
-    panelCollapsed: false,
-  });
-
-  assert.strictEqual(result.changed, true);
-  assert.strictEqual(result.settings.panelCollapsed, false);
-  assert.strictEqual(calls.set, 1);
+  assert.deepStrictEqual(
+    plain(YouTubeGroupsSettings.DEFAULT_SETTINGS),
+    DEFAULTS,
+  );
 });
 
 test("normalizeSettings descarta campos desconocidos y no muta la entrada", () => {
@@ -114,7 +95,6 @@ test("normalizeSettings descarta campos desconocidos y no muta la entrada", () =
     watchedMode: "show",
     outsideMode: "hide",
     autoMarkPercent: 80,
-    panelCollapsed: true,
   });
   assert.deepStrictEqual(raw, { watchedMode: "show", foo: 1 });
   assert.notStrictEqual(result, raw);
@@ -140,7 +120,6 @@ test("updateSettings escribe una vez y no repite si no cambia", async () => {
     watchedMode: "hide",
     outsideMode: "hide",
     autoMarkPercent: 80,
-    panelCollapsed: true,
   });
   assert.strictEqual(calls.set, 1);
   assert.strictEqual(store.youtubeSettings.version, 1);
@@ -168,30 +147,38 @@ test("updateSettings conserva el otro campo", async () => {
     watchedMode: "hide",
     outsideMode: "dim",
     autoMarkPercent: 80,
-    panelCollapsed: true,
   });
 });
 
-test("updateSettings con panelCollapsed escribe una vez y conserva los demás campos", async () => {
-  const { YouTubeGroupsSettings, calls } = loadModules({
+test("ajustes guardados con panelCollapsed se leen sin error y la siguiente escritura no lo guarda", async () => {
+  const { YouTubeGroupsSettings, calls, store } = loadModules({
     youtubeSettings: {
       version: 1,
-      settings: { watchedMode: "show", outsideMode: "dim" },
+      settings: {
+        watchedMode: "show",
+        outsideMode: "dim",
+        panelCollapsed: false,
+      },
     },
   });
 
-  const result = await YouTubeGroupsSettings.updateSettings({
-    panelCollapsed: false,
-  });
-
-  assert.strictEqual(result.changed, true);
-  assert.deepStrictEqual(plain(result.settings), {
+  assert.deepStrictEqual(plain(await YouTubeGroupsSettings.getSettings()), {
     watchedMode: "show",
     outsideMode: "dim",
     autoMarkPercent: 80,
-    panelCollapsed: false,
   });
+
+  const result = await YouTubeGroupsSettings.updateSettings({
+    watchedMode: "hide",
+  });
+
+  assert.strictEqual(result.changed, true);
   assert.strictEqual(calls.set, 1);
+  assert.deepStrictEqual(plain(store.youtubeSettings.settings), {
+    watchedMode: "hide",
+    outsideMode: "dim",
+    autoMarkPercent: 80,
+  });
 });
 
 test("normalizeSettings ignora un sidebarCollapsed guardado", () => {
@@ -225,7 +212,6 @@ test("updateSettings con autoMarkPercent 0 escribe y conserva los otros campos",
     watchedMode: "show",
     outsideMode: "dim",
     autoMarkPercent: 0,
-    panelCollapsed: true,
   });
   assert.strictEqual(calls.set, 1);
 });
@@ -236,7 +222,7 @@ test("updateSettings rechaza claves y valores inválidos sin leer ni escribir", 
     { foo: 1 },
     { autoMarkPercent: 70 },
     { autoMarkPercent: "80" },
-    { panelCollapsed: 1 },
+    { panelCollapsed: true },
     { sidebarCollapsed: true },
   ]) {
     const { YouTubeGroupsSettings, calls } = loadModules();
