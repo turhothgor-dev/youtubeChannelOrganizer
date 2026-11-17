@@ -144,6 +144,38 @@ test("la banda de color va en el botón del grupo, no en la fila", async () => {
   );
 });
 
+test("crear y editar son iconos a la derecha del título, dentro de la cabecera", async () => {
+  const dom = await loadWithGuide();
+  const header = dom.document.querySelector(
+    `${GUIDE} .youtube-groups__guide-header`,
+  );
+  const children = Array.from(header.children).map((child) => child.className);
+  assert.deepStrictEqual(children, [
+    "youtube-groups__guide-back",
+    "youtube-groups__guide-title",
+    "youtube-groups__guide-create",
+    "youtube-groups__guide-edit",
+  ]);
+  for (const selector of [
+    ".youtube-groups__guide-create",
+    ".youtube-groups__guide-edit",
+  ]) {
+    const button = header.querySelector(selector);
+    assert.strictEqual(button.textContent, "");
+    assert.strictEqual(button.children.length, 1);
+    assert.strictEqual(button.firstElementChild.tagName.toLowerCase(), "svg");
+  }
+  const create = header.querySelector(".youtube-groups__guide-create");
+  assert.strictEqual(create.getAttribute("aria-label"), "Crear grupo");
+  assert.strictEqual(create.title, "Crear grupo");
+
+  dom.document.querySelector(".youtube-groups__guide-item").click();
+  await dom.flush();
+  const after = dom.document.querySelector(".youtube-groups__guide-create");
+  assert.strictEqual(after.getAttribute("aria-label"), "Crear subgrupo en «A»");
+  assert.strictEqual(after.title, "Crear subgrupo en «A»");
+});
+
 test('"+ Grupo" con un nombre crea el grupo en el almacenamiento y aparece la fila', async () => {
   const dom = await loadWithGuide();
   dom.document.querySelector(".youtube-groups__guide-create").click();

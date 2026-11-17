@@ -31,6 +31,7 @@
 }
 
 .youtube-groups__guide-back,
+.youtube-groups__guide-create,
 .youtube-groups__guide-edit,
 .youtube-groups__guide-enter {
   flex: none;
@@ -42,6 +43,13 @@
   cursor: pointer;
   font: inherit;
   font-size: 18px;
+}
+
+.youtube-groups__guide-create,
+.youtube-groups__guide-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .youtube-groups__guide-back[hidden] {
@@ -114,24 +122,6 @@
   .youtube-groups__guide-column--out-right {
     animation: none;
   }
-}
-
-.youtube-groups__guide-create {
-  display: block;
-  width: 100%;
-  height: 36px;
-  margin-bottom: 4px;
-  padding: 0 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--yt-spec-text-primary, #0f0f0f);
-  background: var(--yt-spec-badge-chip-background, #f2f2f2);
-  border: 0;
-  border-radius: 10px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
 }
 
 .youtube-groups__guide-clear {
@@ -327,13 +317,11 @@ html[dark] .youtube-groups__guide {
 }
 
 html[dark] .youtube-groups__guide-title,
-html[dark] .youtube-groups__guide-create,
 html[dark] .youtube-groups__guide-clear,
 html[dark] .youtube-groups__guide-item {
   color: var(--yt-spec-text-primary, #f1f1f1);
 }
 
-html[dark] .youtube-groups__guide-create,
 html[dark] .youtube-groups__guide-clear {
   background: var(--yt-spec-badge-chip-background, #272727);
 }
@@ -341,6 +329,7 @@ html[dark] .youtube-groups__guide-clear {
 html[dark] .youtube-groups__guide-empty,
 html[dark] .youtube-groups__guide-toggle,
 html[dark] .youtube-groups__guide-back,
+html[dark] .youtube-groups__guide-create,
 html[dark] .youtube-groups__guide-edit,
 html[dark] .youtube-groups__guide-enter,
 html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {

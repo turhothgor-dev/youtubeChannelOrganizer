@@ -87,7 +87,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
   `tests/ui-guide-section.test.js` · Test (jsdom): con A de color `#2196F3` y A1 sin color, en la columna raíz el
   botón `.youtube-groups__guide-item` de A tiene la clase `youtube-groups__group-band` y `--yg-group-color`, y
   `.youtube-groups__guide-row` no; dentro de A, A1 hereda el color en su botón; B sin color no tiene la clase.
-- [ ] T3 · Crear y editar como iconos a la derecha del título · Ficheros: `ui/guide-section.js`,
+- [x] T3 · Crear y editar como iconos a la derecha del título · Ficheros: `ui/guide-section.js`,
   `ui/guide-section.css`, `tests/ui-guide-section.test.js` · Test (jsdom): `.youtube-groups__guide-create` y
   `.youtube-groups__guide-edit` están dentro de `.youtube-groups__guide-header`, en ese orden y tras el título;
   ninguno tiene texto (solo un `svg`); el de crear tiene `aria-label` y `title` "Crear grupo" en la raíz y "Crear
@@ -195,3 +195,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | feat: iconos de interfaz nuevos (ajustes, reciclaje, añadir, editar, flechas, paleta, papelera, intercambio) | Añadidos 9 iconos a `UI_ICON_PATHS`. Rutas transcritas de memoria sin acceso a los SVG oficiales: revisar visualmente `recycle` (la menos fiable) en V3. |
 | 2026-11-17 | T2 | feat: banda de color en el botón principal del grupo de la guía | `setGroupBand` pasa de la fila al botón; padding derecho de 12 px con banda. Se actualiza `tests/ui-icons-dom.test.js` (comprobaba la banda en la fila) porque el requisito cambia. |
+| 2026-11-17 | T3 | feat: crear y editar como iconos a la derecha del título de la guía | (+) y lápiz son solo icono (`add`, `edit`) dentro de la cabecera, tras el título; `label` ya no se pinta. El formulario queda entre la cabecera y "Limpiar selección" hasta T5. |

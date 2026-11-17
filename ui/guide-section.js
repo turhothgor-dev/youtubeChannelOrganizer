@@ -8,6 +8,7 @@ const YouTubeGroupsGuideSection = (() => {
   const { getAvatarFor } = YouTubeGroupsAvatars;
   const {
     createIconSvg,
+    createUiIconSvg,
     GROUP_ICON_SIZES,
     createGroupMark,
     setGroupBand,
@@ -481,7 +482,7 @@ const YouTubeGroupsGuideSection = (() => {
         edit.className = "youtube-groups__guide-edit";
         edit.title = "Editar grupos";
         edit.setAttribute("aria-label", "Editar grupos");
-        edit.textContent = "✎";
+        edit.append(createUiIconSvg("edit", 20));
         edit.addEventListener("click", () => {
           browser.runtime
             .sendMessage({ type: "youtube-groups:open-editor" })
@@ -493,11 +494,12 @@ const YouTubeGroupsGuideSection = (() => {
             });
         });
 
-        header.append(back, title, edit);
-
         const create = document.createElement("button");
         create.type = "button";
         create.className = "youtube-groups__guide-create";
+        create.append(createUiIconSvg("add", 20));
+
+        header.append(back, title, create, edit);
 
         const form = createGuideCreateForm();
         create.addEventListener("click", () => {
@@ -516,7 +518,7 @@ const YouTubeGroupsGuideSection = (() => {
         viewport = document.createElement("div");
         viewport.className = "youtube-groups__guide-viewport";
 
-        section.replaceChildren(header, create, form, clear, viewport);
+        section.replaceChildren(header, form, clear, viewport);
       }
       guideGroups = groups;
 
@@ -537,7 +539,6 @@ const YouTubeGroupsGuideSection = (() => {
       const create = section.querySelector(".youtube-groups__guide-create");
       back.hidden = !column.parent;
       title.textContent = column.parent ? column.parent.name : "YouTube Groups";
-      create.textContent = guideCreateTarget.label;
       create.title = guideCreateTarget.title;
       create.setAttribute("aria-label", guideCreateTarget.title);
 
