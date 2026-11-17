@@ -161,7 +161,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   lint`, `make test` y a mano V4.
 - [x] T10 · "Subir", "Bajar", "Mover a…" y Alt+↑/Alt+↓ · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V5.
-- [ ] T11 · Arrastrar y soltar con indicador de posición · Ficheros: `options/options.js`, `options/options.css` ·
+- [x] T11 · Arrastrar y soltar con indicador de posición · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V6.
 - [ ] T12 · Cerrar: quitar `promptRenameGroup`, `confirmDeleteGroup` y los nombres que queden sin uso en la
   desestructuración de `YouTubeGroups` en `ui/panel.js`; `docs/ARCHITECTURE.md` (contexto: página de opciones y script
@@ -231,3 +231,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T8 | `feat: renombrar en línea, icono y color y crear grupos en el editor` | Campo en línea (Intro, blur, Escape, F2, doble clic), selector de icono, "+ Grupo" y "+ Subgrupo"; añade el botón en `options.html`; pendiente V3 a mano. |
 | 2026-11-17 | T9 | `feat: eliminar grupos con aviso y deshacer en el editor` | Botón "Eliminar" y Supr, aviso `role="status"` de 10 s con "Deshacer" (`deleteGroupAndSnapshot`/`restoreGroupAndSave`); pendiente V4 a mano. |
 | 2026-11-17 | T10 | `feat: subir, bajar y mover a otro grupo en el editor` | "Subir"/"Bajar" (deshabilitados en extremos), Alt+↑/↓ y "Mover a…" con `<select>` (`moveGroupAndSave`); foco en la fila movida; pendiente V5 a mano. |
+| 2026-11-17 | T11 | `feat: arrastrar y soltar grupos con indicador de posición en el editor` | Asa "⠿" arrastrable, zonas before/after/inside con `getDropPosition` e indicador visual claro/oscuro; pendiente V6 a mano. |

@@ -48,6 +48,37 @@ html[dark] body {
   background: rgba(128, 128, 128, 0.12);
 }
 
+.options__handle {
+  cursor: grab;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.options__row--drop-before {
+  box-shadow: 0 -2px 0 0 #1a73e8;
+}
+
+.options__row--drop-after {
+  box-shadow: 0 2px 0 0 #1a73e8;
+}
+
+.options__row--drop-inside {
+  outline: 2px solid #1a73e8;
+  outline-offset: -2px;
+}
+
+html[dark] .options__row--drop-before {
+  box-shadow: 0 -2px 0 0 #8ab4f8;
+}
+
+html[dark] .options__row--drop-after {
+  box-shadow: 0 2px 0 0 #8ab4f8;
+}
+
+html[dark] .options__row--drop-inside {
+  outline-color: #8ab4f8;
+}
+
 .options__toggle {
   width: 1.5rem;
   background: none;

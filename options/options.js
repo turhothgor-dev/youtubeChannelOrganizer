@@ -492,6 +492,58 @@
     }
   }
 
+  /** Id del grupo que se arrastra, o `null`. */
+  let draggingId = null;
+  const DROP_CLASSES = [
+    "options__row--drop-before",
+    "options__row--drop-after",
+    "options__row--drop-inside",
+  ];
+
+  /**
+   * Quita el indicador de posición de todas las filas.
+   * @returns {void}
+   */
+  function clearDropIndicator() {
+    for (const row of treeEl.querySelectorAll(".options__row")) {
+      row.classList.remove(...DROP_CLASSES);
+    }
+  }
+
+  /**
+   * Muestra el indicador de posición en una fila.
+   * @param {HTMLElement} row - Fila destino.
+   * @param {"before"|"after"|"inside"} zone - Zona de suelta.
+   * @returns {void}
+   */
+  function showDropIndicator(row, zone) {
+    clearDropIndicator();
+    row.classList.add(`options__row--drop-${zone}`);
+  }
+
+  /**
+   * Calcula el lugar de suelta sobre una fila: cuarto superior = antes,
+   * inferior = después, centro = dentro.
+   * @param {HTMLElement} row - Fila destino.
+   * @param {string} targetId - Id del grupo destino.
+   * @param {DragEvent} event - Evento de arrastre.
+   * @returns {null|{parentId: string|null, index: number, zone: string}}
+   *   Lugar válido o `null`.
+   */
+  function dropPlaceFor(row, targetId, event) {
+    const rect = row.getBoundingClientRect();
+    const ratio =
+      rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+    const zone = ratio < 0.25 ? "before" : ratio > 0.75 ? "after" : "inside";
+    const place = YouTubeGroupsEditor.getDropPosition(
+      currentGroups,
+      draggingId,
+      targetId,
+      zone,
+    );
+    return place ? { ...place, zone } : null;
+  }
+
   /**
    * Crea la fila-campo para un grupo nuevo.
    * @returns {HTMLLIElement} Nodo con el campo de edición.
@@ -545,6 +597,48 @@
     if (children.length > 0) {
       row.setAttribute("aria-expanded", String(!isCollapsed));
     }
+
+    const handle = el("span", "options__handle", "⠿");
+    handle.setAttribute("aria-hidden", "true");
+    handle.title = "Arrastrar para mover";
+    handle.draggable = !editing;
+    handle.addEventListener("dragstart", (event) => {
+      draggingId = group.id;
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", group.id);
+      event.dataTransfer.setDragImage(row, 0, 0);
+    });
+    handle.addEventListener("dragend", () => {
+      draggingId = null;
+      clearDropIndicator();
+    });
+    row.addEventListener("dragover", (event) => {
+      const place = draggingId ? dropPlaceFor(row, group.id, event) : null;
+      if (!place) {
+        clearDropIndicator();
+        return;
+      }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      showDropIndicator(row, place.zone);
+    });
+    row.addEventListener("dragleave", (event) => {
+      if (!row.contains(event.relatedTarget)) {
+        row.classList.remove(...DROP_CLASSES);
+      }
+    });
+    row.addEventListener("drop", (event) => {
+      const place = draggingId ? dropPlaceFor(row, group.id, event) : null;
+      const dragged = draggingId ? findGroup(currentGroups, draggingId) : null;
+      draggingId = null;
+      clearDropIndicator();
+      if (!place || !dragged) {
+        return;
+      }
+      event.preventDefault();
+      moveTo(dragged, place.parentId, place.index);
+    });
+    row.append(handle);
 
     const toggle = el("button", "options__toggle");
     toggle.type = "button";
