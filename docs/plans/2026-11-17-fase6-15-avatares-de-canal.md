@@ -143,7 +143,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   observados no agrupados o no válidos, `changed: false` sin diferencias y no muta la entrada; `getInitial` ("  @álvaro"
   → "Á", "😀x" → "😀", "" → "?"); `getFallbackColor` determinista y con formato `hsl(N 45% 40%)`;
   `saveObservedAvatars` escribe una vez con lo agrupado y, repetido con lo mismo, no llama a `set`.
-- [ ] T3 · Avatares en la copia de seguridad · Ficheros: `modules/backup.js`, `tests/backup.test.js` · Test: exportar
+- [x] T3 · Avatares en la copia de seguridad · Ficheros: `modules/backup.js`, `tests/backup.test.js` · Test: exportar
   incluye `avatars`; importar una copia sin `avatars` no toca la clave guardada; con `avatars` válidos los reemplaza;
   entradas con host fuera de la lista, URL sin normalizar o clave no válida se descartan y suman a `dropped`;
   `avatars` como array → error "avatares no válidos" sin escribir nada; una copia antigua (sin el campo) sigue
@@ -226,3 +226,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `feat: clave youtubeAvatars en el almacenamiento` | `KEYS.avatars`, `readAvatarsValue`, `getAvatars`, `saveAvatars` y tests. |
 | 2026-11-17 | T2 | `feat: módulo puro de avatares de canal` | `modules/avatars.js` con normalización, fusión y guardado; cargado en manifest, opciones y helper de tests. |
+| 2026-11-17 | T3 | `feat: avatares en la copia de seguridad` | `buildBackup`, `parseBackup` (`avatars` null si falta) y `importBackup` con `avatars`; tests. |

@@ -8,6 +8,7 @@ const V1 = "dQw4w9WgXcQ";
 const V2 = "abcdefghijk";
 const CHANNEL = "https://www.youtube.com/@canal";
 const CHANNEL_B = "https://www.youtube.com/channel/UC123";
+const AVATAR = "https://yt3.ggpht.com/ytc/AbC=s88-c-k-c0x00ffffff-no-rj";
 
 function sample() {
   return {
@@ -47,6 +48,7 @@ function sample() {
         videos: [{ id: V2, title: "Título", channelName: "Canal", addedAt: 5 }],
       },
     ],
+    avatars: { [CHANNEL]: AVATAR },
   };
 }
 
@@ -69,6 +71,7 @@ test("buildBackup usa el formato del ADR 0006", () => {
   assert.strictEqual(backup.version, 1);
   assert.strictEqual(backup.exportedAt, "2026-11-14T10:00:00.000Z");
   assert.deepStrictEqual(backup.groups, sample().groups);
+  assert.deepStrictEqual(backup.avatars, sample().avatars);
 });
 
 test("parseBackup: ida y vuelta devuelve los mismos datos", () => {
@@ -213,10 +216,81 @@ function fullStore() {
     youtubeWatched: { version: 1, videos: data.watched },
     youtubeSettings: { version: 1, settings: data.settings },
     youtubePlaylists: { version: 1, playlists: data.playlists },
+    youtubeAvatars: { version: 1, avatars: data.avatars },
   };
 }
 
-test("exportBackup e importBackup copian las cuatro claves a otro contexto", async () => {
+test("parseBackup: avatares válidos se conservan y el resto se descarta y cuenta", () => {
+  const { YouTubeGroupsBackup: B } = loadModules();
+  const avatars = {
+    [CHANNEL]: AVATAR,
+    [CHANNEL_B]: "https://i.ytimg.com/vi/x/a.jpg",
+    "https://www.youtube.com/@Mayus": AVATAR,
+    "https://evil.com/@a": AVATAR,
+    "https://www.youtube.com/@otro": "https://yt3.ggpht.com/a=s48",
+  };
+
+  const result = B.parseBackup(envelope({ avatars }));
+
+  assert.deepStrictEqual(plain(result.data.avatars), { [CHANNEL]: AVATAR });
+  assert.strictEqual(result.dropped, 4);
+});
+
+test("parseBackup: una copia antigua sin avatares da avatars null", () => {
+  const { YouTubeGroupsBackup: B } = loadModules();
+
+  const result = B.parseBackup(envelope({ avatars: undefined }));
+
+  assert.strictEqual(result.data.avatars, null);
+  assert.strictEqual(result.dropped, 0);
+});
+
+test("parseBackup rechaza avatares que no son un objeto", () => {
+  const { YouTubeGroupsBackup: B } = loadModules();
+
+  assert.throws(
+    () => B.parseBackup(envelope({ avatars: [] })),
+    /La copia está dañada: avatares no válidos/,
+  );
+});
+
+test("importBackup con avatares no válidos no escribe nada", async () => {
+  const { YouTubeGroupsBackup: B, calls } = loadModules();
+
+  await assert.rejects(
+    () => B.importBackup(envelope({ avatars: [] })),
+    /avatares no válidos/,
+  );
+
+  assert.strictEqual(calls.set, 0);
+});
+
+test("importBackup sin avatares no toca la clave guardada", async () => {
+  const stored = { version: 1, avatars: { [CHANNEL_B]: AVATAR } };
+  const target = loadModules({ youtubeAvatars: stored });
+
+  await target.YouTubeGroupsBackup.importBackup(
+    envelope({ avatars: undefined }),
+  );
+
+  assert.deepStrictEqual(plain(target.store.youtubeAvatars), stored);
+  assert.ok(target.store.youtubeGroups);
+});
+
+test("importBackup con avatares los reemplaza", async () => {
+  const target = loadModules({
+    youtubeAvatars: { version: 1, avatars: { [CHANNEL_B]: AVATAR } },
+  });
+
+  await target.YouTubeGroupsBackup.importBackup(envelope());
+
+  assert.deepStrictEqual(plain(target.store.youtubeAvatars), {
+    version: 1,
+    avatars: { [CHANNEL]: AVATAR },
+  });
+});
+
+test("exportBackup e importBackup copian las cinco claves a otro contexto", async () => {
   const source = loadModules(fullStore());
   const text = await source.YouTubeGroupsBackup.exportBackup();
   assert.strictEqual(JSON.parse(text).version, 1);

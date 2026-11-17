@@ -65,6 +65,7 @@ const YouTubeGroupsBackup = (() => {
       watched: data.watched,
       settings: data.settings,
       playlists: data.playlists,
+      avatars: data.avatars,
     };
   }
 
@@ -226,10 +227,38 @@ const YouTubeGroupsBackup = (() => {
   }
 
   /**
+   * Valida el mapa de avatares de canal. Las copias antiguas no lo traen.
+   *
+   * @param {*} avatars - Mapa clave de canal -> URL de imagen.
+   * @param {{dropped: number}} counter - Contador de descartados.
+   * @returns {Object|null} Mapa limpio, o null si la copia no lo incluye.
+   */
+  function parseAvatars(avatars, counter) {
+    if (avatars === undefined) {
+      return null;
+    }
+    if (!isPlainObject(avatars)) {
+      throw damagedError("avatares no válidos");
+    }
+    const result = {};
+    for (const [key, value] of Object.entries(avatars)) {
+      if (
+        YouTubeGroupsAvatars.isValidAvatarKey(key) &&
+        YouTubeGroupsAvatars.normalizeAvatarUrl(value) === value
+      ) {
+        result[key] = value;
+      } else {
+        counter.dropped += 1;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Valida el texto de una copia y devuelve los datos limpios.
    *
    * @param {string} text - Contenido del fichero.
-   * @returns {{data: {groups: Array, watched: Object, settings: Object, playlists: Array}, dropped: number}}
+   * @returns {{data: {groups: Array, watched: Object, settings: Object, playlists: Array, avatars: (Object|null)}, dropped: number}}
    * @throws {Error} Si el fichero no es una copia válida.
    */
   function parseBackup(text) {
@@ -254,9 +283,10 @@ const YouTubeGroupsBackup = (() => {
     const watched = parseWatched(raw.watched, counter);
     const settings = YouTubeGroupsSettings.normalizeSettings(raw.settings);
     const playlists = parsePlaylists(raw.playlists, counter);
+    const avatars = parseAvatars(raw.avatars, counter);
 
     return {
-      data: { groups, watched, settings, playlists },
+      data: { groups, watched, settings, playlists, avatars },
       dropped: counter.dropped,
     };
   }
@@ -267,14 +297,18 @@ const YouTubeGroupsBackup = (() => {
    * @returns {Promise<string>} JSON con sangría de 2 espacios.
    */
   async function exportBackup() {
-    const [groups, watched, settings, playlists] = await Promise.all([
+    const [groups, watched, settings, playlists, avatars] = await Promise.all([
       YouTubeGroupsStorage.getGroups(),
       YouTubeGroupsStorage.getWatchedVideos(),
       YouTubeGroupsSettings.getSettings(),
       YouTubeGroupsStorage.getPlaylists(),
+      YouTubeGroupsStorage.getAvatars(),
     ]);
     return JSON.stringify(
-      buildBackup({ groups, watched, settings, playlists }, Date.now()),
+      buildBackup(
+        { groups, watched, settings, playlists, avatars },
+        Date.now(),
+      ),
       null,
       2,
     );
@@ -303,6 +337,11 @@ const YouTubeGroupsBackup = (() => {
     await YouTubeGroupsStorage.withLock(keys.watched, () =>
       YouTubeGroupsStorage.saveWatchedVideos(data.watched),
     );
+    if (data.avatars !== null) {
+      await YouTubeGroupsStorage.withLock(keys.avatars, () =>
+        YouTubeGroupsStorage.saveAvatars(data.avatars),
+      );
+    }
     return { dropped };
   }
 
