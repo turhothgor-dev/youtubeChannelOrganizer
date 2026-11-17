@@ -46,7 +46,9 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 
 - **Detección** (`ui/cards.js`): el `MutationObserver` de `content.js` programa las tarjetas (`VIDEO_CARD_SELECTOR`) y las
   procesa en un `requestAnimationFrame` (`processPendingCards`); cada tarjeta guarda nombre y URL de su canal en
-  `data-*`. Los botones de las tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
+  `data-*`. Procesar una tarjeta ya al día no escribe en el DOM (`setCardButtonContent` y los atributos solo se
+  escriben si cambian); si no, la mutación la vuelve a programar y se reprocesa en cada frame. Los botones de las
+  tarjetas se ponen en inicio, suscripciones, búsqueda y la columna de recomendaciones
   de `/watch` (`shouldShowCardControls`; allí, en versión compacta y solo en `#related`). En las tarjetas de vídeo el
   control es una columna superpuesta arriba a la izquierda de la miniatura (`ytd-thumbnail` o
   `yt-thumbnail-view-model`, atributo `data-youtube-groups-thumb-host`, no una clase para no excluir la duración en `getCardTexts`), con los botones colapsados (glifo) que muestran su

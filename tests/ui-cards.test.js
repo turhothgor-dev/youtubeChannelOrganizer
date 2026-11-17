@@ -105,6 +105,36 @@ test("una tarjeta recibe un único control dentro de la miniatura", async () => 
   assert.strictEqual(card.querySelectorAll(CONTROL).length, 1);
 });
 
+for (const [nombre, store] of [
+  ["sin vistos", undefined],
+  [
+    "con el vídeo visto",
+    {
+      youtubeWatched: { version: 1, videos: { abc123DEF45: { watchedAt: 1 } } },
+    },
+  ],
+]) {
+  test(`una tarjeta con botones se estabiliza y reprocesarla no muta el DOM (${nombre})`, async () => {
+    const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML, store });
+    await dom.flush();
+
+    const card = dom.document.querySelector("ytd-rich-item-renderer");
+    card.appendChild(dom.document.createElement("span"));
+    const observer = new dom.window.MutationObserver(() => {});
+    observer.observe(card, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    });
+    observer.takeRecords();
+    await dom.flush();
+
+    assert.strictEqual(observer.takeRecords().length, 0);
+    observer.disconnect();
+  });
+}
+
 test("seleccionar otro grupo oculta la tarjeta y limpiar la selección la muestra", async () => {
   const dom = loadDom({
     html: GUIDE_HTML + SUBSCRIPTION_CARD_HTML,

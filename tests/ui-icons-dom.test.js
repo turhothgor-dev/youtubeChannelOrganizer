@@ -65,6 +65,58 @@ test("setCardButtonContent dos veces no duplica glifo ni etiqueta", () => {
   assert.strictEqual(button.getAttribute("aria-label"), "Añadir a grupo");
 });
 
+test("setCardButtonContent con los mismos datos no muta el botón", () => {
+  const { dom, icons } = loadIconsDom();
+  const casos = [
+    ["eye", "Marcar visto", true],
+    ["+G", "Añadir a grupo", false],
+  ];
+  for (const [glyph, label, isIcon] of casos) {
+    const button = dom.document.createElement("button");
+    icons.setCardButtonContent(button, glyph, label, isIcon);
+
+    const observer = new dom.window.MutationObserver(() => {});
+    observer.observe(button, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    });
+    icons.setCardButtonContent(button, glyph, label, isIcon);
+
+    assert.strictEqual(observer.takeRecords().length, 0, label);
+    observer.disconnect();
+  }
+});
+
+test("setCardButtonContent cambia el glifo y la etiqueta cuando cambian", () => {
+  const { dom, icons } = loadIconsDom();
+  const button = dom.document.createElement("button");
+
+  icons.setCardButtonContent(button, "eye", "Marcar visto");
+  icons.setCardButtonContent(button, "check", "Visto");
+
+  const glyphEl = button.querySelector(".youtube-groups__card-glyph");
+  assert.strictEqual(
+    button.querySelector(".youtube-groups__card-label").textContent,
+    "Visto",
+  );
+  assert.strictEqual(button.getAttribute("aria-label"), "Visto");
+  assert.strictEqual(glyphEl.querySelectorAll("svg").length, 1);
+  assert.strictEqual(
+    glyphEl.getAttribute("data-youtube-groups-glyph"),
+    "icon:check",
+  );
+
+  // Con glyph null se conserva el glifo anterior
+  icons.setCardButtonContent(button, null, "Guardando");
+  assert.strictEqual(glyphEl.querySelectorAll("svg").length, 1);
+  assert.strictEqual(
+    glyphEl.getAttribute("data-youtube-groups-glyph"),
+    "icon:check",
+  );
+});
+
 test("shieldControlEvents impide que un click llegue al padre", () => {
   const { dom, icons } = loadIconsDom();
   const parent = dom.document.createElement("div");

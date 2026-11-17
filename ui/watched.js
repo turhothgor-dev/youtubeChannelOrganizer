@@ -32,7 +32,9 @@ const YouTubeGroupsWatchedUi = (() => {
     function applyWatchedToCard(card) {
       const videoId = ctx.cards.findVideoId(card);
       if (videoId) {
-        card.setAttribute(ctx.cards.VIDEO_ID_ATTRIBUTE, videoId);
+        if (card.getAttribute(ctx.cards.VIDEO_ID_ATTRIBUTE) !== videoId) {
+          card.setAttribute(ctx.cards.VIDEO_ID_ATTRIBUTE, videoId);
+        }
       } else {
         card.removeAttribute(ctx.cards.VIDEO_ID_ATTRIBUTE);
       }
@@ -54,7 +56,9 @@ const YouTubeGroupsWatchedUi = (() => {
         ".youtube-groups__playlist-button",
       );
       if (playlistButton) {
-        playlistButton.disabled = !videoId;
+        if (playlistButton.disabled !== !videoId) {
+          playlistButton.disabled = !videoId;
+        }
       }
     }
 
@@ -77,11 +81,18 @@ const YouTubeGroupsWatchedUi = (() => {
         // Botón del panel: texto plano, como antes
         button.textContent = isWatched ? "✓ Visto" : "Marcar visto";
       }
-      button.setAttribute("aria-pressed", String(state.pressed));
-      button.disabled = state.disabled;
+      if (button.getAttribute("aria-pressed") !== String(state.pressed)) {
+        button.setAttribute("aria-pressed", String(state.pressed));
+      }
+      if (button.disabled !== state.disabled) {
+        button.disabled = state.disabled;
+      }
       if (ctx.state.watchedLoadError !== null) {
-        button.title =
+        const title =
           "No se pudieron leer los vistos: " + ctx.state.watchedLoadError;
+        if (button.title !== title) {
+          button.title = title;
+        }
       }
     }
 

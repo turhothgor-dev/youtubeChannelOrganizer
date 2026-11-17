@@ -114,10 +114,12 @@ const YouTubeGroupsCards = (() => {
       const known = Boolean(
         getChannelFromCard(card) || getDetectedChannel(card),
       );
-      button.disabled = !known;
+      if (button.disabled !== !known) {
+        button.disabled = !known;
+      }
       if (known) {
         button.removeAttribute("title");
-      } else {
+      } else if (button.title !== "No se pudo identificar el canal") {
         button.title = "No se pudo identificar el canal";
       }
     }
@@ -487,8 +489,12 @@ const YouTubeGroupsCards = (() => {
         return;
       }
 
-      card.dataset.youtubeGroupsChannelName = channel.name;
-      card.dataset.youtubeGroupsChannelUrl = channel.url;
+      if (card.dataset.youtubeGroupsChannelName !== channel.name) {
+        card.dataset.youtubeGroupsChannelName = channel.name;
+      }
+      if (card.dataset.youtubeGroupsChannelUrl !== channel.url) {
+        card.dataset.youtubeGroupsChannelUrl = channel.url;
+      }
 
       // La visibilidad se aplica en cuanto se detecta la tarjeta
       applyCardVisibility(card);

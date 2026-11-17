@@ -72,11 +72,21 @@ const YouTubeGroupsIconsDom = (() => {
       labelEl.className = "youtube-groups__card-label";
       button.append(glyphEl, labelEl);
     }
-    labelEl.textContent = label;
-    button.setAttribute("aria-label", label);
+    // Solo se escribe lo que cambia: cada escritura muta el DOM y reprograma la tarjeta
+    if (labelEl.textContent !== label) {
+      labelEl.textContent = label;
+    }
+    if (button.getAttribute("aria-label") !== label) {
+      button.setAttribute("aria-label", label);
+    }
     if (glyph === null) {
       return;
     }
+    const painted = (isIcon ? "icon:" : "text:") + glyph;
+    if (glyphEl.getAttribute("data-youtube-groups-glyph") === painted) {
+      return;
+    }
+    glyphEl.setAttribute("data-youtube-groups-glyph", painted);
     glyphEl.textContent = "";
     if (isIcon) {
       const svg = createUiIconSvg(glyph, 16);
