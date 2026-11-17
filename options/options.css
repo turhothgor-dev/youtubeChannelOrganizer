@@ -115,6 +115,25 @@ html[dark] .options__field-error {
   background: rgba(128, 128, 128, 0.2);
 }
 
+.options__notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 0.5rem;
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.options__notice[hidden] {
+  display: none;
+}
+
+.options__notice-text {
+  flex: 1;
+}
+
 #options-error {
   color: #c00;
 }

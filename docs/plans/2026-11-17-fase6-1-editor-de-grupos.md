@@ -157,7 +157,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   lint`, `make test` y a mano V2.
 - [x] T8 · Renombrar en línea, "Icono y color" y crear grupo y subgrupo · Ficheros: `options/options.js`,
   `options/options.css` · Test: `make lint`, `make test` y a mano V3.
-- [ ] T9 · Eliminar con aviso y "Deshacer" · Ficheros: `options/options.js`, `options/options.css` · Test: `make
+- [x] T9 · Eliminar con aviso y "Deshacer" · Ficheros: `options/options.js`, `options/options.css` · Test: `make
   lint`, `make test` y a mano V4.
 - [ ] T10 · "Subir", "Bajar", "Mover a…" y Alt+↑/Alt+↓ · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V5.
@@ -229,3 +229,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T5 | `feat: botón Editar grupos en el panel y en la guía` | Botón "✎" en `ui/panel.js` y `ui/guide-section.js` que envía `youtube-groups:open-editor`; pendiente V1 a mano. |
 | 2026-11-17 | T7 | `feat: árbol de grupos en la página de opciones` | Filas con plegado, icono, banda, nº de canales, estado vacío y repintado por `storage.onChanged`; pendiente V2 a mano. |
 | 2026-11-17 | T8 | `feat: renombrar en línea, icono y color y crear grupos en el editor` | Campo en línea (Intro, blur, Escape, F2, doble clic), selector de icono, "+ Grupo" y "+ Subgrupo"; añade el botón en `options.html`; pendiente V3 a mano. |
+| 2026-11-17 | T9 | `feat: eliminar grupos con aviso y deshacer en el editor` | Botón "Eliminar" y Supr, aviso `role="status"` de 10 s con "Deshacer" (`deleteGroupAndSnapshot`/`restoreGroupAndSave`); pendiente V4 a mano. |

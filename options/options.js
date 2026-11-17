@@ -266,6 +266,103 @@
     );
   }
 
+  /** Aviso de borrado (`role="status"`), creado en el primer uso. */
+  let noticeEl = null;
+  /** Temporizador que oculta el aviso. */
+  let noticeTimer = null;
+
+  /**
+   * Oculta el aviso de borrado.
+   * @returns {void}
+   */
+  function hideNotice() {
+    clearTimeout(noticeTimer);
+    noticeTimer = null;
+    if (noticeEl) {
+      noticeEl.replaceChildren();
+      noticeEl.hidden = true;
+    }
+  }
+
+  /**
+   * Muestra un aviso, con botón "Deshacer" opcional, durante 10 s.
+   * @param {string} message - Texto del aviso.
+   * @param {function(): void} [onUndo] - Acción de "Deshacer".
+   * @returns {void}
+   */
+  function showNotice(message, onUndo) {
+    if (!noticeEl) {
+      noticeEl = el("div", "options__notice");
+      noticeEl.setAttribute("role", "status");
+      summaryEl.before(noticeEl);
+    }
+    hideNotice();
+    noticeEl.hidden = false;
+    noticeEl.append(el("span", "options__notice-text", message));
+    if (onUndo) {
+      const undo = el("button", "options__action", "Deshacer");
+      undo.type = "button";
+      undo.addEventListener("click", onUndo);
+      noticeEl.append(undo);
+    }
+    noticeTimer = setTimeout(hideNotice, 10000);
+  }
+
+  /**
+   * Restaura el último grupo borrado.
+   * @param {Object} snapshot - Instantánea de `deleteGroupAndSnapshot`.
+   * @returns {Promise<void>}
+   */
+  async function undoDelete(snapshot) {
+    try {
+      const result = await YouTubeGroupsEditor.restoreGroupAndSave(snapshot);
+      showError("");
+      showNotice(
+        !result.restored
+          ? "Ya estaba restaurado"
+          : result.atRoot
+            ? "Restaurado en el primer nivel (su grupo padre ya no existe)"
+            : `Restaurado «${snapshot.group.name}»`,
+      );
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo restaurar.");
+    }
+  }
+
+  /**
+   * Elimina un grupo sin preguntar y avisa con la opción de deshacer.
+   * @param {Object} group - Grupo a eliminar.
+   * @returns {Promise<void>}
+   */
+  async function deleteGroup(group) {
+    try {
+      const { snapshot, summary } =
+        await YouTubeGroupsEditor.deleteGroupAndSnapshot(group.id);
+      showError("");
+      const parts = [];
+      if (summary && summary.subgroups > 0) {
+        parts.push(
+          summary.subgroups === 1
+            ? "1 subgrupo"
+            : `${summary.subgroups} subgrupos`,
+        );
+      }
+      if (summary && summary.channels > 0) {
+        parts.push(
+          summary.channels === 1 ? "1 canal" : `${summary.channels} canales`,
+        );
+      }
+      showNotice(
+        `Eliminado «${group.name}»${parts.length ? `, con ${parts.join(" y ")}` : ""}`,
+        () => undoDelete(snapshot),
+      );
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo eliminar.");
+    }
+  }
+
   /**
    * Crea la fila-campo para un grupo nuevo.
    * @returns {HTMLLIElement} Nodo con el campo de edición.
@@ -381,12 +478,19 @@
       ),
       actionButton("Icono y color", (button) => editAppearance(group, button)),
       actionButton("+ Subgrupo", () => startEdit("create", null, group.id, "")),
+      actionButton("Eliminar", () => deleteGroup(group)),
     );
     row.append(actions);
     row.addEventListener("keydown", (event) => {
-      if (event.target === row && event.key === "F2") {
+      if (event.target !== row) {
+        return;
+      }
+      if (event.key === "F2") {
         event.preventDefault();
         startEdit("rename", group.id, null, group.name);
+      } else if (event.key === "Delete") {
+        event.preventDefault();
+        deleteGroup(group);
       }
     });
     item.append(row);
