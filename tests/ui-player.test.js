@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   VIDEO_ID,
   flushLoose,
@@ -49,6 +49,24 @@ test("un play oculta el control", async () => {
 
   assert.strictEqual(dom.document.querySelectorAll(PLAYER_CONTROL).length, 1);
   assert.strictEqual(dom.document.querySelector(PLAYER_CONTROL).hidden, true);
+});
+
+test("YouTubeGroupsPlayer.create es una función y crearlo no toca el DOM", () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({
+    url: `https://www.youtube.com/watch?v=${VIDEO_ID}`,
+    html: WATCH_PAGE_HTML,
+    scripts,
+  });
+  const before = dom.document.body.innerHTML;
+  const Player = dom.global("YouTubeGroupsPlayer");
+
+  assert.strictEqual(typeof Player.create, "function");
+  const player = Player.create({ state: {} });
+
+  assert.strictEqual(dom.document.body.innerHTML, before);
+  assert.strictEqual(typeof player.start, "function");
+  assert.strictEqual(typeof player.noteMutations, "function");
 });
 
 test("yt-navigate-start oculta el control", async () => {

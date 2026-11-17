@@ -32,6 +32,7 @@
         "modules/backup.js",
         "ui/icons-dom.js",
         "ui/icon-picker.js",
+        "ui/player.js",
         "content.js"
       ],
       "run_at": "document_idle"
