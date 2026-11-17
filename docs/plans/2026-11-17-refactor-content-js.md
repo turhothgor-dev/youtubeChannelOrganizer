@@ -147,7 +147,7 @@ Reglas comunes: las **Reglas del refactor**; JSDoc en lo nuevo (ayudantes, `crea
 `checkPlacement`, `resetDetectedCards`); `make lint` y `make test` en verde; verificación manual indicada (lista al
 final) con la extensión recargada y **sin errores nuevos en la consola**.
 
-- [ ] T1 · `linkedom` y ayudante de DOM, con un test de humo del panel actual. (Antes, la persona ha ejecutado
+- [x] T1 · `linkedom` y ayudante de DOM, con un test de humo del panel actual. (Antes, la persona ha ejecutado
   `npm install --save-dev linkedom`.) · Ficheros: `package.json`, `package-lock.json` (de la persona, se commitean
   aquí), `tests/helpers/load-dom.js`, `tests/helpers/youtube-fixtures.js`, `tests/dom-helper.test.js`,
   `tests/ui-panel.test.js`, `tests/manifest.test.js` · Test: `dom-helper`: cargar solo `modules/` (sin `content.js`)
@@ -295,6 +295,8 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | T1 | Se usa `jsdom` en lugar de `linkedom` como devDependency de los tests de DOM. | En `linkedom`, `HTMLSelectElement.value` solo tiene getter y `syncSettingsControls` falla al crear el panel; es el criterio de paso a `jsdom` previsto en el plan. | La persona ("ok a linkedom o jsdom") |
+| 2026-11-17 | T1 y siguientes | El ayudante no expone `location.assigned`: cuenta las navegaciones en `navigations.count`. Los tests que necesiten la URL de destino comprueban el efecto observable (p. ej. la selección pendiente en `sessionStorage`) en lugar de la URL. | En jsdom `location.assign` no se puede sustituir. | Delegada por la persona ("usa lo recomendado… ejecútalo") |
 
 ## Registro
 
@@ -302,3 +304,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `test: jsdom y ayudante de DOM con tests de humo del panel` | Con `jsdom` (cambio aprobado arriba) `location` es el real y `location.assign` no se puede sustituir: el ayudante cuenta las navegaciones no implementadas en `navigations.count` en lugar de `location.assigned` (a confirmar por la persona; afecta a T2 si un test necesita la URL). Comprobado: `make test` (199 en verde), `make lint` y el `.zip` de `make build` (20 ficheros) sin `node_modules/`, `tests/` ni `jsdom`. |
