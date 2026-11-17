@@ -310,6 +310,7 @@ const YouTubeGroupsPanel = (() => {
       panel.innerHTML = `
           <div class="youtube-groups__header">
             <h2 class="youtube-groups__title">YouTube Groups</h2>
+            <button class="youtube-groups__edit-button" type="button" title="Editar grupos" aria-label="Editar grupos">✎</button>
             <button class="youtube-groups__collapse-button" type="button" aria-expanded="true" title="Minimizar panel" disabled>−</button>
           </div>
           <section class="youtube-groups__current-channel" hidden>
@@ -413,6 +414,19 @@ const YouTubeGroupsPanel = (() => {
             <p class="youtube-groups__backup-message" aria-live="polite"></p>
           </details>
         `;
+
+      panel
+        .querySelector(".youtube-groups__edit-button")
+        .addEventListener("click", () => {
+          browser.runtime
+            .sendMessage({ type: "youtube-groups:open-editor" })
+            .catch((error) => {
+              console.error(
+                "[YouTube Groups] No se pudo abrir el editor de grupos",
+                error,
+              );
+            });
+        });
 
       panel
         .querySelector(".youtube-groups__current-video-button")

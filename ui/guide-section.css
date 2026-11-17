@@ -31,6 +31,7 @@
 }
 
 .youtube-groups__guide-back,
+.youtube-groups__guide-edit,
 .youtube-groups__guide-enter {
   flex: none;
   width: 28px;
@@ -334,6 +335,7 @@ html[dark] .youtube-groups__guide-clear {
 html[dark] .youtube-groups__guide-empty,
 html[dark] .youtube-groups__guide-toggle,
 html[dark] .youtube-groups__guide-back,
+html[dark] .youtube-groups__guide-edit,
 html[dark] .youtube-groups__guide-enter,
 html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {
   color: var(--yt-spec-text-secondary, #aaa);

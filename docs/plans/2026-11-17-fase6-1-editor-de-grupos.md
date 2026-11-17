@@ -150,7 +150,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   `background.scripts` = `["background.js"]` y el fichero existe, `permissions` sigue siendo `["storage"]`, y que
   `options.html` carga solo ficheros que existen, sin scripts en línea, con los módulos compartidos en el mismo orden
   relativo que en `content_scripts` y `options/options.js` el último. `make lint` sin avisos (web-ext lint incluido).
-- [ ] T5 · Botón "Editar grupos" en el panel y en la guía · Ficheros: `ui/panel.js`, `ui/guide-section.js`,
+- [x] T5 · Botón "Editar grupos" en el panel y en la guía · Ficheros: `ui/panel.js`, `ui/guide-section.js`,
   `ui/panel.css`, `ui/guide-section.css` · Test: `make lint`, `make test` y a mano V1.
 - [ ] T7 · Árbol en la página: filas, plegar y desplegar, apariencia, número de canales, estado vacío y repintado por
   `storage.onChanged` conservando el estado · Ficheros: `options/options.js`, `options/options.css` · Test: `make
@@ -214,6 +214,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | T5 | Se quita de `tests/manifest.test.js` el test que fijaba en 216 las reglas de los `ui/*.css`. | Solo servía para comprobar que el refactor (T13) no perdía reglas; ya cumplió y bloquea cualquier estilo nuevo. | Delegada por la persona ("usa lo recomendado y ejecútalo") |
 
 ## Registro
 
@@ -225,3 +226,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T2 | `feat: group-editor con moveGroup, getSiblingMove, getMoveTargets, getDropPosition y moveGroupAndSave` | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
 | 2026-11-17 | T3 | `feat: group-editor con summarizeSubtree, removeGroupWithSnapshot, restoreGroup y borrado con deshacer` | Añade `deleteGroupAndSnapshot` y `restoreGroupAndSave`; 265 tests y lint en verde. |
 | 2026-11-17 | T4 | `feat: página de opciones y script de fondo del editor de grupos` | `options_ui`, `background.js` y esqueleto de `options/` con tema, error y recuento; 267 tests y lint en verde. |
+| 2026-11-17 | T5 | `feat: botón Editar grupos en el panel y en la guía` | Botón "✎" en `ui/panel.js` y `ui/guide-section.js` que envía `youtube-groups:open-editor`; pendiente V1 a mano. |

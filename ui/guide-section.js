@@ -465,7 +465,24 @@ const YouTubeGroupsGuideSection = (() => {
         const title = document.createElement("h3");
         title.className = "youtube-groups__guide-title";
 
-        header.append(back, title);
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "youtube-groups__guide-edit";
+        edit.title = "Editar grupos";
+        edit.setAttribute("aria-label", "Editar grupos");
+        edit.textContent = "✎";
+        edit.addEventListener("click", () => {
+          browser.runtime
+            .sendMessage({ type: "youtube-groups:open-editor" })
+            .catch((error) => {
+              console.error(
+                "[YouTube Groups] No se pudo abrir el editor de grupos",
+                error,
+              );
+            });
+        });
+
+        header.append(back, title, edit);
 
         const create = document.createElement("button");
         create.type = "button";
