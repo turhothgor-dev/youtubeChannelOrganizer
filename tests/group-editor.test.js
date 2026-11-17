@@ -577,3 +577,86 @@ test("moveGroupAndSave: dos movimientos solapados no se pisan", async () => {
   assert.deepStrictEqual(ids(saved), ["A"]);
   assert.deepStrictEqual(ids(saved[0].subgroups), ["C", "B", "A1", "A2"]);
 });
+
+test("normalizeSearchText quita acentos, mayúsculas y espacios sobrantes", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+
+  assert.strictEqual(
+    YouTubeGroupsEditor.normalizeSearchText("  Músíca "),
+    "musica",
+  );
+  assert.strictEqual(
+    YouTubeGroupsEditor.normalizeSearchText("MÚSICA"),
+    "musica",
+  );
+  assert.strictEqual(YouTubeGroupsEditor.normalizeSearchText("a   b"), "a b");
+});
+
+test("searchGroups: consulta vacía devuelve null", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+
+  assert.strictEqual(YouTubeGroupsEditor.searchGroups(sampleTree(), ""), null);
+  assert.strictEqual(
+    YouTubeGroupsEditor.searchGroups(sampleTree(), "   "),
+    null,
+  );
+});
+
+test("searchGroups encuentra grupos por nombre sin acentos ni mayúsculas", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = [
+    node("A", [], { name: "Música" }),
+    node("B", [], { name: "Cine" }),
+  ];
+
+  for (const query of ["  Músíca ", "musica", "MÚSICA"]) {
+    const result = plain(YouTubeGroupsEditor.searchGroups(tree, query));
+    assert.deepStrictEqual(result, {
+      groupIds: ["A"],
+      channelMatches: {},
+      visibleIds: ["A"],
+    });
+  }
+});
+
+test("searchGroups: un canal en A1a hace visibles sus antecesores en preorden", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = sampleTree();
+  tree[0].subgroups[0].subgroups[0].channels = [
+    { name: "Jazz Club", url: "https://www.youtube.com/@jazz" },
+    { name: "Otro", url: "https://www.youtube.com/@otro" },
+  ];
+
+  const result = plain(YouTubeGroupsEditor.searchGroups(tree, "jazz"));
+  assert.deepStrictEqual(result.groupIds, []);
+  assert.deepStrictEqual(result.visibleIds, ["A", "A1", "A1a"]);
+  assert.deepStrictEqual(result.channelMatches, {
+    A1a: ["https://www.youtube.com/@jazz"],
+  });
+});
+
+test("searchGroups encuentra canales por handle de la URL", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = [node("B")];
+  tree[0].channels = [
+    { name: "Chill", url: "https://www.youtube.com/@lofigirl" },
+  ];
+
+  const result = plain(YouTubeGroupsEditor.searchGroups(tree, "lofi"));
+  assert.deepStrictEqual(result.channelMatches, {
+    B: ["https://www.youtube.com/@lofigirl"],
+  });
+});
+
+test("searchGroups no duplica ids si coinciden el grupo y un canal", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = [node("A", [], { name: "Rock" })];
+  tree[0].channels = [{ name: "Rock FM", url: "https://www.youtube.com/@fm" }];
+
+  const result = plain(YouTubeGroupsEditor.searchGroups(tree, "rock"));
+  assert.deepStrictEqual(result.groupIds, ["A"]);
+  assert.deepStrictEqual(result.visibleIds, ["A"]);
+  assert.deepStrictEqual(result.channelMatches, {
+    A: ["https://www.youtube.com/@fm"],
+  });
+});

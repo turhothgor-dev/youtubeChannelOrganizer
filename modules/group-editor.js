@@ -606,7 +606,93 @@ const YouTubeGroupsEditor = (() => {
     );
   }
 
+  /**
+   * Normaliza un texto para buscar: minúsculas, sin diacríticos, espacios
+   * colapsados y recortado.
+   * @param {string} text - Texto original.
+   * @returns {string} Texto normalizado.
+   */
+  function normalizeSearchText(text) {
+    return String(text ?? "")
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * Ruta de una URL de canal (`/@handle`, `/channel/…`); si no es una URL
+   * válida, el texto tal cual.
+   * @param {string} url - URL guardada del canal.
+   * @returns {string} Ruta de la URL.
+   */
+  function channelPath(url) {
+    try {
+      return decodeURIComponent(new URL(url).pathname);
+    } catch {
+      return String(url ?? "");
+    }
+  }
+
+  /**
+   * Busca grupos y canales por nombre (y ruta de URL en los canales).
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} query - Consulta del usuario.
+   * @returns {{groupIds: Array<string>, channelMatches: Object<string,
+   *   Array<string>>, visibleIds: Array<string>}|null} `null` si la consulta
+   *   normalizada está vacía. `visibleIds` incluye coincidencias y antecesores
+   *   en preorden.
+   */
+  function searchGroups(groups, query) {
+    const needle = normalizeSearchText(query);
+    if (!needle) {
+      return null;
+    }
+    const groupIds = [];
+    const channelMatches = {};
+    const visibleIds = [];
+
+    // Devuelve true si el subárbol contiene alguna coincidencia.
+    const visit = (list) => {
+      let any = false;
+      for (const group of list) {
+        const slot = visibleIds.length;
+        visibleIds.push(group.id);
+        let hit = false;
+        if (normalizeSearchText(group.name).includes(needle)) {
+          groupIds.push(group.id);
+          hit = true;
+        }
+        const urls = channelsOf(group)
+          .filter(
+            (channel) =>
+              normalizeSearchText(channel.name).includes(needle) ||
+              normalizeSearchText(channelPath(channel.url)).includes(needle),
+          )
+          .map((channel) => channel.url);
+        if (urls.length > 0) {
+          channelMatches[group.id] = urls;
+          hit = true;
+        }
+        if (visit(childrenOf(group))) {
+          hit = true;
+        }
+        if (hit) {
+          any = true;
+        } else {
+          visibleIds.splice(slot, 1);
+        }
+      }
+      return any;
+    };
+    visit(groups);
+    return { groupIds, channelMatches, visibleIds };
+  }
+
   return {
+    normalizeSearchText,
+    searchGroups,
     removeChannels,
     restoreChannels,
     transferChannels,

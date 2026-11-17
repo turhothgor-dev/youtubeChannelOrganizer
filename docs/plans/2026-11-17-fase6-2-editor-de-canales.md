@@ -77,7 +77,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 
   borrado → 0 sin escribir; copiar a un grupo que ya tiene uno → `added` 1, `skipped` 1; mover quita del origen
   también los `skipped`; `fromId === toId` o grupo inexistente lanza sin escribir; la entrada no se muta; quitar URL
   inexistentes no llama a `set`.
-- [ ] T2 · `normalizeSearchText` y `searchGroups` · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js`
+- [x] T2 · `normalizeSearchText` y `searchGroups` · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js`
   · Test: "  Músíca " encuentra "musica" y "MÚSICA"; consulta vacía o solo espacios → `null`; un canal de A1a que
   coincide da `visibleIds` `[A, A1, A1a]` en preorden y `channelMatches` solo en A1a; coincidencia por handle
   (`/@lofigirl` con "lofi"); un nombre de grupo y un canal en el mismo grupo no duplican ids.
@@ -139,3 +139,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `feat: quitar, restaurar y copiar o mover canales entre grupos en el editor` | Lógica pura y versiones `…AndSave` con tests; sin cambios sobre el plan. |
+| 2026-11-17 | T2 | `feat: búsqueda de grupos y canales sin acentos ni mayúsculas en el editor` | `normalizeSearchText` y `searchGroups` con tests; sin cambios sobre el plan. |
