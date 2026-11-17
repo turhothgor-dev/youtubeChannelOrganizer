@@ -1,6 +1,6 @@
 # Plan: gui-8 · Guía, menú de opciones, editor y línea de color en tarjetas (índice)
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: correcciones de la persona tras probar en Firefox (2026-11-17), con las decisiones por defecto recomendadas
 ("usa lo recomendado"). ADR: [0017](../adr/0017-menu-de-opciones-en-la-guia.md) (propuesta).
@@ -27,7 +27,7 @@ sin dependencias nuevas; sin permisos nuevos; `make lint` y `make test` en verde
 
 ## Tareas
 
-- [ ] T1 · Cerrar el índice cuando los tres planes estén `hecho` · Ficheros: este plan · Test: los tres planes en
+- [x] T1 · Cerrar el índice cuando los tres planes estén `hecho` · Ficheros: este plan · Test: los tres planes en
   `hecho`.
 
 ## Criterios de aceptación
@@ -51,3 +51,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | docs: cerrar gui-8-3 (ARCHITECTURE, línea de color en tarjetas) | Los tres planes (gui-8-1, gui-8-2, gui-8-3) en `hecho`; índice cerrado en el mismo commit que gui-8-3 T3. |

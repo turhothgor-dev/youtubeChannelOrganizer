@@ -1,6 +1,6 @@
 # Plan: gui-8-3 · Línea de color del grupo en las tarjetas de suscripciones
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: corrección 6 de la persona tras probar en Firefox (2026-11-17). Índice:
 [gui-8](2026-11-17-gui-8-guia-y-editor.md). Sin ADR: no cambia el formato ni la estructura; sigue la regla de
@@ -63,7 +63,7 @@ Decisión:
   no produce registros de un `MutationObserver` con `attributes: true` sobre ella; cambiar el color de A en el
   almacenamiento (onChanged) actualiza la línea; los botones de la miniatura siguen y, con un filtro que la excluye,
   la tarjeta tiene `youtube-groups--hidden`.
-- [ ] T3 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/groups.js` con `buildChannelColorIndex` y
+- [x] T3 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/groups.js` con `buildChannelColorIndex` y
   `getStripeBackground`; fila de `ui/cards.js`; flujo "Detección" o uno nuevo "Línea de color en suscripciones"), este
   plan a `hecho` · Test: `make lint`, `make test` y V1 a V4.
 
@@ -107,3 +107,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | feat: índice de colores por canal y fondo de la línea en groups.js | `buildChannelColorIndex` y `getStripeBackground` con tests. |
 | 2026-11-17 | T2 | feat: línea de color del grupo en las tarjetas de suscripciones | `applyGroupStripe` y `refreshChannelColorIndex` en cards.js, CSS, llamada en content.js y tests jsdom. |
+| 2026-11-17 | T3 | docs: cerrar gui-8-3 (ARCHITECTURE, línea de color en tarjetas) | ARCHITECTURE actualizado; `make lint` y `make test` en verde (352). Verificación manual V1 a V4 en Firefox pendiente. |
