@@ -81,7 +81,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 
   · Test: "  Músíca " encuentra "musica" y "MÚSICA"; consulta vacía o solo espacios → `null`; un canal de A1a que
   coincide da `visibleIds` `[A, A1, A1a]` en preorden y `channelMatches` solo en A1a; coincidencia por handle
   (`/@lofigirl` con "lofi"); un nombre de grupo y un canal en el mismo grupo no duplican ids.
-- [ ] T3 · Selección de grupo y panel de canales (dos columnas, resumen, enlaces, casillas, "Seleccionar todo",
+- [x] T3 · Selección de grupo y panel de canales (dos columnas, resumen, enlaces, casillas, "Seleccionar todo",
   repintado por `storage.onChanged`) · Ficheros: `options/options.js`, `options/options.css`, `options/options.html` ·
   Test: `make lint`, `make test` y a mano V1.
 - [ ] T4 · "Quitar (N)" con aviso y "Deshacer" · Ficheros: `options/options.js` · Test: `make lint`, `make test` y a
@@ -140,3 +140,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `feat: quitar, restaurar y copiar o mover canales entre grupos en el editor` | Lógica pura y versiones `…AndSave` con tests; sin cambios sobre el plan. |
 | 2026-11-17 | T2 | `feat: búsqueda de grupos y canales sin acentos ni mayúsculas en el editor` | `normalizeSearchText` y `searchGroups` con tests; sin cambios sobre el plan. |
+| 2026-11-17 | T3 | `feat: selección de grupo y panel de canales en el editor` | Dos columnas, panel con resumen, enlaces, casillas y "Seleccionar todo"; sin cambios sobre el plan. |

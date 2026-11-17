@@ -9,6 +9,7 @@
   const errorEl = document.getElementById("options-error");
   const summaryEl = document.getElementById("options-summary");
   const treeEl = document.getElementById("options-tree");
+  const channelsEl = document.getElementById("options-channels");
 
   /**
    * Aplica el atributo `dark` en <html> según el tema del sistema.
@@ -506,6 +507,162 @@
     }
   }
 
+  /** Id del grupo seleccionado (su lista de canales se ve en el panel), o `null`. */
+  let selectedId = null;
+  /** URL de los canales marcados en el panel. */
+  const selectedUrls = new Set();
+
+  /**
+   * Marca en el árbol la fila del grupo seleccionado.
+   * @returns {void}
+   */
+  function markSelectedRow() {
+    for (const row of treeEl.querySelectorAll("[data-group-id]")) {
+      row.setAttribute(
+        "aria-selected",
+        String(row.dataset.groupId === selectedId),
+      );
+    }
+  }
+
+  /**
+   * Selecciona un grupo, vacía la selección de canales y repinta el panel.
+   * @param {string} groupId - Id del grupo.
+   * @returns {void}
+   */
+  function selectGroup(groupId) {
+    if (selectedId !== groupId) {
+      selectedId = groupId;
+      selectedUrls.clear();
+    }
+    markSelectedRow();
+    renderChannels();
+  }
+
+  /**
+   * Repinta el panel de canales del grupo seleccionado, conservando las
+   * casillas marcadas que sigan existiendo y el foco en una casilla.
+   * @returns {void}
+   */
+  function renderChannels() {
+    const active = document.activeElement;
+    const focusedUrl =
+      active && channelsEl.contains(active) && active.dataset
+        ? active.dataset.url || null
+        : null;
+    const group = selectedId ? findGroup(currentGroups, selectedId) : null;
+    channelsEl.replaceChildren();
+    if (!group) {
+      selectedId = null;
+      selectedUrls.clear();
+      channelsEl.append(el("p", "options__channels-summary", "Elige un grupo"));
+      return;
+    }
+    const channels = Array.isArray(group.channels) ? group.channels : [];
+    const existing = new Set(channels.map((channel) => channel.url));
+    for (const url of [...selectedUrls]) {
+      if (!existing.has(url)) {
+        selectedUrls.delete(url);
+      }
+    }
+
+    channelsEl.append(
+      el("h2", "options__channels-title", `Canales de «${group.name}»`),
+    );
+    const own =
+      channels.length === 1 ? "1 canal" : `${channels.length} canales`;
+    const summary = YouTubeGroupsEditor.summarizeSubtree(
+      currentGroups,
+      group.id,
+    );
+    const ownKeys = new Set(
+      channels.map((channel) => YouTubeGroups.getChannelKey(channel.url)),
+    );
+    const more = summary ? Math.max(0, summary.channels - ownKeys.size) : 0;
+    channelsEl.append(
+      el(
+        "p",
+        "options__channels-summary",
+        more > 0 ? `${own} · ${more} más en subgrupos` : own,
+      ),
+    );
+    if (channels.length === 0) {
+      channelsEl.append(
+        el(
+          "p",
+          "options__channels-summary",
+          "Este grupo no tiene canales propios",
+        ),
+      );
+      return;
+    }
+
+    const bar = el("div", "options__channels-bar");
+    const allLabel = el("label", "options__select-all");
+    const allBox = document.createElement("input");
+    allBox.type = "checkbox";
+    allLabel.append(allBox, " Seleccionar todo");
+    bar.append(allLabel);
+    channelsEl.append(bar);
+
+    const list = el("ul", "options__channel-list");
+    const boxes = [];
+    const updateAll = () => {
+      allBox.checked = selectedUrls.size === channels.length;
+      allBox.indeterminate =
+        selectedUrls.size > 0 && selectedUrls.size < channels.length;
+    };
+    for (const channel of channels) {
+      const item = el("li", "options__channel");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.dataset.url = channel.url;
+      box.checked = selectedUrls.has(channel.url);
+      box.setAttribute("aria-label", `Seleccionar ${channel.name}`);
+      box.addEventListener("change", () => {
+        if (box.checked) {
+          selectedUrls.add(channel.url);
+        } else {
+          selectedUrls.delete(channel.url);
+        }
+        updateAll();
+      });
+      boxes.push(box);
+      const text = el("span", "options__channel-text");
+      const link = el(
+        "a",
+        "options__channel-link",
+        channel.name || channel.url,
+      );
+      link.href = channel.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      text.append(link, el("span", "options__channel-url", channel.url));
+      item.append(box, text);
+      list.append(item);
+    }
+    allBox.addEventListener("change", () => {
+      selectedUrls.clear();
+      if (allBox.checked) {
+        for (const channel of channels) {
+          selectedUrls.add(channel.url);
+        }
+      }
+      for (const box of boxes) {
+        box.checked = allBox.checked;
+      }
+      updateAll();
+    });
+    updateAll();
+    channelsEl.append(list);
+    if (focusedUrl) {
+      const box = boxes.find((item) => item.dataset.url === focusedUrl);
+      if (box) {
+        box.focus();
+      }
+    }
+  }
+
   /** Id del grupo que se arrastra, o `null`. */
   let draggingId = null;
   const DROP_CLASSES = [
@@ -608,6 +765,7 @@
     row.setAttribute("aria-level", String(level));
     row.tabIndex = 0;
     row.dataset.groupId = group.id;
+    row.setAttribute("aria-selected", String(group.id === selectedId));
     if (children.length > 0) {
       row.setAttribute("aria-expanded", String(!isCollapsed));
     }
@@ -695,6 +853,7 @@
       row.append(buildEditor());
     } else {
       const name = el("span", "options__name", group.name);
+      name.addEventListener("click", () => selectGroup(group.id));
       name.addEventListener("dblclick", () =>
         startEdit("rename", group.id, null, group.name),
       );
@@ -749,6 +908,9 @@
       ) {
         event.preventDefault();
         moveSibling(group, event.key === "ArrowUp" ? -1 : 1);
+      } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectGroup(group.id);
       } else if (event.key === "F2") {
         event.preventDefault();
         startEdit("rename", group.id, null, group.name);
@@ -846,6 +1008,7 @@
       }
     }
     rendering = false;
+    renderChannels();
     if (inputFocused && editing && editing.input) {
       editing.input.focus();
       editing.input.setSelectionRange(selection[0], selection[1]);
