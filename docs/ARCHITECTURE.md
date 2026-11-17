@@ -143,7 +143,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   se pasa a la columna del padre con `findGuidePath`) (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
   (`isChannelListOpen`, abierta si contiene un canal seleccionado). No hay elemento "Todos": grupos y canales alternan con `toggleSelectionItem`. No edita ni borra
-  grupos: eso se hace en el editor (página de opciones), que se abre con "✎ Editar grupos". La columna es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
+  grupos: eso se hace en el editor (página de opciones), que se abre con "✎ Editar grupos". La columna es el único sitio para elegir el filtro y, junto con el editor, para crear grupos y subgrupos; el panel no tiene nada de grupos
   (solo "Canal actual" con sus casillas). Si YouTube cambia el DOM de la guía y la sección no aparece, no se puede
   filtrar hasta corregirlo. El panel aparece minimizado por defecto y se puede desplegar con el botón de su cabecera; el
   estado se guarda en el ajuste `panelCollapsed` y se aplica al leer los ajustes y en `storage.onChanged`. Editar,

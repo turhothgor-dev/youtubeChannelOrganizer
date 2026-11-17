@@ -1,7 +1,9 @@
 "use strict";
 
 /**
- * Página de opciones: editor de grupos (esqueleto: tema, errores y recuento).
+ * Página de opciones: editor de grupos. Pinta el árbol y permite renombrar en
+ * línea, cambiar icono y color, crear grupos y subgrupos, subir, bajar, mover
+ * (selector y arrastrar y soltar) y eliminar con "Deshacer".
  */
 (() => {
   const errorEl = document.getElementById("options-error");
@@ -268,7 +270,8 @@
 
   /**
    * Selector "Mover a…" abierto, o `null`.
-   * @type {null|{groupId: string, value: string}}
+   * `value` es `null` si aún no se ha elegido destino y `""` para "Primer nivel".
+   * @type {null|{groupId: string, value: string|null}}
    */
   let moving = null;
 
@@ -320,7 +323,7 @@
    * @returns {void}
    */
   function startMove(group) {
-    moving = { groupId: group.id, value: "" };
+    moving = { groupId: group.id, value: null };
     renderTree(currentGroups);
     const select = treeEl.querySelector(".options__move-select");
     if (select) {
@@ -342,7 +345,8 @@
   /**
    * Crea el selector "Mover a…" con sus botones.
    * @param {Object} group - Grupo a mover.
-   * @returns {HTMLElement} Contenedor del selector.
+   * @returns {HTMLElement|null} Contenedor del selector, o `null` si el
+   *   destino elegido ya no existe (se cancela).
    */
   function buildMoveControl(group) {
     const wrapper = el("span", "options__move");
@@ -363,7 +367,12 @@
         initial = option.value;
       }
     }
-    select.value = moving.value !== "" ? moving.value : initial;
+    select.value = moving.value !== null ? moving.value : initial;
+    if (select.value !== (moving.value !== null ? moving.value : initial)) {
+      // El destino elegido ya no existe: se cancela el selector.
+      moving = null;
+      return null;
+    }
     moving.value = select.value;
     select.addEventListener("change", () => {
       moving.value = select.value;
@@ -417,9 +426,10 @@
    * Muestra un aviso, con botón "Deshacer" opcional, durante 10 s.
    * @param {string} message - Texto del aviso.
    * @param {function(): void} [onUndo] - Acción de "Deshacer".
+   * @param {boolean} [focusUndo] - Si el foco pasa a "Deshacer".
    * @returns {void}
    */
-  function showNotice(message, onUndo) {
+  function showNotice(message, onUndo, focusUndo) {
     if (!noticeEl) {
       noticeEl = el("div", "options__notice");
       noticeEl.setAttribute("role", "status");
@@ -433,6 +443,9 @@
       undo.type = "button";
       undo.addEventListener("click", onUndo);
       noticeEl.append(undo);
+      if (focusUndo) {
+        undo.focus();
+      }
     }
     noticeTimer = setTimeout(hideNotice, 10000);
   }
@@ -485,6 +498,7 @@
       showNotice(
         `Eliminado «${group.name}»${parts.length ? `, con ${parts.join(" y ")}` : ""}`,
         () => undoDelete(snapshot),
+        true,
       );
     } catch (error) {
       console.error(error);
@@ -720,7 +734,10 @@
     );
     row.append(actions);
     if (moving && moving.groupId === group.id) {
-      row.append(buildMoveControl(group));
+      const control = buildMoveControl(group);
+      if (control) {
+        row.append(control);
+      }
     }
     row.addEventListener("keydown", (event) => {
       if (event.target !== row) {
@@ -786,13 +803,21 @@
     const selection = inputFocused
       ? [editing.input.selectionStart, editing.input.selectionEnd]
       : null;
+    const selectFocused = Boolean(
+      active &&
+      active.classList &&
+      active.classList.contains("options__move-select"),
+    );
     const focusedId =
       !inputFocused &&
+      !selectFocused &&
       active &&
       treeEl.contains(active) &&
       active.closest("[data-group-id]")
         ? active.closest("[data-group-id]").dataset.groupId
         : null;
+    // Un repintado nuevo anula cualquier arrastre en curso.
+    draggingId = null;
 
     if (moving && !findGroup(groups, moving.groupId)) {
       moving = null;
@@ -814,7 +839,8 @@
     if (groups.length === 0) {
       summaryEl.textContent = "Aún no hay grupos";
     } else {
-      summaryEl.textContent = `${countGroups(groups)} grupos`;
+      const total = countGroups(groups);
+      summaryEl.textContent = total === 1 ? "1 grupo" : `${total} grupos`;
       for (const group of groups) {
         treeEl.append(buildNode(groups, group, 1));
       }
@@ -823,6 +849,11 @@
     if (inputFocused && editing && editing.input) {
       editing.input.focus();
       editing.input.setSelectionRange(selection[0], selection[1]);
+    } else if (selectFocused && moving) {
+      const select = treeEl.querySelector(".options__move-select");
+      if (select) {
+        select.focus();
+      }
     } else if (focusedId) {
       focusRow(focusedId);
     }
@@ -854,6 +885,14 @@
       ),
     );
   });
+
+  // Si el arrastre termina fuera de una fila, se limpia el estado.
+  for (const type of ["dragend", "drop"]) {
+    document.addEventListener(type, () => {
+      draggingId = null;
+      clearDropIndicator();
+    });
+  }
 
   document.getElementById("options-add-group").addEventListener("click", () => {
     startEdit("create", null, null, "");

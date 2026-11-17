@@ -215,6 +215,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
 | 2026-11-17 | T5 | Se quita de `tests/manifest.test.js` el test que fijaba en 216 las reglas de los `ui/*.css`. | Solo servía para comprobar que el refactor (T13) no perdía reglas; ya cumplió y bloquea cualquier estilo nuevo. | Delegada por la persona ("usa lo recomendado y ejecútalo") |
+| 2026-11-17 | Revisión (T10, T11, T9, T7) | Correcciones de la revisión en `options/options.js` (y `docs/ARCHITECTURE.md`): (a) "Mover a…" distingue "sin elegir" (`null`) de "Primer nivel" (`""`), conserva la elección y el foco del `<select>` en los repintados y se cancela si el destino elegido desaparece; (b) `draggingId` se limpia al repintar y en `dragend`/`drop` a nivel de `document`; (c) tras eliminar, el foco va a "Deshacer"; (d) "1 grupo" en singular y `#options-summary` sin `role="status"`; (e) comentario de cabecera de `options.js` al día; (f) ARCHITECTURE: la guía ya no es el único sitio para crear grupos; (g) Registro de T2 y T3 con los commits reales. Navegación con flechas del árbol queda fuera (mejora futura). | Hallazgos de la revisión del plan. | Delegada por la persona ("usa lo recomendado y ejecútalo") |
 
 ## Registro
 
@@ -223,8 +224,8 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `fix: normalizeChannelUrl con origen fijo y renameGroup con validateGroupName` | ADR 0014 a `aceptada`; opción `origin` en `loadModules`; 249 tests y lint en verde. |
-| 2026-11-17 | T2 | `feat: group-editor con moveGroup, getSiblingMove, getMoveTargets, getDropPosition y moveGroupAndSave` | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
-| 2026-11-17 | T3 | `feat: group-editor con summarizeSubtree, removeGroupWithSnapshot, restoreGroup y borrado con deshacer` | Añade `deleteGroupAndSnapshot` y `restoreGroupAndSave`; 265 tests y lint en verde. |
+| 2026-11-17 | T2 | `feat: módulo group-editor para mover y reordenar grupos` (eb1dc50) | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
+| 2026-11-17 | T3 | `feat: borrar grupos con instantánea para deshacer` (d710229) | Añade `deleteGroupAndSnapshot` y `restoreGroupAndSave`; 265 tests y lint en verde. |
 | 2026-11-17 | T4 | `feat: página de opciones y script de fondo del editor de grupos` | `options_ui`, `background.js` y esqueleto de `options/` con tema, error y recuento; 267 tests y lint en verde. |
 | 2026-11-17 | T5 | `feat: botón Editar grupos en el panel y en la guía` | Botón "✎" en `ui/panel.js` y `ui/guide-section.js` que envía `youtube-groups:open-editor`; pendiente V1 a mano. |
 | 2026-11-17 | T7 | `feat: árbol de grupos en la página de opciones` | Filas con plegado, icono, banda, nº de canales, estado vacío y repintado por `storage.onChanged`; pendiente V2 a mano. |
@@ -232,4 +233,5 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T9 | `feat: eliminar grupos con aviso y deshacer en el editor` | Botón "Eliminar" y Supr, aviso `role="status"` de 10 s con "Deshacer" (`deleteGroupAndSnapshot`/`restoreGroupAndSave`); pendiente V4 a mano. |
 | 2026-11-17 | T10 | `feat: subir, bajar y mover a otro grupo en el editor` | "Subir"/"Bajar" (deshabilitados en extremos), Alt+↑/↓ y "Mover a…" con `<select>` (`moveGroupAndSave`); foco en la fila movida; pendiente V5 a mano. |
 | 2026-11-17 | T11 | `feat: arrastrar y soltar grupos con indicador de posición en el editor` | Asa "⠿" arrastrable, zonas before/after/inside con `getDropPosition` e indicador visual claro/oscuro; pendiente V6 a mano. |
+| 2026-11-17 | Revisión | `fix: correcciones de la revisión del editor de grupos` | Puntos a–g: "Mover a…" distingue sin elegir y "Primer nivel", `draggingId` se limpia, foco en "Deshacer", "1 grupo", ARCHITECTURE; Registro de T2 y T3 con los commits reales. |
 | 2026-11-17 | T12 | `docs: cerrar el editor de grupos (limpieza de panel.js, arquitectura y roadmap)` | Quita `promptRenameGroup` y `confirmDeleteGroup`; ARCHITECTURE.md y ROADMAP.md (6-1 ✅); plan a `hecho`. Verificación manual V1-V7 pendiente. |
