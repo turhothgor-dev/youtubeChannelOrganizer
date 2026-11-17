@@ -237,6 +237,19 @@ html[dark] .options__field-error {
   margin-bottom: 0.5rem;
 }
 
+.options__transfer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.options__transfer-select {
+  max-width: 16rem;
+  font: inherit;
+  white-space: pre;
+}
+
 .options__channel-list {
   list-style: none;
   margin: 0;

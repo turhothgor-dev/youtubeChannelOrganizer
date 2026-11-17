@@ -534,6 +534,7 @@
     if (selectedId !== groupId) {
       selectedId = groupId;
       selectedUrls.clear();
+      transfer = null;
     }
     markSelectedRow();
     renderChannels();
@@ -599,6 +600,130 @@
   }
 
   /**
+   * Selector de destino de "Copiar a…" / "Mover a…" abierto, o `null`.
+   * `value` es el id de destino elegido (`""` si aún no hay).
+   * @type {null|{mode: "copy"|"move", value: string}}
+   */
+  let transfer = null;
+
+  /**
+   * Abre el selector de destino para copiar o mover los canales marcados.
+   * @param {"copy"|"move"} mode - Copiar o mover.
+   * @returns {void}
+   */
+  function startTransfer(mode) {
+    transfer = { mode, value: "" };
+    renderChannels();
+    const select = channelsEl.querySelector(".options__transfer-select");
+    if (select) {
+      select.focus();
+    }
+  }
+
+  /**
+   * Copia o mueve los canales marcados al grupo elegido y avisa del resultado.
+   * @param {Object} group - Grupo de origen.
+   * @param {"copy"|"move"} mode - Copiar o mover.
+   * @param {string} toId - Id del grupo de destino.
+   * @returns {Promise<void>}
+   */
+  async function runTransfer(group, mode, toId) {
+    const urls = [...selectedUrls];
+    const target = findGroup(currentGroups, toId);
+    if (urls.length === 0 || !target) {
+      return;
+    }
+    try {
+      const { added, skipped } =
+        await YouTubeGroupsEditor.transferChannelsAndSave(
+          group.id,
+          urls,
+          toId,
+          mode,
+        );
+      transfer = null;
+      selectedUrls.clear();
+      showError("");
+      const done =
+        mode === "copy"
+          ? added === 1
+            ? "1 copiado"
+            : `${added} copiados`
+          : added === 1
+            ? "1 movido"
+            : `${added} movidos`;
+      const extra =
+        skipped === 0
+          ? ""
+          : skipped === 1
+            ? "; 1 ya estaba"
+            : `; ${skipped} ya estaban`;
+      showNotice(`${done} a «${target.name}»${extra}`);
+      renderChannels();
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo copiar o mover.");
+    }
+  }
+
+  /**
+   * Crea el selector de destino con su botón de confirmar y de cancelar.
+   * @param {Object} group - Grupo de origen (se excluye del selector).
+   * @returns {HTMLElement} Contenedor del selector.
+   */
+  function buildTransferControl(group) {
+    const mode = transfer.mode;
+    const wrapper = el("span", "options__transfer");
+    const select = document.createElement("select");
+    select.className = "options__transfer-select";
+    select.setAttribute("aria-label", mode === "copy" ? "Copiar a" : "Mover a");
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Elige un grupo";
+    select.append(placeholder);
+    for (const target of YouTubeGroups.flattenGroups(currentGroups)) {
+      if (target.id === group.id) {
+        continue;
+      }
+      const option = document.createElement("option");
+      option.value = target.id;
+      option.textContent = "  ".repeat(target.level) + target.name;
+      select.append(option);
+    }
+    select.value = transfer.value;
+    if (select.value !== transfer.value) {
+      // El destino elegido ya no existe.
+      transfer.value = "";
+      select.value = "";
+    }
+    const confirm = actionButton(mode === "copy" ? "Copiar" : "Mover", () =>
+      runTransfer(group, mode, select.value),
+    );
+    confirm.classList.add("options__transfer-confirm");
+    const updateConfirm = () => {
+      confirm.disabled = select.value === "" || selectedUrls.size === 0;
+    };
+    select.addEventListener("change", () => {
+      transfer.value = select.value;
+      updateConfirm();
+    });
+    select.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        transfer = null;
+        renderChannels();
+      }
+    });
+    const cancel = actionButton("Cancelar", () => {
+      transfer = null;
+      renderChannels();
+    });
+    updateConfirm();
+    wrapper.append(select, confirm, cancel);
+    return wrapper;
+  }
+
+  /**
    * Repinta el panel de canales del grupo seleccionado, conservando las
    * casillas marcadas que sigan existiendo y el foco en una casilla.
    * @returns {void}
@@ -614,6 +739,7 @@
     if (!group) {
       selectedId = null;
       selectedUrls.clear();
+      transfer = null;
       channelsEl.append(el("p", "options__channels-summary", "Elige un grupo"));
       return;
     }
@@ -664,7 +790,12 @@
     const removeButton = actionButton("Quitar", () =>
       removeSelectedChannels(group),
     );
-    bar.append(allLabel, removeButton);
+    const copyButton = actionButton("Copiar a…", () => startTransfer("copy"));
+    const moveButton = actionButton("Mover a…", () => startTransfer("move"));
+    bar.append(allLabel, removeButton, copyButton, moveButton);
+    if (transfer) {
+      bar.append(buildTransferControl(group));
+    }
     channelsEl.append(bar);
 
     const list = el("ul", "options__channel-list");
@@ -676,6 +807,12 @@
       removeButton.textContent = `Quitar (${selectedUrls.size})`;
       removeButton.setAttribute("aria-label", removeButton.textContent);
       removeButton.disabled = selectedUrls.size === 0;
+      copyButton.disabled = selectedUrls.size === 0;
+      moveButton.disabled = selectedUrls.size === 0;
+      const confirmButton = bar.querySelector(".options__transfer-confirm");
+      if (confirmButton) {
+        confirmButton.disabled = selectedUrls.size === 0;
+      }
     };
     for (const channel of channels) {
       const item = el("li", "options__channel");

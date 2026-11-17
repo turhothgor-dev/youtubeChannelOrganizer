@@ -86,7 +86,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 
   Test: `make lint`, `make test` y a mano V1.
 - [x] T4 · "Quitar (N)" con aviso y "Deshacer" · Ficheros: `options/options.js` · Test: `make lint`, `make test` y a
   mano V2.
-- [ ] T5 · "Copiar a…" y "Mover a…" · Ficheros: `options/options.js`, `options/options.css` · Test: `make lint`, `make
+- [x] T5 · "Copiar a…" y "Mover a…" · Ficheros: `options/options.js`, `options/options.css` · Test: `make lint`, `make
   test` y a mano V3.
 - [ ] T6 · Búsqueda en árbol y canales · Ficheros: `options/options.js`, `options/options.css`,
   `options/options.html` · Test: `make lint`, `make test` y a mano V4.
@@ -142,3 +142,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T2 | `feat: búsqueda de grupos y canales sin acentos ni mayúsculas en el editor` | `normalizeSearchText` y `searchGroups` con tests; sin cambios sobre el plan. |
 | 2026-11-17 | T3 | `feat: selección de grupo y panel de canales en el editor` | Dos columnas, panel con resumen, enlaces, casillas y "Seleccionar todo"; sin cambios sobre el plan. |
 | 2026-11-17 | T4 | `feat: quitar canales del grupo con aviso y deshacer en el editor` | Botón "Quitar (N)" con aviso de 10 s y "Deshacer"; sin cambios sobre el plan. |
+| 2026-11-17 | T5 | `feat: copiar y mover canales a otro grupo desde el panel del editor` | "Copiar a…" y "Mover a…" con selector de destino sin el grupo actual y aviso del resultado; sin cambios sobre el plan. |
