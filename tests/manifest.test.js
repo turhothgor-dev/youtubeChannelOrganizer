@@ -59,3 +59,19 @@ test("modules/* va antes que ui/* y content.js es el último", () => {
     assert.ok(lastModule < firstUi);
   }
 });
+
+test("los ui/*.js se cargan en el orden de sus dependencias", () => {
+  assert.deepStrictEqual(
+    manifestScripts().filter((f) => f.startsWith("ui/")),
+    [
+      "ui/icons-dom.js",
+      "ui/icon-picker.js",
+      "ui/dropdowns.js",
+      "ui/player.js",
+      "ui/watched.js",
+      "ui/cards.js",
+      "ui/guide-section.js",
+      "ui/panel.js",
+    ],
+  );
+});

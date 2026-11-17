@@ -46,7 +46,7 @@
       activeSelection: [],
       /** Unión de los canales de la selección (`null` sin selección o cargando). */
       activeSelectionUrls: null,
-      /** Filtros avanzados de la página de suscripciones. */
+      /** Filtros avanzados activos (en memoria; se pierden al recargar). */
       advancedFilters: { duration: "any", age: "any", views: "any" },
     },
     setActiveSelection,
