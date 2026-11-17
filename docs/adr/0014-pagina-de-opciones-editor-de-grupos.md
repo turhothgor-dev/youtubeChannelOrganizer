@@ -1,6 +1,6 @@
 # 0014 · Editor de grupos en la página de opciones, abierta con un script de fondo mínimo
 
-- Estado: propuesta (punto 3 modificado por el [ADR 0015](0015-componentes-de-interfaz-en-ui.md))
+- Estado: aceptada (punto 3 modificado por el [ADR 0015](0015-componentes-de-interfaz-en-ui.md))
 - Fecha: 2026-11-17
 
 ## Contexto

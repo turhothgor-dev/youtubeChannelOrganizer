@@ -25,7 +25,10 @@ const MODULES = [
  * Carga los scripts clásicos de modules/ en un contexto vm con un
  * browser.storage.local simulado (guarda y devuelve copias, cuenta llamadas a set).
  */
-function loadModules(initialStore = {}, { latencyMs = 0 } = {}) {
+function loadModules(
+  initialStore = {},
+  { latencyMs = 0, origin = "https://www.youtube.com" } = {},
+) {
   const store = structuredClone(initialStore);
   const calls = { get: 0, set: 0 };
   const delay = () =>
@@ -51,7 +54,7 @@ function loadModules(initialStore = {}, { latencyMs = 0 } = {}) {
   };
 
   const context = vm.createContext({
-    window: { location: { origin: "https://www.youtube.com" } },
+    window: { location: { origin } },
     URL,
     crypto: globalThis.crypto,
     structuredClone,

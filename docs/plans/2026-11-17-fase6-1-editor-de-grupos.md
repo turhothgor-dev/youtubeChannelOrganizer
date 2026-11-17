@@ -121,7 +121,7 @@ Envía `browser.runtime.sendMessage({ type: "youtube-groups:open-editor" })`; si
 Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin dependencias nuevas; `make lint`
 (0 avisos) y `make test` en verde.
 
-- [ ] T1 · `normalizeChannelUrl` con origen fijo y `renameGroup` con `validateGroupName` (ver **Decisiones**). El
+- [x] T1 · `normalizeChannelUrl` con origen fijo y `renameGroup` con `validateGroupName` (ver **Decisiones**). El
   ADR 0014 pasa a `aceptada` · Ficheros: `modules/groups.js`, `tests/helpers/load-modules.js` (opción `origin` para
   `window.location.origin`, por defecto el de YouTube), `tests/groups.test.js`, `docs/adr/0014-…` · Test: con origen
   `moz-extension://abc`, `normalizeChannelUrl("/@a?x=1")` → `https://www.youtube.com/@a` y
@@ -221,3 +221,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `fix: normalizeChannelUrl con origen fijo y renameGroup con validateGroupName` | ADR 0014 a `aceptada`; opción `origin` en `loadModules`; 249 tests y lint en verde. |

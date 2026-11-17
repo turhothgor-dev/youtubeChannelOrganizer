@@ -1,12 +1,14 @@
 const YouTubeGroups = (() => {
+  const YOUTUBE_ORIGIN = "https://www.youtube.com";
+
   /**
    * Normaliza una URL de canal de YouTube.
    * @param {string} href - La URL a normalizar
    * @returns {string|null} La URL normalizada o null si inválida
    */
   function normalizeChannelUrl(href) {
-    const url = new URL(href, window.location.origin);
-    if (url.origin !== window.location.origin) {
+    const url = new URL(href, YOUTUBE_ORIGIN);
+    if (url.origin !== YOUTUBE_ORIGIN) {
       return null;
     }
 
@@ -159,12 +161,15 @@ const YouTubeGroups = (() => {
         throw new Error("No existe el grupo indicado.");
       }
 
-      const newGroupName = newName.trim();
-      if (!newGroupName) {
-        throw new Error("El nombre del grupo no puede estar vacío.");
+      const nameError = validateGroupName(
+        newName,
+        group.type === "subgroup" ? "subgroup" : "group",
+      );
+      if (nameError) {
+        throw new Error(nameError);
       }
 
-      group.name = newGroupName;
+      group.name = newName.trim();
       await YouTubeGroupsStorage.saveGroups(groups);
       return group;
     });

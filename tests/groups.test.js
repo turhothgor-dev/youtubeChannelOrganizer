@@ -507,6 +507,74 @@ test("renameGroup inexistente a la vez que createGroup rechaza y guarda el grupo
   );
 });
 
+test("normalizeChannelUrl no depende del origen de la página (moz-extension)", async () => {
+  const origin = "moz-extension://abc";
+  const { YouTubeGroups, store } = loadModules(
+    {
+      youtubeGroups: {
+        version: 1,
+        groups: [
+          {
+            id: "g1",
+            name: "G1",
+            type: "group",
+            channels: [{ name: "A", url: `${YT}/@a` }],
+            subgroups: [],
+          },
+        ],
+      },
+    },
+    { origin },
+  );
+  const normalize = YouTubeGroups.normalizeChannelUrl;
+
+  assert.strictEqual(normalize("/@a?x=1"), `${YT}/@a`);
+  assert.strictEqual(normalize(`${YT}/channel/UC1/`), `${YT}/channel/UC1`);
+  assert.strictEqual(normalize("https://evil.com/@a"), null);
+
+  await YouTubeGroups.removeChannelFromGroup("g1", `${YT}/@a`);
+  assert.deepStrictEqual(store.youtubeGroups.groups[0].channels, []);
+});
+
+test("renameGroup valida el nombre sin escribir y guarda el recortado", async () => {
+  const { YouTubeGroups, store, calls } = loadModules({
+    youtubeGroups: {
+      version: 1,
+      groups: [
+        {
+          id: "g1",
+          name: "G1",
+          type: "group",
+          channels: [],
+          subgroups: [
+            {
+              id: "s1",
+              name: "S1",
+              type: "subgroup",
+              parentId: "g1",
+              channels: [],
+              subgroups: [],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  await assert.rejects(
+    YouTubeGroups.renameGroup("g1", "a"),
+    /del grupo debe tener al menos 2/,
+  );
+  await assert.rejects(
+    YouTubeGroups.renameGroup("s1", "a".repeat(81)),
+    /del subgrupo no puede exceder 80/,
+  );
+  assert.strictEqual(calls.set, 0);
+
+  await YouTubeGroups.renameGroup("g1", " Nuevo ");
+  assert.strictEqual(store.youtubeGroups.groups[0].name, "Nuevo");
+});
+
 test("flattenGroups devuelve el preorden con el nivel de cada grupo", () => {
   const { YouTubeGroups } = loadModules();
   const groups = [
