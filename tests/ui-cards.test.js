@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   CHANNEL_URL,
   makeGroup,
@@ -27,6 +27,67 @@ function clickGuideItem(document, text) {
   assert.ok(button, `no hay botón de guía "${text}"`);
   button.click();
 }
+
+/**
+ * Crea el componente de tarjetas solo, con un contexto mínimo.
+ * @param {Object} dom - Resultado de `loadDom`.
+ * @returns {Object} API del componente.
+ */
+function createCards(dom) {
+  const Cards = dom.global("YouTubeGroupsCards");
+  return Cards.create({
+    state: {
+      settings: dom.global("YouTubeGroupsSettings").DEFAULT_SETTINGS,
+      activeSelection: [],
+      activeSelectionUrls: null,
+      advancedFilters: { duration: "any", age: "any", views: "any" },
+      watchedVideos: null,
+    },
+    watched: {
+      applyWatchedToCard() {},
+      updateWatchedButton() {},
+      toggleVideoWatched() {},
+    },
+    dropdowns: {},
+  });
+}
+
+test("YouTubeGroupsCards.create no toca el DOM", () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML, scripts });
+  const before = dom.document.body.innerHTML;
+
+  assert.strictEqual(
+    typeof dom.global("YouTubeGroupsCards").create,
+    "function",
+  );
+  const cards = createCards(dom);
+
+  assert.strictEqual(dom.document.body.innerHTML, before);
+  assert.strictEqual(typeof cards.scanDocument, "function");
+  assert.strictEqual(typeof cards.resetDetectedCards, "function");
+});
+
+test("resetDetectedCards y scanDocument vuelven a procesar una tarjeta cuyo enlace de canal ha cambiado", async () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML, scripts });
+  const cards = createCards(dom);
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+
+  cards.scanDocument();
+  await dom.flush();
+  assert.strictEqual(card.dataset.youtubeGroupsChannelUrl, CHANNEL_URL);
+
+  // YouTube reutiliza la tarjeta para otro canal
+  card.querySelector("ytd-channel-name a").setAttribute("href", "/@otro");
+  cards.resetDetectedCards();
+  cards.scanDocument();
+  await dom.flush();
+  assert.strictEqual(
+    card.dataset.youtubeGroupsChannelUrl,
+    "https://www.youtube.com/@otro",
+  );
+});
 
 test("una tarjeta recibe un único control dentro de la miniatura", async () => {
   const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML });
