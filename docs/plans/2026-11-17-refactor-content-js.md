@@ -158,7 +158,7 @@ final) con la extensión recargada y **sin errores nuevos en la consola**.
   ficheros de `content_scripts` existen, `modules/*` van antes que `ui/*` y `content.js` es el último. Además, a
   mano: `make build` y `unzip -l web-ext-artifacts/*.zip` no listan `node_modules/`, `tests/` ni `linkedom`. Si se
   cumple el criterio de `jsdom`, se cambia aquí (la persona instala `jsdom` y desinstala `linkedom`).
-- [ ] T2 · Tests de humo, contra el `content.js` actual, de tarjetas, desplegables, vistos y reproductor ·
+- [x] T2 · Tests de humo, contra el `content.js` actual, de tarjetas, desplegables, vistos y reproductor ·
   Ficheros: `tests/ui-cards.test.js`, `tests/ui-dropdowns.test.js`, `tests/ui-watched.test.js`,
   `tests/ui-player.test.js`, `tests/helpers/youtube-fixtures.js` · Test: **cards**: en suscripciones, una tarjeta
   recibe un único `.youtube-groups__subscription-control` dentro de la miniatura (`data-youtube-groups-thumb-host`),
@@ -305,3 +305,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `test: jsdom y ayudante de DOM con tests de humo del panel` | Con `jsdom` (cambio aprobado arriba) `location` es el real y `location.assign` no se puede sustituir: el ayudante cuenta las navegaciones no implementadas en `navigations.count` en lugar de `location.assigned` (a confirmar por la persona; afecta a T2 si un test necesita la URL). Comprobado: `make test` (199 en verde), `make lint` y el `.zip` de `make build` (20 ficheros) sin `node_modules/`, `tests/` ni `jsdom`. |
+| 2026-11-17 | T2 | `test: tests de humo de tarjetas, desplegables, vistos y reproductor` | 4 ficheros `ui-*.test.js` (13 tests) y ampliación de `youtube-fixtures.js` (ID de 11 caracteres, `ytd-guide-renderer`, host de YouTube Music en la guía, `makeGroup`, `groupsStore`, `flushLoose`). Hallazgo, sin corregir (fuera de alcance): con una tarjeta con botones, `setCardButtonContent` reescribe el texto de la etiqueta en cada procesado, eso muta la tarjeta y la reprograma en cada frame sin parar; por eso los tests usan `flushLoose` (tolera el límite de vueltas de `flush`). Comprobado: `make test` (213 en verde) y `make lint`. |
