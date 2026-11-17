@@ -106,6 +106,44 @@ test('la fila de A muestra "A (n)"; "›" entra en A y "‹" vuelve', async () =
   assert.deepStrictEqual(rowNames(dom), ["A (1)", "B (0)"]);
 });
 
+test("la banda de color va en el botón del grupo, no en la fila", async () => {
+  const groups = [
+    makeGroup("A", { subgroups: [makeGroup("A1")] }),
+    makeGroup("B"),
+  ];
+  groups[0].color = "#2196F3";
+  const dom = await loadWithGuide({ store: groupsStore(groups) });
+  const band = "youtube-groups__group-band";
+
+  const rows = dom.document.querySelectorAll(
+    `${GUIDE} .youtube-groups__guide-row`,
+  );
+  assert.strictEqual(rows.length, 2);
+  const [rowA, rowB] = rows;
+  const buttonA = rowA.querySelector(".youtube-groups__guide-item");
+  assert.ok(buttonA.classList.contains(band));
+  assert.strictEqual(
+    buttonA.style.getPropertyValue("--yg-group-color"),
+    "#2196F3",
+  );
+  assert.strictEqual(rowA.classList.contains(band), false);
+  assert.strictEqual(
+    rowB.querySelector(".youtube-groups__guide-item").classList.contains(band),
+    false,
+  );
+
+  dom.document.querySelector(".youtube-groups__guide-enter").click();
+  await dom.flush();
+  const inner = dom.document
+    .querySelector(`${GUIDE} .youtube-groups__guide-viewport`)
+    .lastElementChild.querySelector(".youtube-groups__guide-item");
+  assert.ok(inner.classList.contains(band));
+  assert.strictEqual(
+    inner.style.getPropertyValue("--yg-group-color"),
+    "#2196F3",
+  );
+});
+
 test('"+ Grupo" con un nombre crea el grupo en el almacenamiento y aparece la fila', async () => {
   const dom = await loadWithGuide();
   dom.document.querySelector(".youtube-groups__guide-create").click();

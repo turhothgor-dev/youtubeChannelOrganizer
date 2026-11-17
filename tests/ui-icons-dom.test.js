@@ -216,7 +216,7 @@ test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 2
   assert.strictEqual(svg.getAttribute("height"), "27");
 });
 
-test("la fila con color tiene la banda y --yg-group-color", async () => {
+test("el botón del grupo con color tiene la banda y --yg-group-color", async () => {
   const dom = loadDom({
     html: GUIDE_HTML,
     store: groupsStore([
@@ -226,17 +226,19 @@ test("la fila con color tiene la banda y --yg-group-color", async () => {
   });
   await dom.flush();
 
-  const rows = dom.document.querySelectorAll(".youtube-groups__guide-row");
+  const buttons = dom.document.querySelectorAll(
+    ".youtube-groups__guide-row .youtube-groups__guide-item",
+  );
   assert.strictEqual(
-    rows[0].classList.contains("youtube-groups__group-band"),
+    buttons[0].classList.contains("youtube-groups__group-band"),
     false,
   );
   assert.strictEqual(
-    rows[1].classList.contains("youtube-groups__group-band"),
+    buttons[1].classList.contains("youtube-groups__group-band"),
     true,
   );
   assert.strictEqual(
-    rows[1].style.getPropertyValue("--yg-group-color"),
+    buttons[1].style.getPropertyValue("--yg-group-color"),
     "#2196F3",
   );
 });

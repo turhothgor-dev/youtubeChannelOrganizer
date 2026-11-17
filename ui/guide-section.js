@@ -130,7 +130,7 @@ const YouTubeGroupsGuideSection = (() => {
       );
       row.append(toggle, main);
       const rowAppearance = YouTubeGroups.getGroupAppearance(groups, item.id);
-      setGroupBand(row, rowAppearance ? rowAppearance.color : null);
+      setGroupBand(main, rowAppearance ? rowAppearance.color : null);
 
       const enter = document.createElement("button");
       enter.type = "button";
