@@ -3,7 +3,7 @@
 
   console.log("[YouTube Groups] content.js cargado");
 
-  const { getGroups, saveGroups } = YouTubeGroupsStorage;
+  const { getGroups, saveGroups, getAvatars } = YouTubeGroupsStorage;
 
   const {
     createGroup,
@@ -48,6 +48,8 @@
       activeSelectionUrls: null,
       /** Filtros avanzados activos (en memoria; se pierden al recargar). */
       advancedFilters: { duration: "any", age: "any", views: "any" },
+      /** Avatares de canal guardados (`clave de canal` → URL de imagen). */
+      avatars: {},
     },
     setActiveSelection,
     refreshActiveSelection,
@@ -131,7 +133,8 @@
       return;
     }
 
-    const groups = await getGroups();
+    const [groups, avatars] = await Promise.all([getGroups(), getAvatars()]);
+    ctx.state.avatars = avatars;
     ctx.cards.refreshChannelNameIndex(groups);
 
     ctx.panel.renderCurrentChannelSection(groups);
@@ -352,6 +355,13 @@
           renderGroupsPanel().catch((error) => {
             console.error(
               "[YouTube Groups] No se pudo repintar los grupos",
+              error,
+            );
+          });
+        } else if (name === "avatars") {
+          renderGroupsPanel().catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo repintar los avatares",
               error,
             );
           });

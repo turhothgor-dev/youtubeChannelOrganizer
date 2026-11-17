@@ -280,6 +280,7 @@ html[dark] .youtube-groups__guide-form-cancel {
 
 .youtube-groups__guide-item.youtube-groups__guide-channel {
   height: 32px;
+  gap: 8px;
   color: var(--yt-spec-text-secondary, #606060);
 }
 

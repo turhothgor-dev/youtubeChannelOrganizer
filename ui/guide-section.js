@@ -3,10 +3,17 @@
  * suscripciones. Se crea con `create(ctx)`; no toca el DOM hasta `start()`.
  */
 const YouTubeGroupsGuideSection = (() => {
-  const { getGroups } = YouTubeGroupsStorage;
+  const { getGroups, getAvatars } = YouTubeGroupsStorage;
   const { createGroup, createSubGroup } = YouTubeGroups;
-  const { createIconSvg, GROUP_ICON_SIZES, createGroupMark, setGroupBand } =
-    YouTubeGroupsIconsDom;
+  const { getAvatarFor } = YouTubeGroupsAvatars;
+  const {
+    createIconSvg,
+    GROUP_ICON_SIZES,
+    createGroupMark,
+    setGroupBand,
+    createChannelAvatar,
+    AVATAR_SIZES,
+  } = YouTubeGroupsIconsDom;
   const { openIconPicker } = YouTubeGroupsIconPicker;
 
   /**
@@ -150,7 +157,11 @@ const YouTubeGroupsGuideSection = (() => {
               url: channel.url,
             }),
           ),
-          null,
+          createChannelAvatar(
+            channel.name,
+            getAvatarFor(ctx.state.avatars, channel.url),
+            AVATAR_SIZES.guide,
+          ),
           () =>
             toggleSelectionItem({
               type: "channel",
@@ -582,8 +593,11 @@ const YouTubeGroupsGuideSection = (() => {
      * Lee los grupos y pinta la sección en la guía de YouTube.
      */
     function paintGuideSection() {
-      getGroups()
-        .then((groups) => renderGuideSection(groups))
+      Promise.all([getGroups(), getAvatars()])
+        .then(([groups, avatars]) => {
+          ctx.state.avatars = avatars;
+          renderGuideSection(groups);
+        })
         .catch((error) => {
           console.error(
             "[YouTube Groups] No se pudo pintar la guía lateral",

@@ -153,7 +153,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   alto 20 y la inicial debajo; sin URL o con URL no permitida (`https://evil.com/a.png`) no hay `img` y sí la inicial y
   `--yg-avatar-bg`; disparar `error` en el `img` lo quita y deja la inicial; el contenedor tiene `aria-hidden="true"`
   y un nombre con `<b>` se pinta como texto.
-- [ ] T5 · Avatares en la guía · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`, `content.js`,
+- [x] T5 · Avatares en la guía · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`, `content.js`,
   `tests/ui-guide-section.test.js` · Test (jsdom): con un grupo desplegado de dos canales y `youtubeAvatars` con uno,
   la fila de ese canal tiene `img.youtube-groups__avatar-img` con su URL y la otra solo la inicial; el nombre y
   `title` del botón no cambian; escribir en `youtubeAvatars` (onChanged) repinta y la segunda fila gana su `img`.
@@ -228,3 +228,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T2 | `feat: módulo puro de avatares de canal` | `modules/avatars.js` con normalización, fusión y guardado; cargado en manifest, opciones y helper de tests. |
 | 2026-11-17 | T3 | `feat: avatares en la copia de seguridad` | `buildBackup`, `parseBackup` (`avatars` null si falta) y `importBackup` con `avatars`; tests. |
 | 2026-11-17 | T4 | `feat: createChannelAvatar y estilos de avatar` | `AVATAR_SIZES` y `createChannelAvatar` en `icons-dom.js`, CSS en `icons.css` y tests jsdom. |
+| 2026-11-17 | T5 | `feat: avatares de canal en la guía` | `ctx.state.avatars`, lectura en `renderGroupsPanel`/`paintGuideSection`, `createChannelAvatar` en las filas de canal, repintado con `"avatars"` y test jsdom. `ctx.avatars` queda para T7. |

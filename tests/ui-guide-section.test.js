@@ -190,6 +190,58 @@ test("YouTubeGroupsGuideSection.create no toca el DOM ni fija la guía hasta sta
   );
 });
 
+test("la guía muestra el avatar guardado de un canal y repinta al cambiar youtubeAvatars", async () => {
+  const otherUrl = "https://www.youtube.com/@otro";
+  const avatarUrl = "https://yt3.ggpht.com/abc=s88-c-k-c0x00ffffff-no-rj";
+  const otherAvatarUrl = "https://yt3.ggpht.com/def=s88-c-k-c0x00ffffff-no-rj";
+  const store = groupsStore([
+    makeGroup("A", {
+      channels: [
+        { name: "Canal", url: CHANNEL_URL },
+        { name: "Otro", url: otherUrl },
+      ],
+    }),
+  ]);
+  store.youtubeAvatars = {
+    version: 1,
+    avatars: { [CHANNEL_URL]: avatarUrl },
+  };
+  const dom = await loadWithGuide({ store });
+
+  const rows = () =>
+    Array.from(
+      dom.document.querySelectorAll(`${GUIDE} .youtube-groups__guide-channel`),
+    );
+  assert.strictEqual(rows().length, 2);
+  const [first, second] = rows();
+  assert.strictEqual(
+    first.querySelector("img.youtube-groups__avatar-img").getAttribute("src"),
+    avatarUrl,
+  );
+  assert.strictEqual(second.querySelector("img"), null);
+  assert.ok(second.querySelector(".youtube-groups__avatar-initial"));
+  assert.strictEqual(
+    first.querySelector(".youtube-groups__guide-name").textContent,
+    "Canal",
+  );
+  assert.strictEqual(first.title, CHANNEL_URL);
+
+  await dom.browser.storage.local.set({
+    youtubeAvatars: {
+      version: 1,
+      avatars: { [CHANNEL_URL]: avatarUrl, [otherUrl]: otherAvatarUrl },
+    },
+  });
+  await dom.flush();
+
+  assert.strictEqual(
+    rows()[1]
+      .querySelector("img.youtube-groups__avatar-img")
+      .getAttribute("src"),
+    otherAvatarUrl,
+  );
+});
+
 test("en suscripciones la guía está fija en <html> y en inicio no", async () => {
   const pinned = await loadPinned("https://www.youtube.com/feed/subscriptions");
   assert.strictEqual(
