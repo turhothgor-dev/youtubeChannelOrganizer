@@ -129,11 +129,6 @@
   }
 
   async function renderGroupsPanel() {
-    const panel = ctx.panel.createGroupsPanel();
-    if (!panel) {
-      return;
-    }
-
     const [groups, avatars] = await Promise.all([getGroups(), getAvatars()]);
     ctx.state.avatars = avatars;
     ctx.avatars.setGroupedChannels(groups);

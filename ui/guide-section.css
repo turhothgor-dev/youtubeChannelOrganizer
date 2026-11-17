@@ -132,7 +132,8 @@
   padding: 0 4px;
 }
 
-.youtube-groups__guide-clear {
+.youtube-groups__guide-clear,
+.youtube-groups__guide-menu-button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -349,11 +350,13 @@ html[dark] .youtube-groups__guide {
 
 html[dark] .youtube-groups__guide-title,
 html[dark] .youtube-groups__guide-clear,
+html[dark] .youtube-groups__guide-menu-button,
 html[dark] .youtube-groups__guide-item {
   color: var(--yt-spec-text-primary, #f1f1f1);
 }
 
-html[dark] .youtube-groups__guide-clear {
+html[dark] .youtube-groups__guide-clear,
+html[dark] .youtube-groups__guide-menu-button {
   background: var(--yt-spec-badge-chip-background, #272727);
 }
 

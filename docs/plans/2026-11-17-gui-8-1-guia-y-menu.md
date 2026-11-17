@@ -102,7 +102,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
   `#youtube-groups-guide` (tras el `viewport`) y contiene `.youtube-groups__guide-clear`; sin selección está
   visible, deshabilitado, con `aria-label` "Limpiar selección" y la insignia oculta; al pulsar un grupo se habilita,
   `aria-label` "Limpiar selección (1)" e insignia "1"; pulsarlo vacía la selección. (El engranaje llega en T6.)
-- [ ] T6 · Menú de opciones con el engranaje (el panel deja de existir) · Ficheros: `ui/panel.js`, `ui/panel.css`,
+- [x] T6 · Menú de opciones con el engranaje (el panel deja de existir) · Ficheros: `ui/panel.js`, `ui/panel.css`,
   `ui/fullscreen.css`, `ui/guide-section.js`, `ui/guide-section.css`, `content.js`, `tests/ui-panel.test.js`,
   `tests/ui-guide-section.test.js` · Alcance: menú perezoso en `body` con Listas, Filtros, Limpieza y Ajustes (orden
   nuevo), apertura, posición y cierre según "Contexto y decisión"; engranaje en el pie que llama a
@@ -198,3 +198,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T3 | feat: crear y editar como iconos a la derecha del título de la guía | (+) y lápiz son solo icono (`add`, `edit`) dentro de la cabecera, tras el título; `label` ya no se pinta. El formulario queda entre la cabecera y "Limpiar selección" hasta T5. |
 | 2026-11-17 | T4 | feat: función pura getMenuPosition para colocar el menú de opciones | Añadida a `modules/guide.js` y expuesta; 6 tests en `tests/guide.test.js` (derecha, borde, abajo, más alto, más estrecho, enteros). |
 | 2026-11-17 | T5 | feat: pie de la guía con Limpiar selección de icono | Pie `.youtube-groups__guide-footer` tras el viewport con reciclaje (deshabilitado sin selección, `aria-label`/`title` con N e insignia). El formulario sigue entre cabecera y columna. El engranaje llega en T6. |
+| 2026-11-17 | T6 | feat: menú de opciones con el engranaje de la guía en lugar del panel flotante | `ui/panel.js` crea perezosamente `#youtube-groups-menu` (Listas, Filtros, Limpieza, Ajustes; "Canal actual"/"Vídeo actual" siguen hasta T7) con `toggleMenu`/`openMenu`/`closeMenu`/`isMenuOpen`, cierre por Escape, clic fuera, navegación y resize. Engranaje en el pie; `renderGroupsPanel` ya no crea el panel; CSS y pantalla completa actualizados; `getAllChannelsFromGroup` retirado. `renderPlaylistsSection` se llama ya tras añadir el menú a `body` (antes corría con el panel fuera del documento). Tests de `ui-panel` reescritos. |

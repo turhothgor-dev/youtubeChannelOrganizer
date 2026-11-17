@@ -343,6 +343,23 @@ test("la guía muestra el avatar guardado de un canal y repinta al cambiar youtu
   );
 });
 
+test("el engranaje del pie abre y cierra el menú y refleja aria-expanded", async () => {
+  const dom = await loadWithGuide();
+  const gear = dom.document.querySelector(
+    `${GUIDE} .youtube-groups__guide-footer .youtube-groups__guide-menu-button`,
+  );
+  assert.strictEqual(gear.getAttribute("aria-label"), "Opciones");
+  assert.strictEqual(gear.getAttribute("aria-haspopup"), "dialog");
+  assert.strictEqual(gear.getAttribute("aria-controls"), "youtube-groups-menu");
+  assert.strictEqual(gear.getAttribute("aria-expanded"), "false");
+  assert.strictEqual(gear.textContent, "");
+
+  gear.click();
+  assert.strictEqual(gear.getAttribute("aria-expanded"), "true");
+  gear.click();
+  assert.strictEqual(gear.getAttribute("aria-expanded"), "false");
+});
+
 test("en suscripciones la guía está fija en <html> y en inicio no", async () => {
   const pinned = await loadPinned("https://www.youtube.com/feed/subscriptions");
   assert.strictEqual(

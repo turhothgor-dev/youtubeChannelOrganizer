@@ -1,9 +1,10 @@
-#youtube-groups-panel {
+#youtube-groups-menu {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 2147483647;
-  width: min(360px, calc(100vw - 32px));
+  z-index: 2147483646;
+  width: 360px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
   padding: 16px;
   color: #0f0f0f;
   background: #ffffff;
@@ -11,9 +12,11 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
   font-family: Roboto, Arial, sans-serif;
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
   box-sizing: border-box;
+}
+
+#youtube-groups-menu[hidden] {
+  display: none;
 }
 
 .youtube-groups__settings,
@@ -252,54 +255,6 @@ html[dark] .youtube-groups__playlist-input {
   border-color: #777;
 }
 
-.youtube-groups__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.youtube-groups__title {
-  margin: 0 auto 0 0;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.youtube-groups__collapse-button,
-.youtube-groups__edit-button {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 8px;
-  color: inherit;
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 18px;
-  line-height: 1;
-}
-
-.youtube-groups__collapse-button:hover,
-.youtube-groups__edit-button:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-html[dark] .youtube-groups__collapse-button:hover,
-html[dark] .youtube-groups__edit-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-#youtube-groups-panel.youtube-groups--collapsed
-  > :not(.youtube-groups__header) {
-  display: none;
-}
-
-#youtube-groups-panel.youtube-groups--collapsed .youtube-groups__header {
-  margin-bottom: 0;
-}
-
 .youtube-groups__current-channel {
   margin-bottom: 12px;
   padding-top: 12px;
@@ -368,7 +323,7 @@ html[dark] .youtube-groups__edit-button:hover {
   gap: 8px;
 }
 
-html[dark] #youtube-groups-panel {
+html[dark] #youtube-groups-menu {
   color: #f1f1f1;
   background: #212121;
   border-color: #555;

@@ -1,33 +1,36 @@
 /**
- * Panel flotante "YouTube Groups": canal y vídeo actuales, listas, limpieza,
- * filtros, ajustes y copia de seguridad. Se crea con `create(ctx)`; no toca el
- * DOM hasta que se llama a `createGroupsPanel`.
+ * Menú de opciones "YouTube Groups" (ADR 0017): canal y vídeo actuales, listas,
+ * filtros, limpieza, ajustes y copia de seguridad. Se crea con `create(ctx)`;
+ * no toca el DOM hasta que se abre por primera vez con `openMenu`/`toggleMenu`.
  */
 const YouTubeGroupsPanel = (() => {
   const { getGroups } = YouTubeGroupsStorage;
   const { setChannelGroups } = YouTubeGroups;
 
   /**
-   * Crea el componente del panel.
+   * Crea el componente del menú.
    * @param {Object} ctx - Contexto compartido de `content.js`.
-   * @returns {Readonly<Object>} API: `createGroupsPanel`,
-   *   `syncSettingsControls`, `renderPlaylistsSection`,
+   * @returns {Readonly<Object>} API: `toggleMenu`, `openMenu`, `closeMenu`,
+   *   `isMenuOpen`, `syncSettingsControls`, `renderPlaylistsSection`,
    *   `openPlaylistVideosModal`, `closePlaylistModal`,
    *   `renderCurrentChannelSection`, `renderCurrentVideoSection` y
    *   `scheduleCurrentChannelPanelUpdate`.
    */
   function create(ctx) {
-    const GROUPS_PANEL_ID = "youtube-groups-panel";
+    const GROUPS_PANEL_ID = "youtube-groups-menu";
 
     // URL del canal pintado por última vez en la sección "Canal actual".
     let renderedCurrentChannelUrl = null;
 
     let currentChannelUpdateScheduled = false;
 
+    /** Engranaje con el que se abrió el menú (para el foco y `aria-expanded`). */
+    let menuAnchor = null;
+
     /**
-     * Refleja los ajustes en los selectores de la sección "Ajustes" del panel.
+     * Refleja los ajustes en los selectores de la sección "Ajustes" del menú.
      * Los selectores quedan deshabilitados hasta cargar los ajustes.
-     * @param {Element|null} [panel] - Panel; por defecto, el que hay en el documento.
+     * @param {Element|null} [panel] - Menú; por defecto, el que hay en el documento.
      */
     function syncSettingsControls(
       panel = document.getElementById(GROUPS_PANEL_ID),
@@ -44,24 +47,6 @@ const YouTubeGroupsPanel = (() => {
       const autoMarkSelect = panel.querySelector(
         ".youtube-groups__auto-mark-select",
       );
-      panel.classList.toggle(
-        "youtube-groups--collapsed",
-        ctx.state.settings.panelCollapsed,
-      );
-      const collapseButton = panel.querySelector(
-        ".youtube-groups__collapse-button",
-      );
-      collapseButton.textContent = ctx.state.settings.panelCollapsed
-        ? "+"
-        : "−";
-      collapseButton.title = ctx.state.settings.panelCollapsed
-        ? "Mostrar panel"
-        : "Minimizar panel";
-      collapseButton.setAttribute(
-        "aria-expanded",
-        String(!ctx.state.settings.panelCollapsed),
-      );
-      collapseButton.disabled = !ctx.state.settingsLoaded;
       watchedSelect.value = ctx.state.settings.watchedMode;
       outsideSelect.value = ctx.state.settings.outsideMode;
       autoMarkSelect.value = String(ctx.state.settings.autoMarkPercent);
@@ -294,7 +279,11 @@ const YouTubeGroupsPanel = (() => {
       });
     }
 
-    function createGroupsPanel() {
+    /**
+     * Crea el menú (oculto) y lo añade a `body`. Si ya existe, lo devuelve.
+     * @returns {HTMLElement|null} Menú, o `null` si aún no hay `body`.
+     */
+    function createMenu() {
       const existingPanel = document.getElementById(GROUPS_PANEL_ID);
       if (existingPanel) {
         return existingPanel;
@@ -304,15 +293,14 @@ const YouTubeGroupsPanel = (() => {
         return null;
       }
 
-      const panel = document.createElement("aside");
+      const panel = document.createElement("div");
       panel.id = GROUPS_PANEL_ID;
-      panel.setAttribute("aria-label", "YouTube Groups");
+      panel.className = "youtube-groups__menu";
+      panel.setAttribute("role", "dialog");
+      panel.setAttribute("aria-label", "Opciones de YouTube Groups");
+      panel.tabIndex = -1;
+      panel.hidden = true;
       panel.innerHTML = `
-          <div class="youtube-groups__header">
-            <h2 class="youtube-groups__title">YouTube Groups</h2>
-            <button class="youtube-groups__edit-button" type="button" title="Editar grupos" aria-label="Editar grupos">✎</button>
-            <button class="youtube-groups__collapse-button" type="button" aria-expanded="true" title="Minimizar panel" disabled>−</button>
-          </div>
           <section class="youtube-groups__current-channel" hidden>
             <h3 class="youtube-groups__section-title">Canal actual</h3>
             <p class="youtube-groups__channel-name"></p>
@@ -342,6 +330,22 @@ const YouTubeGroupsPanel = (() => {
             <ul class="youtube-groups__playlist-list"></ul>
             <p class="youtube-groups__playlist-error" aria-live="polite"></p>
           </details>
+          <details class="youtube-groups__filters">
+            <summary>Filtros</summary>
+            <label class="youtube-groups__setting">
+              <span>Duración</span>
+              <select class="youtube-groups__filter-select" data-filter="duration"></select>
+            </label>
+            <label class="youtube-groups__setting">
+              <span>Fecha</span>
+              <select class="youtube-groups__filter-select" data-filter="age"></select>
+            </label>
+            <label class="youtube-groups__setting">
+              <span>Popularidad</span>
+              <select class="youtube-groups__filter-select" data-filter="views"></select>
+            </label>
+            <button class="youtube-groups__filters-reset action-button secondary-button" type="button">Quitar filtros</button>
+          </details>
           <details class="youtube-groups__cleanup">
             <summary>Limpieza</summary>
             <button class="youtube-groups__cleanup-analyze action-button secondary-button" type="button">Analizar</button>
@@ -362,22 +366,6 @@ const YouTubeGroupsPanel = (() => {
               <button class="youtube-groups__cleanup-apply action-button primary-button" type="button" disabled>Limpiar</button>
             </div>
             <p class="youtube-groups__cleanup-message" aria-live="polite"></p>
-          </details>
-          <details class="youtube-groups__filters">
-            <summary>Filtros</summary>
-            <label class="youtube-groups__setting">
-              <span>Duración</span>
-              <select class="youtube-groups__filter-select" data-filter="duration"></select>
-            </label>
-            <label class="youtube-groups__setting">
-              <span>Fecha</span>
-              <select class="youtube-groups__filter-select" data-filter="age"></select>
-            </label>
-            <label class="youtube-groups__setting">
-              <span>Popularidad</span>
-              <select class="youtube-groups__filter-select" data-filter="views"></select>
-            </label>
-            <button class="youtube-groups__filters-reset action-button secondary-button" type="button">Quitar filtros</button>
           </details>
           <details class="youtube-groups__settings">
             <summary>Ajustes</summary>
@@ -414,19 +402,6 @@ const YouTubeGroupsPanel = (() => {
             <p class="youtube-groups__backup-message" aria-live="polite"></p>
           </details>
         `;
-
-      panel
-        .querySelector(".youtube-groups__edit-button")
-        .addEventListener("click", () => {
-          browser.runtime
-            .sendMessage({ type: "youtube-groups:open-editor" })
-            .catch((error) => {
-              console.error(
-                "[YouTube Groups] No se pudo abrir el editor de grupos",
-                error,
-              );
-            });
-        });
 
       panel
         .querySelector(".youtube-groups__current-video-button")
@@ -500,32 +475,6 @@ const YouTubeGroupsPanel = (() => {
             settingsError,
             Number,
           );
-        });
-      panel
-        .querySelector(".youtube-groups__collapse-button")
-        .addEventListener("click", async (event) => {
-          const button = event.currentTarget;
-          button.disabled = true;
-          ctx.state.settingsWriteSeq += 1;
-          const seq = ctx.state.settingsWriteSeq;
-          try {
-            const result = await YouTubeGroupsSettings.updateSettings({
-              panelCollapsed: !ctx.state.settings.panelCollapsed,
-            });
-            if (seq > ctx.state.settingsAppliedSeq) {
-              ctx.state.settingsAppliedSeq = seq;
-              ctx.state.settings = result.settings;
-            }
-          } catch (error) {
-            settingsError.textContent =
-              "No se pudo guardar el ajuste: " + error.message;
-            console.error(
-              "[YouTube Groups] No se pudo guardar el ajuste",
-              error,
-            );
-          } finally {
-            syncSettingsControls();
-          }
         });
       syncSettingsControls(panel);
 
@@ -607,7 +556,6 @@ const YouTubeGroupsPanel = (() => {
             playlistError.textContent = exception.message;
           }
         });
-      renderPlaylistsSection();
       setupCleanupSection(panel);
 
       const filterSelects = panel.querySelectorAll(
@@ -702,7 +650,128 @@ const YouTubeGroupsPanel = (() => {
       });
 
       document.body.append(panel);
+      renderPlaylistsSection();
       return panel;
+    }
+
+    /**
+     * Indica si el menú existe y está visible.
+     * @returns {boolean} `true` si está abierto.
+     */
+    function isMenuOpen() {
+      const menu = document.getElementById(GROUPS_PANEL_ID);
+      return menu !== null && !menu.hidden;
+    }
+
+    /**
+     * Coloca el menú a la derecha del engranaje (o dentro de la ventana).
+     * @param {HTMLElement} menu - Menú visible.
+     * @param {Element} anchor - Engranaje.
+     */
+    function positionMenu(menu, anchor) {
+      const rect = anchor.getBoundingClientRect();
+      const size = menu.getBoundingClientRect();
+      const position = YouTubeGroupsGuide.getMenuPosition(
+        rect,
+        { width: size.width, height: size.height },
+        { width: window.innerWidth, height: window.innerHeight },
+      );
+      menu.style.left = position.left + "px";
+      menu.style.top = position.top + "px";
+    }
+
+    function onMenuKeydown(event) {
+      if (event.key !== "Escape" || !isMenuOpen()) {
+        return;
+      }
+      const anchor = menuAnchor;
+      closeMenu();
+      if (anchor?.isConnected) {
+        anchor.focus();
+      }
+    }
+
+    function onMenuPointerDown(event) {
+      const menu = document.getElementById(GROUPS_PANEL_ID);
+      const target = event.target;
+      if (
+        !menu ||
+        !(target instanceof Node) ||
+        menu.contains(target) ||
+        menuAnchor?.contains(target) ||
+        (target instanceof Element &&
+          target.closest(".youtube-groups__channel-list-modal"))
+      ) {
+        return;
+      }
+      closeMenu();
+    }
+
+    /** Cierra el menú, si está abierto, conservando el estado de sus secciones. */
+    function closeMenu() {
+      const menu = document.getElementById(GROUPS_PANEL_ID);
+      if (!menu || menu.hidden) {
+        return;
+      }
+      menu.hidden = true;
+      menuAnchor?.setAttribute("aria-expanded", "false");
+      document.removeEventListener("keydown", onMenuKeydown, true);
+      document.removeEventListener("pointerdown", onMenuPointerDown, true);
+      document.removeEventListener("yt-navigate-start", closeMenu);
+      window.removeEventListener("resize", closeMenu);
+    }
+
+    /**
+     * Abre el menú junto al engranaje (lo crea la primera vez).
+     * @param {Element} anchor - Engranaje que lo abre.
+     */
+    function openMenu(anchor) {
+      if (!anchor?.isConnected) {
+        closeMenu();
+        return;
+      }
+      const isNew = document.getElementById(GROUPS_PANEL_ID) === null;
+      const menu = createMenu();
+      if (!menu) {
+        return;
+      }
+      if (isNew) {
+        getGroups()
+          .then((groups) => renderCurrentChannelSection(groups))
+          .catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo pintar el canal actual",
+              error,
+            );
+          });
+        renderCurrentVideoSection();
+      }
+      if (menuAnchor && menuAnchor !== anchor) {
+        menuAnchor.setAttribute("aria-expanded", "false");
+      }
+      menuAnchor = anchor;
+      if (menu.hidden) {
+        document.addEventListener("keydown", onMenuKeydown, true);
+        document.addEventListener("pointerdown", onMenuPointerDown, true);
+        document.addEventListener("yt-navigate-start", closeMenu);
+        window.addEventListener("resize", closeMenu);
+      }
+      menu.hidden = false;
+      positionMenu(menu, anchor);
+      anchor.setAttribute("aria-expanded", "true");
+      menu.focus();
+    }
+
+    /**
+     * Abre el menú si está cerrado y lo cierra si está abierto.
+     * @param {Element} anchor - Engranaje pulsado.
+     */
+    function toggleMenu(anchor) {
+      if (isMenuOpen()) {
+        closeMenu();
+      } else {
+        openMenu(anchor);
+      }
     }
 
     /**
@@ -962,31 +1031,6 @@ const YouTubeGroupsPanel = (() => {
       );
     }
 
-    // Añadir nueva función para obtener todos los canales de un grupo y sus subgrupos
-    async function getAllChannelsFromGroup(groupId) {
-      const groups = await getGroups();
-      const group = groups.find((item) => item.id === groupId);
-
-      if (!group) {
-        return [];
-      }
-
-      // Función recursiva para obtener todos los canales
-      function collectChannels(group) {
-        let channels = [...group.channels];
-
-        if (group.subgroups && group.subgroups.length > 0) {
-          group.subgroups.forEach((subgroup) => {
-            channels = channels.concat(collectChannels(subgroup));
-          });
-        }
-
-        return channels;
-      }
-
-      return collectChannels(group);
-    }
-
     function scheduleCurrentChannelPanelUpdate() {
       const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
       if (
@@ -1019,7 +1063,10 @@ const YouTubeGroupsPanel = (() => {
     }
 
     return Object.freeze({
-      createGroupsPanel,
+      toggleMenu,
+      openMenu,
+      closeMenu,
+      isMenuOpen,
       syncSettingsControls,
       renderPlaylistsSection,
       openPlaylistVideosModal,

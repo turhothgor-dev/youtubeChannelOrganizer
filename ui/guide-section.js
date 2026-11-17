@@ -519,9 +519,22 @@ const YouTubeGroupsGuideSection = (() => {
         clear.append(badge);
         clear.addEventListener("click", () => ctx.setActiveSelection([]));
 
+        const menuButton = document.createElement("button");
+        menuButton.type = "button";
+        menuButton.className = "youtube-groups__guide-menu-button";
+        menuButton.title = "Opciones: listas, filtros, limpieza y ajustes";
+        menuButton.setAttribute("aria-label", "Opciones");
+        menuButton.setAttribute("aria-haspopup", "dialog");
+        menuButton.setAttribute("aria-controls", "youtube-groups-menu");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.append(createUiIconSvg("settings", 20));
+        menuButton.addEventListener("click", () => {
+          ctx.panel.toggleMenu(menuButton);
+        });
+
         const footer = document.createElement("div");
         footer.className = "youtube-groups__guide-footer";
-        footer.append(clear);
+        footer.append(clear, menuButton);
 
         viewport = document.createElement("div");
         viewport.className = "youtube-groups__guide-viewport";

@@ -7,9 +7,25 @@ const {
   CHANNEL_URL,
   makeGroup,
   groupsStore,
+  GUIDE_HTML,
 } = require("./helpers/youtube-fixtures");
 
-const PANEL = "#youtube-groups-panel";
+const MENU = "#youtube-groups-menu";
+const GEAR = ".youtube-groups__guide-menu-button";
+
+/**
+ * Carga una página con la guía, la estabiliza y abre el menú con el engranaje.
+ * @param {Object} [options] - Opciones de loadDom (store...).
+ * @returns {Promise<Object>} loadDom con `gear` y `menu`.
+ */
+async function loadWithMenu(options = {}) {
+  const dom = loadDom({ html: GUIDE_HTML, ...options });
+  await dom.flush();
+  const gear = dom.document.querySelector(GEAR);
+  gear.click();
+  await dom.flush();
+  return { ...dom, gear, menu: dom.document.querySelector(MENU) };
+}
 
 test("YouTubeGroupsPanel.create no toca el DOM", () => {
   const scripts = manifestScripts().filter((file) => file !== "content.js");
@@ -21,12 +37,89 @@ test("YouTubeGroupsPanel.create no toca el DOM", () => {
   const panel = Panel.create({ state: {} });
 
   assert.strictEqual(dom.document.body.innerHTML, before);
-  assert.strictEqual(typeof panel.createGroupsPanel, "function");
-  assert.strictEqual(typeof panel.renderCurrentVideoSection, "function");
-  assert.strictEqual(
-    typeof panel.scheduleCurrentChannelPanelUpdate,
-    "function",
+  for (const name of ["toggleMenu", "openMenu", "closeMenu", "isMenuOpen"]) {
+    assert.strictEqual(typeof panel[name], "function", name);
+  }
+  assert.strictEqual(panel.createGroupsPanel, undefined);
+});
+
+test("tras cargar no hay panel flotante ni menú", async () => {
+  const dom = loadDom({ html: GUIDE_HTML });
+  await dom.flush();
+
+  assert.strictEqual(dom.document.querySelector("#youtube-groups-panel"), null);
+  assert.strictEqual(dom.document.querySelector(MENU), null);
+});
+
+test("el engranaje crea un único menú en body, visible y colocado", async () => {
+  const { document, gear, menu } = await loadWithMenu();
+
+  assert.strictEqual(document.querySelectorAll(MENU).length, 1);
+  assert.strictEqual(menu.parentElement, document.body);
+  assert.strictEqual(menu.hidden, false);
+  assert.strictEqual(gear.getAttribute("aria-expanded"), "true");
+  assert.deepStrictEqual(
+    Array.from(
+      menu.querySelectorAll(":scope > details > summary"),
+      (summary) => summary.textContent,
+    ),
+    ["Listas", "Filtros", "Limpieza", "Ajustes"],
   );
+  assert.match(menu.style.left, /^\d+px$/);
+  assert.match(menu.style.top, /^\d+px$/);
+});
+
+test("Escape cierra el menú y devuelve el foco al engranaje", async () => {
+  const { document, window, gear, menu } = await loadWithMenu();
+
+  document.dispatchEvent(
+    new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+  );
+
+  assert.strictEqual(menu.hidden, true);
+  assert.strictEqual(gear.getAttribute("aria-expanded"), "false");
+  assert.strictEqual(document.activeElement, gear);
+});
+
+test("pointerdown fuera cierra el menú y dentro no", async () => {
+  const { document, window, menu } = await loadWithMenu();
+
+  menu
+    .querySelector("summary")
+    .dispatchEvent(new window.Event("pointerdown", { bubbles: true }));
+  assert.strictEqual(menu.hidden, false);
+
+  document.body.dispatchEvent(
+    new window.Event("pointerdown", { bubbles: true }),
+  );
+  assert.strictEqual(menu.hidden, true);
+});
+
+test("el engranaje otra vez cierra el menú y reabrir reutiliza el elemento", async () => {
+  const { document, window, gear, menu } = await loadWithMenu();
+  const select = menu.querySelector('[data-filter="duration"]');
+  select.value = "short";
+  select.dispatchEvent(new window.Event("change"));
+
+  gear.click();
+  assert.strictEqual(menu.hidden, true);
+
+  gear.click();
+  assert.strictEqual(menu.hidden, false);
+  assert.strictEqual(document.querySelectorAll(MENU).length, 1);
+  assert.strictEqual(document.querySelector(MENU), menu);
+  assert.strictEqual(
+    menu.querySelector(".youtube-groups__filters summary").textContent,
+    "Filtros (1)",
+  );
+});
+
+test("yt-navigate-start cierra el menú", async () => {
+  const { document, window, menu } = await loadWithMenu();
+
+  document.dispatchEvent(new window.Event("yt-navigate-start"));
+
+  assert.strictEqual(menu.hidden, true);
 });
 
 test("Analizar en Limpieza lista un canal repetido", async () => {
@@ -38,58 +131,26 @@ test("Analizar en Limpieza lista un canal repetido", async () => {
       ],
     }),
   ]);
-  const dom = loadDom({ store });
-  await dom.flush();
-  const panel = dom.document.querySelector(PANEL);
-  panel.querySelector(".youtube-groups__cleanup-analyze").click();
-  await dom.flush();
+  const { flush, menu } = await loadWithMenu({ store });
+  menu.querySelector(".youtube-groups__cleanup-analyze").click();
+  await flush();
 
   assert.strictEqual(
-    panel.querySelector(".youtube-groups__cleanup-result").hidden,
+    menu.querySelector(".youtube-groups__cleanup-result").hidden,
     false,
   );
   assert.match(
-    panel.querySelector(".youtube-groups__cleanup-report").textContent,
+    menu.querySelector(".youtube-groups__cleanup-report").textContent,
     /Canales repetidos: 1/,
   );
 });
 
-test("cambiar Duración en Filtros pone Filtros (1)", async () => {
-  const dom = loadDom();
-  await dom.flush();
-  const panel = dom.document.querySelector(PANEL);
-  const select = panel.querySelector('[data-filter="duration"]');
-  select.value = "short";
-  select.dispatchEvent(new dom.window.Event("change"));
+test("cambiar Vídeos vistos a Ocultar guarda watchedMode", async () => {
+  const { window, flush, store, menu } = await loadWithMenu();
+  const select = menu.querySelector(".youtube-groups__watched-mode-select");
+  select.value = "hide";
+  select.dispatchEvent(new window.Event("change"));
+  await flush();
 
-  assert.strictEqual(
-    panel.querySelector(".youtube-groups__filters summary").textContent,
-    "Filtros (1)",
-  );
-});
-
-test("el panel se crea una vez, minimizado, y no se duplica al navegar", async () => {
-  const dom = loadDom();
-  await dom.flush();
-  assert.strictEqual(dom.document.querySelectorAll(PANEL).length, 1);
-  assert.ok(
-    dom.document
-      .querySelector(PANEL)
-      .classList.contains("youtube-groups--collapsed"),
-  );
-
-  dom.document.dispatchEvent(new dom.window.Event("yt-navigate-finish"));
-  await dom.flush();
-  assert.strictEqual(dom.document.querySelectorAll(PANEL).length, 1);
-});
-
-test("minimizar el panel guarda panelCollapsed y quita la clase", async () => {
-  const dom = loadDom();
-  await dom.flush();
-  const panel = dom.document.querySelector(PANEL);
-  panel.querySelector(".youtube-groups__collapse-button").click();
-  await dom.flush();
-
-  assert.strictEqual(dom.store.youtubeSettings.settings.panelCollapsed, false);
-  assert.ok(!panel.classList.contains("youtube-groups--collapsed"));
+  assert.strictEqual(store.youtubeSettings.settings.watchedMode, "hide");
 });
