@@ -6,7 +6,6 @@ const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   makeGroup,
   groupsStore,
-  flushLoose,
   GUIDE_HTML,
 } = require("./helpers/youtube-fixtures");
 
@@ -23,7 +22,7 @@ async function loadWithGuideForm() {
     html: GUIDE_HTML,
     store: groupsStore([makeGroup("A")]),
   });
-  await flushLoose(dom);
+  await dom.flush();
   dom.document.querySelector(".youtube-groups__guide-create").click();
   return dom;
 }
@@ -56,7 +55,7 @@ test('elegir un icono y "Guardar" lo pone en la vista previa y oculta el selecto
   );
   options[1].click();
   dom.document.querySelector(".youtube-groups__icon-picker-save").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.ok(dom.document.querySelector(`${FORM_PREVIEW} svg`));
   assert.strictEqual(dom.document.querySelector(PICKER).hidden, true);
@@ -102,7 +101,7 @@ test("openIconPicker abre el selector y Guardar llama a onSave con la elección"
     .querySelectorAll(".youtube-groups__icon-picker-option")[1]
     .click();
   dom.document.querySelector(".youtube-groups__icon-picker-save").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(saved.length, 1);
   assert.ok(saved[0].iconId);
@@ -119,7 +118,7 @@ test("si onSave lanza, el error se muestra y el selector sigue abierto", async (
     throw new Error("Fallo al guardar");
   });
   dom.document.querySelector(".youtube-groups__icon-picker-save").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(
     dom.document.querySelector(".youtube-groups__icon-picker-error")

@@ -7,7 +7,6 @@ const {
   CHANNEL_URL,
   makeGroup,
   groupsStore,
-  flushLoose,
   SUBSCRIPTION_CARD_HTML,
 } = require("./helpers/youtube-fixtures");
 
@@ -25,7 +24,7 @@ async function loadWithCard() {
     html: SUBSCRIPTION_CARD_HTML,
     store: groupsStore([makeGroup("A"), makeGroup("B")]),
   });
-  await flushLoose(dom);
+  await dom.flush();
   return dom;
 }
 
@@ -50,9 +49,9 @@ test('"+G" abre un único desplegable con una casilla por grupo y no se duplica'
   );
 
   addButton.click();
-  await flushLoose(dom);
+  await dom.flush();
   addButton.click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(
     dom.document.querySelectorAll(SUBSCRIPTION_DROPDOWN).length,
@@ -68,7 +67,7 @@ test("marcar B y Guardar añade el canal a B en el almacenamiento", async () => 
   dom.document
     .querySelector(".youtube-groups__subscription-add-button")
     .click();
-  await flushLoose(dom);
+  await dom.flush();
 
   const form = dom.document.querySelector(SUBSCRIPTION_FORM);
   const checkboxB = Array.from(form.querySelectorAll("input")).find(
@@ -76,7 +75,7 @@ test("marcar B y Guardar añade el canal a B en el almacenamiento", async () => 
   );
   checkboxB.checked = true;
   form.querySelector("button[type='submit']").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   const groups = dom.store.youtubeGroups.groups;
   assert.deepStrictEqual(
@@ -93,7 +92,7 @@ test("marcar B y Guardar añade el canal a B en el almacenamiento", async () => 
 test('"Lista" abre el desplegable de listas, "Crear" crea la lista y la deja marcada', async () => {
   const dom = await loadWithCard();
   dom.document.querySelector(".youtube-groups__playlist-button").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(
     dom.document.querySelectorAll(PLAYLIST_DROPDOWN).length,
@@ -107,7 +106,7 @@ test('"Lista" abre el desplegable de listas, "Crear" crea la lista y la deja mar
   dom.document
     .querySelector(".youtube-groups__playlist-dropdown-create")
     .click();
-  await flushLoose(dom);
+  await dom.flush();
 
   const playlists = dom.store.youtubePlaylists.playlists;
   assert.deepStrictEqual(
@@ -129,14 +128,14 @@ test("abrir un desplegable oculta el otro", async () => {
   );
 
   addButton.click();
-  await flushLoose(dom);
+  await dom.flush();
   assert.strictEqual(
     dom.document.querySelector(SUBSCRIPTION_FORM).hidden,
     false,
   );
 
   listButton.click();
-  await flushLoose(dom);
+  await dom.flush();
   assert.strictEqual(
     dom.document.querySelector(SUBSCRIPTION_FORM).hidden,
     true,
@@ -144,7 +143,7 @@ test("abrir un desplegable oculta el otro", async () => {
   assert.strictEqual(dom.document.querySelector(PLAYLIST_FORM).hidden, false);
 
   addButton.click();
-  await flushLoose(dom);
+  await dom.flush();
   assert.strictEqual(dom.document.querySelector(PLAYLIST_FORM).hidden, true);
   assert.strictEqual(
     dom.document.querySelector(SUBSCRIPTION_FORM).hidden,

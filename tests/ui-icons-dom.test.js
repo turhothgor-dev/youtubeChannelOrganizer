@@ -6,7 +6,6 @@ const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   makeGroup,
   groupsStore,
-  flushLoose,
   GUIDE_HTML,
 } = require("./helpers/youtube-fixtures");
 
@@ -143,7 +142,7 @@ test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 2
     html: GUIDE_HTML,
     store: groupsStore([makeGroup("A"), { ...makeGroup("B"), icon: "tech" }]),
   });
-  await flushLoose(dom);
+  await dom.flush();
 
   const rows = dom.document.querySelectorAll(".youtube-groups__guide-row");
   assert.strictEqual(rows[0].querySelector(".youtube-groups__icon"), null);
@@ -161,7 +160,7 @@ test("la fila con color tiene la banda y --yg-group-color", async () => {
       { ...makeGroup("B"), color: "#2196F3" },
     ]),
   });
-  await flushLoose(dom);
+  await dom.flush();
 
   const rows = dom.document.querySelectorAll(".youtube-groups__guide-row");
   assert.strictEqual(

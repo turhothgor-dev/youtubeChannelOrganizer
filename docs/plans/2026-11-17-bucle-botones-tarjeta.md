@@ -1,6 +1,6 @@
 # Plan: cortar el bucle de reprocesado de las tarjetas con botones
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: sin issue (detectado por los tests de humo del refactor de `content.js`, ver
 `docs/plans/2026-11-17-refactor-content-js.md`, Registro de la revisión).
@@ -70,7 +70,7 @@ frase al flujo **Detección**.
     (`childList`, `subtree`, `attributes`, `characterData`), `await dom.flush()` no lanza y `takeRecords()` está vacío.
     Repetirlo con el vídeo guardado como visto en el `store` (glifo `check`, botón pulsado) para cubrir
     `updateWatchedButton` con estado distinto del inicial.
-- [ ] T2 · Quitar la tolerancia de los tests: sustituir `await flushLoose(dom)` por `await dom.flush()` en todos los
+- [x] T2 · Quitar la tolerancia de los tests: sustituir `await flushLoose(dom)` por `await dom.flush()` en todos los
   tests de `ui-*` y eliminar `flushLoose` (función, comentario y exportación) de `tests/helpers/youtube-fixtures.js`.
   Si algún test sigue sin estabilizarse tras T1, es otro bucle: no se vuelve a tolerar; se para y se informa (causa
   y propuesta) para anotarlo en **Cambios aprobados** o en un plan aparte · Ficheros:
@@ -116,3 +116,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `fix: procesar tarjetas con botones sin reescribir el DOM si nada cambia` | `setCardButtonContent` y atributos condicionales; tests nuevos en `ui-icons-dom` y `ui-cards`. |
+| 2026-11-17 | T2 | `test: quitar flushLoose y usar flush estricto en los tests de ui-*` | Sustituido en 7 ficheros `ui-*.test.js` y eliminado de `youtube-fixtures.js`; todos se estabilizan. `make test` (247) y `make lint` en verde. |

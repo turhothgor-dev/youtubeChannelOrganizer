@@ -7,7 +7,6 @@ const {
   CHANNEL_URL,
   makeGroup,
   groupsStore,
-  flushLoose,
   GUIDE_HTML,
 } = require("./helpers/youtube-fixtures");
 
@@ -34,7 +33,7 @@ function guideStore() {
  */
 async function loadWithGuide(options = {}) {
   const dom = loadDom({ html: GUIDE_HTML, store: guideStore(), ...options });
-  await flushLoose(dom);
+  await dom.flush();
   return dom;
 }
 
@@ -81,7 +80,7 @@ test("añadir un nodo a #sections no duplica ni mueve la sección", async () => 
 
   const extra = dom.document.createElement("div");
   sections.append(extra);
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(dom.document.querySelectorAll(GUIDE).length, 1);
   assert.strictEqual(
@@ -95,7 +94,7 @@ test('la fila de A muestra "A (n)"; "›" entra en A y "‹" vuelve', async () =
   assert.deepStrictEqual(rowNames(dom), ["A (1)", "B (0)"]);
 
   dom.document.querySelector(".youtube-groups__guide-enter").click();
-  await flushLoose(dom);
+  await dom.flush();
   assert.deepStrictEqual(rowNames(dom), ["A1 (0)"]);
   assert.strictEqual(
     dom.document.querySelector(".youtube-groups__guide-back").hidden,
@@ -103,7 +102,7 @@ test('la fila de A muestra "A (n)"; "›" entra en A y "‹" vuelve', async () =
   );
 
   dom.document.querySelector(".youtube-groups__guide-back").click();
-  await flushLoose(dom);
+  await dom.flush();
   assert.deepStrictEqual(rowNames(dom), ["A (1)", "B (0)"]);
 });
 
@@ -115,7 +114,7 @@ test('"+ Grupo" con un nombre crea el grupo en el almacenamiento y aparece la fi
 
   form.querySelector("input").value = "Nuevo";
   form.querySelector("button[type='submit']").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.deepStrictEqual(
     dom.store.youtubeGroups.groups.map((group) => group.name),
@@ -131,7 +130,7 @@ test("un nombre de un carácter muestra el error y no escribe", async () => {
 
   form.querySelector("input").value = "X";
   form.querySelector("button[type='submit']").click();
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(
     form.querySelector(".youtube-groups__guide-form-error").textContent,
@@ -151,7 +150,7 @@ async function loadPinned(url) {
   const dom = loadDom({ url, html: GUIDE_HTML, store: guideStore() });
   Object.defineProperty(dom.document, "fullscreenElement", { value: null });
   dom.document.dispatchEvent(new dom.window.Event("fullscreenchange"));
-  await flushLoose(dom);
+  await dom.flush();
   return dom;
 }
 

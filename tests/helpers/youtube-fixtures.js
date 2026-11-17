@@ -74,28 +74,8 @@ function groupsStore(groups) {
   return { youtubeGroups: { version: 1, groups } };
 }
 
-/**
- * `flush` que tolera que no se estabilice. Con una tarjeta con botones,
- * `setCardButtonContent` reescribe el texto de la etiqueta en cada procesado,
- * eso muta el DOM de la tarjeta y la vuelve a programar en el siguiente frame,
- * sin parar (comportamiento actual de content.js, que este plan no cambia).
- * Tras las vueltas del límite el estado ya es el final.
- * @param {{flush: Function}} dom - Resultado de loadDom.
- * @returns {Promise<void>}
- */
-async function flushLoose(dom) {
-  try {
-    await dom.flush();
-  } catch (error) {
-    if (!String(error.message).startsWith("flush: no se estabiliza")) {
-      throw error;
-    }
-  }
-}
-
 module.exports = {
   VIDEO_ID,
-  flushLoose,
   CHANNEL_URL,
   makeGroup,
   groupsStore,

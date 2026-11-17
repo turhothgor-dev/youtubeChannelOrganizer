@@ -3,11 +3,7 @@
 const test = require("node:test");
 const assert = require("node:assert");
 const { loadDom, manifestScripts } = require("./helpers/load-dom");
-const {
-  VIDEO_ID,
-  flushLoose,
-  WATCH_PAGE_HTML,
-} = require("./helpers/youtube-fixtures");
+const { VIDEO_ID, WATCH_PAGE_HTML } = require("./helpers/youtube-fixtures");
 
 const PLAYER_CONTROL = ".youtube-groups__player-actions";
 
@@ -24,7 +20,7 @@ async function loadWatch() {
   // pantalla completa; `fullscreenchange` recalcula el control.
   Object.defineProperty(dom.document, "fullscreenElement", { value: null });
   dom.document.dispatchEvent(new dom.window.Event("fullscreenchange"));
-  await flushLoose(dom);
+  await dom.flush();
   return dom;
 }
 
@@ -45,7 +41,7 @@ test("un play oculta el control", async () => {
   Object.defineProperty(video, "paused", { value: false });
 
   video.dispatchEvent(new dom.window.Event("play"));
-  await flushLoose(dom);
+  await dom.flush();
 
   assert.strictEqual(dom.document.querySelectorAll(PLAYER_CONTROL).length, 1);
   assert.strictEqual(dom.document.querySelector(PLAYER_CONTROL).hidden, true);
