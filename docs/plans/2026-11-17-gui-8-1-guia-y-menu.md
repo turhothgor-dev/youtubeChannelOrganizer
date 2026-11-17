@@ -1,6 +1,6 @@
 # Plan: gui-8-1 · Guía con iconos y menú de opciones en lugar del panel flotante
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: correcciones 1, 2 y 3 de la persona tras probar en Firefox (2026-11-17). Índice:
 [gui-8](2026-11-17-gui-8-guia-y-editor.md). ADR: [0017](../adr/0017-menu-de-opciones-en-la-guia.md) (propuesta;
@@ -129,7 +129,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
   ajustes guardados con `panelCollapsed` se leen sin error y la siguiente escritura no lo guarda; importar una copia
   con `panelCollapsed` la acepta (`dropped` igual) y no lo guarda (como el test de `sidebarCollapsed`). Los tests que
   esperaban `panelCollapsed` se actualizan porque el requisito cambia, no para que pasen.
-- [ ] T9 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `ui/panel.js` → menú de opciones; `modules/icons.js`
+- [x] T9 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `ui/panel.js` → menú de opciones; `modules/icons.js`
   con los iconos nuevos; `modules/guide.js` con `getMenuPosition`; `modules/settings.js` sin `panelCollapsed`;
   `ui/*.css` y `fullscreen.css`; flujos que citan el panel, "Canal actual" o "Vídeo actual": botones del reproductor,
   añadir un canal, filtros avanzados, marcar como visto, listas, reproducir lo visible, sincronización, guía lateral,
@@ -201,3 +201,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T6 | feat: menú de opciones con el engranaje de la guía en lugar del panel flotante | `ui/panel.js` crea perezosamente `#youtube-groups-menu` (Listas, Filtros, Limpieza, Ajustes; "Canal actual"/"Vídeo actual" siguen hasta T7) con `toggleMenu`/`openMenu`/`closeMenu`/`isMenuOpen`, cierre por Escape, clic fuera, navegación y resize. Engranaje en el pie; `renderGroupsPanel` ya no crea el panel; CSS y pantalla completa actualizados; `getAllChannelsFromGroup` retirado. `renderPlaylistsSection` se llama ya tras añadir el menú a `body` (antes corría con el panel fuera del documento). Tests de `ui-panel` reescritos. |
 | 2026-11-17 | T7 | feat: quitar Canal actual y Vídeo actual del menú de opciones | Retiradas ambas secciones, sus funciones y su CSS de `ui/panel.js`/`ui/panel.css`; `watched.js` sin `renderCurrentVideoSection` ni botón del panel (el error del marcado automático queda en consola); `content.js` llama a `ctx.player.schedulePlayerControlSync()` en las mutaciones del propietario. Tests nuevos en `ui-panel` (sin secciones) y `ui-player` (propietario tardío habilita "+G"). |
 | 2026-11-17 | T8 | feat: retirar el ajuste panelCollapsed | Fuera de `DEFAULT_SETTINGS`, `ALLOWED_VALUES` y `PANEL_COLLAPSED_VALUES` en `modules/settings.js`. Tests de ajustes actualizados (valor guardado ignorado y no reescrito, `updateSettings` lo rechaza); `sample()` de backup sin él y test nuevo de copia con `panelCollapsed` aceptada sin guardarlo. |
+| 2026-11-17 | T9 | docs: cerrar gui-8-1 (ARCHITECTURE, ADR 0017 aceptada, ROADMAP 6-16) | ARCHITECTURE al día (menú, iconos, `getMenuPosition`, sin `panelCollapsed`, flujos sin "Canal actual"/"Vídeo actual"); ADR 0017 aceptada y "Modificado por" en 0003, 0010 y 0014; `panelCollapsed` retirado en el 0003; ROADMAP con "Botones en Shorts" (6-16). Verificación manual V1 a V8 en Firefox pendiente de la persona. |

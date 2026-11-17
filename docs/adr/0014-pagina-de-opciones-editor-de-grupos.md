@@ -1,6 +1,7 @@
 # 0014 · Editor de grupos en la página de opciones, abierta con un script de fondo mínimo
 
 - Estado: aceptada (punto 3 modificado por el [ADR 0015](0015-componentes-de-interfaz-en-ui.md))
+- Modificado por: [0017](0017-menu-de-opciones-en-la-guia.md) (punto 2: solo la guía envía el mensaje)
 - Fecha: 2026-11-17
 
 ## Contexto

@@ -1,6 +1,7 @@
 # 0003 · Formato de los ajustes en browser.storage.local (versión 1)
 
 - Estado: aceptada
+- Modificado por: [0017](0017-menu-de-opciones-en-la-guia.md) (se retira `panelCollapsed`)
 - Fecha: 2026-11-14
 
 ## Contexto
@@ -36,8 +37,9 @@ Los ajustes se guardan en una clave propia, `youtubeSettings`:
   vídeos que no pasan el filtro activo (grupo y, cuando existan, filtros avanzados).
 - `autoMarkPercent`: `0` (desactivado), `50`, `80` o `95`; por defecto `80`. Lo introduce el plan
   `2026-11-14-fase3-2-marcado-automatico`; hasta entonces no se guarda ni se lee.
-- `panelCollapsed`: `false` o `true`; por defecto `true`. Indica si el panel flotante está minimizado. Lo
-  introduce el plan `2026-11-14-fase4-3-sidebar`; el valor por defecto (antes `false`) lo cambia el plan
+- `panelCollapsed`: **retirado** por el plan `2026-11-17-gui-8-1-guia-y-menu` (ADR 0017), que elimina el panel
+  flotante; un valor guardado o en una copia se ignora sin error y no se vuelve a guardar. Antes: `false` o `true`
+  (por defecto `true`), indicaba si el panel flotante estaba minimizado. Lo introdujo el plan `2026-11-14-fase4-3-sidebar`; el valor por defecto (antes `false`) lo cambia el plan
   `2026-11-15-gui-4-panel`. Es un cambio de valor por defecto de un campo opcional: no sube `version`.
 - `sidebarCollapsed`: **retirado** por el plan `2026-11-15-gui-6-1-guia-fija` (ADR 0010). Lo introdujo
   `2026-11-15-gui-5-1-columna-propia` para plegar la columna propia, que ya no existe. No sube `version`: un valor

@@ -3,7 +3,7 @@
 - Estado: aceptada
 - Fecha: 2026-11-15
 - Sustituye a: [0008](0008-columna-propia-que-desplaza-el-contenido.md)
-- Modificado por: [0012](0012-guia-fija-solo-en-suscripciones.md)
+- Modificado por: [0012](0012-guia-fija-solo-en-suscripciones.md), [0017](0017-menu-de-opciones-en-la-guia.md)
 
 ## Contexto
 

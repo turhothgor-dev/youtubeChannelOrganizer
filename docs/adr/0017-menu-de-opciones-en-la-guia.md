@@ -1,6 +1,6 @@
 # 0017 · Menú de opciones en la guía en lugar del panel flotante
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-17
 - Modifica: [0014](0014-pagina-de-opciones-editor-de-grupos.md) (punto 2: el panel ya no envía
   `youtube-groups:open-editor`), [0003](0003-formato-almacenamiento-ajustes.md) (se retira `panelCollapsed`) y la

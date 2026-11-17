@@ -51,6 +51,8 @@ Prioridad entre paréntesis; plan en `docs/plans/`.
 - ⬜ Ajustes y copia de seguridad en la página de opciones (baja, 6-11): todo lo que no es filtrar, fuera de YouTube
 - ⬜ Atajos de teclado (baja, 6-12): abrir el editor y limpiar la selección sin ratón
 - ⬜ Reproducir un grupo (baja, 6-13): un clic para ver en cola lo último de un grupo
+- ⬜ Botones en Shorts (media, 6-16): recuperar visto, lista y +G manuales en `/shorts`, que se perdieron al retirar
+  "Canal actual" y "Vídeo actual" del panel (ADR 0017)
 - ⬜ Sincronización automática con `storage.sync` (baja, 6-14): grupos y ajustes en todos los dispositivos, si cabe
   en la cuota
 
