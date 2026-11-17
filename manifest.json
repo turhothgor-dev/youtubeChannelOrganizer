@@ -36,6 +36,7 @@
         "ui/player.js",
         "ui/watched.js",
         "ui/cards.js",
+        "ui/guide-section.js",
         "content.js"
       ],
       "run_at": "document_idle"

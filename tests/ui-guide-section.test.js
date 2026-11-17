@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   CHANNEL_URL,
   makeGroup,
@@ -154,6 +154,42 @@ async function loadPinned(url) {
   await flushLoose(dom);
   return dom;
 }
+
+test("YouTubeGroupsGuideSection.create no toca el DOM ni fija la guía hasta start()", () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({
+    url: "https://www.youtube.com/feed/subscriptions",
+    html: GUIDE_HTML,
+    scripts,
+  });
+  const before = dom.document.body.innerHTML;
+  const pinnedClass = "youtube-groups--guide-pinned";
+
+  const Guide = dom.global("YouTubeGroupsGuideSection");
+  assert.strictEqual(typeof Guide.create, "function");
+  const guide = Guide.create({
+    state: { activeSelection: [] },
+    setActiveSelection() {},
+    navigateToSubscriptions() {},
+    renderGroupsPanel: async () => {},
+  });
+
+  assert.strictEqual(dom.document.body.innerHTML, before);
+  assert.strictEqual(
+    dom.document.documentElement.classList.contains(pinnedClass),
+    false,
+  );
+  assert.strictEqual(typeof guide.renderGuideSection, "function");
+  assert.strictEqual(typeof guide.noteMutations, "function");
+  assert.strictEqual(typeof guide.checkPlacement, "function");
+
+  Object.defineProperty(dom.document, "fullscreenElement", { value: null });
+  guide.start();
+  assert.strictEqual(
+    dom.document.documentElement.classList.contains(pinnedClass),
+    true,
+  );
+});
 
 test("en suscripciones la guía está fija en <html> y en inicio no", async () => {
   const pinned = await loadPinned("https://www.youtube.com/feed/subscriptions");
