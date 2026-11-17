@@ -424,6 +424,100 @@ test("getGroupAppearance devuelve null si el grupo no existe y no muta", () => {
   assert.strictEqual(JSON.stringify(groups), before);
 });
 
+const colorGroup = (id, color, urls, subgroups = []) => ({
+  id,
+  name: id,
+  color,
+  channels: urls.map((url) => ({ url, name: url })),
+  subgroups,
+});
+
+test("buildChannelColorIndex devuelve el color del grupo del canal", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [colorGroup("a", "#2196F3", [`${YT}/@x`])];
+  const index = YouTubeGroups.buildChannelColorIndex(groups);
+
+  assert.deepStrictEqual(plain(index.get(`${YT}/@x`)), ["#2196f3"]);
+});
+
+test("buildChannelColorIndex junta colores de varios grupos en preorden", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    colorGroup("a", "#ff0000", [`${YT}/@x`]),
+    colorGroup("b", "#00ff00", [`${YT}/@x`]),
+  ];
+  const index = YouTubeGroups.buildChannelColorIndex(groups);
+
+  assert.deepStrictEqual(plain(index.get(`${YT}/@x`)), ["#ff0000", "#00ff00"]);
+});
+
+test("buildChannelColorIndex hereda color en subgrupos sin repetir", () => {
+  const { YouTubeGroups } = loadModules();
+  const sub = colorGroup("a1", "", [`${YT}/@x`]);
+  const groups = [colorGroup("a", "#ff0000", [`${YT}/@x`], [sub])];
+  let index = YouTubeGroups.buildChannelColorIndex(groups);
+  assert.deepStrictEqual(plain(index.get(`${YT}/@x`)), ["#ff0000"]);
+
+  sub.color = "#0000ff";
+  index = YouTubeGroups.buildChannelColorIndex(groups);
+  assert.deepStrictEqual(plain(index.get(`${YT}/@x`)), ["#ff0000", "#0000ff"]);
+});
+
+test("buildChannelColorIndex ignora grupos sin color y colores no válidos", () => {
+  const { YouTubeGroups } = loadModules();
+  const groups = [
+    colorGroup("a", "", [`${YT}/@x`]),
+    colorGroup("b", "red", [`${YT}/@y`]),
+    colorGroup("c", "#fff", [`${YT}/@z`]),
+  ];
+  const index = YouTubeGroups.buildChannelColorIndex(groups);
+
+  assert.strictEqual(index.size, 0);
+});
+
+test("buildChannelColorIndex limita a 4 colores, unifica claves y no muta", () => {
+  const { YouTubeGroups } = loadModules();
+  const colors = [
+    "#000001",
+    "#000002",
+    "#000003",
+    "#000004",
+    "#000005",
+    "#000006",
+  ];
+  const groups = colors.map((c, i) =>
+    colorGroup(`g${i}`, c, [i % 2 ? `${YT}/@Canal` : `${YT}/@canal`]),
+  );
+  const before = JSON.stringify(groups);
+  const index = YouTubeGroups.buildChannelColorIndex(groups);
+
+  assert.strictEqual(index.size, 1);
+  assert.deepStrictEqual(
+    plain(index.get(YouTubeGroups.getChannelKey(`${YT}/@canal`))),
+    colors.slice(0, 4),
+  );
+  assert.strictEqual(JSON.stringify(groups), before);
+});
+
+test("getStripeBackground construye el degradado en segmentos iguales", () => {
+  const { YouTubeGroups } = loadModules();
+  const f = YouTubeGroups.getStripeBackground;
+
+  assert.strictEqual(f([]), "");
+  assert.strictEqual(
+    f(["#ff0000"]),
+    "linear-gradient(to right, #ff0000 0% 100%)",
+  );
+  assert.strictEqual(
+    f(["#ff0000", "#00ff00"]),
+    "linear-gradient(to right, #ff0000 0% 50%, #00ff00 50% 100%)",
+  );
+  assert.strictEqual(
+    f(["#a", "#b", "#c"]),
+    "linear-gradient(to right, #a 0% 33.33%, #b 33.33% 66.67%, #c 66.67% 100%)",
+  );
+});
+
 test("setChannelGroups no escribe sin cambios ni con error", async () => {
   const { YouTubeGroups, calls } = loadModules({
     youtubeGroups: seedGroups(),

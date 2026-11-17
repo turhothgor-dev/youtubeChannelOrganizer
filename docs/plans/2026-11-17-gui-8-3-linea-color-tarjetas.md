@@ -48,7 +48,7 @@ Decisión:
 
 ## Tareas
 
-- [ ] T1 · Colores de un canal y fondo de la línea · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test:
+- [x] T1 · Colores de un canal y fondo de la línea · Ficheros: `modules/groups.js`, `tests/groups.test.js` · Test:
   canal en un grupo con color → `["#2196f3"]`; en dos grupos con colores distintos → los dos en preorden; en A (rojo) y
   en su subgrupo A1 sin color → solo rojo (heredado y sin repetir); A1 con color propio → rojo y su color; grupo sin
   color y sin antecesor con color → no aporta (canal ausente del índice); color no válido (`"red"`, `"#fff"`) → no
@@ -105,3 +105,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | feat: índice de colores por canal y fondo de la línea en groups.js | `buildChannelColorIndex` y `getStripeBackground` con tests. |

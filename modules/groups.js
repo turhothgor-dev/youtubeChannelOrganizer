@@ -588,6 +588,60 @@ const YouTubeGroups = (() => {
   }
 
   /**
+   * Índice de colores por canal: recorre el árbol en preorden con el color
+   * resultante de cada grupo (propio o del antecesor más cercano con color).
+   * Solo cuentan colores válidos y no vacíos, en minúsculas, sin repetir por
+   * canal y como mucho 4. No muta la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @returns {Map<string, string[]>} Clave de canal (getChannelKey) → colores.
+   */
+  function buildChannelColorIndex(groups) {
+    const index = new Map();
+    const visit = (list, inherited) => {
+      for (const group of list || []) {
+        const own = group.color;
+        const color =
+          typeof own === "string" &&
+          own !== "" &&
+          YouTubeGroupsIcons.isValidColor(own)
+            ? own.toLowerCase()
+            : inherited;
+        if (color) {
+          for (const channel of group.channels || []) {
+            if (typeof channel.url !== "string") {
+              continue;
+            }
+            const key = getChannelKey(channel.url);
+            const colors = index.get(key) || [];
+            if (colors.length < 4 && !colors.includes(color)) {
+              colors.push(color);
+              index.set(key, colors);
+            }
+          }
+        }
+        visit(group.subgroups, color);
+      }
+    };
+    visit(groups, "");
+    return index;
+  }
+
+  /**
+   * Fondo de la línea de color: degradado con segmentos iguales.
+   * @param {string[]} colors - Colores de la línea.
+   * @returns {string} "" si no hay colores.
+   */
+  function getStripeBackground(colors) {
+    if (!Array.isArray(colors) || colors.length === 0) {
+      return "";
+    }
+    const n = colors.length;
+    const pct = (i) => +((i * 100) / n).toFixed(2);
+    const stops = colors.map((c, i) => `${c} ${pct(i)}% ${pct(i + 1)}%`);
+    return `linear-gradient(to right, ${stops.join(", ")})`;
+  }
+
+  /**
    * Aplana el árbol de grupos en preorden (grupo, sus subgrupos, siguiente
    * grupo) sin mutar la entrada.
    * @param {Array<Object>} groups - Árbol de grupos.
@@ -850,6 +904,8 @@ const YouTubeGroups = (() => {
     cleanupGroups,
     flattenGroups,
     getGroupAppearance,
+    buildChannelColorIndex,
+    getStripeBackground,
     validateGroupName,
     createGroup,
     removeGroupById,
