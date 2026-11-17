@@ -1,6 +1,6 @@
 # Plan: Fase 6-15 · Avatares de canal en la guía y en el editor
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 6: "Avatares de canal (alta, 6-15)". Petición de la persona (2026-11-17): "si es posible, los
 canales en grupos y subgrupos que muestren el icono del canal". Hoja de ruta: `docs/plans/2026-11-17-fase6-hoja-de-ruta.md`.
@@ -169,7 +169,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   `ytd-channel-renderer` y una entrada de suscripción de la guía también se capturan; en una página de canal la
   cabecera con banner y avatar guarda el avatar, no el banner; un avatar ya guardado y visto distinto se actualiza
   una vez y no más en la misma sesión.
-- [ ] T8 · Cerrar: `docs/ARCHITECTURE.md` (filas de `modules/avatars.js` y `ui/avatars.js`, `storage.js` con
+- [x] T8 · Cerrar: `docs/ARCHITECTURE.md` (filas de `modules/avatars.js` y `ui/avatars.js`, `storage.js` con
   `KEYS.avatars`, `backup.js` con `avatars`, `icons-dom.js` con `createChannelAvatar`, flujo nuevo "Avatares de canal"
   y ADR 0016 en "Decisiones"); ADR 0016 a "aceptada"; en `ROADMAP.md`, "⬜" → "✅" en "Avatares de canal"; este plan a
   `hecho` · Ficheros: `docs/ARCHITECTURE.md`, `docs/adr/0016-avatares-de-canal-en-clave-aparte.md`, `ROADMAP.md`, este
@@ -231,3 +231,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T5 | `feat: avatares de canal en la guía` | `ctx.state.avatars`, lectura en `renderGroupsPanel`/`paintGuideSection`, `createChannelAvatar` en las filas de canal, repintado con `"avatars"` y test jsdom. `ctx.avatars` queda para T7. |
 | 2026-11-17 | T6 | `feat: avatares en el panel Canales del editor` | `currentAvatars` en `options.js` (lectura en `render()` y `onChanged`, que solo repinta el panel si cambia `avatars`), avatar de 24 px en cada fila y margen en CSS. |
 | 2026-11-17 | T7 | `feat: recolector de avatares de canal` | `ui/avatars.js` (`ctx.avatars`), enganches en `cards.js` (`getChannelResultUrl`, `noteCard` con `?.` para que los tests de tarjetas sin avatares sigan valiendo) y `content.js` (`setGroupedChannels`/`scheduleScan` en `renderGroupsPanel` y en el `MutationObserver`), manifest y tests jsdom. |
+| 2026-11-17 | T8 | `docs: cerrar avatares de canal (6-15)` | `ARCHITECTURE.md` (componentes, flujo y ADR), ADR 0016 aceptada, ROADMAP 6-15 ✅ y plan a `hecho`. Pendiente: verificación manual V1 a V6 en Firefox. |

@@ -1,6 +1,6 @@
 # 0016 · Avatares de canal en una clave aparte, capturados del DOM de YouTube
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-17
 
 ## Contexto
