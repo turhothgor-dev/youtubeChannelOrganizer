@@ -1,6 +1,6 @@
 # Plan: gui-8-2 · Editor de grupos con nombre legible y acciones de icono
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: correcciones 4 y 5 de la persona tras probar en Firefox (2026-11-17). Índice:
 [gui-8](2026-11-17-gui-8-guia-y-editor.md). Depende de T1 de
@@ -56,7 +56,7 @@ Decisión:
 - [x] T3 · Nombre con espacio flexible y elipsis · Ficheros: `options/options.js`, `options/options.css`,
   `tests/ui-options.test.js` · Test (jsdom): `.options__name` de un grupo "Ciencia y tecnología divulgativa" tiene
   `title` igual a su nombre; el resto es CSS (V1 y V2).
-- [ ] T4 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `options/` y flujo "Editor de grupos": acciones de icono;
+- [x] T4 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `options/` y flujo "Editor de grupos": acciones de icono;
   fila de `tests/` con `ui-options.test.js`), este plan a `hecho` · Test: `make lint`, `make test` y V1 a V4.
 
 ### Verificación manual (Firefox, editor abierto en una ventana de 1280 px y luego de 800 px)
@@ -99,3 +99,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T1 | `test: ayudante loadOptionsDom y test del árbol del editor` | `optionsPage()` y `loadOptionsDom()` en `tests/helpers/load-dom.js`; test inicial en `tests/ui-options.test.js`. |
 | 2026-11-17 | T2 | `feat: acciones de fila del editor solo con icono y nuevo orden` | `iconButton` en `options.js`, estilos `.options__action--icon` y 7 tests de DOM. |
 | 2026-11-17 | T3 | `feat: nombre de grupo con espacio flexible y elipsis en el editor` | `title` en `.options__name`; CSS con fila `flex-wrap`, nombre con elipsis y "Mover a…" en línea propia; 1 test. |
+| 2026-11-17 | T4 | `docs: cerrar gui-8-2 (ARCHITECTURE, acciones de icono del editor)` | `ARCHITECTURE.md` (filas `options/` y `tests/`, flujo "Editor de grupos"); lint y 340 tests en verde. Pendiente: verificación manual V1 a V4 en Firefox. |
