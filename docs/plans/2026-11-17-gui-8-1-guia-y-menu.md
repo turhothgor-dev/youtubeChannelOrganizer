@@ -93,7 +93,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
   ninguno tiene texto (solo un `svg`); el de crear tiene `aria-label` y `title` "Crear grupo" en la raíz y "Crear
   subgrupo de A" con A seleccionado; los tests existentes de crear grupo y de nombre corto siguen pasando sin cambiar
   lo que comprueban.
-- [ ] T4 · `getMenuPosition` · Ficheros: `modules/guide.js`, `tests/guide.test.js` · Test: hueco a la derecha →
+- [x] T4 · `getMenuPosition` · Ficheros: `modules/guide.js`, `tests/guide.test.js` · Test: hueco a la derecha →
   `left = right + 8` y `top = anchor.top`; sin hueco a la derecha → pegado al borde derecho menos 8; ancla cerca del
   borde inferior → sube hasta caber; menú más alto que la ventana → `top = 8`; ventana más estrecha que el menú →
   `left = 8`; devuelve enteros.
@@ -196,3 +196,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T1 | feat: iconos de interfaz nuevos (ajustes, reciclaje, añadir, editar, flechas, paleta, papelera, intercambio) | Añadidos 9 iconos a `UI_ICON_PATHS`. Rutas transcritas de memoria sin acceso a los SVG oficiales: revisar visualmente `recycle` (la menos fiable) en V3. |
 | 2026-11-17 | T2 | feat: banda de color en el botón principal del grupo de la guía | `setGroupBand` pasa de la fila al botón; padding derecho de 12 px con banda. Se actualiza `tests/ui-icons-dom.test.js` (comprobaba la banda en la fila) porque el requisito cambia. |
 | 2026-11-17 | T3 | feat: crear y editar como iconos a la derecha del título de la guía | (+) y lápiz son solo icono (`add`, `edit`) dentro de la cabecera, tras el título; `label` ya no se pinta. El formulario queda entre la cabecera y "Limpiar selección" hasta T5. |
+| 2026-11-17 | T4 | feat: función pura getMenuPosition para colocar el menú de opciones | Añadida a `modules/guide.js` y expuesta; 6 tests en `tests/guide.test.js` (derecha, borde, abajo, más alto, más estrecho, enteros). |

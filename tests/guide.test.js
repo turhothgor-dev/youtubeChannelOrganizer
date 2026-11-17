@@ -237,3 +237,64 @@ test("findGuideInsertionIndex localiza la sección Más de YouTube", () => {
   assert.strictEqual(G.findGuideInsertionIndex([]), -1);
   assert.strictEqual(JSON.stringify(sections), before);
 });
+
+test("getMenuPosition coloca el menú a la derecha del ancla", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 10, top: 100, right: 40, bottom: 130 };
+  const size = { width: 360, height: 300 };
+  const viewport = { width: 1200, height: 800 };
+  assert.deepStrictEqual(plain(G.getMenuPosition(anchor, size, viewport)), {
+    left: 48,
+    top: 100,
+  });
+});
+
+test("getMenuPosition se pega al borde derecho si no hay hueco", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 300, top: 50, right: 340, bottom: 80 };
+  const size = { width: 360, height: 200 };
+  const pos = plain(
+    G.getMenuPosition(anchor, size, { width: 600, height: 800 }),
+  );
+  assert.deepStrictEqual(pos, { left: 232, top: 50 });
+});
+
+test("getMenuPosition sube el menú si el ancla está abajo", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 10, top: 700, right: 40, bottom: 730 };
+  const size = { width: 360, height: 300 };
+  const pos = plain(
+    G.getMenuPosition(anchor, size, { width: 1200, height: 800 }),
+  );
+  assert.deepStrictEqual(pos, { left: 48, top: 492 });
+});
+
+test("getMenuPosition usa top 8 si el menú es más alto que la ventana", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 10, top: 300, right: 40, bottom: 330 };
+  const size = { width: 360, height: 900 };
+  const pos = plain(
+    G.getMenuPosition(anchor, size, { width: 1200, height: 800 }),
+  );
+  assert.strictEqual(pos.top, 8);
+});
+
+test("getMenuPosition usa left 8 si la ventana es más estrecha que el menú", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 10, top: 50, right: 40, bottom: 80 };
+  const size = { width: 360, height: 200 };
+  const pos = plain(
+    G.getMenuPosition(anchor, size, { width: 300, height: 800 }),
+  );
+  assert.strictEqual(pos.left, 8);
+});
+
+test("getMenuPosition devuelve enteros", () => {
+  const { YouTubeGroupsGuide: G } = loadModules();
+  const anchor = { left: 10.4, top: 100.6, right: 40.3, bottom: 130.2 };
+  const size = { width: 360, height: 300 };
+  const pos = plain(
+    G.getMenuPosition(anchor, size, { width: 1200, height: 800 }),
+  );
+  assert.ok(Number.isInteger(pos.left) && Number.isInteger(pos.top));
+});

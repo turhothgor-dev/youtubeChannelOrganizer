@@ -261,7 +261,32 @@ const YouTubeGroupsGuide = (() => {
     return -1;
   }
 
+  /**
+   * Calcula la posición del menú de opciones junto a su ancla.
+   *
+   * @param {{left: number, top: number, right: number, bottom: number}} anchor
+   *   Rectángulo del engranaje.
+   * @param {{width: number, height: number}} size Tamaño del menú.
+   * @param {{width: number, height: number}} viewport Tamaño de la ventana.
+   * @param {number} [gap=8] Separación mínima.
+   * @returns {{left: number, top: number}} Posición entera.
+   */
+  function getMenuPosition(anchor, size, viewport, gap = 8) {
+    let left = anchor.right + gap;
+    if (left + size.width > viewport.width - gap) {
+      left = Math.max(gap, viewport.width - gap - size.width);
+    }
+    let top = anchor.top;
+    if (size.height > viewport.height - 2 * gap) {
+      top = gap;
+    } else {
+      top = Math.min(Math.max(top, gap), viewport.height - gap - size.height);
+    }
+    return { left: Math.round(left), top: Math.round(top) };
+  }
+
   return {
+    getMenuPosition,
     normalizeGuidePath,
     getGuideColumn,
     enterGuideGroup,
