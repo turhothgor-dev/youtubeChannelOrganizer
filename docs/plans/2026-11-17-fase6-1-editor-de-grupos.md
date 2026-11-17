@@ -159,7 +159,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   `options/options.css` · Test: `make lint`, `make test` y a mano V3.
 - [x] T9 · Eliminar con aviso y "Deshacer" · Ficheros: `options/options.js`, `options/options.css` · Test: `make
   lint`, `make test` y a mano V4.
-- [ ] T10 · "Subir", "Bajar", "Mover a…" y Alt+↑/Alt+↓ · Ficheros: `options/options.js`, `options/options.css` ·
+- [x] T10 · "Subir", "Bajar", "Mover a…" y Alt+↑/Alt+↓ · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V5.
 - [ ] T11 · Arrastrar y soltar con indicador de posición · Ficheros: `options/options.js`, `options/options.css` ·
   Test: `make lint`, `make test` y a mano V6.
@@ -230,3 +230,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T7 | `feat: árbol de grupos en la página de opciones` | Filas con plegado, icono, banda, nº de canales, estado vacío y repintado por `storage.onChanged`; pendiente V2 a mano. |
 | 2026-11-17 | T8 | `feat: renombrar en línea, icono y color y crear grupos en el editor` | Campo en línea (Intro, blur, Escape, F2, doble clic), selector de icono, "+ Grupo" y "+ Subgrupo"; añade el botón en `options.html`; pendiente V3 a mano. |
 | 2026-11-17 | T9 | `feat: eliminar grupos con aviso y deshacer en el editor` | Botón "Eliminar" y Supr, aviso `role="status"` de 10 s con "Deshacer" (`deleteGroupAndSnapshot`/`restoreGroupAndSave`); pendiente V4 a mano. |
+| 2026-11-17 | T10 | `feat: subir, bajar y mover a otro grupo en el editor` | "Subir"/"Bajar" (deshabilitados en extremos), Alt+↑/↓ y "Mover a…" con `<select>` (`moveGroupAndSave`); foco en la fila movida; pendiente V5 a mano. |

@@ -266,6 +266,135 @@
     );
   }
 
+  /**
+   * Selector "Mover a…" abierto, o `null`.
+   * @type {null|{groupId: string, value: string}}
+   */
+  let moving = null;
+
+  /**
+   * Mueve un grupo a un lugar y deja el foco en su fila.
+   * @param {Object} group - Grupo a mover.
+   * @param {string|null} parentId - Nuevo padre (`null` = primer nivel).
+   * @param {number} index - Posición en la lista de destino.
+   * @returns {Promise<void>}
+   */
+  async function moveTo(group, parentId, index) {
+    try {
+      if (parentId) {
+        collapsed.delete(parentId);
+      }
+      await YouTubeGroupsEditor.moveGroupAndSave(group.id, parentId, index);
+      showError("");
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo mover.");
+    }
+    if (moving && moving.groupId === group.id) {
+      moving = null;
+    }
+    renderTree(currentGroups);
+    focusRow(group.id);
+  }
+
+  /**
+   * Sube o baja un grupo entre sus hermanos.
+   * @param {Object} group - Grupo a mover.
+   * @param {number} delta - `-1` sube, `1` baja.
+   * @returns {Promise<void>}
+   */
+  async function moveSibling(group, delta) {
+    const place = YouTubeGroupsEditor.getSiblingMove(
+      currentGroups,
+      group.id,
+      delta,
+    );
+    if (place) {
+      await moveTo(group, place.parentId, place.index);
+    }
+  }
+
+  /**
+   * Abre el selector "Mover a…" de un grupo.
+   * @param {Object} group - Grupo a mover.
+   * @returns {void}
+   */
+  function startMove(group) {
+    moving = { groupId: group.id, value: "" };
+    renderTree(currentGroups);
+    const select = treeEl.querySelector(".options__move-select");
+    if (select) {
+      select.focus();
+    }
+  }
+
+  /**
+   * Cierra el selector "Mover a…" y devuelve el foco a la fila.
+   * @param {string} groupId - Grupo del selector.
+   * @returns {void}
+   */
+  function cancelMove(groupId) {
+    moving = null;
+    renderTree(currentGroups);
+    focusRow(groupId);
+  }
+
+  /**
+   * Crea el selector "Mover a…" con sus botones.
+   * @param {Object} group - Grupo a mover.
+   * @returns {HTMLElement} Contenedor del selector.
+   */
+  function buildMoveControl(group) {
+    const wrapper = el("span", "options__move");
+    const select = document.createElement("select");
+    select.className = "options__move-select";
+    select.setAttribute("aria-label", "Mover a");
+    const targets = YouTubeGroupsEditor.getMoveTargets(currentGroups, group.id);
+    let initial = "";
+    for (const target of targets) {
+      const option = document.createElement("option");
+      option.value = target.id === null ? "" : target.id;
+      option.textContent =
+        "  ".repeat(target.level) +
+        target.name +
+        (target.current ? " (actual)" : "");
+      select.append(option);
+      if (target.current) {
+        initial = option.value;
+      }
+    }
+    select.value = moving.value !== "" ? moving.value : initial;
+    moving.value = select.value;
+    select.addEventListener("change", () => {
+      moving.value = select.value;
+    });
+    select.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelMove(group.id);
+      }
+    });
+    const confirm = actionButton("Mover", () => {
+      const parentId = select.value === "" ? null : select.value;
+      const target = parentId ? findGroup(currentGroups, parentId) : null;
+      const siblings = parentId
+        ? target
+          ? target.subgroups || []
+          : []
+        : currentGroups;
+      // Índice relativo a la lista de destino sin el grupo movido.
+      moveTo(
+        group,
+        parentId,
+        siblings.filter((item) => item.id !== group.id).length,
+      );
+    });
+    const cancel = actionButton("Cancelar", () => cancelMove(group.id));
+    wrapper.append(select, confirm, cancel);
+    return wrapper;
+  }
+
   /** Aviso de borrado (`role="status"`), creado en el primer uso. */
   let noticeEl = null;
   /** Temporizador que oculta el aviso. */
@@ -472,20 +601,44 @@
       ),
     );
     const actions = el("span", "options__actions");
+    const upButton = actionButton("Subir", () => moveSibling(group, -1));
+    upButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
+      groups,
+      group.id,
+      -1,
+    );
+    const downButton = actionButton("Bajar", () => moveSibling(group, 1));
+    downButton.disabled = !YouTubeGroupsEditor.getSiblingMove(
+      groups,
+      group.id,
+      1,
+    );
     actions.append(
       actionButton("Renombrar", () =>
         startEdit("rename", group.id, null, group.name),
       ),
       actionButton("Icono y color", (button) => editAppearance(group, button)),
       actionButton("+ Subgrupo", () => startEdit("create", null, group.id, "")),
+      upButton,
+      downButton,
+      actionButton("Mover a…", () => startMove(group)),
       actionButton("Eliminar", () => deleteGroup(group)),
     );
     row.append(actions);
+    if (moving && moving.groupId === group.id) {
+      row.append(buildMoveControl(group));
+    }
     row.addEventListener("keydown", (event) => {
       if (event.target !== row) {
         return;
       }
-      if (event.key === "F2") {
+      if (
+        event.altKey &&
+        (event.key === "ArrowUp" || event.key === "ArrowDown")
+      ) {
+        event.preventDefault();
+        moveSibling(group, event.key === "ArrowUp" ? -1 : 1);
+      } else if (event.key === "F2") {
         event.preventDefault();
         startEdit("rename", group.id, null, group.name);
       } else if (event.key === "Delete") {
@@ -547,6 +700,9 @@
         ? active.closest("[data-group-id]").dataset.groupId
         : null;
 
+    if (moving && !findGroup(groups, moving.groupId)) {
+      moving = null;
+    }
     // Si el grupo que se renombra o al que se añade un subgrupo ya no existe, se cancela.
     if (editing) {
       const missingId =
