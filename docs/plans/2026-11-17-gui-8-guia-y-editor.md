@@ -3,7 +3,7 @@
 **Estado:** hecho
 
 Issue: correcciones de la persona tras probar en Firefox (2026-11-17), con las decisiones por defecto recomendadas
-("usa lo recomendado"). ADR: [0017](../adr/0017-menu-de-opciones-en-la-guia.md) (propuesta).
+("usa lo recomendado"). ADR: [0017](../adr/0017-menu-de-opciones-en-la-guia.md) (aceptada).
 
 <!-- Estados: borrador → aprobado (AAAA-MM-DD) → hecho. Se cambia solo la línea `**Estado:**`, y lo
      hace quien tiene la aprobación de una persona; los subagentes no ven la conversación, solo este fichero. -->

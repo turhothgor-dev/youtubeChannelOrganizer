@@ -554,6 +554,10 @@ const YouTubeGroupsPanel = (() => {
       if (event.key !== "Escape" || !isMenuOpen()) {
         return;
       }
+      if (document.querySelector(".youtube-groups__channel-list-modal")) {
+        return;
+      }
+      event.preventDefault();
       const anchor = menuAnchor;
       closeMenu();
       if (anchor?.isConnected) {

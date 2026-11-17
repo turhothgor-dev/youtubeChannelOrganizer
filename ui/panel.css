@@ -255,33 +255,10 @@ html[dark] .youtube-groups__playlist-input {
   border-color: #777;
 }
 
-.youtube-groups__input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 10px;
-  color: inherit;
-  background: #ffffff;
-  border: 1px solid #8f8f8f;
-  border-radius: 6px;
-  font: inherit;
-}
-
-.youtube-groups__form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 html[dark] #youtube-groups-menu {
   color: #f1f1f1;
   background: #212121;
   border-color: #555;
-}
-
-html[dark] .youtube-groups__input {
-  color: #f1f1f1;
-  background: #121212;
-  border-color: #777;
 }
 
 .youtube-groups__channel-list-modal {
@@ -325,34 +302,4 @@ html[dark] .youtube-groups__input {
   position: absolute;
   top: 10px;
   right: 10px;
-}
-
-/* Añadir estilos para tooltips */
-.youtube-groups__tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-.youtube-groups__tooltip .youtube-groups__tooltiptext {
-  visibility: hidden;
-  width: 200px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.youtube-groups__tooltip:hover .youtube-groups__tooltiptext {
-  visibility: visible;
-  opacity: 1;
 }

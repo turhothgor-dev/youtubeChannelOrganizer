@@ -94,6 +94,32 @@ test("Escape cierra el menú y devuelve el foco al engranaje", async () => {
   assert.strictEqual(document.activeElement, gear);
 });
 
+test("Escape no cierra el menú con un modal de lista abierto y sí lo hace con preventDefault sin él", async () => {
+  const { document, window, menu } = await loadWithMenu();
+  const modal = document.createElement("div");
+  modal.className = "youtube-groups__channel-list-modal";
+  document.body.appendChild(modal);
+
+  const withModal = new window.KeyboardEvent("keydown", {
+    key: "Escape",
+    bubbles: true,
+    cancelable: true,
+  });
+  document.dispatchEvent(withModal);
+  assert.strictEqual(menu.hidden, false);
+  assert.strictEqual(withModal.defaultPrevented, false);
+
+  modal.remove();
+  const withoutModal = new window.KeyboardEvent("keydown", {
+    key: "Escape",
+    bubbles: true,
+    cancelable: true,
+  });
+  document.dispatchEvent(withoutModal);
+  assert.strictEqual(menu.hidden, true);
+  assert.strictEqual(withoutModal.defaultPrevented, true);
+});
+
 test("pointerdown fuera cierra el menú y dentro no", async () => {
   const { document, window, menu } = await loadWithMenu();
 
