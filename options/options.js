@@ -507,6 +507,14 @@
     }
   }
 
+  /** Texto de la búsqueda activa (vacío = sin búsqueda). */
+  let searchQuery = "";
+  /**
+   * Resultado de la búsqueda sobre el último árbol, o `null` sin búsqueda.
+   * @type {null|{groupIds: string[], channelMatches: Object, visibleIds: string[]}}
+   */
+  let searchResult = null;
+
   /** Id del grupo seleccionado (su lista de canales se ve en el panel), o `null`. */
   let selectedId = null;
   /** URL de los canales marcados en el panel. */
@@ -743,7 +751,14 @@
       channelsEl.append(el("p", "options__channels-summary", "Elige un grupo"));
       return;
     }
-    const channels = Array.isArray(group.channels) ? group.channels : [];
+    const allChannels = Array.isArray(group.channels) ? group.channels : [];
+    const matchUrls =
+      searchResult && searchResult.channelMatches[group.id]
+        ? new Set(searchResult.channelMatches[group.id])
+        : null;
+    const channels = matchUrls
+      ? allChannels.filter((channel) => matchUrls.has(channel.url))
+      : allChannels;
     const existing = new Set(channels.map((channel) => channel.url));
     for (const url of [...selectedUrls]) {
       if (!existing.has(url)) {
@@ -754,14 +769,17 @@
     channelsEl.append(
       el("h2", "options__channels-title", `Canales de «${group.name}»`),
     );
-    const own =
-      channels.length === 1 ? "1 canal" : `${channels.length} canales`;
+    const own = matchUrls
+      ? `${channels.length} de ${allChannels.length} canales`
+      : channels.length === 1
+        ? "1 canal"
+        : `${channels.length} canales`;
     const summary = YouTubeGroupsEditor.summarizeSubtree(
       currentGroups,
       group.id,
     );
     const ownKeys = new Set(
-      channels.map((channel) => YouTubeGroups.getChannelKey(channel.url)),
+      allChannels.map((channel) => YouTubeGroups.getChannelKey(channel.url)),
     );
     const more = summary ? Math.max(0, summary.channels - ownKeys.size) : 0;
     channelsEl.append(
@@ -955,8 +973,13 @@
    * @returns {HTMLLIElement} Nodo del árbol.
    */
   function buildNode(groups, group, level) {
-    const children = Array.isArray(group.subgroups) ? group.subgroups : [];
-    const isCollapsed = children.length > 0 && collapsed.has(group.id);
+    const searching = searchResult !== null;
+    const visible = searching ? new Set(searchResult.visibleIds) : null;
+    const children = (
+      Array.isArray(group.subgroups) ? group.subgroups : []
+    ).filter((child) => !visible || visible.has(child.id));
+    const isCollapsed =
+      !searching && children.length > 0 && collapsed.has(group.id);
 
     const item = document.createElement("li");
     item.className = "options__node";
@@ -975,7 +998,8 @@
     const handle = el("span", "options__handle", "⠿");
     handle.setAttribute("aria-hidden", "true");
     handle.title = "Arrastrar para mover";
-    handle.draggable = !editing;
+    handle.draggable = !editing && !searching;
+    handle.hidden = searching;
     handle.addEventListener("dragstart", (event) => {
       draggingId = group.id;
       event.dataTransfer.effectAllowed = "move";
@@ -1062,11 +1086,21 @@
       row.append(name);
     }
     const count = Array.isArray(group.channels) ? group.channels.length : 0;
+    const matched =
+      searching && searchResult.channelMatches[group.id]
+        ? searchResult.channelMatches[group.id].length
+        : 0;
+    if (searching && searchResult.groupIds.includes(group.id)) {
+      row.classList.add("options__row--match");
+    }
     row.append(
       el(
         "span",
         "options__count",
-        count === 1 ? "1 canal" : `${count} canales`,
+        (count === 1 ? "1 canal" : `${count} canales`) +
+          (matched > 0
+            ? ` · ${matched === 1 ? "1 canal" : `${matched} canales`}`
+            : ""),
       ),
     );
     const actions = el("span", "options__actions");
@@ -1088,11 +1122,15 @@
       ),
       actionButton("Icono y color", (button) => editAppearance(group, button)),
       actionButton("+ Subgrupo", () => startEdit("create", null, group.id, "")),
-      upButton,
-      downButton,
-      actionButton("Mover a…", () => startMove(group)),
-      actionButton("Eliminar", () => deleteGroup(group)),
     );
+    if (!searching) {
+      actions.append(
+        upButton,
+        downButton,
+        actionButton("Mover a…", () => startMove(group)),
+      );
+    }
+    actions.append(actionButton("Eliminar", () => deleteGroup(group)));
     row.append(actions);
     if (moving && moving.groupId === group.id) {
       const control = buildMoveControl(group);
@@ -1108,6 +1146,9 @@
         event.altKey &&
         (event.key === "ArrowUp" || event.key === "ArrowDown")
       ) {
+        if (searching) {
+          return;
+        }
         event.preventDefault();
         moveSibling(group, event.key === "ArrowUp" ? -1 : 1);
       } else if (event.key === "Enter" || event.key === " ") {
@@ -1183,7 +1224,8 @@
     // Un repintado nuevo anula cualquier arrastre en curso.
     draggingId = null;
 
-    if (moving && !findGroup(groups, moving.groupId)) {
+    searchResult = YouTubeGroupsEditor.searchGroups(groups, searchQuery);
+    if (moving && (searchResult || !findGroup(groups, moving.groupId))) {
       moving = null;
     }
     // Si el grupo que se renombra o al que se añade un subgrupo ya no existe, se cancela.
@@ -1205,8 +1247,14 @@
     } else {
       const total = countGroups(groups);
       summaryEl.textContent = total === 1 ? "1 grupo" : `${total} grupos`;
+      if (searchResult && searchResult.visibleIds.length === 0) {
+        summaryEl.textContent = "Sin resultados";
+      }
+      const visible = searchResult ? new Set(searchResult.visibleIds) : null;
       for (const group of groups) {
-        treeEl.append(buildNode(groups, group, 1));
+        if (!visible || visible.has(group.id)) {
+          treeEl.append(buildNode(groups, group, 1));
+        }
       }
     }
     rendering = false;
@@ -1258,6 +1306,24 @@
       clearDropIndicator();
     });
   }
+
+  const searchEl = document.getElementById("options-search");
+  searchEl.addEventListener("input", () => {
+    searchQuery = searchEl.value;
+    selectedUrls.clear();
+    transfer = null;
+    renderTree(currentGroups);
+  });
+  searchEl.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && searchEl.value !== "") {
+      event.preventDefault();
+      searchEl.value = "";
+      searchQuery = "";
+      selectedUrls.clear();
+      transfer = null;
+      renderTree(currentGroups);
+    }
+  });
 
   document.getElementById("options-add-group").addEventListener("click", () => {
     startEdit("create", null, null, "");

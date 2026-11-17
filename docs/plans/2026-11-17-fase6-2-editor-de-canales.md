@@ -88,7 +88,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 
   mano V2.
 - [x] T5 · "Copiar a…" y "Mover a…" · Ficheros: `options/options.js`, `options/options.css` · Test: `make lint`, `make
   test` y a mano V3.
-- [ ] T6 · Búsqueda en árbol y canales · Ficheros: `options/options.js`, `options/options.css`,
+- [x] T6 · Búsqueda en árbol y canales · Ficheros: `options/options.js`, `options/options.css`,
   `options/options.html` · Test: `make lint`, `make test` y a mano V4.
 - [ ] T7 · Cerrar: `docs/ARCHITECTURE.md` (fila de `group-editor.js` con las funciones nuevas y flujo "Editor de
   grupos" con canales y búsqueda); en `ROADMAP.md`, "⬜" → "✅" en "Editor de canales y búsqueda"; este plan a
@@ -143,3 +143,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T3 | `feat: selección de grupo y panel de canales en el editor` | Dos columnas, panel con resumen, enlaces, casillas y "Seleccionar todo"; sin cambios sobre el plan. |
 | 2026-11-17 | T4 | `feat: quitar canales del grupo con aviso y deshacer en el editor` | Botón "Quitar (N)" con aviso de 10 s y "Deshacer"; sin cambios sobre el plan. |
 | 2026-11-17 | T5 | `feat: copiar y mover canales a otro grupo desde el panel del editor` | "Copiar a…" y "Mover a…" con selector de destino sin el grupo actual y aviso del resultado; sin cambios sobre el plan. |
+| 2026-11-17 | T6 | `feat: búsqueda en el árbol y en los canales del editor de grupos` | Campo de búsqueda, árbol filtrado y marcado, panel "N de M", sin Subir/Bajar/Mover/arrastre con búsqueda; sin cambios sobre el plan. |
