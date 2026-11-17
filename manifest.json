@@ -37,6 +37,7 @@
         "modules/fxemoji-data.js",
         "modules/icons.js",
         "modules/groups.js",
+        "modules/avatars.js",
         "modules/watched.js",
         "modules/settings.js",
         "modules/visibility.js",

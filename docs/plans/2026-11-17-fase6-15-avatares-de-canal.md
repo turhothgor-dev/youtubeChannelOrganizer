@@ -131,7 +131,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   `avatars: "youtubeAvatars"` y sigue congelado; `readAvatarsValue` con `undefined`, array, `{ avatars: [] }` y uno
   válido; `getAvatars` sin datos → `{}` sin llamar a `set`; `saveAvatars` guarda `{ version: 1, avatars }` y lanza con
   un array; `getChangedKeys` con `youtubeAvatars` devuelve `["avatars"]` y el orden de `KEYS` se mantiene.
-- [ ] T2 · Módulo puro `modules/avatars.js` · Ficheros: `modules/avatars.js`, `manifest.json` (tras
+- [x] T2 · Módulo puro `modules/avatars.js` · Ficheros: `modules/avatars.js`, `manifest.json` (tras
   `modules/groups.js`), `options/options.html` (tras `/modules/groups.js`), `tests/helpers/load-modules.js` (en
   `MODULES` tras `groups.js` y expuesto), `tests/avatars.test.js` · Test: `normalizeAvatarUrl` acepta
   `https://yt3.ggpht.com/ytc/AbC=s68-c-k-c0x00ffffff-no-rj?x=1#y` → `…/ytc/AbC=s88-c-k-c0x00ffffff-no-rj`, `//yt3.ggpht.com/a=s48`
@@ -225,3 +225,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | `feat: clave youtubeAvatars en el almacenamiento` | `KEYS.avatars`, `readAvatarsValue`, `getAvatars`, `saveAvatars` y tests. |
+| 2026-11-17 | T2 | `feat: módulo puro de avatares de canal` | `modules/avatars.js` con normalización, fusión y guardado; cargado en manifest, opciones y helper de tests. |
