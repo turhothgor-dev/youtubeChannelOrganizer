@@ -49,6 +49,8 @@
   const collapsed = new Set();
   /** Último árbol leído. */
   let currentGroups = [];
+  /** Últimos avatares leídos (clave de canal → URL de imagen). */
+  let currentAvatars = {};
   /**
    * Edición en línea en curso (renombrar o crear), o `null`.
    * @type {null|{kind: "rename"|"create", groupId: string|null,
@@ -932,7 +934,12 @@
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       text.append(link, el("span", "options__channel-url", channel.url));
-      item.append(box, text);
+      const avatar = YouTubeGroupsIconsDom.createChannelAvatar(
+        channel.name || channel.url,
+        YouTubeGroupsAvatars.getAvatarFor(currentAvatars, channel.url),
+        YouTubeGroupsIconsDom.AVATAR_SIZES.editor,
+      );
+      item.append(box, avatar, text);
       list.append(item);
     }
     allBox.addEventListener("change", () => {
@@ -1353,7 +1360,12 @@
    */
   async function render() {
     try {
-      renderTree(await YouTubeGroupsStorage.getGroups());
+      const [groups, avatars] = await Promise.all([
+        YouTubeGroupsStorage.getGroups(),
+        YouTubeGroupsStorage.getAvatars(),
+      ]);
+      currentAvatars = avatars;
+      renderTree(groups);
       showError("");
     } catch (error) {
       console.error(error);
@@ -1362,16 +1374,22 @@
   }
 
   browser.storage.onChanged.addListener((changes, areaName) => {
-    if (
-      !YouTubeGroupsStorage.getChangedKeys(changes, areaName).includes("groups")
-    ) {
-      return;
+    const keys = YouTubeGroupsStorage.getChangedKeys(changes, areaName);
+    if (keys.includes("avatars")) {
+      currentAvatars = YouTubeGroupsStorage.readAvatarsValue(
+        changes[YouTubeGroupsStorage.KEYS.avatars].newValue,
+      );
+      if (!keys.includes("groups")) {
+        renderChannels();
+      }
     }
-    renderTree(
-      YouTubeGroupsStorage.readGroupsValue(
-        changes[YouTubeGroupsStorage.KEYS.groups].newValue,
-      ),
-    );
+    if (keys.includes("groups")) {
+      renderTree(
+        YouTubeGroupsStorage.readGroupsValue(
+          changes[YouTubeGroupsStorage.KEYS.groups].newValue,
+        ),
+      );
+    }
   });
 
   // Si el arrastre termina fuera de una fila, se limpia el estado.

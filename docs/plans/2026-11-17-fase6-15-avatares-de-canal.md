@@ -157,7 +157,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   `tests/ui-guide-section.test.js` · Test (jsdom): con un grupo desplegado de dos canales y `youtubeAvatars` con uno,
   la fila de ese canal tiene `img.youtube-groups__avatar-img` con su URL y la otra solo la inicial; el nombre y
   `title` del botón no cambian; escribir en `youtubeAvatars` (onChanged) repinta y la segunda fila gana su `img`.
-- [ ] T6 · Avatares en el panel "Canales" del editor · Ficheros: `options/options.js`, `options/options.css` · Test:
+- [x] T6 · Avatares en el panel "Canales" del editor · Ficheros: `options/options.js`, `options/options.css` · Test:
   `make lint`, `make test` y a mano V3.
 - [ ] T7 · Recolector `ui/avatars.js` y enganches · Ficheros: `ui/avatars.js`, `ui/cards.js`, `content.js`,
   `manifest.json` (tras `ui/icon-picker.js`), `tests/manifest.test.js` (orden de `ui/*.js` con `ui/avatars.js`, cambio
@@ -229,3 +229,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T3 | `feat: avatares en la copia de seguridad` | `buildBackup`, `parseBackup` (`avatars` null si falta) y `importBackup` con `avatars`; tests. |
 | 2026-11-17 | T4 | `feat: createChannelAvatar y estilos de avatar` | `AVATAR_SIZES` y `createChannelAvatar` en `icons-dom.js`, CSS en `icons.css` y tests jsdom. |
 | 2026-11-17 | T5 | `feat: avatares de canal en la guía` | `ctx.state.avatars`, lectura en `renderGroupsPanel`/`paintGuideSection`, `createChannelAvatar` en las filas de canal, repintado con `"avatars"` y test jsdom. `ctx.avatars` queda para T7. |
+| 2026-11-17 | T6 | `feat: avatares en el panel Canales del editor` | `currentAvatars` en `options.js` (lectura en `render()` y `onChanged`, que solo repinta el panel si cambia `avatars`), avatar de 24 px en cada fila y margen en CSS. |
