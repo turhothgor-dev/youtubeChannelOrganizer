@@ -1,0 +1,410 @@
+/* Sección "YouTube Groups" dentro de la guía de YouTube */
+.youtube-groups__guide {
+  padding: 4px 8px 12px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.youtube-groups__guide-name {
+  min-width: 0;
+}
+
+.youtube-groups__guide-title {
+  margin: 0;
+  padding: 6px 12px 8px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.youtube-groups__guide-header {
+  display: flex;
+  align-items: center;
+}
+
+.youtube-groups__guide-header .youtube-groups__guide-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.youtube-groups__guide-back,
+.youtube-groups__guide-enter {
+  flex: none;
+  width: 28px;
+  height: 36px;
+  color: var(--yt-spec-text-secondary, #606060);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+}
+
+.youtube-groups__guide-back[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.youtube-groups__guide-column--out-left,
+.youtube-groups__guide-column--out-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.youtube-groups__guide-column--in-right {
+  animation: youtube-groups-in-right 200ms ease both;
+}
+
+.youtube-groups__guide-column--in-left {
+  animation: youtube-groups-in-left 200ms ease both;
+}
+
+.youtube-groups__guide-column--out-left {
+  animation: youtube-groups-out-left 200ms ease both;
+}
+
+.youtube-groups__guide-column--out-right {
+  animation: youtube-groups-out-right 200ms ease both;
+}
+
+@keyframes youtube-groups-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes youtube-groups-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes youtube-groups-out-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes youtube-groups-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .youtube-groups__guide-column--in-right,
+  .youtube-groups__guide-column--in-left,
+  .youtube-groups__guide-column--out-left,
+  .youtube-groups__guide-column--out-right {
+    animation: none;
+  }
+}
+
+.youtube-groups__guide-create {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.youtube-groups__guide-clear {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 4px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.youtube-groups__guide-clear[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.youtube-groups__guide-form[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-form-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: transparent;
+  border: 1px solid var(--yt-spec-10-percent-layer, #ccc);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.youtube-groups__guide-form-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.youtube-groups__guide-form-icon-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+html[dark] .youtube-groups__guide-form-icon {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+  background: var(--yt-spec-badge-chip-background, #272727);
+}
+
+.youtube-groups__guide-form-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.youtube-groups__guide-form-save,
+.youtube-groups__guide-form-cancel {
+  flex: 1;
+  height: 32px;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.youtube-groups__guide-form-error {
+  min-height: 14px;
+  margin: 0;
+  color: #f00;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__guide-form-input,
+html[dark] .youtube-groups__guide-form-save,
+html[dark] .youtube-groups__guide-form-cancel {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .youtube-groups__guide-form-save,
+html[dark] .youtube-groups__guide-form-cancel {
+  background: var(--yt-spec-badge-chip-background, #272727);
+}
+
+.youtube-groups__guide-empty {
+  margin: 0;
+  padding: 6px 12px;
+  color: var(--yt-spec-text-secondary, #606060);
+  font-size: 13px;
+}
+
+.youtube-groups__guide-row {
+  display: flex;
+  align-items: center;
+}
+
+.youtube-groups__guide-toggle {
+  flex: none;
+  width: 24px;
+  height: 36px;
+  color: var(--yt-spec-text-secondary, #606060);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.youtube-groups__guide-toggle[hidden],
+.youtube-groups__guide-channels[hidden] {
+  display: none;
+}
+
+.youtube-groups__guide-row .youtube-groups__guide-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.youtube-groups__guide-channels {
+  padding-left: 24px;
+}
+
+.youtube-groups__guide-item.youtube-groups__guide-channel {
+  height: 32px;
+  color: var(--yt-spec-text-secondary, #606060);
+}
+
+.youtube-groups__guide-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+
+.youtube-groups__guide-item:hover,
+.youtube-groups__guide-item[aria-pressed="true"] {
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+}
+
+.youtube-groups__guide-item[aria-pressed="true"] {
+  font-weight: 700;
+}
+
+.youtube-groups__guide-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[dark] .youtube-groups__guide {
+  border-bottom-color: var(--yt-spec-10-percent-layer, #3f3f3f);
+}
+
+html[dark] .youtube-groups__guide-title,
+html[dark] .youtube-groups__guide-create,
+html[dark] .youtube-groups__guide-clear,
+html[dark] .youtube-groups__guide-item {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .youtube-groups__guide-create,
+html[dark] .youtube-groups__guide-clear {
+  background: var(--yt-spec-badge-chip-background, #272727);
+}
+
+html[dark] .youtube-groups__guide-empty,
+html[dark] .youtube-groups__guide-toggle,
+html[dark] .youtube-groups__guide-back,
+html[dark] .youtube-groups__guide-enter,
+html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {
+  color: var(--yt-spec-text-secondary, #aaa);
+}
+
+html[dark] .youtube-groups__guide-item:hover,
+html[dark] .youtube-groups__guide-item[aria-pressed="true"] {
+  background: var(--yt-spec-badge-chip-background, #272727);
+}
+
+/* Guía de YouTube forzada abierta y fija solo en suscripciones (ADR 0010 y 0012).
+   Todas las reglas cuelgan de la clase que pone el content script. */
+html.youtube-groups--guide-pinned ytd-mini-guide-renderer {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide {
+  visibility: visible !important;
+  top: var(--ytd-masthead-height, 56px) !important;
+  bottom: 0 !important;
+  right: auto !important;
+  width: var(--app-drawer-width, 240px) !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #contentContainer {
+  visibility: visible !important;
+  transform: none !important;
+  box-shadow: none !important;
+  top: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: auto !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #guide-spacer {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned tp-yt-app-drawer#guide #scrim {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned
+  tp-yt-app-drawer#guide
+  #guide-content
+  > #header,
+html.youtube-groups--guide-pinned
+  tp-yt-app-drawer#guide
+  #guide-wrapper
+  > #header {
+  display: none !important;
+}
+
+html.youtube-groups--guide-pinned ytd-page-manager#page-manager {
+  margin-left: var(--app-drawer-width, 240px) !important;
+}
+
+html.youtube-groups--guide-pinned ytd-app {
+  overflow-x: clip;
+  --ytd-mini-guide-width: var(--app-drawer-width, 240px);
+}
+
+html.youtube-groups--guide-pinned #frosted-glass,
+html.youtube-groups--guide-pinned
+  ytd-rich-grid-renderer
+  #header
+  ytd-feed-filter-chip-bar-renderer,
+html.youtube-groups--guide-pinned ytd-rich-grid-renderer #header #chips-wrapper,
+html.youtube-groups--guide-pinned ytd-shorts {
+  left: var(--app-drawer-width, 240px) !important;
+}

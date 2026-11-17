@@ -1,0 +1,19 @@
+.youtube-groups__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.youtube-groups__icon svg {
+  display: block;
+}
+
+/* El color del grupo no tiñe el emoji (multicolor): se muestra como banda
+   vertical en el borde derecho; inset no cambia el tamaño del elemento */
+.youtube-groups__group-band {
+  box-shadow: inset -4px 0 0 var(--yg-group-color);
+  padding-right: 8px;
+}

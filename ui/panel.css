@@ -1,0 +1,456 @@
+#youtube-groups-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  font-family: Roboto, Arial, sans-serif;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.youtube-groups__settings,
+.youtube-groups__filters {
+  margin-bottom: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d8d8d8;
+}
+
+.youtube-groups__filters-reset {
+  margin-top: 8px;
+}
+
+.youtube-groups__settings summary,
+.youtube-groups__filters summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.youtube-groups__setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.youtube-groups__setting select {
+  padding: 4px 6px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #8f8f8f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.youtube-groups__setting select:disabled {
+  opacity: 0.5;
+}
+
+.youtube-groups__settings-error {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+.youtube-groups__backup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.youtube-groups__backup-message {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #0f0f0f;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__backup-message {
+  color: #f1f1f1;
+}
+
+html[dark] .youtube-groups__settings,
+html[dark] .youtube-groups__filters {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__setting select {
+  color: #f1f1f1;
+  background: #121212;
+  border-color: #777;
+}
+
+.youtube-groups__playlists {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
+}
+
+.youtube-groups__playlists summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.youtube-groups__playlist-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.youtube-groups__playlist-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  color: #0f0f0f;
+  background: #ffffff;
+  border: 1px solid #8f8f8f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.youtube-groups__playlist-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.youtube-groups__playlist-item {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.youtube-groups__playlist-name {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.youtube-groups__playlist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.youtube-groups__playlist-play {
+  text-decoration: none;
+}
+
+.youtube-groups__playlist-error {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+.youtube-groups__playlist-video {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.youtube-groups__playlist-video a {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.youtube-groups__playlist-video-channel {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+.youtube-groups__cleanup {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
+}
+
+.youtube-groups__cleanup summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.youtube-groups__cleanup-analyze {
+  margin-top: 8px;
+}
+
+.youtube-groups__cleanup-title {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.youtube-groups__cleanup-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.youtube-groups__cleanup-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.youtube-groups__cleanup-apply {
+  margin-top: 8px;
+}
+
+.youtube-groups__cleanup-message {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #0f0f0f;
+  font-size: 12px;
+}
+
+.youtube-groups__play-visible {
+  margin-top: 8px;
+}
+
+.youtube-groups__play-visible-message {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #0f0f0f;
+  font-size: 12px;
+}
+
+html[dark] .youtube-groups__play-visible-message {
+  color: #f1f1f1;
+}
+
+html[dark] .youtube-groups__cleanup {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__cleanup-message {
+  color: #f1f1f1;
+}
+
+html[dark] .youtube-groups__playlists {
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__playlist-input {
+  color: #f1f1f1;
+  background: #121212;
+  border-color: #777;
+}
+
+.youtube-groups__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.youtube-groups__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.youtube-groups__collapse-button {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.youtube-groups__collapse-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html[dark] .youtube-groups__collapse-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#youtube-groups-panel.youtube-groups--collapsed
+  > :not(.youtube-groups__header) {
+  display: none;
+}
+
+#youtube-groups-panel.youtube-groups--collapsed .youtube-groups__header {
+  margin-bottom: 0;
+}
+
+.youtube-groups__current-channel {
+  margin-bottom: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d8d8d8;
+}
+
+.youtube-groups__section-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.youtube-groups__channel-name {
+  margin: 0 0 8px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.youtube-groups__channel-groups-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.youtube-groups__channel-groups-form[hidden] {
+  display: none;
+}
+
+.youtube-groups__channel-groups {
+  display: grid;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.youtube-groups__group-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.youtube-groups__channel-error {
+  min-height: 18px;
+  margin: 0;
+  color: #c00;
+  font-size: 12px;
+}
+
+.youtube-groups__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  color: inherit;
+  background: #ffffff;
+  border: 1px solid #8f8f8f;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.youtube-groups__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html[dark] #youtube-groups-panel {
+  color: #f1f1f1;
+  background: #212121;
+  border-color: #555;
+}
+
+html[dark] .youtube-groups__input {
+  color: #f1f1f1;
+  background: #121212;
+  border-color: #777;
+}
+
+html[dark] .youtube-groups__current-channel {
+  border-color: #555;
+}
+
+.youtube-groups__channel-list-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.youtube-groups__channel-list-content {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.youtube-groups__channel-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.youtube-groups__close-channels-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Añadir estilos para tooltips */
+.youtube-groups__tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.youtube-groups__tooltip .youtube-groups__tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.youtube-groups__tooltip:hover .youtube-groups__tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}

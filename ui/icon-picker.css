@@ -1,0 +1,169 @@
+/* New styles for icon picker */
+.youtube-groups__icon-picker {
+  position: fixed;
+  z-index: 2147483647;
+  color: #0f0f0f;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+html[dark] .youtube-groups__icon-picker {
+  color: #f1f1f1;
+  background: #212121;
+  border-color: #555;
+}
+
+.youtube-groups__icon-picker-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.youtube-groups__icon-picker[hidden],
+.youtube-groups__icon-picker-form[hidden] {
+  display: none;
+}
+
+.youtube-groups__icon-picker-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-bottom: 1px solid #ddd;
+}
+
+html[dark] .youtube-groups__icon-picker-preview {
+  border-bottom-color: #555;
+}
+
+.youtube-groups__icon-picker-preview-empty {
+  font-size: 12px;
+  color: #606060;
+}
+
+html[dark] .youtube-groups__icon-picker-preview-empty {
+  color: #aaa;
+}
+
+.youtube-groups__icon-picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.youtube-groups__icon-picker-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #606060;
+  margin: 0;
+}
+
+html[dark] .youtube-groups__icon-picker-label {
+  color: #aaa;
+}
+
+.youtube-groups__icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.youtube-groups__icon-picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: #0f0f0f;
+  font-size: 11px;
+}
+
+html[dark] .youtube-groups__icon-picker-option {
+  color: #f1f1f1;
+}
+
+.youtube-groups__icon-picker-option:hover {
+  background: #e5e5e5;
+}
+
+.youtube-groups__icon-picker-option.selected {
+  border-color: #065fd4;
+  background: #e5e5e5;
+}
+
+html[dark] .youtube-groups__icon-picker-option:hover {
+  background: #3f3f3f;
+}
+
+html[dark] .youtube-groups__icon-picker-option.selected {
+  border-color: #3ea6ff;
+  background: #3f3f3f;
+}
+
+.youtube-groups__icon-picker-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.youtube-groups__icon-picker-color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.youtube-groups__icon-picker-color-option:hover {
+  transform: scale(1.15);
+}
+
+.youtube-groups__icon-picker-color-option.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--yt-primary-color, #3ea6ff);
+}
+
+.youtube-groups__icon-picker-color-option:first-child {
+  background: transparent;
+  border: 2px dashed #606060;
+  font-size: 9px;
+  color: #606060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html[dark] .youtube-groups__icon-picker-color-option:first-child {
+  border-color: #aaa;
+  color: #aaa;
+}
+
+.youtube-groups__icon-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+}
+
+html[dark] .youtube-groups__icon-picker-actions {
+  border-top-color: #555;
+}
+
+.youtube-groups__icon-picker-error {
+  font-size: 12px;
+  color: #f00;
+  margin: 0;
+  min-height: 14px;
+}

@@ -15,7 +15,16 @@
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*"],
-      "css": ["content.css"],
+      "css": [
+        "ui/panel.css",
+        "ui/cards.css",
+        "ui/dropdowns.css",
+        "ui/buttons.css",
+        "ui/icons.css",
+        "ui/icon-picker.css",
+        "ui/guide-section.css",
+        "ui/fullscreen.css"
+      ],
       "js": [
         "modules/storage.js",
         "modules/fxemoji-data.js",

@@ -1,0 +1,170 @@
+.youtube-groups--hidden {
+  display: none !important;
+}
+
+.youtube-groups--dimmed {
+  opacity: 0.55;
+}
+
+.youtube-groups--dimmed:hover {
+  opacity: 1;
+}
+
+.youtube-groups__subscription-control {
+  display: inline-block;
+  margin-left: 8px;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+/* En resultados de búsqueda el control va en línea propia bajo el canal. */
+ytd-video-renderer .youtube-groups__subscription-control,
+ytd-channel-renderer .youtube-groups__subscription-control {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 0;
+  margin-top: 4px;
+}
+
+/* Recomendaciones de /watch: botones pequeños, en línea propia. */
+.youtube-groups__subscription-control--compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: 0;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.youtube-groups__subscription-control--compact button {
+  margin-left: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.youtube-groups__subscription-control--compact
+  .youtube-groups__subscription-add-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+html[dark] .youtube-groups__subscription-control--compact button {
+  color: #f1f1f1;
+}
+
+.youtube-groups__card-glyph {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.youtube-groups__card-glyph:empty {
+  display: none;
+}
+
+.youtube-groups__card-label {
+  white-space: nowrap;
+}
+
+.youtube-groups__watched-button {
+  margin-left: 6px;
+}
+
+.youtube-groups__watched-button[aria-pressed="true"]
+  .youtube-groups__card-glyph {
+  color: #2e7d32;
+}
+
+.youtube-groups__watched-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Columna de botones sobre la miniatura, colapsada: solo el botón con el
+   cursor o el foco de teclado muestra su texto. */
+[data-youtube-groups-thumb-host] {
+  position: relative;
+}
+
+.youtube-groups__subscription-control.youtube-groups__card-actions--overlay {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0;
+  max-width: none;
+}
+
+.youtube-groups__card-actions--overlay button {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 28px;
+  margin: 0;
+  padding: 0 7px;
+  font-size: 12px;
+  line-height: 1;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.7);
+  border: 0;
+  border-radius: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.youtube-groups__card-actions--overlay.youtube-groups__subscription-control--compact
+  button {
+  height: 22px;
+  padding: 0 5px;
+  font-size: 11px;
+  color: #ffffff;
+}
+
+.youtube-groups__card-actions--overlay button:disabled {
+  pointer-events: none;
+}
+
+.youtube-groups__card-actions--overlay
+  .youtube-groups__watched-button[aria-pressed="true"] {
+  background: rgba(46, 125, 50, 0.9);
+}
+
+.youtube-groups__card-actions--overlay
+  .youtube-groups__watched-button[aria-pressed="true"]
+  .youtube-groups__card-glyph {
+  color: #ffffff;
+}
+
+.youtube-groups__card-actions--overlay .youtube-groups__card-glyph {
+  margin-right: 0;
+}
+
+.youtube-groups__card-actions--overlay .youtube-groups__card-label {
+  display: none;
+  margin-left: 4px;
+}
+
+.youtube-groups__card-actions--overlay button:hover .youtube-groups__card-label,
+.youtube-groups__card-actions--overlay
+  button:focus-visible
+  .youtube-groups__card-label {
+  display: inline;
+}
+
+/* Columna sobre #movie_player en /watch, solo con el vídeo parado. */
+.youtube-groups__player-actions[hidden] {
+  display: none !important;
+}
+
+.youtube-groups__subscription-control.youtube-groups__card-actions--overlay.youtube-groups__player-actions {
+  top: 12px;
+  left: 12px;
+  z-index: 60;
+}
