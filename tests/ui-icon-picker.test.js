@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   makeGroup,
   groupsStore,
@@ -78,4 +78,65 @@ test('"Cancelar" oculta el selector sin cambiar la vista previa', async () => {
     dom.document.querySelector(FORM_PREVIEW).children.length,
     0,
   );
+});
+
+/** Carga los scripts del manifiesto sin content.js y devuelve el componente. */
+function loadIconPicker() {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({ scripts });
+  return { dom, picker: dom.global("YouTubeGroupsIconPicker") };
+}
+
+test("openIconPicker abre el selector y Guardar llama a onSave con la elección", async () => {
+  const { dom, picker } = loadIconPicker();
+  const anchor = dom.document.createElement("button");
+  dom.document.body.appendChild(anchor);
+  const saved = [];
+
+  picker.openIconPicker({ iconId: "", colorHex: "" }, anchor, (choice) => {
+    saved.push(choice);
+  });
+  assert.strictEqual(dom.document.querySelector(PICKER).hidden, false);
+
+  dom.document
+    .querySelectorAll(".youtube-groups__icon-picker-option")[1]
+    .click();
+  dom.document.querySelector(".youtube-groups__icon-picker-save").click();
+  await flushLoose(dom);
+
+  assert.strictEqual(saved.length, 1);
+  assert.ok(saved[0].iconId);
+  assert.strictEqual(saved[0].colorHex, "");
+  assert.strictEqual(dom.document.querySelector(PICKER).hidden, true);
+});
+
+test("si onSave lanza, el error se muestra y el selector sigue abierto", async () => {
+  const { dom, picker } = loadIconPicker();
+  const anchor = dom.document.createElement("button");
+  dom.document.body.appendChild(anchor);
+
+  picker.openIconPicker({}, anchor, () => {
+    throw new Error("Fallo al guardar");
+  });
+  dom.document.querySelector(".youtube-groups__icon-picker-save").click();
+  await flushLoose(dom);
+
+  assert.strictEqual(
+    dom.document.querySelector(".youtube-groups__icon-picker-error")
+      .textContent,
+    "Fallo al guardar",
+  );
+  assert.strictEqual(dom.document.querySelector(PICKER).hidden, false);
+});
+
+test("hideIconPicker oculta el selector", () => {
+  const { dom, picker } = loadIconPicker();
+  const anchor = dom.document.createElement("button");
+  dom.document.body.appendChild(anchor);
+  picker.openIconPicker({}, anchor, () => {});
+
+  picker.hideIconPicker();
+
+  assert.strictEqual(dom.document.querySelector(PICKER).hidden, true);
+  assert.strictEqual(dom.document.querySelector(PICKER_FORM).hidden, true);
 });
