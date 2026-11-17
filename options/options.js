@@ -540,6 +540,65 @@
   }
 
   /**
+   * Restaura canales quitados de un grupo.
+   * @param {string} groupId - Id del grupo.
+   * @param {Array<{channel: Object, index: number}>} removed - Quitados.
+   * @returns {Promise<void>}
+   */
+  async function undoRemoveChannels(groupId, removed) {
+    try {
+      const result = await YouTubeGroupsEditor.restoreChannelsAndSave(
+        groupId,
+        removed,
+      );
+      showError("");
+      showNotice(
+        !result.restored
+          ? "Ya estaban restaurados"
+          : result.restored === 1
+            ? "Restaurado 1 canal"
+            : `Restaurados ${result.restored} canales`,
+      );
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo restaurar.");
+    }
+  }
+
+  /**
+   * Quita del grupo los canales marcados, sin preguntar, y avisa con "Deshacer".
+   * @param {Object} group - Grupo seleccionado.
+   * @returns {Promise<void>}
+   */
+  async function removeSelectedChannels(group) {
+    const urls = [...selectedUrls];
+    if (urls.length === 0) {
+      return;
+    }
+    try {
+      const { removed } = await YouTubeGroupsEditor.removeChannelsAndSave(
+        group.id,
+        urls,
+      );
+      selectedUrls.clear();
+      showError("");
+      if (removed.length > 0) {
+        showNotice(
+          removed.length === 1
+            ? `Quitado 1 canal de «${group.name}»`
+            : `Quitados ${removed.length} canales de «${group.name}»`,
+          () => undoRemoveChannels(group.id, removed),
+          true,
+        );
+      }
+      renderChannels();
+    } catch (error) {
+      console.error(error);
+      showError(error.message || "No se pudo quitar.");
+    }
+  }
+
+  /**
    * Repinta el panel de canales del grupo seleccionado, conservando las
    * casillas marcadas que sigan existiendo y el foco en una casilla.
    * @returns {void}
@@ -602,7 +661,10 @@
     const allBox = document.createElement("input");
     allBox.type = "checkbox";
     allLabel.append(allBox, " Seleccionar todo");
-    bar.append(allLabel);
+    const removeButton = actionButton("Quitar", () =>
+      removeSelectedChannels(group),
+    );
+    bar.append(allLabel, removeButton);
     channelsEl.append(bar);
 
     const list = el("ul", "options__channel-list");
@@ -611,6 +673,9 @@
       allBox.checked = selectedUrls.size === channels.length;
       allBox.indeterminate =
         selectedUrls.size > 0 && selectedUrls.size < channels.length;
+      removeButton.textContent = `Quitar (${selectedUrls.size})`;
+      removeButton.setAttribute("aria-label", removeButton.textContent);
+      removeButton.disabled = selectedUrls.size === 0;
     };
     for (const channel of channels) {
       const item = el("li", "options__channel");
