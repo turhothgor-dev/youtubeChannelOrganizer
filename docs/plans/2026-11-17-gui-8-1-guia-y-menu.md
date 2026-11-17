@@ -79,7 +79,7 @@ Alternativas descartadas: ver ADR 0017 (menú dentro de la guía, `popover` de H
 
 ## Tareas
 
-- [ ] T1 · Iconos de interfaz nuevos · Ficheros: `modules/icons.js`, `tests/icons.test.js` · Test: el test de
+- [x] T1 · Iconos de interfaz nuevos · Ficheros: `modules/icons.js`, `tests/icons.test.js` · Test: el test de
   `getUiIconPath` recorre también `settings`, `recycle`, `add`, `edit`, `arrow-up`, `arrow-down`, `palette`,
   `delete` y `swap` (cadena no vacía, solo comandos de ruta SVG `/^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/`, fuera de
   `ICON_SET`) y `ICON_SET` sigue con 12.
@@ -184,6 +184,8 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | T1 | La ruta de `recycle` se sustituye por la oficial de Material Icons `recycling` (relleno), descargada de `@material-design-icons/svg@0.14.13`. | La ruta escrita de memoria no era el icono real. | Delegada por la persona ("usa lo recomendado") |
+| 2026-11-17 | General | Consecuencias aceptadas: (1) sin "Canal actual" y "Vídeo actual", en `/shorts` no hay botones manuales de visto, lista y +G; se añade al ROADMAP un punto de botones en Shorts; (2) si la guía de YouTube cambia y la sección no aparece, también se pierde el menú (lo mitiga 6-11); (3) la línea de color de gui-8-3 se decide en su V1. | Puntos abiertos del plan. | Delegada por la persona ("usa lo recomendado") |
 
 ## Registro
 
@@ -191,3 +193,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | feat: iconos de interfaz nuevos (ajustes, reciclaje, añadir, editar, flechas, paleta, papelera, intercambio) | Añadidos 9 iconos a `UI_ICON_PATHS`. Rutas transcritas de memoria sin acceso a los SVG oficiales: revisar visualmente `recycle` (la menos fiable) en V3. |

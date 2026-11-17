@@ -78,10 +78,25 @@ test("isValidIconId y getIconGraphic", () => {
 });
 
 test("getUiIconPath devuelve rutas de interfaz sin mezclarlas con ICON_SET", () => {
-  for (const id of ["eye", "check", "playlist-add"]) {
+  const ids = [
+    "eye",
+    "check",
+    "playlist-add",
+    "settings",
+    "recycle",
+    "add",
+    "edit",
+    "arrow-up",
+    "arrow-down",
+    "palette",
+    "delete",
+    "swap",
+  ];
+  for (const id of ids) {
     const path = Icons.getUiIconPath(id);
     assert.equal(typeof path, "string", id);
     assert.ok(path.length > 0, id);
+    assert.match(path, /^[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+$/, id);
     assert.equal(Icons.isValidIconId(id), false, id);
     assert.equal(Icons.getIconGraphic(id), null, id);
   }
