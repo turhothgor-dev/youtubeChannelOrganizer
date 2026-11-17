@@ -30,6 +30,7 @@
         "modules/guide.js",
         "modules/playlists.js",
         "modules/backup.js",
+        "ui/icons-dom.js",
         "content.js"
       ],
       "run_at": "document_idle"
