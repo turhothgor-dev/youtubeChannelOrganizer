@@ -1,28 +1,20 @@
 /**
- * Menú de opciones "YouTube Groups" (ADR 0017): canal y vídeo actuales, listas,
- * filtros, limpieza, ajustes y copia de seguridad. Se crea con `create(ctx)`;
+ * Menú de opciones "YouTube Groups" (ADR 0017): listas, filtros, limpieza,
+ * ajustes y copia de seguridad. Se crea con `create(ctx)`;
  * no toca el DOM hasta que se abre por primera vez con `openMenu`/`toggleMenu`.
  */
 const YouTubeGroupsPanel = (() => {
   const { getGroups } = YouTubeGroupsStorage;
-  const { setChannelGroups } = YouTubeGroups;
 
   /**
    * Crea el componente del menú.
    * @param {Object} ctx - Contexto compartido de `content.js`.
    * @returns {Readonly<Object>} API: `toggleMenu`, `openMenu`, `closeMenu`,
    *   `isMenuOpen`, `syncSettingsControls`, `renderPlaylistsSection`,
-   *   `openPlaylistVideosModal`, `closePlaylistModal`,
-   *   `renderCurrentChannelSection`, `renderCurrentVideoSection` y
-   *   `scheduleCurrentChannelPanelUpdate`.
+   *   `openPlaylistVideosModal` y `closePlaylistModal`.
    */
   function create(ctx) {
     const GROUPS_PANEL_ID = "youtube-groups-menu";
-
-    // URL del canal pintado por última vez en la sección "Canal actual".
-    let renderedCurrentChannelUrl = null;
-
-    let currentChannelUpdateScheduled = false;
 
     /** Engranaje con el que se abrió el menú (para el foco y `aria-expanded`). */
     let menuAnchor = null;
@@ -115,30 +107,6 @@ const YouTubeGroupsPanel = (() => {
       } finally {
         select.disabled = false;
       }
-    }
-
-    /**
-     * Muestra u oculta la sección "Vídeo actual" del panel y refleja su estado.
-     */
-    function renderCurrentVideoSection() {
-      const panel = document.getElementById("youtube-groups-panel");
-      const section = panel?.querySelector(".youtube-groups__current-video");
-      if (!section) {
-        return;
-      }
-      const videoId = ctx.watched.getCurrentVideoId();
-      section.hidden = !videoId;
-      if (!videoId) {
-        return;
-      }
-      const isWatched =
-        ctx.state.watchedVideos !== null &&
-        YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId);
-      ctx.watched.updateWatchedButton(
-        section.querySelector(".youtube-groups__current-video-button"),
-        videoId,
-        isWatched,
-      );
     }
 
     /**
@@ -301,24 +269,6 @@ const YouTubeGroupsPanel = (() => {
       panel.tabIndex = -1;
       panel.hidden = true;
       panel.innerHTML = `
-          <section class="youtube-groups__current-channel" hidden>
-            <h3 class="youtube-groups__section-title">Canal actual</h3>
-            <p class="youtube-groups__channel-name"></p>
-            <button class="youtube-groups__add-channel-button action-button secondary-button" type="button">Añadir a un grupo</button>
-            <form class="youtube-groups__channel-groups-form" hidden>
-              <div class="youtube-groups__channel-groups" aria-label="Seleccionar grupos"></div>
-              <div class="youtube-groups__form-actions">
-                <button class="youtube-groups__cancel-channel-button action-button noaction-button" type="button">Cancelar</button>
-                <button class="youtube-groups__confirm-channel-button action-button primary-button" type="submit">Guardar</button>
-              </div>
-              <p class="youtube-groups__channel-error" aria-live="polite"></p>
-            </form>
-          </section>
-          <section class="youtube-groups__current-video" hidden>
-            <h3 class="youtube-groups__section-title">Vídeo actual</h3>
-            <button class="youtube-groups__watched-button youtube-groups__current-video-button action-button secondary-button" type="button">Marcar visto</button>
-            <button class="youtube-groups__current-playlist-button action-button secondary-button" type="button">Guardar en lista</button>
-          </section>
           <details class="youtube-groups__playlists">
             <summary>Listas</summary>
             <button class="youtube-groups__play-visible action-button secondary-button" type="button">Reproducir lo visible</button>
@@ -403,12 +353,6 @@ const YouTubeGroupsPanel = (() => {
           </details>
         `;
 
-      panel
-        .querySelector(".youtube-groups__current-video-button")
-        .addEventListener("click", (event) => {
-          ctx.watched.toggleCurrentVideoWatched(event.currentTarget);
-        });
-
       const playVisibleMessage = panel.querySelector(
         ".youtube-groups__play-visible-message",
       );
@@ -440,17 +384,6 @@ const YouTubeGroupsPanel = (() => {
           } else {
             playVisibleMessage.textContent = "No hay vídeos visibles sin ver.";
           }
-        });
-
-      panel
-        .querySelector(".youtube-groups__current-playlist-button")
-        .addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          ctx.dropdowns.openPlaylistForm(
-            ctx.watched.getCurrentWatchVideoData(),
-            event.currentTarget,
-          );
         });
 
       const settingsError = panel.querySelector(
@@ -586,69 +519,6 @@ const YouTubeGroupsPanel = (() => {
         });
       syncFiltersControls(panel);
 
-      const currentChannelForm = panel.querySelector(
-        ".youtube-groups__channel-groups-form",
-      );
-      const currentChannelError = panel.querySelector(
-        ".youtube-groups__channel-error",
-      );
-
-      panel
-        .querySelector(".youtube-groups__add-channel-button")
-        .addEventListener("click", () => {
-          currentChannelForm.hidden = false;
-          currentChannelError.textContent = "";
-        });
-
-      panel
-        .querySelector(".youtube-groups__cancel-channel-button")
-        .addEventListener("click", () => {
-          currentChannelForm.hidden = true;
-          currentChannelError.textContent = "";
-        });
-
-      currentChannelForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        currentChannelError.textContent = "";
-
-        const channel = ctx.cards.getCurrentVideoChannel();
-        const selectedGroupIds = new Set(
-          Array.from(
-            currentChannelForm.querySelectorAll("input:checked"),
-            (input) => input.value,
-          ),
-        );
-
-        if (!channel) {
-          currentChannelError.textContent =
-            "No se ha podido identificar el canal actual.";
-          return;
-        }
-
-        const submitButton = currentChannelForm.querySelector(
-          ".youtube-groups__confirm-channel-button",
-        );
-        const originalText = submitButton.textContent;
-        submitButton.textContent = "Guardando...";
-        submitButton.disabled = true;
-
-        try {
-          await setChannelGroups(channel, selectedGroupIds);
-          await ctx.renderGroupsPanel();
-          await ctx.refreshActiveSelection();
-
-          currentChannelError.textContent = "Canales asignados correctamente";
-          setTimeout(() => {
-            currentChannelError.textContent = "";
-          }, 3000);
-        } catch (exception) {
-          currentChannelError.textContent = exception.message;
-        } finally {
-          submitButton.textContent = originalText;
-          submitButton.disabled = false;
-        }
-      });
-
       document.body.append(panel);
       renderPlaylistsSection();
       return panel;
@@ -730,21 +600,9 @@ const YouTubeGroupsPanel = (() => {
         closeMenu();
         return;
       }
-      const isNew = document.getElementById(GROUPS_PANEL_ID) === null;
       const menu = createMenu();
       if (!menu) {
         return;
-      }
-      if (isNew) {
-        getGroups()
-          .then((groups) => renderCurrentChannelSection(groups))
-          .catch((error) => {
-            console.error(
-              "[YouTube Groups] No se pudo pintar el canal actual",
-              error,
-            );
-          });
-        renderCurrentVideoSection();
       }
       if (menuAnchor && menuAnchor !== anchor) {
         menuAnchor.setAttribute("aria-expanded", "false");
@@ -992,76 +850,6 @@ const YouTubeGroupsPanel = (() => {
       }
     }
 
-    function renderCurrentChannelSection(groups) {
-      const panel = document.getElementById(GROUPS_PANEL_ID);
-      if (!panel) {
-        return;
-      }
-
-      const currentChannelSection = panel.querySelector(
-        ".youtube-groups__current-channel",
-      );
-      const currentChannelName = panel.querySelector(
-        ".youtube-groups__channel-name",
-      );
-      const currentChannelGroups = panel.querySelector(
-        ".youtube-groups__channel-groups",
-      );
-      const currentChannelForm = panel.querySelector(
-        ".youtube-groups__channel-groups-form",
-      );
-
-      const channel = ctx.cards.getCurrentVideoChannel();
-      renderedCurrentChannelUrl = channel ? channel.url : null;
-      currentChannelSection.hidden = !channel;
-      currentChannelForm.hidden = true;
-      currentChannelGroups.replaceChildren();
-
-      if (!channel) {
-        return;
-      }
-
-      currentChannelName.textContent = channel.name;
-
-      ctx.dropdowns.renderChannelGroupChoices(
-        currentChannelGroups,
-        groups,
-        channel.url,
-        "youtube-groups__group-choice",
-      );
-    }
-
-    function scheduleCurrentChannelPanelUpdate() {
-      const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
-      if (
-        currentChannelUpdateScheduled ||
-        (pageType !== "watch" && pageType !== "shorts")
-      ) {
-        return;
-      }
-
-      currentChannelUpdateScheduled = true;
-      requestAnimationFrame(() => {
-        currentChannelUpdateScheduled = false;
-        // El canal del vídeo llega tarde: el control del reproductor lo recalcula
-        ctx.player.syncPlayerControl();
-        const channel = ctx.cards.getCurrentVideoChannel();
-        const channelUrl = channel ? channel.url : null;
-        if (channelUrl === renderedCurrentChannelUrl) {
-          return;
-        }
-
-        getGroups()
-          .then((groups) => renderCurrentChannelSection(groups))
-          .catch((error) => {
-            console.error(
-              "[YouTube Groups] No se pudo actualizar el canal actual",
-              error,
-            );
-          });
-      });
-    }
-
     return Object.freeze({
       toggleMenu,
       openMenu,
@@ -1071,9 +859,6 @@ const YouTubeGroupsPanel = (() => {
       renderPlaylistsSection,
       openPlaylistVideosModal,
       closePlaylistModal,
-      renderCurrentChannelSection,
-      renderCurrentVideoSection,
-      scheduleCurrentChannelPanelUpdate,
     });
   }
 

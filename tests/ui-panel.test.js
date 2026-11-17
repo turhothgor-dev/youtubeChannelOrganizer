@@ -69,6 +69,19 @@ test("el engranaje crea un único menú en body, visible y colocado", async () =
   assert.match(menu.style.top, /^\d+px$/);
 });
 
+test("el menú no tiene Canal actual ni Vídeo actual", async () => {
+  const { menu } = await loadWithMenu();
+
+  assert.strictEqual(
+    menu.querySelector(".youtube-groups__current-channel"),
+    null,
+  );
+  assert.strictEqual(
+    menu.querySelector(".youtube-groups__current-video"),
+    null,
+  );
+});
+
 test("Escape cierra el menú y devuelve el foco al engranaje", async () => {
   const { document, window, gear, menu } = await loadWithMenu();
 

@@ -139,7 +139,7 @@ const YouTubeGroupsWatchedUi = (() => {
 
     /**
      * Reaplica el estado de visto a la tarjeta pulsada (si la hay), a las demás
-     * tarjetas con ese ID y a la sección "Vídeo actual" del panel.
+     * tarjetas con ese ID y al control del reproductor.
      * @param {string} videoId - ID del vídeo.
      * @param {Element|null} [pressedCard] - Tarjeta cuyo botón se pulsó.
      */
@@ -157,7 +157,6 @@ const YouTubeGroupsWatchedUi = (() => {
           applyWatchedToCard(card);
         }
       }
-      ctx.panel.renderCurrentVideoSection();
       ctx.player.schedulePlayerControlSync();
     }
 
@@ -221,16 +220,13 @@ const YouTubeGroupsWatchedUi = (() => {
 
     /**
      * Marca un vídeo como visto desde el marcado automático.
-     * Un error se registra y se muestra en el botón del panel; no se reintenta.
+     * Un error se registra en la consola; no se reintenta.
      * @param {string} videoId - ID del vídeo.
      * @returns {Promise<void>}
      */
     async function markVideoWatched(videoId) {
       savingWatchedIds.add(videoId);
       refreshWatchedUi(videoId, null);
-      const panelButton = document.querySelector(
-        ".youtube-groups__current-video-button",
-      );
       ctx.state.watchedWriteSeq += 1;
       const seq = ctx.state.watchedWriteSeq;
       try {
@@ -242,11 +238,7 @@ const YouTubeGroupsWatchedUi = (() => {
           ctx.state.watchedAppliedSeq = seq;
           ctx.state.watchedVideos = result.videos;
         }
-        panelButton?.removeAttribute("title");
       } catch (error) {
-        if (panelButton) {
-          panelButton.title = "No se pudo guardar: " + error.message;
-        }
         console.error(
           "[YouTube Groups] No se pudo guardar el visto automático",
           error,
@@ -344,7 +336,6 @@ const YouTubeGroupsWatchedUi = (() => {
           )) {
             applyWatchedToCard(card);
           }
-          ctx.panel.renderCurrentVideoSection();
         })
         .catch((error) => {
           ctx.state.watchedLoadError = error.message;
@@ -353,7 +344,6 @@ const YouTubeGroupsWatchedUi = (() => {
           )) {
             applyWatchedToCard(card);
           }
-          ctx.panel.renderCurrentVideoSection();
           console.error(
             "[YouTube Groups] No se pudieron leer los vistos",
             error,

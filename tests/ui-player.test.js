@@ -65,6 +65,29 @@ test("YouTubeGroupsPlayer.create es una función y crearlo no toca el DOM", () =
   assert.strictEqual(typeof player.noteMutations, "function");
 });
 
+test("añadir el propietario tras cargar habilita +G del reproductor", async () => {
+  const dom = loadDom({
+    url: `https://www.youtube.com/watch?v=${VIDEO_ID}`,
+    html: `<ytd-watch-flexy video-id="${VIDEO_ID}">
+      <div id="movie_player"><video></video></div>
+    </ytd-watch-flexy>`,
+  });
+  Object.defineProperty(dom.document, "fullscreenElement", { value: null });
+  dom.document.dispatchEvent(new dom.window.Event("fullscreenchange"));
+  await dom.flush();
+  const addButton = dom.document.querySelector(
+    ".youtube-groups__subscription-add-button",
+  );
+  assert.strictEqual(addButton.disabled, true);
+
+  const owner = dom.document.createElement("ytd-video-owner-renderer");
+  owner.innerHTML = '<a href="/@canal">Canal</a>';
+  dom.document.querySelector("ytd-watch-flexy").append(owner);
+  await dom.flush();
+
+  assert.strictEqual(addButton.disabled, false);
+});
+
 test("yt-navigate-start oculta el control", async () => {
   const dom = await loadWatch();
   assert.strictEqual(dom.document.querySelector(PLAYER_CONTROL).hidden, false);

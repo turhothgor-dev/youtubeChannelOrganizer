@@ -135,8 +135,6 @@
     ctx.avatars.scheduleScan({ guide: true });
     ctx.cards.refreshChannelNameIndex(groups);
 
-    ctx.panel.renderCurrentChannelSection(groups);
-    ctx.panel.renderCurrentVideoSection();
     ctx.guide.renderGuideSection(groups);
   }
 
@@ -261,14 +259,14 @@
           ctx.cards.nodeBelongsToCurrentVideoOwner(mutation.target) ||
           mutation.target.localName === "ytd-reel-video-renderer"
         ) {
-          ctx.panel.scheduleCurrentChannelPanelUpdate();
+          ctx.player.schedulePlayerControlSync();
         }
       }
 
       for (const node of mutation.addedNodes) {
         ctx.cards.scheduleCardsIn(node);
         if (ctx.cards.nodeBelongsToCurrentVideoOwner(node)) {
-          ctx.panel.scheduleCurrentChannelPanelUpdate();
+          ctx.player.schedulePlayerControlSync();
         }
       }
     }
@@ -334,7 +332,6 @@
           )) {
             ctx.watched.applyWatchedToCard(card);
           }
-          ctx.panel.renderCurrentVideoSection();
         } else if (name === "settings") {
           ctx.state.settings = YouTubeGroupsSettings.normalizeSettings(
             storage.readSettingsValue(newValue),

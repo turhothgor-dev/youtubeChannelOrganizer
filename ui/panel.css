@@ -255,57 +255,6 @@ html[dark] .youtube-groups__playlist-input {
   border-color: #777;
 }
 
-.youtube-groups__current-channel {
-  margin-bottom: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #d8d8d8;
-}
-
-.youtube-groups__section-title {
-  margin: 0 0 4px;
-  font-size: 14px;
-}
-
-.youtube-groups__channel-name {
-  margin: 0 0 8px;
-  overflow: hidden;
-  font-size: 14px;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.youtube-groups__channel-groups-form {
-  display: grid;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.youtube-groups__channel-groups-form[hidden] {
-  display: none;
-}
-
-.youtube-groups__channel-groups {
-  display: grid;
-  gap: 6px;
-  max-height: 140px;
-  overflow-y: auto;
-}
-
-.youtube-groups__group-choice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.youtube-groups__channel-error {
-  min-height: 18px;
-  margin: 0;
-  color: #c00;
-  font-size: 12px;
-}
-
 .youtube-groups__input {
   width: 100%;
   box-sizing: border-box;
@@ -333,10 +282,6 @@ html[dark] .youtube-groups__input {
   color: #f1f1f1;
   background: #121212;
   border-color: #777;
-}
-
-html[dark] .youtube-groups__current-channel {
-  border-color: #555;
 }
 
 .youtube-groups__channel-list-modal {
