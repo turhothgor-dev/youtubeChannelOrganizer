@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { loadDom } = require("./helpers/load-dom");
+const { loadDom, manifestScripts } = require("./helpers/load-dom");
 const {
   CHANNEL_URL,
   makeGroup,
@@ -28,6 +28,20 @@ async function loadWithCard() {
   await flushLoose(dom);
   return dom;
 }
+
+test("YouTubeGroupsDropdowns.create es una función y crearlo no toca el DOM", () => {
+  const scripts = manifestScripts().filter((file) => file !== "content.js");
+  const dom = loadDom({ html: SUBSCRIPTION_CARD_HTML, scripts });
+  const before = dom.document.body.innerHTML;
+  const Dropdowns = dom.global("YouTubeGroupsDropdowns");
+
+  assert.strictEqual(typeof Dropdowns.create, "function");
+  const dropdowns = Dropdowns.create({ state: {} });
+
+  assert.strictEqual(dom.document.body.innerHTML, before);
+  assert.strictEqual(typeof dropdowns.openSubscriptionGroupsForm, "function");
+  assert.strictEqual(typeof dropdowns.openPlaylistForm, "function");
+});
 
 test('"+G" abre un único desplegable con una casilla por grupo y no se duplica', async () => {
   const dom = await loadWithCard();

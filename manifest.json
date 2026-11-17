@@ -32,6 +32,7 @@
         "modules/backup.js",
         "ui/icons-dom.js",
         "ui/icon-picker.js",
+        "ui/dropdowns.js",
         "ui/player.js",
         "content.js"
       ],
