@@ -60,6 +60,56 @@ test("modules/* va antes que ui/* y content.js es el último", () => {
   }
 });
 
+function readManifest() {
+  return JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
+}
+
+test("options_ui y background apuntan a ficheros existentes, sin permisos nuevos", () => {
+  const manifest = readManifest();
+  assert.strictEqual(manifest.options_ui.open_in_tab, true);
+  assert.ok(fs.existsSync(path.join(ROOT, manifest.options_ui.page)));
+  assert.deepStrictEqual(manifest.background.scripts, ["background.js"]);
+  assert.ok(fs.existsSync(path.join(ROOT, "background.js")));
+  assert.deepStrictEqual(manifest.permissions, ["storage"]);
+});
+
+test("options.html carga ficheros existentes, sin scripts en línea y en orden", () => {
+  const manifest = readManifest();
+  const pageFile = path.join(ROOT, manifest.options_ui.page);
+  const html = fs.readFileSync(pageFile, "utf8");
+  const resolve = (ref) =>
+    ref.startsWith("/")
+      ? path.join(ROOT, ref)
+      : path.join(path.dirname(pageFile), ref);
+
+  const scriptTags = [...html.matchAll(/<script\b([^>]*)>/g)];
+  const scripts = scriptTags.map((m) => /src="([^"]+)"/.exec(m[1])?.[1]);
+  assert.ok(scripts.every(Boolean), "script sin src (en línea)");
+  assert.ok(
+    !/<script\b[^>]*>\s*\S/.test(
+      html.replace(/<script\b[^>]*src=[^>]*><\/script>/g, ""),
+    ),
+  );
+  for (const ref of scripts) {
+    assert.ok(fs.existsSync(resolve(ref)), ref);
+  }
+  const hrefs = [...html.matchAll(/<link\b[^>]*href="([^"]+)"/g)].map(
+    (m) => m[1],
+  );
+  for (const ref of hrefs) {
+    assert.ok(fs.existsSync(resolve(ref)), ref);
+  }
+
+  assert.strictEqual(scripts[scripts.length - 1], "options.js");
+  const shared = scripts.slice(0, -1).map((ref) => ref.replace(/^\//, ""));
+  const contentOrder = manifest.content_scripts[0].js;
+  const sharedInContent = shared.filter((f) => contentOrder.includes(f));
+  assert.deepStrictEqual(
+    sharedInContent,
+    contentOrder.filter((f) => shared.includes(f)),
+  );
+});
+
 test("los ui/*.js se cargan en el orden de sus dependencias", () => {
   assert.deepStrictEqual(
     manifestScripts().filter((f) => f.startsWith("ui/")),

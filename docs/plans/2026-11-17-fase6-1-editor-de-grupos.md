@@ -143,7 +143,7 @@ Reglas comunes: sin `innerHTML` con datos (en `options.js`, ninguno); JSDoc; sin
   (mismo orden e índices); restaurar dos veces → `restored: false` sin escribir; restaurar con el padre borrado → al
   final del primer nivel como `type: "group"` sin `parentId` y `atRoot: true`; restaurar tras añadir otro hermano
   respeta el índice acotado; un error de grupo inexistente no escribe.
-- [ ] T4 · Página de opciones y script de fondo: `manifest.json` (`options_ui`, `background`), `background.js` y
+- [x] T4 · Página de opciones y script de fondo: `manifest.json` (`options_ui`, `background`), `background.js` y
   esqueleto de `options/` (cabecera, tema, carga de módulos, mensaje de error y "N grupos" leídos con `getGroups`) ·
   Ficheros: `manifest.json`, `background.js`, `options/options.html`, `options/options.js`, `options/options.css`,
   `tests/manifest.test.js` (ya existe, se amplía) · Test: `tests/manifest.test.js` comprueba `options_ui.page` existente con `open_in_tab`,
@@ -224,3 +224,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T1 | `fix: normalizeChannelUrl con origen fijo y renameGroup con validateGroupName` | ADR 0014 a `aceptada`; opción `origin` en `loadModules`; 249 tests y lint en verde. |
 | 2026-11-17 | T2 | `feat: group-editor con moveGroup, getSiblingMove, getMoveTargets, getDropPosition y moveGroupAndSave` | Módulo puro `YouTubeGroupsEditor` y tests; `moveGroupAndSave` devuelve `{ changed }`. |
 | 2026-11-17 | T3 | `feat: group-editor con summarizeSubtree, removeGroupWithSnapshot, restoreGroup y borrado con deshacer` | Añade `deleteGroupAndSnapshot` y `restoreGroupAndSave`; 265 tests y lint en verde. |
+| 2026-11-17 | T4 | `feat: página de opciones y script de fondo del editor de grupos` | `options_ui`, `background.js` y esqueleto de `options/` con tema, error y recuento; 267 tests y lint en verde. |

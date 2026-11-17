@@ -1,0 +1,34 @@
+:root {
+  color-scheme: light;
+}
+
+html[dark] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+  background: #fff;
+  color: #0f0f0f;
+}
+
+html[dark] body {
+  background: #0f0f0f;
+  color: #f1f1f1;
+}
+
+.options__header h1 {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+}
+
+#options-error {
+  color: #c00;
+}
+
+html[dark] #options-error {
+  color: #ff8a80;
+}

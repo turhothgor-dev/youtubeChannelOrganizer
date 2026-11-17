@@ -12,6 +12,13 @@
     }
   },
   "permissions": ["storage"],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*"],
