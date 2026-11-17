@@ -373,6 +373,195 @@ test("deleteGroupAndSnapshot y restoreGroupAndSave guardan y no escriben de más
   assert.strictEqual(calls.set, 2);
 });
 
+const chUrl = (name) => `https://www.youtube.com/@${name}`;
+
+// A con cinco canales (c1..c5); B con c2 y A1 vacío
+function treeWithFiveChannels() {
+  const tree = sampleTree();
+  tree[0].channels = [1, 2, 3, 4, 5].map((n) => ({
+    name: `c${n}`,
+    url: chUrl(`c${n}`),
+  }));
+  tree[1].channels = [{ name: "c2", url: chUrl("C2") }];
+  return tree;
+}
+
+const urlsOf = (group) => Array.from(group.channels, (channel) => channel.url);
+
+test("removeChannels y restoreChannels dejan el orden original", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithFiveChannels();
+  const before = structuredClone(tree);
+
+  const out = YouTubeGroupsEditor.removeChannels(tree, "A", [
+    chUrl("c4"),
+    chUrl("c2"),
+    chUrl("noexiste"),
+  ]);
+  assert.deepStrictEqual(urlsOf(out.groups[0]), [
+    chUrl("c1"),
+    chUrl("c3"),
+    chUrl("c5"),
+  ]);
+  assert.deepStrictEqual(
+    plain(out.removed).map((item) => [item.channel.name, item.index]),
+    [
+      ["c2", 1],
+      ["c4", 3],
+    ],
+  );
+  assert.deepStrictEqual(plain(tree), plain(before));
+
+  const back = YouTubeGroupsEditor.restoreChannels(
+    out.groups,
+    "A",
+    out.removed,
+  );
+  assert.strictEqual(back.restored, 2);
+  assert.deepStrictEqual(plain(back.groups), plain(before));
+
+  assert.throws(() => YouTubeGroupsEditor.removeChannels(tree, "X", []));
+});
+
+test("restoreChannels no duplica uno ya vuelto a añadir y no falla sin el grupo", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithFiveChannels();
+  const out = YouTubeGroupsEditor.removeChannels(tree, "A", [chUrl("c1")]);
+  const readded = structuredClone(out.groups);
+  readded[0].channels.push({ name: "C1", url: chUrl("C1") });
+
+  const back = YouTubeGroupsEditor.restoreChannels(readded, "A", out.removed);
+  assert.strictEqual(back.restored, 0);
+  assert.strictEqual(back.groups[0].channels.length, 5);
+
+  const gone = YouTubeGroupsEditor.restoreChannels(
+    sampleTree(),
+    "X",
+    out.removed,
+  );
+  assert.strictEqual(gone.restored, 0);
+  assert.deepStrictEqual(plain(gone.groups), plain(sampleTree()));
+});
+
+test("transferChannels copia sin repetir y mover quita también los repetidos", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithFiveChannels();
+  const before = structuredClone(tree);
+  const urls = [chUrl("c1"), chUrl("c2"), chUrl("c3")];
+
+  const copied = YouTubeGroupsEditor.transferChannels(
+    tree,
+    "A",
+    urls,
+    "B",
+    "copy",
+  );
+  assert.strictEqual(copied.added, 2);
+  assert.strictEqual(copied.skipped, 1);
+  assert.strictEqual(copied.groups[0].channels.length, 5);
+  assert.deepStrictEqual(urlsOf(copied.groups[1]), [
+    chUrl("C2"),
+    chUrl("c1"),
+    chUrl("c3"),
+  ]);
+
+  const moved = YouTubeGroupsEditor.transferChannels(
+    tree,
+    "A",
+    urls,
+    "B",
+    "move",
+  );
+  assert.strictEqual(moved.added, 2);
+  assert.strictEqual(moved.skipped, 1);
+  assert.deepStrictEqual(urlsOf(moved.groups[0]), [chUrl("c4"), chUrl("c5")]);
+  assert.deepStrictEqual(plain(tree), plain(before));
+
+  assert.throws(() =>
+    YouTubeGroupsEditor.transferChannels(tree, "A", urls, "A", "copy"),
+  );
+  assert.throws(() =>
+    YouTubeGroupsEditor.transferChannels(tree, "A", urls, "X", "copy"),
+  );
+  assert.throws(() =>
+    YouTubeGroupsEditor.transferChannels(tree, "X", urls, "B", "copy"),
+  );
+});
+
+test("removeChannelsAndSave, restoreChannelsAndSave y transferChannelsAndSave guardan solo si cambia algo", async () => {
+  const { YouTubeGroupsEditor, store, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: treeWithFiveChannels() },
+  });
+  const before = structuredClone(store.youtubeGroups.groups);
+
+  const none = await YouTubeGroupsEditor.removeChannelsAndSave("A", [
+    chUrl("noexiste"),
+  ]);
+  assert.strictEqual(none.removed.length, 0);
+  assert.strictEqual(calls.set, 0);
+
+  const removed = await YouTubeGroupsEditor.removeChannelsAndSave("A", [
+    chUrl("c2"),
+    chUrl("c4"),
+  ]);
+  assert.strictEqual(removed.removed.length, 2);
+  assert.strictEqual(calls.set, 1);
+  assert.strictEqual(store.youtubeGroups.groups[0].channels.length, 3);
+
+  const restored = await YouTubeGroupsEditor.restoreChannelsAndSave(
+    "A",
+    removed.removed,
+  );
+  assert.strictEqual(restored.restored, 2);
+  assert.strictEqual(calls.set, 2);
+  assert.deepStrictEqual(plain(store.youtubeGroups.groups), plain(before));
+
+  const again = await YouTubeGroupsEditor.restoreChannelsAndSave(
+    "A",
+    removed.removed,
+  );
+  assert.strictEqual(again.restored, 0);
+  assert.strictEqual(calls.set, 2);
+
+  const missing = await YouTubeGroupsEditor.restoreChannelsAndSave(
+    "X",
+    removed.removed,
+  );
+  assert.strictEqual(missing.restored, 0);
+  assert.strictEqual(calls.set, 2);
+
+  const copied = await YouTubeGroupsEditor.transferChannelsAndSave(
+    "A",
+    [chUrl("c2")],
+    "B",
+    "copy",
+  );
+  assert.deepStrictEqual(plain(copied), { added: 0, skipped: 1 });
+  assert.strictEqual(calls.set, 2);
+
+  const moved = await YouTubeGroupsEditor.transferChannelsAndSave(
+    "A",
+    [chUrl("c2"), chUrl("c3")],
+    "B",
+    "move",
+  );
+  assert.deepStrictEqual(plain(moved), { added: 1, skipped: 1 });
+  assert.strictEqual(calls.set, 3);
+  assert.deepStrictEqual(urlsOf(store.youtubeGroups.groups[0]), [
+    chUrl("c1"),
+    chUrl("c4"),
+    chUrl("c5"),
+  ]);
+
+  await assert.rejects(
+    YouTubeGroupsEditor.transferChannelsAndSave("A", [], "A", "move"),
+  );
+  await assert.rejects(
+    YouTubeGroupsEditor.transferChannelsAndSave("A", [], "X", "move"),
+  );
+  assert.strictEqual(calls.set, 3);
+});
+
 test("moveGroupAndSave: dos movimientos solapados no se pisan", async () => {
   const { YouTubeGroupsEditor, store } = loadModules(
     { youtubeGroups: { version: 1, groups: sampleTree() } },

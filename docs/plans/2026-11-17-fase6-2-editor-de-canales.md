@@ -1,6 +1,6 @@
 # Plan: Fase 6 (2/2 del editor) · Editor de grupos: canales del grupo y búsqueda
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-17)
 
 Issue: `ROADMAP.md`, Fase 6: "Editor de canales y búsqueda". Hoja de ruta:
 `docs/plans/2026-11-17-fase6-hoja-de-ruta.md`. ADR: [0014](../adr/0014-pagina-de-opciones-editor-de-grupos.md) (sin
@@ -71,7 +71,7 @@ repetidos en destino con `YouTubeGroups.getChannelKey`):
 
 Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 avisos) y `make test` en verde.
 
-- [ ] T1 · `removeChannels`, `restoreChannels`, `transferChannels` y sus versiones `…AndSave` · Ficheros:
+- [x] T1 · `removeChannels`, `restoreChannels`, `transferChannels` y sus versiones `…AndSave` · Ficheros:
   `modules/group-editor.js`, `tests/group-editor.test.js` · Test: quitar dos de cinco y restaurar deja el orden
   original; restaurar con uno ya vuelto a añadir (`/@Foo` frente a `/@foo`) no lo duplica; restaurar en un grupo
   borrado → 0 sin escribir; copiar a un grupo que ya tiene uno → `added` 1, `skipped` 1; mover quita del origen
@@ -138,3 +138,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `feat: quitar, restaurar y copiar o mover canales entre grupos en el editor` | Lógica pura y versiones `…AndSave` con tests; sin cambios sobre el plan. |

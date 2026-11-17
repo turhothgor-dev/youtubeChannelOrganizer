@@ -411,7 +411,208 @@ const YouTubeGroupsEditor = (() => {
     );
   }
 
+  /**
+   * Lista de canales de un grupo (vacía si no tiene).
+   * @param {Object} group - Grupo o subgrupo.
+   * @returns {Array<Object>} Sus canales.
+   */
+  function channelsOf(group) {
+    return Array.isArray(group.channels) ? group.channels : [];
+  }
+
+  /**
+   * Quita canales de un grupo sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} groupId - Id del grupo.
+   * @param {Array<string>} urls - URL tal como están guardadas.
+   * @returns {{groups: Array<Object>, removed: Array<{channel: Object,
+   *   index: number}>}} Árbol resultante y los quitados con su posición
+   *   original; las URL que no están se ignoran.
+   * @throws {Error} Si el grupo no existe.
+   */
+  function removeChannels(groups, groupId, urls) {
+    if (!locate(groups, groupId)) {
+      throw new Error("No existe el grupo indicado.");
+    }
+    const wanted = new Set(urls);
+    const result = structuredClone(groups);
+    const target = locate(result, groupId).group;
+    const removed = [];
+    const kept = [];
+    channelsOf(target).forEach((channel, index) => {
+      if (wanted.has(channel.url)) {
+        removed.push({ channel: structuredClone(channel), index });
+      } else {
+        kept.push(channel);
+      }
+    });
+    target.channels = kept;
+    return { groups: result, removed };
+  }
+
+  /**
+   * Devuelve a su posición canales quitados, sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos actual.
+   * @param {string} groupId - Id del grupo.
+   * @param {Array<{channel: Object, index: number}>} removed - Resultado de
+   *   `removeChannels`.
+   * @returns {{groups: Array<Object>, restored: number}} Cuántos se
+   *   reinsertaron; los que ya están (por clave) no se repiten y, si el grupo
+   *   ya no existe, `restored` es 0.
+   */
+  function restoreChannels(groups, groupId, removed) {
+    const result = structuredClone(groups);
+    const found = locate(result, groupId);
+    if (!found) {
+      return { groups: result, restored: 0 };
+    }
+    const target = found.group;
+    if (!Array.isArray(target.channels)) {
+      target.channels = [];
+    }
+    const keys = new Set(
+      target.channels.map((channel) =>
+        YouTubeGroups.getChannelKey(channel.url),
+      ),
+    );
+    let restored = 0;
+    const ordered = [...removed].sort((a, b) => a.index - b.index);
+    for (const item of ordered) {
+      const key = YouTubeGroups.getChannelKey(item.channel.url);
+      if (keys.has(key)) {
+        continue;
+      }
+      keys.add(key);
+      const at = Math.min(Math.max(item.index, 0), target.channels.length);
+      target.channels.splice(at, 0, structuredClone(item.channel));
+      restored += 1;
+    }
+    return { groups: result, restored };
+  }
+
+  /**
+   * Copia o mueve canales de un grupo a otro sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} fromId - Id del grupo de origen.
+   * @param {Array<string>} urls - URL tal como están guardadas en el origen.
+   * @param {string} toId - Id del grupo de destino.
+   * @param {"copy"|"move"} mode - Copiar o mover.
+   * @returns {{groups: Array<Object>, added: number, skipped: number}}
+   *   `skipped` cuenta los que ya estaban en el destino; con `"move"` se
+   *   quitan del origen en todo caso.
+   * @throws {Error} Si algún grupo no existe o origen y destino coinciden.
+   */
+  function transferChannels(groups, fromId, urls, toId, mode) {
+    if (fromId === toId) {
+      throw new Error("El origen y el destino son el mismo grupo.");
+    }
+    if (!locate(groups, fromId) || !locate(groups, toId)) {
+      throw new Error("No existe el grupo indicado.");
+    }
+    const wanted = new Set(urls);
+    const result = structuredClone(groups);
+    const from = locate(result, fromId).group;
+    const to = locate(result, toId).group;
+    if (!Array.isArray(to.channels)) {
+      to.channels = [];
+    }
+    const keys = new Set(
+      to.channels.map((channel) => YouTubeGroups.getChannelKey(channel.url)),
+    );
+    let added = 0;
+    let skipped = 0;
+    for (const channel of channelsOf(from)) {
+      if (!wanted.has(channel.url)) {
+        continue;
+      }
+      const key = YouTubeGroups.getChannelKey(channel.url);
+      if (keys.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      keys.add(key);
+      to.channels.push(structuredClone(channel));
+      added += 1;
+    }
+    if (mode === "move") {
+      from.channels = channelsOf(from).filter(
+        (channel) => !wanted.has(channel.url),
+      );
+    }
+    return { groups: result, added, skipped };
+  }
+
+  /**
+   * Quita canales de un grupo y guarda; no escribe si no quita ninguno.
+   * @param {string} groupId - Id del grupo.
+   * @param {Array<string>} urls - URL tal como están guardadas.
+   * @returns {Promise<{removed: Array<{channel: Object, index: number}>}>}
+   * @throws {Error} Si el grupo no existe (no escribe).
+   */
+  async function removeChannelsAndSave(groupId, urls) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const result = removeChannels(groups, groupId, urls);
+        if (result.removed.length > 0) {
+          await YouTubeGroupsStorage.saveGroups(result.groups);
+        }
+        return { removed: result.removed };
+      },
+    );
+  }
+
+  /**
+   * Restaura canales quitados y guarda; no escribe si no restaura ninguno.
+   * @param {string} groupId - Id del grupo.
+   * @param {Array<{channel: Object, index: number}>} removed - Quitados.
+   * @returns {Promise<{restored: number}>}
+   */
+  async function restoreChannelsAndSave(groupId, removed) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const result = restoreChannels(groups, groupId, removed);
+        if (result.restored > 0) {
+          await YouTubeGroupsStorage.saveGroups(result.groups);
+        }
+        return { restored: result.restored };
+      },
+    );
+  }
+
+  /**
+   * Copia o mueve canales y guarda; no escribe si no cambia nada.
+   * @param {string} fromId - Id del grupo de origen.
+   * @param {Array<string>} urls - URL tal como están guardadas en el origen.
+   * @param {string} toId - Id del grupo de destino.
+   * @param {"copy"|"move"} mode - Copiar o mover.
+   * @returns {Promise<{added: number, skipped: number}>}
+   * @throws {Error} Si algún grupo no existe o coinciden (no escribe).
+   */
+  async function transferChannelsAndSave(fromId, urls, toId, mode) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const result = transferChannels(groups, fromId, urls, toId, mode);
+        if (JSON.stringify(result.groups) !== JSON.stringify(groups)) {
+          await YouTubeGroupsStorage.saveGroups(result.groups);
+        }
+        return { added: result.added, skipped: result.skipped };
+      },
+    );
+  }
+
   return {
+    removeChannels,
+    restoreChannels,
+    transferChannels,
+    removeChannelsAndSave,
+    restoreChannelsAndSave,
+    transferChannelsAndSave,
     findGroupLocation,
     moveGroup,
     getSiblingMove,
