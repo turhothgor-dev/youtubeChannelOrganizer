@@ -135,6 +135,70 @@ test("shieldControlEvents impide que un click llegue al padre", () => {
   assert.strictEqual(reached, false);
 });
 
+test("createChannelAvatar con URL válida pinta el img y la inicial debajo", () => {
+  const { icons } = loadIconsDom();
+  const src = "https://yt3.ggpht.com/ytc/AbC=s88-c-k-c0x00ffffff-no-rj";
+
+  const avatar = icons.createChannelAvatar("Álvaro", src, 20);
+
+  assert.strictEqual(avatar.getAttribute("aria-hidden"), "true");
+  assert.strictEqual(avatar.className, "youtube-groups__avatar");
+  assert.strictEqual(avatar.style.width, "20px");
+  assert.strictEqual(avatar.style.height, "20px");
+  assert.ok(avatar.style.getPropertyValue("--yg-avatar-bg"));
+  const initial = avatar.querySelector(".youtube-groups__avatar-initial");
+  assert.strictEqual(initial.textContent, "Á");
+  const img = avatar.querySelector("img.youtube-groups__avatar-img");
+  assert.ok(img);
+  assert.strictEqual(img.getAttribute("alt"), "");
+  assert.strictEqual(img.getAttribute("loading"), "lazy");
+  assert.strictEqual(img.getAttribute("referrerpolicy"), "no-referrer");
+  assert.strictEqual(img.getAttribute("width"), "20");
+  assert.strictEqual(img.getAttribute("height"), "20");
+  assert.strictEqual(img.getAttribute("src"), src);
+  assert.ok(initial.compareDocumentPosition(img) & 4, "el img va después");
+});
+
+test("createChannelAvatar sin URL o con URL no permitida solo pinta la inicial", () => {
+  const { icons } = loadIconsDom();
+
+  for (const src of [null, "https://evil.com/a.png"]) {
+    const avatar = icons.createChannelAvatar("Foo", src, 20);
+    assert.strictEqual(avatar.querySelector("img"), null);
+    assert.strictEqual(
+      avatar.querySelector(".youtube-groups__avatar-initial").textContent,
+      "F",
+    );
+    assert.ok(avatar.style.getPropertyValue("--yg-avatar-bg"));
+  }
+});
+
+test("createChannelAvatar quita el img si falla la carga", () => {
+  const { dom, icons } = loadIconsDom();
+  const avatar = icons.createChannelAvatar(
+    "Foo",
+    "https://yt3.ggpht.com/a=s88-c-k-c0x00ffffff-no-rj",
+    24,
+  );
+
+  avatar.querySelector("img").dispatchEvent(new dom.window.Event("error"));
+
+  assert.strictEqual(avatar.querySelector("img"), null);
+  assert.ok(avatar.querySelector(".youtube-groups__avatar-initial"));
+});
+
+test("createChannelAvatar pinta el nombre como texto", () => {
+  const { icons } = loadIconsDom();
+
+  const avatar = icons.createChannelAvatar("<b>x</b>", null, 20);
+
+  assert.strictEqual(avatar.querySelector("b"), null);
+  assert.strictEqual(
+    avatar.querySelector(".youtube-groups__avatar-initial").textContent,
+    "<",
+  );
+});
+
 // A través de la guía.
 
 test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 27 px", async () => {

@@ -148,7 +148,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; sin permisos ni
   entradas con host fuera de la lista, URL sin normalizar o clave no válida se descartan y suman a `dropped`;
   `avatars` como array → error "avatares no válidos" sin escribir nada; una copia antigua (sin el campo) sigue
   importándose igual.
-- [ ] T4 · `createChannelAvatar` y estilos · Ficheros: `ui/icons-dom.js`, `ui/icons.css`, `tests/ui-icons-dom.test.js`
+- [x] T4 · `createChannelAvatar` y estilos · Ficheros: `ui/icons-dom.js`, `ui/icons.css`, `tests/ui-icons-dom.test.js`
   · Test (jsdom): con URL válida hay un `img` con `alt=""`, `loading="lazy"`, `referrerpolicy="no-referrer"`, ancho y
   alto 20 y la inicial debajo; sin URL o con URL no permitida (`https://evil.com/a.png`) no hay `img` y sí la inicial y
   `--yg-avatar-bg`; disparar `error` en el `img` lo quita y deja la inicial; el contenedor tiene `aria-hidden="true"`
@@ -227,3 +227,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T1 | `feat: clave youtubeAvatars en el almacenamiento` | `KEYS.avatars`, `readAvatarsValue`, `getAvatars`, `saveAvatars` y tests. |
 | 2026-11-17 | T2 | `feat: módulo puro de avatares de canal` | `modules/avatars.js` con normalización, fusión y guardado; cargado en manifest, opciones y helper de tests. |
 | 2026-11-17 | T3 | `feat: avatares en la copia de seguridad` | `buildBackup`, `parseBackup` (`avatars` null si falta) y `importBackup` con `avatars`; tests. |
+| 2026-11-17 | T4 | `feat: createChannelAvatar y estilos de avatar` | `AVATAR_SIZES` y `createChannelAvatar` en `icons-dom.js`, CSS en `icons.css` y tests jsdom. |

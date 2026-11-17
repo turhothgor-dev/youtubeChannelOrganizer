@@ -130,6 +130,50 @@ const YouTubeGroupsIconsDom = (() => {
     return chip;
   }
 
+  /** Lado en píxeles del avatar de canal según el sitio donde se pinta. */
+  const AVATAR_SIZES = { guide: 20, editor: 24 };
+
+  /**
+   * Crea el avatar de un canal: círculo con la inicial y, encima, la imagen si
+   * hay una URL permitida. Si la imagen falla, se quita y queda la inicial.
+   * @param {string} name - Nombre del canal.
+   * @param {string|null} src - URL de imagen ya normalizada, o null.
+   * @param {number} size - Lado en píxeles.
+   * @returns {HTMLElement} El contenedor del avatar.
+   */
+  function createChannelAvatar(name, src, size) {
+    const avatar = document.createElement("span");
+    avatar.className = "youtube-groups__avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.style.width = `${size}px`;
+    avatar.style.height = `${size}px`;
+    avatar.style.setProperty(
+      "--yg-avatar-bg",
+      YouTubeGroupsAvatars.getFallbackColor(name),
+    );
+    const initial = document.createElement("span");
+    initial.className = "youtube-groups__avatar-initial";
+    initial.textContent = YouTubeGroupsAvatars.getInitial(name);
+    avatar.append(initial);
+    if (
+      typeof src === "string" &&
+      YouTubeGroupsAvatars.normalizeAvatarUrl(src) === src
+    ) {
+      const img = document.createElement("img");
+      img.className = "youtube-groups__avatar-img";
+      img.alt = "";
+      img.setAttribute("loading", "lazy");
+      img.setAttribute("decoding", "async");
+      img.setAttribute("referrerpolicy", "no-referrer");
+      img.setAttribute("width", String(size));
+      img.setAttribute("height", String(size));
+      img.addEventListener("error", () => img.remove());
+      img.src = src;
+      avatar.append(img);
+    }
+    return avatar;
+  }
+
   /**
    * Pinta o quita la banda de color en el borde derecho de un elemento.
    * @param {HTMLElement} element - Fila o caja del grupo.
@@ -179,6 +223,8 @@ const YouTubeGroupsIconsDom = (() => {
     setCardButtonContent,
     GROUP_ICON_SIZES,
     createGroupMark,
+    AVATAR_SIZES,
+    createChannelAvatar,
     setGroupBand,
     shieldControlEvents,
   });
