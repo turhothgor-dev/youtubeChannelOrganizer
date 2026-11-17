@@ -217,6 +217,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | Revisión (T7) | (a) El escaneo de la guía de YouTube (`ytd-guide-entry-renderer`) solo se hace al arrancar, al navegar y cuando un lote de mutaciones toca `ytd-guide-renderer` (o se marcan las entradas ya vistas), no en cada lote; (b) `findChannelUrl` de `ui/avatars.js` reutiliza la función equivalente de `ui/cards.js` (expuesta en `ctx.cards`) en lugar de duplicarla; (c) en `ui/cards.js`, `ctx.avatars?.noteCard(...)` se llama después de crear los controles de la tarjeta y protegido con `try/catch` (con `console.error`), para que un fallo del recolector no deje tarjetas sin botones. Con tests de humo que lo cubran. | Sugerencias de la revisión del plan. | Delegada por la persona ("usa lo recomendado y ejecútalo") |
 
 ## Registro
 
@@ -232,3 +233,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T6 | `feat: avatares en el panel Canales del editor` | `currentAvatars` en `options.js` (lectura en `render()` y `onChanged`, que solo repinta el panel si cambia `avatars`), avatar de 24 px en cada fila y margen en CSS. |
 | 2026-11-17 | T7 | `feat: recolector de avatares de canal` | `ui/avatars.js` (`ctx.avatars`), enganches en `cards.js` (`getChannelResultUrl`, `noteCard` con `?.` para que los tests de tarjetas sin avatares sigan valiendo) y `content.js` (`setGroupedChannels`/`scheduleScan` en `renderGroupsPanel` y en el `MutationObserver`), manifest y tests jsdom. |
 | 2026-11-17 | T8 | `docs: cerrar avatares de canal (6-15)` | `ARCHITECTURE.md` (componentes, flujo y ADR), ADR 0016 aceptada, ROADMAP 6-15 ✅ y plan a `hecho`. Pendiente: verificación manual V1 a V6 en Firefox. |
+| 2026-11-17 | Revisión (a–c) | `fix: correcciones de la revisión de avatares de canal` | `scanPage(includeGuide)`, `scheduleScan({ guide })` y `noteMutations` (la guía solo se lee al arrancar, navegar o si una mutación toca `ytd-guide-renderer`); `ctx.cards.getChannelResultUrl` reutilizado en lugar de `findChannelUrl`; `noteCard` tras crear los controles y con `try/catch` en `cards.js`; dos tests de humo nuevos. |

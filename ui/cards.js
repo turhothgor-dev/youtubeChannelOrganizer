@@ -639,21 +639,30 @@ const YouTubeGroupsCards = (() => {
       }
     }
 
+    // Anota el avatar de la tarjeta; un fallo del recolector no debe dejar
+    // tarjetas sin controles. `?.`: los tests de tarjetas no crean avatares.
+    function noteCardAvatar(card, url) {
+      try {
+        ctx.avatars?.noteCard(card, url);
+      } catch (error) {
+        console.error("[YouTube Groups] No se pudo anotar el avatar", error);
+      }
+    }
+
     function processPendingCards() {
       processingScheduled = false;
       for (const card of pendingCards) {
         if (card.matches(CHANNEL_RESULT_SELECTOR)) {
-          // `?.`: los tests de tarjetas crean el componente sin avatares
-          ctx.avatars?.noteCard(card, getChannelResultUrl(card));
           ensureChannelResultControl(card);
+          noteCardAvatar(card, getChannelResultUrl(card));
           continue;
         }
 
         // Primero el ID de vídeo: el filtro de detectCard lo necesita al día
         ctx.watched.applyWatchedToCard(card);
         detectCard(card);
-        ctx.avatars?.noteCard(card, card.dataset.youtubeGroupsChannelUrl);
         ensureChannelControl(card);
+        noteCardAvatar(card, card.dataset.youtubeGroupsChannelUrl);
       }
 
       pendingCards.clear();
@@ -714,6 +723,7 @@ const YouTubeGroupsCards = (() => {
       applyVisibilityToAllCards,
       findVideoId,
       getChannelFromCard,
+      getChannelResultUrl,
       getCurrentVideoChannel,
       refreshChannelNameIndex,
       applyCardVisibility,

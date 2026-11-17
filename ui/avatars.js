@@ -20,16 +20,18 @@ const YouTubeGroupsAvatarsUi = (() => {
   const HEADER_SELECTOR =
     "yt-page-header-renderer, ytd-c4-tabbed-header-renderer";
 
+  const GUIDE_SELECTOR = "ytd-guide-renderer";
   const MAX_SEEN = 500;
   const FLUSH_DELAY_MS = 2000;
 
   /**
    * Crea el recolector.
    * @param {Object} ctx - Contexto compartido de `content.js`; usa
-   *   `ctx.state.avatars` y `ctx.cards.getChannelFromCard`.
+   *   `ctx.state.avatars`, `ctx.cards.getChannelFromCard` y
+   *   `ctx.cards.getChannelResultUrl`.
    * @returns {Readonly<Object>} API: `AVATAR_IMG_SELECTOR`, `findAvatarSrc`,
    *   `noteAvatar`, `noteCard`, `setGroupedChannels`, `scanPage`,
-   *   `scheduleScan` y `flushPending`.
+   *   `scheduleScan`, `noteMutations` y `flushPending`.
    */
   function create(ctx) {
     const { normalizeAvatarUrl, getGroupedChannelKeys, saveObservedAvatars } =
@@ -45,6 +47,7 @@ const YouTubeGroupsAvatarsUi = (() => {
     let groupedKeys = new Set();
     let flushTimer = null;
     let scanScheduled = false;
+    let scanGuide = false;
 
     /**
      * URL del avatar de un elemento: la normalizada si las imágenes que casan
@@ -133,27 +136,22 @@ const YouTubeGroupsAvatarsUi = (() => {
       }
     }
 
-    /** Primer enlace de canal de un elemento, normalizado. */
-    function findChannelUrl(root) {
-      for (const link of root.querySelectorAll("a[href]")) {
-        const url = normalizeChannelUrl(link.href);
-        if (url) {
-          return url;
-        }
-      }
-      return null;
-    }
-
-    /** Lee de la página los avatares visibles que no son de tarjeta. */
-    function scanPage() {
+    /**
+     * Lee de la página los avatares visibles que no son de tarjeta.
+     * @param {boolean} [includeGuide=true] - Si se leen también las
+     *   suscripciones de la guía.
+     */
+    function scanPage(includeGuide = true) {
       const pageType = YouTubeGroupsPages.getPageType(window.location.pathname);
 
-      for (const entry of document.querySelectorAll(
-        "ytd-guide-entry-renderer",
-      )) {
-        const url = findChannelUrl(entry);
-        if (url) {
-          noteAvatar(url, findAvatarSrc(entry));
+      if (includeGuide) {
+        for (const entry of document.querySelectorAll(
+          "ytd-guide-entry-renderer",
+        )) {
+          const url = ctx.cards.getChannelResultUrl(entry);
+          if (url) {
+            noteAvatar(url, findAvatarSrc(entry));
+          }
         }
       }
 
@@ -180,16 +178,40 @@ const YouTubeGroupsAvatarsUi = (() => {
       }
     }
 
-    /** Programa como mucho un `scanPage` por frame. */
-    function scheduleScan() {
+    /**
+     * Programa como mucho un `scanPage` por frame.
+     * @param {{guide?: boolean}} [options] - `guide: true` incluye las
+     *   suscripciones de la guía (arranque, navegación y cambios en la guía).
+     */
+    function scheduleScan({ guide = false } = {}) {
+      scanGuide = scanGuide || guide;
       if (scanScheduled) {
         return;
       }
       scanScheduled = true;
       requestAnimationFrame(() => {
+        const includeGuide = scanGuide;
         scanScheduled = false;
-        scanPage();
+        scanGuide = false;
+        scanPage(includeGuide);
       });
+    }
+
+    /**
+     * Programa un escaneo tras un lote de mutaciones; la guía solo se lee si
+     * alguna toca `ytd-guide-renderer`.
+     * @param {MutationRecord[]} mutations - Mutaciones observadas.
+     */
+    function noteMutations(mutations) {
+      const touchesGuide = (node) =>
+        node instanceof Element &&
+        (node.matches(GUIDE_SELECTOR) || node.closest(GUIDE_SELECTOR) !== null);
+      const guide = mutations.some(
+        (mutation) =>
+          touchesGuide(mutation.target) ||
+          [...mutation.addedNodes].some(touchesGuide),
+      );
+      scheduleScan({ guide });
     }
 
     /**
@@ -229,6 +251,7 @@ const YouTubeGroupsAvatarsUi = (() => {
       setGroupedChannels,
       scanPage,
       scheduleScan,
+      noteMutations,
       flushPending,
     });
   }

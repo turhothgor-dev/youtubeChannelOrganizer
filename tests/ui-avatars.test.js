@@ -159,11 +159,60 @@ test("una entrada de suscripción de la guía se captura con scanPage", async ()
     </ytd-guide-entry-renderer>`,
   });
 
-  ctx.avatars.scheduleScan();
+  ctx.avatars.scheduleScan({ guide: true });
   await dom.flush();
   await ctx.avatars.flushPending();
 
   assert.strictEqual(dom.store.youtubeAvatars.avatars[KEY], IMG_A + SUFFIX);
+});
+
+test("la guía solo se escanea al pedirlo o si una mutación la toca", async () => {
+  const { dom, ctx } = setup({
+    html: `<ytd-guide-renderer><ytd-guide-entry-renderer id="e">
+      <a href="/@canal"><yt-img-shadow><img src="${IMG_A}=s48-c-k"></yt-img-shadow></a>
+    </ytd-guide-entry-renderer></ytd-guide-renderer><div id="other"></div>`,
+  });
+  const document = dom.window.document;
+
+  // Mutación fuera de la guía: no se lee
+  ctx.avatars.noteMutations([
+    { target: document.getElementById("other"), addedNodes: [] },
+  ]);
+  await dom.flush();
+  await ctx.avatars.flushPending();
+  assert.strictEqual(dom.calls.set, 0);
+
+  // Mutación dentro de la guía: se lee
+  ctx.avatars.noteMutations([
+    { target: document.getElementById("e"), addedNodes: [] },
+  ]);
+  await dom.flush();
+  await ctx.avatars.flushPending();
+  assert.strictEqual(dom.store.youtubeAvatars.avatars[KEY], IMG_A + SUFFIX);
+});
+
+test("un fallo del recolector no deja la tarjeta sin controles", async () => {
+  const { dom, ctx } = setup({ html: card("canal", [IMG_A]) });
+  const original = ctx.avatars.noteCard;
+  const errors = [];
+  const consoleError = dom.window.console.error;
+  dom.window.console.error = (...args) => errors.push(args);
+  ctx.avatars = {
+    ...ctx.avatars,
+    noteCard() {
+      throw new Error("boom");
+    },
+  };
+  assert.ok(original);
+
+  ctx.cards.scanDocument();
+  await dom.flush();
+  dom.window.console.error = consoleError;
+
+  assert.ok(
+    dom.window.document.querySelector(".youtube-groups__subscription-control"),
+  );
+  assert.strictEqual(errors.length, 1);
 });
 
 test("en una página de canal se guarda el avatar de la cabecera, no el banner", async () => {

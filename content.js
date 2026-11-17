@@ -137,7 +137,7 @@
     const [groups, avatars] = await Promise.all([getGroups(), getAvatars()]);
     ctx.state.avatars = avatars;
     ctx.avatars.setGroupedChannels(groups);
-    ctx.avatars.scheduleScan();
+    ctx.avatars.scheduleScan({ guide: true });
     ctx.cards.refreshChannelNameIndex(groups);
 
     ctx.panel.renderCurrentChannelSection(groups);
@@ -278,7 +278,7 @@
       }
     }
     ctx.guide.checkPlacement();
-    ctx.avatars.scheduleScan();
+    ctx.avatars.noteMutations(mutations);
   });
 
   observer.observe(document.documentElement, {
