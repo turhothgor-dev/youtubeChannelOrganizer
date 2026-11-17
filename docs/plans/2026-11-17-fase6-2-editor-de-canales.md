@@ -1,6 +1,6 @@
 # Plan: Fase 6 (2/2 del editor) · Editor de grupos: canales del grupo y búsqueda
 
-**Estado:** aprobado (2026-11-17)
+**Estado:** hecho
 
 Issue: `ROADMAP.md`, Fase 6: "Editor de canales y búsqueda". Hoja de ruta:
 `docs/plans/2026-11-17-fase6-hoja-de-ruta.md`. ADR: [0014](../adr/0014-pagina-de-opciones-editor-de-grupos.md) (sin
@@ -90,7 +90,7 @@ Reglas comunes: sin `innerHTML`; JSDoc; sin dependencias nuevas; `make lint` (0 
   test` y a mano V3.
 - [x] T6 · Búsqueda en árbol y canales · Ficheros: `options/options.js`, `options/options.css`,
   `options/options.html` · Test: `make lint`, `make test` y a mano V4.
-- [ ] T7 · Cerrar: `docs/ARCHITECTURE.md` (fila de `group-editor.js` con las funciones nuevas y flujo "Editor de
+- [x] T7 · Cerrar: `docs/ARCHITECTURE.md` (fila de `group-editor.js` con las funciones nuevas y flujo "Editor de
   grupos" con canales y búsqueda); en `ROADMAP.md`, "⬜" → "✅" en "Editor de canales y búsqueda"; este plan a
   `hecho` · Ficheros: `docs/ARCHITECTURE.md`, `ROADMAP.md`, este plan · Test: `make lint`, `make test` y V5.
 
@@ -144,3 +144,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T4 | `feat: quitar canales del grupo con aviso y deshacer en el editor` | Botón "Quitar (N)" con aviso de 10 s y "Deshacer"; sin cambios sobre el plan. |
 | 2026-11-17 | T5 | `feat: copiar y mover canales a otro grupo desde el panel del editor` | "Copiar a…" y "Mover a…" con selector de destino sin el grupo actual y aviso del resultado; sin cambios sobre el plan. |
 | 2026-11-17 | T6 | `feat: búsqueda en el árbol y en los canales del editor de grupos` | Campo de búsqueda, árbol filtrado y marcado, panel "N de M", sin Subir/Bajar/Mover/arrastre con búsqueda; sin cambios sobre el plan. |
+| 2026-11-17 | T7 | `docs: cerrar la fase 6-2 del editor de canales y búsqueda` | ARCHITECTURE y ROADMAP actualizados, plan a `hecho`; verificación manual V1 a V5 en Firefox pendiente. |

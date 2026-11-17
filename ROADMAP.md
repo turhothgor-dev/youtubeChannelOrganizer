@@ -34,7 +34,7 @@
 Prioridad entre paréntesis; plan en `docs/plans/`.
 - ✅ Editor de grupos en una página propia (alta, 6-1): renombrar, icono y color, crear, mover y reordenar y borrar
   con "Deshacer" sin depender de la guía de YouTube
-- ⬜ Editor de canales y búsqueda (alta, 6-2): quitar, copiar o mover canales en bloque y ver en qué grupos está un
+- ✅ Editor de canales y búsqueda (alta, 6-2): quitar, copiar o mover canales en bloque y ver en qué grupos está un
   canal
 - ⬜ Avatares de canal (alta, 6-15): cada canal de un grupo o subgrupo muestra su imagen de canal en la guía y en el
   editor, para reconocerlo de un vistazo

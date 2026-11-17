@@ -19,7 +19,7 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 | `manifest.json` | WebExtensions MV3 | Permiso `storage`, content scripts en `*://www.youtube.com/*`, `options_ui` (página de opciones en pestaña) y `background` (`background.js`) |
 | `background.js` | JS clásico, script de fondo mínimo | Escucha `youtube-groups:open-editor` y abre la página de opciones con `runtime.openOptionsPage()` (ADR 0014) |
 | `options/` | HTML + JS clásico + CSS | Editor de grupos (`options.html`, `options.js`, `options.css`): árbol con renombrar, icono y color, crear, mover, arrastrar y eliminar con "Deshacer"; reutiliza `modules/` y `ui/icons-dom.js`, `ui/icon-picker.js` (ADR 0014) |
-| `modules/group-editor.js` | JS clásico (`YouTubeGroupsEditor`), sin DOM | Lógica pura del editor: `findGroupLocation`, `moveGroup`, `getSiblingMove`, `getMoveTargets`, `getDropPosition`, `summarizeSubtree`, `removeGroupWithSnapshot`, `restoreGroup` y sus versiones con escritura (`moveGroupAndSave`, `deleteGroupAndSnapshot`, `restoreGroupAndSave`, en `withLock`). Se carga tras `groups.js`; no entra en los content scripts |
+| `modules/group-editor.js` | JS clásico (`YouTubeGroupsEditor`), sin DOM | Lógica pura del editor: `findGroupLocation`, `moveGroup`, `getSiblingMove`, `getMoveTargets`, `getDropPosition`, `summarizeSubtree`, `removeGroupWithSnapshot`, `restoreGroup`, `removeChannels`, `restoreChannels`, `transferChannels` (copiar o mover canales), `normalizeSearchText`, `searchGroups` y sus versiones con escritura (`moveGroupAndSave`, `deleteGroupAndSnapshot`, `restoreGroupAndSave`, `removeChannelsAndSave`, `restoreChannelsAndSave`, `transferChannelsAndSave`, en `withLock`). Se carga tras `groups.js`; no entra en los content scripts |
 | `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005), los lectores puros `readGroupsValue`, `readWatchedValue`, `readSettingsValue` y `readPlaylistsValue`, y `getChangedKeys(changes, areaName)` para `storage.onChanged` (ADR 0006) |
 | `modules/fxemoji-data.js` | JS clásico (`YouTubeGroupsFxemoji`), sin DOM | Datos de los 12 iconos de grupo de Mozilla fxemoji (CC BY 4.0, ADR 0013): `ICONS` congelado e indexado por id, con `{ codepoint, file, viewBox, shapes }`. Transcritos de `third_party/fxemoji/*.svg` (fuera del paquete); `tests/fxemoji.test.js` comprueba que coinciden. Se carga antes de `icons.js`; la atribución está en `THIRD_PARTY_NOTICES.md`, incluido en el paquete |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos (`ICON_SET` con `{ id, label, codepoint }`), `getIconGraphic(id)` (`{ viewBox, shapes }` de fxemoji o `null`) y `getUiIconPath(id)` con los iconos de interfaz de los botones de tarjeta (`eye`, `check`, `playlist-add`), separados de `ICON_SET` |
@@ -148,15 +148,18 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   filtrar hasta corregirlo. El panel aparece minimizado por defecto y se puede desplegar con el botón de su cabecera; el
   estado se guarda en el ajuste `panelCollapsed` y se aplica al leer los ajustes y en `storage.onChanged`. Editar,
   mover y borrar grupos se hace en la página de opciones (flujo "Editor de grupos"); `removeChannelFromGroup` en
-  `modules/groups.js` sigue sin enlazar hasta el plan 6-2.
+  `modules/groups.js` sigue sin enlazar; quitar canales en bloque se hace desde el panel "Canales" del editor.
 - **Editor de grupos** (ADR 0014, `options/`): el botón "✎" ("Editar grupos") de la cabecera del panel y de la guía
   envía `youtube-groups:open-editor` a `background.js`, que llama a `runtime.openOptionsPage()`; también se abre
   desde `about:addons`. `options/options.js` pinta el árbol (listas anidadas con `role="tree"`, sin `innerHTML`) y
   permite renombrar en línea, cambiar icono y color (`YouTubeGroupsIconPicker`), crear grupos y subgrupos, subir,
   bajar, "Mover a…", arrastrar y soltar y eliminar con aviso y "Deshacer" durante 10 s. La lógica pura está en
   `modules/group-editor.js` (`moveGroup`, `getDropPosition`, `summarizeSubtree`, `removeGroupWithSnapshot`,
-  `restoreGroup`...) y las escrituras van en `withLock` (ADR 0005). La página escucha `storage.onChanged` (ADR 0006)
-  y las pestañas de YouTube repintan con el mismo evento.
+  `restoreGroup`...) y las escrituras van en `withLock` (ADR 0005). Al seleccionar un grupo, el panel "Canales" lista
+  los suyos con selección múltiple para quitar (con "Deshacer" 10 s), copiar o mover a otro grupo
+  (`removeChannelsAndSave`, `restoreChannelsAndSave`, `transferChannelsAndSave`); el campo de búsqueda
+  (`searchGroups`, sin mayúsculas ni acentos) filtra árbol y canales y oculta subir, bajar, mover y arrastre mientras
+  está activo. La página escucha `storage.onChanged` (ADR 0006) y las pestañas de YouTube repintan con el mismo evento.
 - **Limpieza**: la sección "Limpieza" del panel (`<details>`) analiza el árbol con `YouTubeGroups.analyzeGroups`:
   canales repetidos en un mismo grupo (misma `getChannelKey`, se conserva el primero), URL no válidas (las
   recuperables, con `normalizeChannelUrl` no nulo, se corrigen y conservan sus campos; solo se quitan las
