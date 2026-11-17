@@ -25,6 +25,51 @@ html[dark] body {
   margin: 0 0 0.5rem;
 }
 
+#options-tree,
+.options__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.options__children {
+  padding-left: 1.5rem;
+}
+
+.options__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.options__row:hover {
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.options__toggle {
+  width: 1.5rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.options__toggle:disabled {
+  visibility: hidden;
+}
+
+.options__name {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.options__count {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
 #options-error {
   color: #c00;
 }
