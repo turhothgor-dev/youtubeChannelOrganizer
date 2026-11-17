@@ -13,7 +13,8 @@ const YouTubeGroupsCards = (() => {
    * @returns {Readonly<Object>} API: `VIDEO_CARD_SELECTOR`, `WATCHED_CLASS`,
    *   `VIDEO_ID_ATTRIBUTE`, `applyVisibilityToAllCards`, `findVideoId`,
    *   `getChannelFromCard`, `getCurrentVideoChannel`,
-   *   `refreshChannelNameIndex`, `applyCardVisibility`, `showAllVideoCards`,
+   *   `refreshChannelNameIndex`, `refreshChannelColorIndex`,
+   *   `applyCardVisibility`, `showAllVideoCards`,
    *   `filterAllDetectedCards`, `scheduleCardsIn`, `scheduleContainingCard`,
    *   `scanDocument`, `nodeBelongsToCurrentVideoOwner` y `resetDetectedCards`.
    */
@@ -39,6 +40,12 @@ const YouTubeGroupsCards = (() => {
      * @type {Map<string, string>}
      */
     let channelNameIndex = new Map();
+
+    /**
+     * Índice clave de canal → colores de sus grupos (línea de color).
+     * @type {Map<string, string[]>}
+     */
+    let channelColorIndex = new Map();
 
     const WATCHED_CLASS = "youtube-groups--watched";
     const VIDEO_ID_ATTRIBUTE = "data-youtube-groups-video-id";
@@ -425,6 +432,70 @@ const YouTubeGroupsCards = (() => {
       }
     }
 
+    const STRIPE_CLASS = "youtube-groups--group-stripe";
+    const STRIPE_PROPERTY = "--yg-group-stripe";
+
+    /**
+     * Pinta (o quita) la línea de color del grupo en una tarjeta de
+     * suscripciones. Solo escribe en el DOM si el valor cambia.
+     * @param {Element} card - Tarjeta de vídeo.
+     */
+    function applyGroupStripe(card) {
+      let value = "";
+      const url = card.dataset.youtubeGroupsChannelUrl;
+      if (
+        url &&
+        YouTubeGroupsPages.getPageType(window.location.pathname) ===
+          "subscriptions"
+      ) {
+        value = YouTubeGroups.getStripeBackground(
+          channelColorIndex.get(YouTubeGroups.getChannelKey(url)) ?? [],
+        );
+      }
+
+      if (value) {
+        if (card.style.getPropertyValue(STRIPE_PROPERTY) !== value) {
+          card.style.setProperty(STRIPE_PROPERTY, value);
+        }
+        if (!card.classList.contains(STRIPE_CLASS)) {
+          card.classList.add(STRIPE_CLASS);
+        }
+      } else {
+        if (card.style.getPropertyValue(STRIPE_PROPERTY) !== "") {
+          card.style.removeProperty(STRIPE_PROPERTY);
+        }
+        if (card.classList.contains(STRIPE_CLASS)) {
+          card.classList.remove(STRIPE_CLASS);
+        }
+      }
+    }
+
+    /**
+     * Recalcula el índice de colores por canal; si cambia, reaplica la línea
+     * a todas las tarjetas sin reprogramarlas.
+     * @param {Array<Object>} groups - Árbol de grupos.
+     */
+    function refreshChannelColorIndex(groups) {
+      const next = YouTubeGroups.buildChannelColorIndex(groups);
+      const changed =
+        next.size !== channelColorIndex.size ||
+        [...next].some(([key, colors]) => {
+          const previous = channelColorIndex.get(key);
+          return (
+            !previous ||
+            previous.length !== colors.length ||
+            previous.some((color, i) => color !== colors[i])
+          );
+        });
+      channelColorIndex = next;
+      if (!changed) {
+        return;
+      }
+      for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
+        applyGroupStripe(card);
+      }
+    }
+
     function detectCard(card) {
       if (!card.isConnected) {
         return;
@@ -661,6 +732,7 @@ const YouTubeGroupsCards = (() => {
         // Primero el ID de vídeo: el filtro de detectCard lo necesita al día
         ctx.watched.applyWatchedToCard(card);
         detectCard(card);
+        applyGroupStripe(card);
         ensureChannelControl(card);
         noteCardAvatar(card, card.dataset.youtubeGroupsChannelUrl);
       }
@@ -726,6 +798,7 @@ const YouTubeGroupsCards = (() => {
       getChannelResultUrl,
       getCurrentVideoChannel,
       refreshChannelNameIndex,
+      refreshChannelColorIndex,
       applyCardVisibility,
       showAllVideoCards,
       filterAllDetectedCards,

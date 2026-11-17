@@ -50,10 +50,13 @@ const CHANNEL_URL = "https://www.youtube.com/@canal";
 /**
  * Grupo con el formato guardado (ver createGroup de modules/groups.js).
  * @param {string} id - Id (y nombre por defecto) del grupo.
- * @param {Object} [options] - name, channels, subgroups.
+ * @param {Object} [options] - name, channels, subgroups, color.
  * @returns {Object} Grupo.
  */
-function makeGroup(id, { name = id, channels = [], subgroups = [] } = {}) {
+function makeGroup(
+  id,
+  { name = id, channels = [], subgroups = [], color = "" } = {},
+) {
   return {
     id,
     name,
@@ -61,7 +64,7 @@ function makeGroup(id, { name = id, channels = [], subgroups = [] } = {}) {
     channels,
     subgroups,
     icon: "",
-    color: "",
+    color,
   };
 }
 

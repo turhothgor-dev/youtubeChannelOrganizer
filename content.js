@@ -134,6 +134,7 @@
     ctx.avatars.setGroupedChannels(groups);
     ctx.avatars.scheduleScan({ guide: true });
     ctx.cards.refreshChannelNameIndex(groups);
+    ctx.cards.refreshChannelColorIndex(groups);
 
     ctx.guide.renderGuideSection(groups);
   }

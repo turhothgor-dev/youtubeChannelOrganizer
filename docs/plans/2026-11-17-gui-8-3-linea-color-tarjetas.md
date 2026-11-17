@@ -55,7 +55,7 @@ Decisión:
   aporta; seis grupos con colores distintos → los 4 primeros; `/@Canal` y `/@canal` → misma clave; la entrada no se
   muta; `getStripeBackground([])` → `""`, uno, dos y tres colores con las cadenas exactas
   (`#a 0% 33.33%, #b 33.33% 66.67%, #c 66.67% 100%`).
-- [ ] T2 · Línea en las tarjetas de suscripciones · Ficheros: `ui/cards.js`, `ui/cards.css`, `content.js`,
+- [x] T2 · Línea en las tarjetas de suscripciones · Ficheros: `ui/cards.js`, `ui/cards.css`, `content.js`,
   `tests/ui-cards.test.js`, `tests/helpers/youtube-fixtures.js` (opción `color` en `makeGroup`) · Test (jsdom): en
   `/feed/subscriptions`, una tarjeta de un canal de A (`#2196F3`) tiene la clase `youtube-groups--group-stripe` y
   `--yg-group-stripe` con ese color; el canal en A y B (colores distintos) da dos segmentos; un canal en un grupo sin
@@ -106,3 +106,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-17 | T1 | feat: índice de colores por canal y fondo de la línea en groups.js | `buildChannelColorIndex` y `getStripeBackground` con tests. |
+| 2026-11-17 | T2 | feat: línea de color del grupo en las tarjetas de suscripciones | `applyGroupStripe` y `refreshChannelColorIndex` en cards.js, CSS, llamada en content.js y tests jsdom. |

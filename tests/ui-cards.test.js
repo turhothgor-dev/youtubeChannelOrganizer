@@ -155,6 +155,122 @@ test("seleccionar otro grupo oculta la tarjeta y limpiar la selección la muestr
   assert.ok(!card.classList.contains("youtube-groups--hidden"));
 });
 
+const STRIPE_CLASS = "youtube-groups--group-stripe";
+const STRIPE_PROPERTY = "--yg-group-stripe";
+const CHANNEL = { name: "Canal", url: CHANNEL_URL };
+
+test("la tarjeta de un canal de un grupo con color recibe la línea de color", async () => {
+  const dom = loadDom({
+    html: SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#2196F3" }),
+    ]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+
+  assert.ok(card.classList.contains(STRIPE_CLASS));
+  assert.strictEqual(
+    card.style.getPropertyValue(STRIPE_PROPERTY),
+    "linear-gradient(to right, #2196f3 0% 100%)",
+  );
+});
+
+test("un canal en dos grupos con colores distintos da dos segmentos", async () => {
+  const dom = loadDom({
+    html: SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#2196f3" }),
+      makeGroup("B", { channels: [CHANNEL], color: "#f44336" }),
+    ]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+
+  assert.strictEqual(
+    card.style.getPropertyValue(STRIPE_PROPERTY),
+    "linear-gradient(to right, #2196f3 0% 50%, #f44336 50% 100%)",
+  );
+});
+
+test("un canal en un grupo sin color no recibe la línea", async () => {
+  const dom = loadDom({
+    html: SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([makeGroup("A", { channels: [CHANNEL] })]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+
+  assert.ok(!card.classList.contains(STRIPE_CLASS));
+  assert.strictEqual(card.style.getPropertyValue(STRIPE_PROPERTY), "");
+});
+
+test("fuera de suscripciones la tarjeta no recibe la línea", async () => {
+  const dom = loadDom({
+    url: "https://www.youtube.com/",
+    html: SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#2196f3" }),
+    ]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+
+  assert.ok(!card.classList.contains(STRIPE_CLASS));
+  assert.strictEqual(card.style.getPropertyValue(STRIPE_PROPERTY), "");
+});
+
+test("reprocesar una tarjeta con línea no produce mutaciones de atributos", async () => {
+  const dom = loadDom({
+    html: SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#2196f3" }),
+    ]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+  assert.ok(card.classList.contains(STRIPE_CLASS));
+
+  card.appendChild(dom.document.createElement("span"));
+  const observer = new dom.window.MutationObserver(() => {});
+  observer.observe(card, { attributes: true });
+  observer.takeRecords();
+  await dom.flush();
+
+  assert.strictEqual(observer.takeRecords().length, 0);
+  observer.disconnect();
+});
+
+test("cambiar el color del grupo actualiza la línea y los botones y el filtro siguen", async () => {
+  const dom = loadDom({
+    html: GUIDE_HTML + SUBSCRIPTION_CARD_HTML,
+    store: groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#2196f3" }),
+      makeGroup("B"),
+    ]),
+  });
+  await dom.flush();
+  const card = dom.document.querySelector("ytd-rich-item-renderer");
+  assert.ok(card.querySelector(CONTROL));
+
+  await dom.browser.storage.local.set(
+    groupsStore([
+      makeGroup("A", { channels: [CHANNEL], color: "#4caf50" }),
+      makeGroup("B"),
+    ]),
+  );
+  await dom.flush();
+  assert.strictEqual(
+    card.style.getPropertyValue(STRIPE_PROPERTY),
+    "linear-gradient(to right, #4caf50 0% 100%)",
+  );
+  assert.ok(card.querySelector(CONTROL));
+
+  clickGuideItem(dom.document, "B");
+  await dom.flush();
+  assert.ok(card.classList.contains("youtube-groups--hidden"));
+});
+
 test("un resultado de canal en búsqueda recibe solo Añadir a grupo", async () => {
   const dom = loadDom({
     url: "https://www.youtube.com/results?search_query=canal",
