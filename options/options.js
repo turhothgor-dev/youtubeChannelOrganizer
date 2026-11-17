@@ -600,7 +600,6 @@
           true,
         );
       }
-      renderChannels();
     } catch (error) {
       console.error(error);
       showError(error.message || "No se pudo quitar.");
@@ -667,7 +666,6 @@
             ? "; 1 ya estaba"
             : `; ${skipped} ya estaban`;
       showNotice(`${done} a «${target.name}»${extra}`);
-      renderChannels();
     } catch (error) {
       console.error(error);
       showError(error.message || "No se pudo copiar o mover.");
@@ -705,12 +703,15 @@
       select.value = "";
     }
     const confirm = actionButton(mode === "copy" ? "Copiar" : "Mover", () =>
-      runTransfer(group, mode, select.value),
+      runBusy(() => runTransfer(group, mode, select.value)),
     );
     confirm.classList.add("options__transfer-confirm");
     const updateConfirm = () => {
-      confirm.disabled = select.value === "" || selectedUrls.size === 0;
+      confirm.disabled = busy || select.value === "" || selectedUrls.size === 0;
     };
+    select.dataset.focus = "transfer-select";
+    select.disabled = busy;
+    confirm.dataset.focus = "transfer-confirm";
     select.addEventListener("change", () => {
       transfer.value = select.value;
       updateConfirm();
@@ -726,22 +727,88 @@
       transfer = null;
       renderChannels();
     });
+    cancel.dataset.focus = "transfer-cancel";
+    cancel.disabled = busy;
     updateConfirm();
     wrapper.append(select, confirm, cancel);
     return wrapper;
   }
 
   /**
+   * Clave del control del panel que tiene el foco (`data-focus` o, en las
+   * casillas de canal, `url:<url>`), o `null` si el foco no está en el panel.
+   * @returns {string|null} Clave del control enfocado.
+   */
+  function getChannelsFocusKey() {
+    const active = document.activeElement;
+    if (!active || !channelsEl.contains(active) || !active.dataset) {
+      return null;
+    }
+    if (active.dataset.url) {
+      return `url:${active.dataset.url}`;
+    }
+    return active.dataset.focus || null;
+  }
+
+  /**
+   * Devuelve el foco al control del panel que lo tenía, si sigue existiendo.
+   * @param {string|null} key - Clave de `getChannelsFocusKey`.
+   * @returns {void}
+   */
+  function restoreChannelsFocus(key) {
+    if (!key) {
+      return;
+    }
+    for (const node of channelsEl.querySelectorAll(
+      "[data-url], [data-focus]",
+    )) {
+      const nodeKey = node.dataset.url
+        ? `url:${node.dataset.url}`
+        : node.dataset.focus;
+      if (nodeKey === key && !node.disabled) {
+        node.focus();
+        return;
+      }
+    }
+  }
+
+  /** Si hay una escritura en curso desde el panel (desactiva sus acciones). */
+  let busy = false;
+
+  /**
+   * Ejecuta una escritura desde el panel con sus acciones desactivadas y, al
+   * terminar, repinta con los grupos ya guardados y devuelve el foco.
+   * @param {function(): Promise<void>} action - Escritura (gestiona sus errores).
+   * @returns {Promise<void>}
+   */
+  async function runBusy(action) {
+    if (busy) {
+      return;
+    }
+    const focusKey = getChannelsFocusKey();
+    busy = true;
+    renderChannels();
+    try {
+      await action();
+    } finally {
+      busy = false;
+      try {
+        renderTree(await YouTubeGroupsStorage.getGroups());
+      } catch (error) {
+        console.error(error);
+        renderChannels();
+      }
+      restoreChannelsFocus(focusKey);
+    }
+  }
+
+  /**
    * Repinta el panel de canales del grupo seleccionado, conservando las
-   * casillas marcadas que sigan existiendo y el foco en una casilla.
+   * casillas marcadas que sigan existiendo y el foco en sus controles.
    * @returns {void}
    */
   function renderChannels() {
-    const active = document.activeElement;
-    const focusedUrl =
-      active && channelsEl.contains(active) && active.dataset
-        ? active.dataset.url || null
-        : null;
+    const focusKey = getChannelsFocusKey();
     const group = selectedId ? findGroup(currentGroups, selectedId) : null;
     channelsEl.replaceChildren();
     if (!group) {
@@ -804,12 +871,16 @@
     const allLabel = el("label", "options__select-all");
     const allBox = document.createElement("input");
     allBox.type = "checkbox";
+    allBox.dataset.focus = "select-all";
     allLabel.append(allBox, " Seleccionar todo");
     const removeButton = actionButton("Quitar", () =>
-      removeSelectedChannels(group),
+      runBusy(() => removeSelectedChannels(group)),
     );
+    removeButton.dataset.focus = "remove";
     const copyButton = actionButton("Copiar a…", () => startTransfer("copy"));
+    copyButton.dataset.focus = "copy";
     const moveButton = actionButton("Mover a…", () => startTransfer("move"));
+    moveButton.dataset.focus = "move";
     bar.append(allLabel, removeButton, copyButton, moveButton);
     if (transfer) {
       bar.append(buildTransferControl(group));
@@ -824,12 +895,15 @@
         selectedUrls.size > 0 && selectedUrls.size < channels.length;
       removeButton.textContent = `Quitar (${selectedUrls.size})`;
       removeButton.setAttribute("aria-label", removeButton.textContent);
-      removeButton.disabled = selectedUrls.size === 0;
-      copyButton.disabled = selectedUrls.size === 0;
-      moveButton.disabled = selectedUrls.size === 0;
+      removeButton.disabled = busy || selectedUrls.size === 0;
+      copyButton.disabled = busy || selectedUrls.size === 0;
+      moveButton.disabled = busy || selectedUrls.size === 0;
       const confirmButton = bar.querySelector(".options__transfer-confirm");
       if (confirmButton) {
-        confirmButton.disabled = selectedUrls.size === 0;
+        confirmButton.disabled =
+          busy ||
+          selectedUrls.size === 0 ||
+          !bar.querySelector(".options__transfer-select").value;
       }
     };
     for (const channel of channels) {
@@ -875,12 +949,7 @@
     });
     updateAll();
     channelsEl.append(list);
-    if (focusedUrl) {
-      const box = boxes.find((item) => item.dataset.url === focusedUrl);
-      if (box) {
-        box.focus();
-      }
-    }
+    restoreChannelsFocus(focusKey);
   }
 
   /** Id del grupo que se arrastra, o `null`. */
@@ -1040,7 +1109,13 @@
 
     const toggle = el("button", "options__toggle");
     toggle.type = "button";
-    if (children.length > 0) {
+    if (searching) {
+      // Con búsqueda el árbol se muestra desplegado: no hay nada que plegar.
+      // Se deja el hueco vacío (como en los grupos sin hijos) para no desalinear.
+      toggle.disabled = true;
+      toggle.tabIndex = -1;
+      toggle.setAttribute("aria-hidden", "true");
+    } else if (children.length > 0) {
       toggle.textContent = isCollapsed ? "▸" : "▾";
       toggle.setAttribute("aria-label", isCollapsed ? "Desplegar" : "Plegar");
       toggle.addEventListener("click", () => {

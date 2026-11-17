@@ -443,6 +443,30 @@ test("restoreChannels no duplica uno ya vuelto a añadir y no falla sin el grupo
   assert.deepStrictEqual(plain(gone.groups), plain(sampleTree()));
 });
 
+test("restoreChannels no muta la entrada", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const out = YouTubeGroupsEditor.removeChannels(treeWithFiveChannels(), "A", [
+    chUrl("c2"),
+    chUrl("c4"),
+  ]);
+  const input = structuredClone(out.groups);
+  const removed = structuredClone(out.removed);
+  const back = YouTubeGroupsEditor.restoreChannels(input, "A", removed);
+  assert.strictEqual(back.restored, 2);
+  assert.deepStrictEqual(plain(input), plain(out.groups));
+  assert.deepStrictEqual(plain(removed), plain(out.removed));
+});
+
+test("removeChannelsAndSave con un grupo inexistente lanza sin escribir", async () => {
+  const { YouTubeGroupsEditor, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: treeWithFiveChannels() },
+  });
+  await assert.rejects(() =>
+    YouTubeGroupsEditor.removeChannelsAndSave("X", [chUrl("c1")]),
+  );
+  assert.strictEqual(calls.set, 0);
+});
+
 test("transferChannels copia sin repetir y mover quita también los repetidos", () => {
   const { YouTubeGroupsEditor } = loadModules();
   const tree = treeWithFiveChannels();

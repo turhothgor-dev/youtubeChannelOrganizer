@@ -131,6 +131,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-17 | Revisión (T3–T6, T1) | Correcciones de la revisión: (a) el botón de plegar del árbol se oculta mientras hay búsqueda; (b) `renderChannels` conserva el foco del selector de destino, "Cancelar", "Seleccionar todo" y los botones de la barra al repintar; (c) "Quitar", "Copiar"/"Mover" y su confirmación se desactivan mientras dura la escritura y el panel se repinta con los grupos ya guardados; (d) tests de que `restoreChannels` no muta la entrada y de que `removeChannelsAndSave` con un grupo inexistente lanza sin escribir. | Hallazgos de la revisión del plan. | Delegada por la persona ("usa lo recomendado y ejecútalo") |
 
 ## Registro
 
@@ -145,3 +146,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-17 | T5 | `feat: copiar y mover canales a otro grupo desde el panel del editor` | "Copiar a…" y "Mover a…" con selector de destino sin el grupo actual y aviso del resultado; sin cambios sobre el plan. |
 | 2026-11-17 | T6 | `feat: búsqueda en el árbol y en los canales del editor de grupos` | Campo de búsqueda, árbol filtrado y marcado, panel "N de M", sin Subir/Bajar/Mover/arrastre con búsqueda; sin cambios sobre el plan. |
 | 2026-11-17 | T7 | `docs: cerrar la fase 6-2 del editor de canales y búsqueda` | ARCHITECTURE y ROADMAP actualizados, plan a `hecho`; verificación manual V1 a V5 en Firefox pendiente. |
+| 2026-11-17 | Revisión (a–d) | `fix: correcciones de la revisión del editor de canales` | Sin toggle con búsqueda, foco conservado en el panel, escrituras con acciones desactivadas y repintado con lo guardado, y dos tests nuevos; según la fila de Cambios aprobados. |
