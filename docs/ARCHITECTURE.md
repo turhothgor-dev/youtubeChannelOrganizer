@@ -5,8 +5,8 @@ Vista general del sistema. La mantiene el rol arquitecto: actualízala cuando un
 ## Contexto
 
 Extensión de Firefox (Manifest V3, JavaScript sin compilar) que permite organizar canales de YouTube en grupos y
-subgrupos y filtrar los vídeos por grupo. Solo toca `www.youtube.com` (content scripts) y
-`browser.storage.local`; no hace peticiones de red. Roadmap en `ROADMAP.md` y `PROJECT.md`.
+subgrupos y filtrar los vídeos por grupo. Solo toca `www.youtube.com` (content scripts), su página de opciones
+(editor de grupos, ADR 0014), un script de fondo mínimo y `browser.storage.local`; no hace peticiones de red. Roadmap en `ROADMAP.md` y `PROJECT.md`.
 
 ## Componentes
 
@@ -16,7 +16,10 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| `manifest.json` | WebExtensions MV3 | Permiso `storage` y content scripts en `*://www.youtube.com/*` |
+| `manifest.json` | WebExtensions MV3 | Permiso `storage`, content scripts en `*://www.youtube.com/*`, `options_ui` (página de opciones en pestaña) y `background` (`background.js`) |
+| `background.js` | JS clásico, script de fondo mínimo | Escucha `youtube-groups:open-editor` y abre la página de opciones con `runtime.openOptionsPage()` (ADR 0014) |
+| `options/` | HTML + JS clásico + CSS | Editor de grupos (`options.html`, `options.js`, `options.css`): árbol con renombrar, icono y color, crear, mover, arrastrar y eliminar con "Deshacer"; reutiliza `modules/` y `ui/icons-dom.js`, `ui/icon-picker.js` (ADR 0014) |
+| `modules/group-editor.js` | JS clásico (`YouTubeGroupsEditor`), sin DOM | Lógica pura del editor: `findGroupLocation`, `moveGroup`, `getSiblingMove`, `getMoveTargets`, `getDropPosition`, `summarizeSubtree`, `removeGroupWithSnapshot`, `restoreGroup` y sus versiones con escritura (`moveGroupAndSave`, `deleteGroupAndSnapshot`, `restoreGroupAndSave`, en `withLock`). Se carga tras `groups.js`; no entra en los content scripts |
 | `modules/storage.js` | JS clásico (`YouTubeGroupsStorage`) | Leer y escribir el árbol de grupos (ADR 0001) los vídeos vistos (ADR 0002), los ajustes (ADR 0003) y las listas de vídeos (ADR 0004). Expone `KEYS` (claves de almacenamiento) y `withLock(key, fn)`, una cola FIFO por clave que serializa las operaciones de leer-aplicar-escribir dentro de la pestaña (ADR 0005), los lectores puros `readGroupsValue`, `readWatchedValue`, `readSettingsValue` y `readPlaylistsValue`, y `getChangedKeys(changes, areaName)` para `storage.onChanged` (ADR 0006) |
 | `modules/fxemoji-data.js` | JS clásico (`YouTubeGroupsFxemoji`), sin DOM | Datos de los 12 iconos de grupo de Mozilla fxemoji (CC BY 4.0, ADR 0013): `ICONS` congelado e indexado por id, con `{ codepoint, file, viewBox, shapes }`. Transcritos de `third_party/fxemoji/*.svg` (fuera del paquete); `tests/fxemoji.test.js` comprueba que coinciden. Se carga antes de `icons.js`; la atribución está en `THIRD_PARTY_NOTICES.md`, incluido en el paquete |
 | `modules/icons.js` | JS clásico (`YouTubeGroupsIcons`) | Iconos y colores disponibles para los grupos (`ICON_SET` con `{ id, label, codepoint }`), `getIconGraphic(id)` (`{ viewBox, shapes }` de fxemoji o `null`) y `getUiIconPath(id)` con los iconos de interfaz de los botones de tarjeta (`eye`, `check`, `playlist-add`), separados de `ICON_SET` |
@@ -140,13 +143,20 @@ Los scripts de contenido son scripts clásicos (sin módulos ES) que se cargan e
   se pasa a la columna del padre con `findGuidePath`) (formulario con icono y color opcionales,
   `validateGroupName` y `setGroupAppearance`) y, por elemento, una lista de canales desplegable
   (`isChannelListOpen`, abierta si contiene un canal seleccionado). No hay elemento "Todos": grupos y canales alternan con `toggleSelectionItem`. No edita ni borra
-  grupos. La columna es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
+  grupos: eso se hace en el editor (página de opciones), que se abre con "✎ Editar grupos". La columna es el único sitio para elegir filtro y crear grupos y subgrupos; el panel no tiene nada de grupos
   (solo "Canal actual" con sus casillas). Si YouTube cambia el DOM de la guía y la sección no aparece, no se puede
   filtrar hasta corregirlo. El panel aparece minimizado por defecto y se puede desplegar con el botón de su cabecera; el
-  estado se guarda en el ajuste `panelCollapsed` y se aplica al leer los ajustes y en `storage.onChanged`. Quedan
-  sin enlazar, para la futura pantalla de edición de grupos (`ROADMAP.md`), `promptRenameGroup` y
-  `confirmDeleteGroup` en `ui/panel.js` y `renameGroup`, `deleteGroup`, `deleteSubGroup`, `setGroupAppearance` y
-  `removeChannelFromGroup` en `modules/groups.js`.
+  estado se guarda en el ajuste `panelCollapsed` y se aplica al leer los ajustes y en `storage.onChanged`. Editar,
+  mover y borrar grupos se hace en la página de opciones (flujo "Editor de grupos"); `removeChannelFromGroup` en
+  `modules/groups.js` sigue sin enlazar hasta el plan 6-2.
+- **Editor de grupos** (ADR 0014, `options/`): el botón "✎" ("Editar grupos") de la cabecera del panel y de la guía
+  envía `youtube-groups:open-editor` a `background.js`, que llama a `runtime.openOptionsPage()`; también se abre
+  desde `about:addons`. `options/options.js` pinta el árbol (listas anidadas con `role="tree"`, sin `innerHTML`) y
+  permite renombrar en línea, cambiar icono y color (`YouTubeGroupsIconPicker`), crear grupos y subgrupos, subir,
+  bajar, "Mover a…", arrastrar y soltar y eliminar con aviso y "Deshacer" durante 10 s. La lógica pura está en
+  `modules/group-editor.js` (`moveGroup`, `getDropPosition`, `summarizeSubtree`, `removeGroupWithSnapshot`,
+  `restoreGroup`...) y las escrituras van en `withLock` (ADR 0005). La página escucha `storage.onChanged` (ADR 0006)
+  y las pestañas de YouTube repintan con el mismo evento.
 - **Limpieza**: la sección "Limpieza" del panel (`<details>`) analiza el árbol con `YouTubeGroups.analyzeGroups`:
   canales repetidos en un mismo grupo (misma `getChannelKey`, se conserva el primero), URL no válidas (las
   recuperables, con `normalizeChannelUrl` no nulo, se corrigen y conservan sus campos; solo se quitan las
@@ -166,4 +176,5 @@ Las decisiones relevantes están en `docs/adr/`. El filtro activo y el paso a su
 (modificado por el 0012 para fijarla solo en suscripciones): [ADR 0010](adr/0010-seccion-en-la-guia-de-youtube-fija.md) y
 [ADR 0012](adr/0012-guia-fija-solo-en-suscripciones.md). La selección limitada a hermanos (sustituye al 0009,
 que sustituía en parte al 0007): [ADR 0011](adr/0011-seleccion-de-hermanos.md). La interfaz dividida en componentes
-de `ui/` con `ctx` y tests de DOM: [ADR 0015](adr/0015-componentes-de-interfaz-en-ui.md).
+de `ui/` con `ctx` y tests de DOM: [ADR 0015](adr/0015-componentes-de-interfaz-en-ui.md). El editor de grupos en la
+página de opciones: [ADR 0014](adr/0014-pagina-de-opciones-editor-de-grupos.md).

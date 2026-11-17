@@ -5,7 +5,7 @@
  */
 const YouTubeGroupsPanel = (() => {
   const { getGroups } = YouTubeGroupsStorage;
-  const { renameGroup, deleteGroup, setChannelGroups } = YouTubeGroups;
+  const { setChannelGroups } = YouTubeGroups;
 
   /**
    * Crea el componente del panel.
@@ -920,54 +920,6 @@ const YouTubeGroupsPanel = (() => {
 
         item.append(label, actions);
         listElement.append(item);
-      }
-    }
-
-    /**
-     * Pide un nuevo nombre y renombra un grupo o subgrupo.
-     *
-     * Sin uso a propósito: la usará la pantalla de edición de grupos, ver
-     * ROADMAP.md.
-     *
-     * @param {{ id: string, name: string }} group - Grupo o subgrupo a renombrar.
-     * @returns {Promise<void>}
-     */
-    async function promptRenameGroup(group) {
-      const newName = prompt("Nuevo nombre del grupo:", group.name);
-      if (newName === null) {
-        return;
-      }
-      try {
-        await renameGroup(group.id, newName);
-        await ctx.renderGroupsPanel();
-      } catch (exception) {
-        alert(exception.message);
-      }
-    }
-
-    /**
-     * Pide confirmación y elimina un grupo o subgrupo.
-     *
-     * Sin uso a propósito: la usará la pantalla de edición de grupos, ver
-     * ROADMAP.md.
-     *
-     * @param {{ id: string, name: string }} group - Grupo o subgrupo a eliminar.
-     * @returns {Promise<void>}
-     */
-    async function confirmDeleteGroup(group) {
-      if (
-        !confirm(
-          `¿Estás seguro de que quieres eliminar el grupo "${group.name}"?`,
-        )
-      ) {
-        return;
-      }
-      try {
-        await deleteGroup(group.id);
-        await ctx.handleGroupsRemoved();
-        await ctx.renderGroupsPanel();
-      } catch (exception) {
-        alert(exception.message);
       }
     }
 
