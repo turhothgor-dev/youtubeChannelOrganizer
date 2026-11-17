@@ -40,7 +40,7 @@ Decisión:
 
 ## Tareas
 
-- [ ] T1 · Ayudante de tests para la página de opciones · Ficheros: `tests/helpers/load-dom.js`,
+- [x] T1 · Ayudante de tests para la página de opciones · Ficheros: `tests/helpers/load-dom.js`,
   `tests/ui-options.test.js` · Alcance: `loadOptionsDom({ store })` (o `optionsPage()` que devuelva `{ html,
   scripts }` para `loadDom`) lee `options/options.html`, toma el contenido de `<body>` sin `<script>` y las rutas de
   sus `<script src>` (relativas a la raíz, como el test de `manifest.test.js`), y llama a `loadDom` con una URL
@@ -96,3 +96,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-17 | T1 | `test: ayudante loadOptionsDom y test del árbol del editor` | `optionsPage()` y `loadOptionsDom()` en `tests/helpers/load-dom.js`; test inicial en `tests/ui-options.test.js`. |

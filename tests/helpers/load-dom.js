@@ -163,4 +163,42 @@ function loadDom({
   };
 }
 
-module.exports = { loadDom, manifestScripts };
+/**
+ * Lee options/options.html y devuelve el contenido de <body> sin <script> y las
+ * rutas de sus <script src>, relativas a la raíz del proyecto y en su orden.
+ * @returns {{html: string, scripts: string[]}} Entrada para loadDom.
+ */
+function optionsPage() {
+  const source = fs.readFileSync(
+    path.join(ROOT, "options", "options.html"),
+    "utf8",
+  );
+  const body = /<body[^>]*>([\s\S]*)<\/body>/.exec(source)[1];
+  const scripts = [
+    ...body.matchAll(/<script\b[^>]*src="([^"]+)"[^>]*>\s*<\/script>/g),
+  ].map((match) =>
+    match[1].startsWith("/")
+      ? match[1].slice(1)
+      : path.posix.join("options", match[1]),
+  );
+  const html = body.replace(/<script\b[\s\S]*?<\/script>/g, "");
+  return { html, scripts };
+}
+
+/**
+ * Carga options/options.html en jsdom con sus scripts. Usa una URL https: con
+ * un origen opaco (moz-extension:) jsdom lanza al leer sessionStorage.
+ * @param {Object} [options] - Opciones de loadDom (store, confirm, prompt...).
+ * @returns {Object} Lo mismo que loadDom.
+ */
+function loadOptionsDom(options = {}) {
+  const { html, scripts } = optionsPage();
+  return loadDom({
+    url: "https://example.com/options/options.html",
+    ...options,
+    html,
+    scripts,
+  });
+}
+
+module.exports = { loadDom, manifestScripts, optionsPage, loadOptionsDom };
