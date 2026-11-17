@@ -17,6 +17,87 @@
   } = YouTubeGroups;
 
   /**
+   * Contexto compartido entre los componentes de la interfaz. `state` reúne el
+   * estado que leen o escriben varios componentes; los espacios de nombres son
+   * un puente hacia las funciones que aún están en este fichero.
+   */
+  const ctx = {
+    state: {
+      /** Vídeos vistos en memoria; null hasta cargarlos (sin datos no se marca nada). */
+      watchedVideos: null,
+      /** Mensaje del error al leer los vistos; null si no ha fallado. */
+      watchedLoadError: null,
+      /** Número de la última operación de vistos iniciada. */
+      watchedWriteSeq: 0,
+      /** Número de la última operación de vistos cuyo resultado se aplicó. */
+      watchedAppliedSeq: 0,
+      /** Número de la última operación de ajustes iniciada. */
+      settingsWriteSeq: 0,
+      /** Número de la última operación de ajustes cuyo resultado se aplicó. */
+      settingsAppliedSeq: 0,
+      /** Ajustes en memoria; valores por defecto hasta cargar los guardados. */
+      settings: YouTubeGroupsSettings.DEFAULT_SETTINGS,
+      /** Si los ajustes guardados ya se han leído (habilita los selectores). */
+      settingsLoaded: false,
+      /** Mensaje del error al leer los ajustes; null si no ha fallado. */
+      settingsLoadError: null,
+      /** Claves de la selección activa (`[]` es "todos"). */
+      activeSelection: [],
+      /** Unión de los canales de la selección (`null` sin selección o cargando). */
+      activeSelectionUrls: null,
+      /** Filtros avanzados de la página de suscripciones. */
+      advancedFilters: { duration: "any", age: "any", views: "any" },
+    },
+    setActiveSelection,
+    refreshActiveSelection,
+    handleGroupsRemoved,
+    renderGroupsPanel,
+    navigateToSubscriptions,
+    watched: {
+      applyWatchedToCard,
+      updateWatchedButton,
+      toggleVideoWatched,
+      getCurrentVideoId,
+      isWatchPageInSync,
+      getCurrentWatchVideoData,
+      toggleCurrentVideoWatched,
+    },
+    cards: {
+      applyVisibilityToAllCards,
+      findVideoId,
+      getChannelFromCard,
+      getCurrentVideoChannel,
+      refreshChannelNameIndex,
+      applyCardVisibility,
+      showAllVideoCards,
+      filterAllDetectedCards,
+      scheduleCardsIn,
+      scheduleContainingCard,
+      scanDocument,
+      nodeBelongsToCurrentVideoOwner,
+    },
+    dropdowns: {
+      renderChannelGroupChoices,
+      openSubscriptionGroupsForm,
+      hideSubscriptionDropdown,
+      openPlaylistForm,
+      hidePlaylistDropdown,
+    },
+    panel: {
+      createGroupsPanel,
+      syncSettingsControls,
+      renderPlaylistsSection,
+      openPlaylistVideosModal,
+      closePlaylistModal,
+      renderCurrentChannelSection,
+      renderCurrentVideoSection,
+      scheduleCurrentChannelPanelUpdate,
+    },
+    guide: { renderGuideSection },
+    player: { syncPlayerControl, schedulePlayerControlSync },
+  };
+
+  /**
    * Crea el SVG de un icono sin usar innerHTML.
    * @param {string} iconId - Id del icono de ICON_SET.
    * @param {number} size - Lado en píxeles.
@@ -179,24 +260,6 @@
   const WATCHED_CLASS = "youtube-groups--watched";
   const VIDEO_ID_ATTRIBUTE = "data-youtube-groups-video-id";
 
-  /** Vídeos vistos en memoria; null hasta cargarlos (sin datos no se marca nada). */
-  let watchedVideos = null;
-
-  /** Mensaje del error al leer los vistos; null si no ha fallado. */
-  let watchedLoadError = null;
-
-  /** Número de la última operación de vistos iniciada. */
-  let watchedWriteSeq = 0;
-
-  /** Número de la última operación de vistos cuyo resultado se aplicó. */
-  let watchedAppliedSeq = 0;
-
-  /** Número de la última operación de ajustes iniciada. */
-  let settingsWriteSeq = 0;
-
-  /** Número de la última operación de ajustes cuyo resultado se aplicó. */
-  let settingsAppliedSeq = 0;
-
   /** IDs de vídeo cuyo cambio de visto se está guardando. */
   const savingWatchedIds = new Set();
 
@@ -206,9 +269,6 @@
   /** ID de vídeo del que se ha visto el inicio (`currentTime < 1`); en Shorts habilita el marcado. */
   let autoMarkArmedId = null;
 
-  /** Ajustes en memoria; valores por defecto hasta cargar los guardados. */
-  let settings = YouTubeGroupsSettings.DEFAULT_SETTINGS;
-
   /**
    * Reaplica la visibilidad a todas las tarjetas de vídeo.
    */
@@ -217,12 +277,6 @@
       applyCardVisibility(card);
     }
   }
-
-  /** Si los ajustes guardados ya se han leído (habilita los selectores). */
-  let settingsLoaded = false;
-
-  /** Mensaje del error al leer los ajustes; null si no ha fallado. */
-  let settingsLoadError = null;
 
   /**
    * Refleja los ajustes en los selectores de la sección "Ajustes" del panel.
@@ -246,29 +300,29 @@
     );
     panel.classList.toggle(
       "youtube-groups--collapsed",
-      settings.panelCollapsed,
+      ctx.state.settings.panelCollapsed,
     );
     const collapseButton = panel.querySelector(
       ".youtube-groups__collapse-button",
     );
-    collapseButton.textContent = settings.panelCollapsed ? "+" : "−";
-    collapseButton.title = settings.panelCollapsed
+    collapseButton.textContent = ctx.state.settings.panelCollapsed ? "+" : "−";
+    collapseButton.title = ctx.state.settings.panelCollapsed
       ? "Mostrar panel"
       : "Minimizar panel";
     collapseButton.setAttribute(
       "aria-expanded",
-      String(!settings.panelCollapsed),
+      String(!ctx.state.settings.panelCollapsed),
     );
-    collapseButton.disabled = !settingsLoaded;
-    watchedSelect.value = settings.watchedMode;
-    outsideSelect.value = settings.outsideMode;
-    autoMarkSelect.value = String(settings.autoMarkPercent);
-    watchedSelect.disabled = !settingsLoaded;
-    outsideSelect.disabled = !settingsLoaded;
-    autoMarkSelect.disabled = !settingsLoaded;
-    if (settingsLoadError !== null) {
+    collapseButton.disabled = !ctx.state.settingsLoaded;
+    watchedSelect.value = ctx.state.settings.watchedMode;
+    outsideSelect.value = ctx.state.settings.outsideMode;
+    autoMarkSelect.value = String(ctx.state.settings.autoMarkPercent);
+    watchedSelect.disabled = !ctx.state.settingsLoaded;
+    outsideSelect.disabled = !ctx.state.settingsLoaded;
+    autoMarkSelect.disabled = !ctx.state.settingsLoaded;
+    if (ctx.state.settingsLoadError !== null) {
       panel.querySelector(".youtube-groups__settings-error").textContent =
-        "No se pudieron leer los ajustes: " + settingsLoadError;
+        "No se pudieron leer los ajustes: " + ctx.state.settingsLoadError;
     }
   }
 
@@ -282,7 +336,7 @@
     for (const select of panel.querySelectorAll(
       ".youtube-groups__filter-select",
     )) {
-      const value = advancedFilters[select.dataset.filter];
+      const value = ctx.state.advancedFilters[select.dataset.filter];
       select.value = value;
       if (value !== "any") {
         active += 1;
@@ -294,13 +348,13 @@
 
   YouTubeGroupsSettings.getSettings()
     .then((loaded) => {
-      settings = loaded;
-      settingsLoaded = true;
+      ctx.state.settings = loaded;
+      ctx.state.settingsLoaded = true;
       applyVisibilityToAllCards();
       syncSettingsControls();
     })
     .catch((error) => {
-      settingsLoadError = error.message;
+      ctx.state.settingsLoadError = error.message;
       syncSettingsControls();
       console.error("[YouTube Groups] No se pudieron leer los ajustes", error);
     });
@@ -322,19 +376,19 @@
   ) {
     errorElement.textContent = "";
     select.disabled = true;
-    settingsWriteSeq += 1;
-    const seq = settingsWriteSeq;
+    ctx.state.settingsWriteSeq += 1;
+    const seq = ctx.state.settingsWriteSeq;
     try {
       const result = await YouTubeGroupsSettings.updateSettings({
         [key]: parse(select.value),
       });
-      if (seq > settingsAppliedSeq) {
-        settingsAppliedSeq = seq;
-        settings = result.settings;
+      if (seq > ctx.state.settingsAppliedSeq) {
+        ctx.state.settingsAppliedSeq = seq;
+        ctx.state.settings = result.settings;
         applyVisibilityToAllCards();
       }
     } catch (error) {
-      select.value = String(settings[key]);
+      select.value = String(ctx.state.settings[key]);
       errorElement.textContent =
         "No se pudo guardar el ajuste: " + error.message;
       console.error("[YouTube Groups] No se pudo guardar el ajuste", error);
@@ -374,8 +428,8 @@
     }
     const isWatched =
       Boolean(videoId) &&
-      watchedVideos !== null &&
-      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
+      ctx.state.watchedVideos !== null &&
+      YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId);
     card.classList.toggle(WATCHED_CLASS, isWatched);
     applyCardVisibility(card);
 
@@ -402,7 +456,7 @@
     const state = YouTubeGroupsWatched.getWatchedButtonState({
       videoId,
       isWatched,
-      loaded: watchedVideos !== null,
+      loaded: ctx.state.watchedVideos !== null,
       saving: Boolean(videoId) && savingWatchedIds.has(videoId),
     });
     if (button.querySelector(".youtube-groups__card-label")) {
@@ -413,8 +467,9 @@
     }
     button.setAttribute("aria-pressed", String(state.pressed));
     button.disabled = state.disabled;
-    if (watchedLoadError !== null) {
-      button.title = "No se pudieron leer los vistos: " + watchedLoadError;
+    if (ctx.state.watchedLoadError !== null) {
+      button.title =
+        "No se pudieron leer los vistos: " + ctx.state.watchedLoadError;
     }
   }
 
@@ -426,21 +481,25 @@
    * @returns {Promise<void>}
    */
   async function toggleVideoWatched(videoId, button, card = null) {
-    if (!videoId || watchedVideos === null || savingWatchedIds.has(videoId)) {
+    if (
+      !videoId ||
+      ctx.state.watchedVideos === null ||
+      savingWatchedIds.has(videoId)
+    ) {
       return;
     }
     savingWatchedIds.add(videoId);
     refreshWatchedUi(videoId, card);
-    watchedWriteSeq += 1;
-    const seq = watchedWriteSeq;
+    ctx.state.watchedWriteSeq += 1;
+    const seq = ctx.state.watchedWriteSeq;
     try {
       const result = await YouTubeGroupsWatched.setVideoWatched(
         videoId,
-        !YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId),
+        !YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId),
       );
-      if (seq > watchedAppliedSeq) {
-        watchedAppliedSeq = seq;
-        watchedVideos = result.videos;
+      if (seq > ctx.state.watchedAppliedSeq) {
+        ctx.state.watchedAppliedSeq = seq;
+        ctx.state.watchedVideos = result.videos;
       }
       button.removeAttribute("title");
     } catch (error) {
@@ -544,8 +603,8 @@
       return;
     }
     const isWatched =
-      watchedVideos !== null &&
-      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId);
+      ctx.state.watchedVideos !== null &&
+      YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId);
     updateWatchedButton(
       section.querySelector(".youtube-groups__current-video-button"),
       videoId,
@@ -565,13 +624,13 @@
     const panelButton = document.querySelector(
       ".youtube-groups__current-video-button",
     );
-    watchedWriteSeq += 1;
-    const seq = watchedWriteSeq;
+    ctx.state.watchedWriteSeq += 1;
+    const seq = ctx.state.watchedWriteSeq;
     try {
       const result = await YouTubeGroupsWatched.setVideoWatched(videoId, true);
-      if (seq > watchedAppliedSeq) {
-        watchedAppliedSeq = seq;
-        watchedVideos = result.videos;
+      if (seq > ctx.state.watchedAppliedSeq) {
+        ctx.state.watchedAppliedSeq = seq;
+        ctx.state.watchedVideos = result.videos;
       }
       panelButton?.removeAttribute("title");
     } catch (error) {
@@ -594,10 +653,10 @@
    * @param {Event} event - Evento `timeupdate`.
    */
   function handleVideoProgress(event) {
-    if (!settingsLoaded) {
+    if (!ctx.state.settingsLoaded) {
       return;
     }
-    if (settings.autoMarkPercent === 0) {
+    if (ctx.state.settings.autoMarkPercent === 0) {
       return;
     }
     const video = event.target;
@@ -627,8 +686,8 @@
       return;
     }
     if (
-      watchedVideos === null ||
-      YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId) ||
+      ctx.state.watchedVideos === null ||
+      YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId) ||
       savingWatchedIds.has(videoId) ||
       autoMarkHandledIds.has(videoId)
     ) {
@@ -638,7 +697,7 @@
       !YouTubeGroupsWatched.shouldAutoMark(
         video.currentTime,
         video.duration,
-        settings.autoMarkPercent,
+        ctx.state.settings.autoMarkPercent,
       )
     ) {
       return;
@@ -664,14 +723,14 @@
 
   YouTubeGroupsStorage.getWatchedVideos()
     .then((videos) => {
-      watchedVideos = videos;
+      ctx.state.watchedVideos = videos;
       for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
         applyWatchedToCard(card);
       }
       renderCurrentVideoSection();
     })
     .catch((error) => {
-      watchedLoadError = error.message;
+      ctx.state.watchedLoadError = error.message;
       for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
         applyWatchedToCard(card);
       }
@@ -680,10 +739,6 @@
     });
 
   const GROUPS_PANEL_ID = "youtube-groups-panel";
-  /** Claves de la selección activa (`[]` es "todos"). */
-  let activeSelection = [];
-  /** Unión de los canales de la selección (`null` sin selección o cargando). */
-  let activeSelectionUrls = null;
   let filterUpdateVersion = 0;
 
   /**
@@ -694,16 +749,16 @@
   function setActiveSelection(selection) {
     const next = YouTubeGroupsFilter.normalizeSelection(selection);
     if (
-      next.length === activeSelection.length &&
-      next.every((key, index) => key === activeSelection[index])
+      next.length === ctx.state.activeSelection.length &&
+      next.every((key, index) => key === ctx.state.activeSelection[index])
     ) {
       return;
     }
 
-    activeSelection = next;
+    ctx.state.activeSelection = next;
     // Sin selección, no quedan URLs de una selección anterior
     if (next.length === 0) {
-      activeSelectionUrls = null;
+      ctx.state.activeSelectionUrls = null;
     }
 
     refreshActiveSelection();
@@ -1046,15 +1101,15 @@
       .addEventListener("click", async (event) => {
         const button = event.currentTarget;
         button.disabled = true;
-        settingsWriteSeq += 1;
-        const seq = settingsWriteSeq;
+        ctx.state.settingsWriteSeq += 1;
+        const seq = ctx.state.settingsWriteSeq;
         try {
           const result = await YouTubeGroupsSettings.updateSettings({
-            panelCollapsed: !settings.panelCollapsed,
+            panelCollapsed: !ctx.state.settings.panelCollapsed,
           });
-          if (seq > settingsAppliedSeq) {
-            settingsAppliedSeq = seq;
-            settings = result.settings;
+          if (seq > ctx.state.settingsAppliedSeq) {
+            ctx.state.settingsAppliedSeq = seq;
+            ctx.state.settings = result.settings;
           }
         } catch (error) {
           settingsError.textContent =
@@ -1157,7 +1212,7 @@
         select.append(optionElement);
       }
       select.addEventListener("change", () => {
-        advancedFilters[key] = select.value;
+        ctx.state.advancedFilters[key] = select.value;
         syncFiltersControls(panel);
         applyVisibilityToAllCards();
       });
@@ -1165,8 +1220,8 @@
     panel
       .querySelector(".youtube-groups__filters-reset")
       .addEventListener("click", () => {
-        for (const key of Object.keys(advancedFilters)) {
-          advancedFilters[key] = "any";
+        for (const key of Object.keys(ctx.state.advancedFilters)) {
+          ctx.state.advancedFilters[key] = "any";
         }
         syncFiltersControls(panel);
         applyVisibilityToAllCards();
@@ -1535,7 +1590,7 @@
    * @param {Object} filter - Filtro pulsado.
    */
   function toggleSelectionItem(filter) {
-    const previous = activeSelection;
+    const previous = ctx.state.activeSelection;
     const next = YouTubeGroupsFilter.toggleSelection(
       guideGroups,
       previous,
@@ -1660,7 +1715,7 @@
       guideChannelOverrides,
       item,
       depth,
-      activeSelection,
+      ctx.state.activeSelection,
     );
 
     const toggle = document.createElement("button");
@@ -1679,7 +1734,7 @@
 
     const main = createGuideButton(
       `${item.name} (${item.channels.length})`,
-      activeSelection.includes(`group:${item.id}`),
+      ctx.state.activeSelection.includes(`group:${item.id}`),
       createGroupMark(groups, item.id, GROUP_ICON_SIZES.guide),
       () => toggleSelectionItem({ type: "group", id: item.id }),
     );
@@ -1705,7 +1760,7 @@
     for (const channel of item.channels) {
       const channelButton = createGuideButton(
         channel.name,
-        activeSelection.includes(
+        ctx.state.activeSelection.includes(
           YouTubeGroupsFilter.getFilterKey({
             type: "channel",
             containerId: item.id,
@@ -2058,7 +2113,7 @@
     guideCreateTarget = YouTubeGroupsGuide.getCreateTarget(
       groups,
       guidePath,
-      activeSelection,
+      ctx.state.activeSelection,
     );
     const targetKey = guideCreateTarget.parentId ?? "";
     if (targetKey !== guideRenderedTargetKey) {
@@ -2076,8 +2131,8 @@
     create.setAttribute("aria-label", guideCreateTarget.title);
 
     const clear = section.querySelector(".youtube-groups__guide-clear");
-    clear.hidden = activeSelection.length === 0;
-    clear.textContent = `Limpiar selección (${activeSelection.length})`;
+    clear.hidden = ctx.state.activeSelection.length === 0;
+    clear.textContent = `Limpiar selección (${ctx.state.activeSelection.length})`;
 
     const list = document.createElement("div");
     list.className = "youtube-groups__guide-column";
@@ -2432,8 +2487,11 @@
       watchedButton,
       initialVideoId,
       Boolean(initialVideoId) &&
-        watchedVideos !== null &&
-        YouTubeGroupsWatched.isVideoWatched(watchedVideos, initialVideoId),
+        ctx.state.watchedVideos !== null &&
+        YouTubeGroupsWatched.isVideoWatched(
+          ctx.state.watchedVideos,
+          initialVideoId,
+        ),
     );
     control.appendChild(watchedButton);
 
@@ -3223,15 +3281,12 @@
    */
   function cardMatchesFilter(card) {
     return YouTubeGroupsVisibility.matchesGroupFilter({
-      hasFilter: activeSelection.length > 0,
-      channelUrls: activeSelectionUrls,
+      hasFilter: ctx.state.activeSelection.length > 0,
+      channelUrls: ctx.state.activeSelectionUrls,
       channelUrl: card.dataset.youtubeGroupsChannelUrl,
       hasVideoId: card.hasAttribute(VIDEO_ID_ATTRIBUTE),
     });
   }
-
-  /** Filtros avanzados activos (en memoria; se pierden al recargar). */
-  const advancedFilters = { duration: "any", age: "any", views: "any" };
 
   /** Caché tarjeta -> { videoId, metadata } de los metadatos ya leídos. */
   const cardMetadataCache = new WeakMap();
@@ -3305,12 +3360,12 @@
    * @returns {boolean}
    */
   function cardMatchesAdvancedFilters(card) {
-    if (!YouTubeGroupsMetadata.hasActiveFilters(advancedFilters)) {
+    if (!YouTubeGroupsMetadata.hasActiveFilters(ctx.state.advancedFilters)) {
       return true;
     }
     return YouTubeGroupsMetadata.matchesAdvancedFilters(
       getCardMetadata(card),
-      advancedFilters,
+      ctx.state.advancedFilters,
     );
   }
 
@@ -3326,7 +3381,7 @@
           cardMatchesFilter(card) && cardMatchesAdvancedFilters(card),
         isWatched: card.classList.contains(WATCHED_CLASS),
       },
-      settings,
+      ctx.state.settings,
     );
     card.classList.toggle("youtube-groups--hidden", visibility === "hidden");
     card.classList.toggle("youtube-groups--dimmed", visibility === "dimmed");
@@ -3342,11 +3397,11 @@
 
   async function refreshActiveSelection() {
     const updateVersion = ++filterUpdateVersion;
-    const selection = activeSelection;
+    const selection = ctx.state.activeSelection;
 
     // Sin selección no hay URLs que aplicar
     if (selection.length === 0) {
-      activeSelectionUrls = null;
+      ctx.state.activeSelectionUrls = null;
       showAllVideoCards();
       return;
     }
@@ -3357,7 +3412,7 @@
       const groups = await getGroups();
       if (
         updateVersion !== filterUpdateVersion ||
-        selection !== activeSelection
+        selection !== ctx.state.activeSelection
       ) {
         return;
       }
@@ -3375,7 +3430,7 @@
         return;
       }
 
-      activeSelectionUrls = resolved.urls;
+      ctx.state.activeSelectionUrls = resolved.urls;
       filterAllDetectedCards();
     } catch (error) {
       console.error(
@@ -3685,8 +3740,8 @@
       control.querySelector(".youtube-groups__watched-button"),
       videoId,
       Boolean(videoId) &&
-        watchedVideos !== null &&
-        YouTubeGroupsWatched.isVideoWatched(watchedVideos, videoId),
+        ctx.state.watchedVideos !== null &&
+        YouTubeGroupsWatched.isVideoWatched(ctx.state.watchedVideos, videoId),
     );
     control.querySelector(".youtube-groups__playlist-button").disabled =
       !videoId;
@@ -4094,20 +4149,20 @@
       const newValue = changes[storage.KEYS[name]].newValue;
       try {
         if (name === "watched") {
-          watchedVideos = storage.readWatchedValue(newValue);
-          watchedLoadError = null;
-          watchedAppliedSeq = watchedWriteSeq;
+          ctx.state.watchedVideos = storage.readWatchedValue(newValue);
+          ctx.state.watchedLoadError = null;
+          ctx.state.watchedAppliedSeq = ctx.state.watchedWriteSeq;
           for (const card of document.querySelectorAll(VIDEO_CARD_SELECTOR)) {
             applyWatchedToCard(card);
           }
           renderCurrentVideoSection();
         } else if (name === "settings") {
-          settings = YouTubeGroupsSettings.normalizeSettings(
+          ctx.state.settings = YouTubeGroupsSettings.normalizeSettings(
             storage.readSettingsValue(newValue),
           );
-          settingsLoaded = true;
-          settingsLoadError = null;
-          settingsAppliedSeq = settingsWriteSeq;
+          ctx.state.settingsLoaded = true;
+          ctx.state.settingsLoadError = null;
+          ctx.state.settingsAppliedSeq = ctx.state.settingsWriteSeq;
           syncSettingsControls();
           applyVisibilityToAllCards();
         } else if (name === "groups") {
