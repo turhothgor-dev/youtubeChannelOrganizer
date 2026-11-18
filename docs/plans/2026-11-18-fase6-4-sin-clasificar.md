@@ -103,7 +103,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   `getPageType("/feed/channels") === "channels"`; `/feed/subscriptions` sigue siendo `"subscriptions"` y
   `/feed/history` `"other"`; `shouldShowCardControls("channels")` y `shouldPinGuide("channels", 1200, false)` son
   `false`.
-- [ ] T4 · Recolector: suscripciones de la guía · Ficheros: `ui/subscriptions.js` (nuevo), `manifest.json` (tras
+- [x] T4 · Recolector: suscripciones de la guía · Ficheros: `ui/subscriptions.js` (nuevo), `manifest.json` (tras
   `ui/avatars.js`), `content.js`, `tests/manifest.test.js`, `tests/ui-subscriptions.test.js` (nuevo) · Test (jsdom,
   guía con una sección "Tú" con un enlace a un canal propio y una sección con `/feed/channels` y dos entradas de canal):
   tras arrancar y `flushPending()`, `youtubeSubscriptions` tiene solo los dos canales de la sección de suscripciones,
@@ -195,3 +195,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T1 | feat: clave youtubeSubscriptions en el almacenamiento | `KEYS.subscriptions`, `readSubscriptionsValue`, `getSubscriptions`, `saveSubscriptions`; test de KEYS actualizado a seis claves. |
 | 2026-11-18 | T2 | feat: lógica pura de suscripciones conocidas | `modules/subscriptions.js` (normalize, merge, getUnclassified, findSubscriptionSectionIndex, isChannelListComplete, saveObserved), registrado en manifiesto, `options.html` y `load-modules.js`; tests nuevos. |
 | 2026-11-18 | T3 | feat: tipo de página "channels" para /feed/channels | `getPageType("/feed/channels")` devuelve `"channels"`; sin controles de tarjeta ni guía fija; tests actualizados. |
+| 2026-11-18 | T4 | feat: recolector de suscripciones de la guía | `ui/subscriptions.js` (`readGuide`, `scheduleGuideRead`, `noteMutations`, `flushPending`), creado en `content.js` tras avatares, registrado en el manifiesto; lectura al arrancar, en `yt-navigate-finish` y con mutaciones de la guía ajenas a `#youtube-groups-guide`. |

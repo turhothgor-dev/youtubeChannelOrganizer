@@ -58,6 +58,7 @@
     navigateToSubscriptions,
   };
   ctx.avatars = YouTubeGroupsAvatarsUi.create(ctx);
+  ctx.subscriptions = YouTubeGroupsSubscriptionsUi.create(ctx);
   ctx.cards = YouTubeGroupsCards.create(ctx);
   ctx.watched = YouTubeGroupsWatchedUi.create(ctx);
   ctx.dropdowns = YouTubeGroupsDropdowns.create(ctx);
@@ -273,6 +274,7 @@
     }
     ctx.guide.checkPlacement();
     ctx.avatars.noteMutations(mutations);
+    ctx.subscriptions.noteMutations(mutations);
   });
 
   observer.observe(document.documentElement, {
@@ -287,6 +289,7 @@
     clearPendingFilter();
     ctx.cards.resetDetectedCards();
     ctx.cards.scanDocument();
+    ctx.subscriptions.scheduleGuideRead();
     refreshActiveSelection();
     renderGroupsPanel().catch((error) => {
       console.error(
@@ -297,6 +300,7 @@
   });
 
   ctx.cards.scanDocument();
+  ctx.subscriptions.scheduleGuideRead();
   consumePendingFilter();
   refreshActiveSelection();
   renderGroupsPanel().catch((error) => {

@@ -105,6 +105,7 @@ test("los ui/*.js se cargan en el orden de sus dependencias", () => {
       "ui/icons-dom.js",
       "ui/icon-picker.js",
       "ui/avatars.js",
+      "ui/subscriptions.js",
       "ui/dropdowns.js",
       "ui/player.js",
       "ui/watched.js",
