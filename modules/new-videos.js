@@ -172,7 +172,7 @@ const YouTubeGroupsNewVideos = (() => {
 
   /**
    * Vídeos nuevos por grupo (con sus subgrupos), sin red.
-   * Nuevo: no visto, `seenAt > ack` y (`publishedBefore` nulo o `> ack`), con
+   * Nuevo: no visto, `seenAt > ack` y `publishedBefore` no nulo y `> ack`, con
    * `ack` la visita más reciente de los grupos cuyo subárbol contiene el
    * canal, o `since` si no hay visitas.
    * @param {*} state Estado guardado.
@@ -225,9 +225,11 @@ const YouTubeGroupsNewVideos = (() => {
         return false;
       }
       const ack = channelAcks.get(entry.channel) ?? since ?? 0;
+      // Sin edad legible (directos, estrenos, tarjetas sin fecha) no cuenta
       return (
+        entry.publishedBefore !== null &&
         entry.seenAt > ack &&
-        (entry.publishedBefore === null || entry.publishedBefore > ack)
+        entry.publishedBefore > ack
       );
     };
 

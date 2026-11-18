@@ -200,6 +200,19 @@ const YouTubeGroupsIconsDom = (() => {
     const selector = ":scope > .youtube-groups__group-bullet";
     let bullet = element.querySelector(selector);
     const hasCount = count > 0;
+    const description = hasCount
+      ? count === 1
+        ? "1 vídeo nuevo"
+        : `${count} vídeos nuevos`
+      : "";
+    // El bullet es aria-hidden: la descripción va en el botón del grupo
+    if ((element.getAttribute("aria-description") || "") !== description) {
+      if (description) {
+        element.setAttribute("aria-description", description);
+      } else {
+        element.removeAttribute("aria-description");
+      }
+    }
     if (!color && !hasCount) {
       if (bullet) {
         bullet.remove();
@@ -242,18 +255,6 @@ const YouTubeGroupsIconsDom = (() => {
         bullet.style.setProperty("--yg-bullet-text", textColor);
       } else {
         bullet.style.removeProperty("--yg-bullet-text");
-      }
-    }
-    const description = hasCount
-      ? count === 1
-        ? "1 vídeo nuevo"
-        : `${count} vídeos nuevos`
-      : "";
-    if ((bullet.getAttribute("aria-description") || "") !== description) {
-      if (description) {
-        bullet.setAttribute("aria-description", description);
-      } else {
-        bullet.removeAttribute("aria-description");
       }
     }
   }

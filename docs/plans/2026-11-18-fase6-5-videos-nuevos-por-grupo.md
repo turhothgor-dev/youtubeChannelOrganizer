@@ -150,6 +150,7 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-18 | Revisión (T3–T5) | (a) `setGroupBullet` pone y quita `aria-description` ("N vídeos nuevos") en el elemento (botón del grupo), no en el bullet `aria-hidden`; test ajustado; (b) un vídeo sin edad legible (`publishedBefore === null`) no cuenta como nuevo (directos, estrenos, tarjetas sin fecha); ADR 0019 y tests al día; (c) los reconocimientos se mantienen "en vuelo" hasta que termina `saveFeedBatch` y `applyStoredValue` los sigue aplicando mientras tanto (el número no reaparece por un `onChanged` de otra pestaña); (d) `noted` (`ui/new-videos.js`) se limita (p. ej. 2000 entradas, descarta las más antiguas) y se recalcula en `setGroups` para que un canal que vuelve a un grupo se anote de nuevo. | Hallazgos de la revisión. | Delegada por la persona ("retoma el plan y lo implementas") |
 
 ## Registro
 
@@ -164,3 +165,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T5 | `feat: recolector de vídeos nuevos y conexión en content.js` | `ui/new-videos.js` (`noteVideo`, `acknowledgeSelection`, `flushPending`, `setGroups`, `applyStoredValue`, `recount`, `start`), anotación desde `ui/cards.js`, conexión en `content.js` y manifiesto; `ctx.guide.updateNewVideoBullets` se llama con `?.` hasta T6. |
 | 2026-11-18 | T6 | `feat: número de vídeos nuevos en el bullet de la guía` | `createGuideRow` pasa el recuento a `setGroupBullet`; `updateNewVideoBullets()` actualiza los bullets sin rehacer la columna; test jsdom. |
 | 2026-11-18 | T7 | `docs: cierre de la fase 6-5, vídeos nuevos por grupo` | ARCHITECTURE (filas, flujo y decisión), ADR 0019 aceptada, ROADMAP 6-5 ✅ y plan a `hecho`. Verificación manual V1 a V6 pendiente en Firefox. |
+| 2026-11-18 | Revisión (a–d) | `fix: correcciones de la revisión de 6-5` | `aria-description` en el botón del grupo; sin edad legible no cuenta como nuevo (ADR y tests al día); reconocimientos en vuelo conservados hasta terminar `saveFeedBatch`; `noted` con tope de 2000 y vaciado en `setGroups` si cambian los canales agrupados. |

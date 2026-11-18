@@ -170,9 +170,9 @@ test("el bullet muestra los vídeos nuevos, baja sin rehacer la fila y se vacía
     version: 1,
     since: now - 1000,
     videos: {
-      [ids[0]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: null },
-      [ids[1]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: null },
-      [ids[2]]: { channel: OTHER_URL, seenAt: now, publishedBefore: null },
+      [ids[0]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: now },
+      [ids[1]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: now },
+      [ids[2]]: { channel: OTHER_URL, seenAt: now, publishedBefore: now },
     },
     visits: {},
   };

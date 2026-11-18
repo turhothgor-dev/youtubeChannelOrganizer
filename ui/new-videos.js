@@ -7,6 +7,8 @@
  */
 const YouTubeGroupsNewVideosUi = (() => {
   const FLUSH_DELAY_MS = 2000;
+  /** Tope de vídeos recordados por pestaña en `noted`. */
+  const MAX_NOTED = 2000;
 
   /**
    * Crea el recolector.
@@ -29,6 +31,8 @@ const YouTubeGroupsNewVideosUi = (() => {
     const pending = new Map();
     /** Reconocimientos aún no volcados: id de grupo -> ms. */
     const pendingAcks = new Map();
+    /** Reconocimientos de volcados en curso (hasta que termina el guardado). */
+    const inFlightAcks = new Set();
     let flushTimer = null;
 
     const isSubscriptionsPage = () =>
@@ -86,6 +90,11 @@ const YouTubeGroupsNewVideosUi = (() => {
         return;
       }
       noted.set(videoId, hasAge);
+      // Se descartan los más antiguos (el Map conserva el orden de inserción)
+      while (noted.size > MAX_NOTED) {
+        const oldest = noted.keys().next().value;
+        noted.delete(oldest);
+      }
       pending.set(videoId, {
         channelUrl,
         seenAt: Date.now(),
@@ -147,11 +156,14 @@ const YouTubeGroupsNewVideosUi = (() => {
       const flushedAcks = new Map(pendingAcks);
       pending.clear();
       pendingAcks.clear();
+      inFlightAcks.add(flushedAcks);
       try {
         const result = await N.saveFeedBatch(batch, { ackGroupIds: ackIds });
+        inFlightAcks.delete(flushedAcks);
         state = result.state;
         applyStoredValue(state);
       } catch (error) {
+        inFlightAcks.delete(flushedAcks);
         // Para que se reintente con la próxima tarjeta.
         for (const id of batch.keys()) {
           noted.delete(id);
@@ -208,9 +220,12 @@ const YouTubeGroupsNewVideosUi = (() => {
      */
     function applyStoredValue(newValue) {
       let next = N.normalizeNewVideos(newValue);
-      for (const [id, time] of pendingAcks) {
-        if (!(next.visits[id] >= time)) {
-          next = N.acknowledgeGroups(next, [id], time);
+      const unsaved = [pendingAcks, ...inFlightAcks];
+      for (const acks of unsaved) {
+        for (const [id, time] of acks) {
+          if (!(next.visits[id] >= time)) {
+            next = N.acknowledgeGroups(next, [id], time);
+          }
         }
       }
       state = next;
@@ -223,7 +238,21 @@ const YouTubeGroupsNewVideosUi = (() => {
      */
     function setGroups(newGroups) {
       groups = Array.isArray(newGroups) ? newGroups : [];
+      const previousKeys = groupedKeys;
       groupedKeys = YouTubeGroupsAvatars.getGroupedChannelKeys(groups);
+      const changed =
+        previousKeys !== null &&
+        (previousKeys.size !== groupedKeys.size ||
+          [...previousKeys].some((key) => !groupedKeys.has(key)));
+      if (changed) {
+        // Un canal que vuelve a un grupo debe anotarse de nuevo: los vídeos
+        // anotados antes pudieron podarse del almacenamiento.
+        for (const id of [...noted.keys()]) {
+          if (!pending.has(id)) {
+            noted.delete(id);
+          }
+        }
+      }
       recount();
     }
 

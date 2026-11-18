@@ -46,8 +46,9 @@ Clave nueva `youtubeNewVideos`:
   mientras se mira ese grupo no es nuevo). Seleccionar canales sueltos o ver suscripciones sin filtro no reconoce nada
   (si no, como solo se observa en suscripciones, el contador nunca subiría).
 - **Vídeo nuevo**: con `ack(v)` = la visita más reciente entre los grupos cuyo subárbol contiene el canal de `v` (o
-  `since`), `v` es nuevo si no está en `youtubeWatched` (ADR 0002), `seenAt > ack(v)` y (`publishedBefore` es `null`
-  o `publishedBefore > ack(v)`). La segunda condición evita contar vídeos antiguos que aparecen al desplazarse.
+  `since`), `v` es nuevo si no está en `youtubeWatched` (ADR 0002), `seenAt > ack(v)` y `publishedBefore` no es `null`
+  y es `> ack(v)`. La segunda condición evita contar vídeos antiguos que aparecen al desplazarse; un vídeo sin edad
+  legible (directos, estrenos, tarjetas sin fecha) no cuenta.
 - **Contador de un grupo**: número de vídeos nuevos distintos de los canales de su subárbol (grupo y subgrupos). Ver un
   subgrupo reduce también el contador del padre; ver un grupo, el de sus subgrupos y el de otros grupos que comparten
   el canal.
@@ -81,4 +82,4 @@ Clave nueva `youtubeNewVideos`:
   `since`; la antigüedad es aproximada ("hace 1 día" puede ser 47 h) y la cota usa el límite favorable a contar. Con
   varias pestañas en suscripciones a la vez, un volcado puede pisar otro (límite del ADR 0005); se recupera al volver
   a observar.
-- A vigilar: si YouTube cambia el texto de la antigüedad, `publishedBefore` queda `null` y solo cuenta `seenAt`.
+- A vigilar: si YouTube cambia el texto de la antigüedad, `publishedBefore` queda `null` y los vídeos nuevos dejan de contarse.

@@ -101,16 +101,17 @@ test("setGroupBullet con número: texto, clase, aria-description y tope 99+", ()
   assert.strictEqual(bullet.textContent, "3");
   assert.ok(bullet.classList.contains("youtube-groups__group-bullet--count"));
   assert.strictEqual(
-    bullet.getAttribute("aria-description"),
+    element.getAttribute("aria-description"),
     "3 vídeos nuevos",
   );
+  assert.strictEqual(bullet.hasAttribute("aria-description"), false);
   assert.strictEqual(
     bullet.style.getPropertyValue("--yg-bullet-text"),
     "#0f0f0f",
   );
 
   icons.setGroupBullet(element, "#2196F3", 1);
-  assert.strictEqual(bullet.getAttribute("aria-description"), "1 vídeo nuevo");
+  assert.strictEqual(element.getAttribute("aria-description"), "1 vídeo nuevo");
 
   icons.setGroupBullet(element, "#2196F3", 150);
   assert.strictEqual(bullet.textContent, "99+");
@@ -118,7 +119,7 @@ test("setGroupBullet con número: texto, clase, aria-description y tope 99+", ()
   icons.setGroupBullet(element, "#2196F3", 0);
   assert.strictEqual(bullet.textContent, "");
   assert.ok(!bullet.classList.contains("youtube-groups__group-bullet--count"));
-  assert.strictEqual(bullet.hasAttribute("aria-description"), false);
+  assert.strictEqual(element.hasAttribute("aria-description"), false);
 });
 
 test("setGroupBullet sin color: con número es gris y sin número no hay bullet", () => {

@@ -217,7 +217,7 @@ const countGroups = [
   makeGroup("B", { channels: [X] }),
 ];
 
-function video(seenAt, publishedBefore = null, channel = X_KEY) {
+function video(seenAt, publishedBefore = seenAt, channel = X_KEY) {
   return { channel, seenAt, publishedBefore };
 }
 
@@ -256,6 +256,16 @@ test("countNewVideos no cuenta vistos ni anteriores a la visita o a since", () =
   assert.strictEqual(N.countNewVideos(seenBefore, countGroups, {}).size, 0);
 });
 
+test("countNewVideos no cuenta un vídeo sin edad legible", () => {
+  const { YouTubeGroupsNewVideos: N } = loadModules();
+  const state = {
+    since: 100,
+    videos: { [V1]: video(200, null) },
+    visits: {},
+  };
+  assert.strictEqual(N.countNewVideos(state, countGroups, {}).size, 0);
+});
+
 test("countNewVideos cuenta una vez un vídeo y omite grupos sin nuevos", () => {
   const { YouTubeGroupsNewVideos: N } = loadModules();
   const y = { name: "Y", url: "https://www.youtube.com/@Y" };
@@ -267,7 +277,7 @@ test("countNewVideos cuenta una vez un vídeo y omite grupos sin nuevos", () => 
     since: 100,
     videos: {
       [V1]: video(200),
-      [V2]: video(200, null, "https://www.youtube.com/@y"),
+      [V2]: video(200, 200, "https://www.youtube.com/@y"),
     },
     visits: {},
   };
