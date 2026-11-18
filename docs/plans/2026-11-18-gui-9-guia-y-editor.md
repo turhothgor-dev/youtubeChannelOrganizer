@@ -1,6 +1,6 @@
 # Plan: gui-9 · Ajustes de la guía (pie, bullet de color, iconos, separación, navegación) y texto del editor
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-18)
 
 Issue: correcciones de la persona tras probar gui-8 en Firefox (2026-11-18), puntos 1 a 6 y el bullet sin número del
 punto 2. Índice: [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). Sin ADR (solo presentación).

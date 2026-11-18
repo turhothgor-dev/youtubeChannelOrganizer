@@ -1,6 +1,6 @@
 # Plan: Fase 6-5 · Vídeos nuevos por grupo en el bullet de la guía
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-18)
 
 Issue: punto 2 de la persona tras probar gui-8 (2026-11-18), el número dentro del bullet, y ROADMAP 6-5. Índice:
 [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). ADR:

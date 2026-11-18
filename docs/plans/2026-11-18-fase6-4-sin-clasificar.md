@@ -1,6 +1,6 @@
 # Plan: Fase 6-4 · Suscripciones sin grupo en el editor (bandeja "Sin clasificar")
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-18)
 
 Issue: punto 7 de la persona tras probar gui-8 (2026-11-18) y ROADMAP 6-4. Índice:
 [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). ADR:
