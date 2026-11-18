@@ -45,6 +45,23 @@
   font-size: 18px;
 }
 
+.youtube-groups__guide-back,
+.youtube-groups__guide-enter {
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.youtube-groups__guide-back:hover,
+.youtube-groups__guide-back:focus-visible,
+.youtube-groups__guide-enter:hover,
+.youtube-groups__guide-enter:focus-visible,
+.youtube-groups__guide-toggle:hover,
+.youtube-groups__guide-toggle:focus-visible {
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+}
+
 .youtube-groups__guide-create,
 .youtube-groups__guide-edit {
   display: inline-flex;
@@ -127,6 +144,7 @@
 .youtube-groups__guide-footer {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
   padding: 0 4px;
@@ -278,12 +296,13 @@ html[dark] .youtube-groups__guide-form-cancel {
   flex: none;
   width: 24px;
   height: 36px;
-  color: var(--yt-spec-text-secondary, #606060);
+  color: var(--yt-spec-text-primary, #0f0f0f);
   background: transparent;
   border: 0;
+  border-radius: 6px;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .youtube-groups__guide-toggle[hidden],
@@ -301,8 +320,20 @@ html[dark] .youtube-groups__guide-form-cancel {
   padding-right: 12px;
 }
 
+.youtube-groups__guide-column,
+.youtube-groups__guide-group,
+.youtube-groups__guide-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .youtube-groups__guide-channels {
   padding-left: 24px;
+}
+
+.youtube-groups__guide-channels[hidden] {
+  display: none;
 }
 
 .youtube-groups__guide-item.youtube-groups__guide-channel {
@@ -361,13 +392,25 @@ html[dark] .youtube-groups__guide-menu-button {
 }
 
 html[dark] .youtube-groups__guide-empty,
-html[dark] .youtube-groups__guide-toggle,
-html[dark] .youtube-groups__guide-back,
 html[dark] .youtube-groups__guide-create,
 html[dark] .youtube-groups__guide-edit,
-html[dark] .youtube-groups__guide-enter,
 html[dark] .youtube-groups__guide-item.youtube-groups__guide-channel {
   color: var(--yt-spec-text-secondary, #aaa);
+}
+
+html[dark] .youtube-groups__guide-toggle,
+html[dark] .youtube-groups__guide-back,
+html[dark] .youtube-groups__guide-enter {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .youtube-groups__guide-back:hover,
+html[dark] .youtube-groups__guide-back:focus-visible,
+html[dark] .youtube-groups__guide-enter:hover,
+html[dark] .youtube-groups__guide-enter:focus-visible,
+html[dark] .youtube-groups__guide-toggle:hover,
+html[dark] .youtube-groups__guide-toggle:focus-visible {
+  background: var(--yt-spec-badge-chip-background, #272727);
 }
 
 html[dark] .youtube-groups__guide-item:hover,

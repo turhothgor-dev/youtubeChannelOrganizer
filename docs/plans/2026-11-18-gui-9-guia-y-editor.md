@@ -61,7 +61,7 @@ Alternativa descartada: conservar la banda y añadir el bullet aparte (dos marca
 
 ## Tareas
 
-- [ ] T1 · Pie a la derecha, separación vertical y navegación más visible (decisiones 1, 4 y 5) · Ficheros:
+- [x] T1 · Pie a la derecha, separación vertical y navegación más visible (decisiones 1, 4 y 5) · Ficheros:
   `ui/guide-section.css` · Test: `make lint` y `make test` en verde (los tests de la guía no cambian) y V1, V3 y V4.
 - [ ] T2 · Iconos de grupo un 10 % más pequeños (decisión 3) · Ficheros: `ui/icons-dom.js`,
   `tests/ui-icons-dom.test.js` · Test: el test "la marca de un grupo con icono es un .youtube-groups__icon con un svg
@@ -124,3 +124,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-18 | gui-9 T1 | `style: pie a la derecha, separación vertical y navegación más visible en la guía` | Solo CSS; lint y 353 tests en verde. V1, V3 y V4 pendientes en Firefox. |
