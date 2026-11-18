@@ -1,6 +1,6 @@
 # 0018 · Suscripciones conocidas en una clave aparte, leídas del DOM de YouTube
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-18
 
 ## Contexto

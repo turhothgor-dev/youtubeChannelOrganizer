@@ -1,10 +1,10 @@
 # Plan: Fase 6-4 · Suscripciones sin grupo en el editor (bandeja "Sin clasificar")
 
-**Estado:** aprobado (2026-11-18)
+**Estado:** hecho
 
 Issue: punto 7 de la persona tras probar gui-8 (2026-11-18) y ROADMAP 6-4. Índice:
 [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). ADR:
-[0018](../adr/0018-suscripciones-conocidas-en-clave-aparte.md) (propuesta; modifica el 0016).
+[0018](../adr/0018-suscripciones-conocidas-en-clave-aparte.md) (aceptada; modifica el 0016).
 
 <!-- Estados: borrador → aprobado (AAAA-MM-DD) → hecho. Se cambia solo la línea `**Estado:**`, y lo
      hace quien tiene la aprobación de una persona; los subagentes no ven la conversación, solo este fichero. -->
@@ -136,7 +136,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   "Seleccionar todo" marca todas y queda indeterminado con una desmarcada; elegir el subgrupo A1 y "Añadir" guarda
   los dos en A1 (una escritura de `youtubeGroups`), muestra "2 añadidos a «A1»" y la lista queda vacía con "Todas las
   suscripciones conocidas están en algún grupo."; Escape en el selector lo cierra sin escribir.
-- [ ] T10 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (filas de `modules/subscriptions.js`, `ui/subscriptions.js` y
+- [x] T10 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (filas de `modules/subscriptions.js`, `ui/subscriptions.js` y
   `options/unclassified.js`; `modules/storage.js` con `KEYS.subscriptions`; `modules/pages.js` con `"channels"`;
   `modules/avatars.js` y `modules/group-editor.js` con lo nuevo; flujos "Avatares de canal" y "Editor de grupos" y
   flujo nuevo "Suscripciones conocidas"; ADR 0018 en "Decisiones"), `docs/adr/0018-…` (aceptada),
@@ -201,3 +201,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T7 | feat: añadir canales a un grupo desde el editor | `addChannels` y `addChannelsAndSave` en `modules/group-editor.js` (solo escribe si `added > 0`); tests nuevos. |
 | 2026-11-18 | T8 | feat: bandeja de suscripciones sin grupo en el editor | `options/unclassified.js` (lista, textos vacíos, filtro por buscador), sección en `options.html`/`.css`, `options.js` lee `getSubscriptions()` y repinta con `storage.onChanged`; 4 tests nuevos. |
 | 2026-11-18 | T9 | feat: selección y "Añadir a…" en la bandeja de suscripciones | `options/unclassified.js` (casillas, "Seleccionar todo" indeterminado, selector con sangría, aviso/error, Escape), estilos en `options.css`; 2 tests nuevos. |
+| 2026-11-18 | T10 | feat: cerrar la fase 6-4 (documentación, ADR 0018 aceptada, ROADMAP) | `ARCHITECTURE.md` (filas, flujos y decisiones), ADR 0018 aceptada, 0016 con "Modificado por", ROADMAP 6-4 ✅, plan a `hecho`. Verificación manual V1 a V7 pendiente de la persona. |

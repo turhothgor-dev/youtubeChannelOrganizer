@@ -1,6 +1,7 @@
 # 0016 · Avatares de canal en una clave aparte, capturados del DOM de YouTube
 
 - Estado: aceptada
+- Modificado por: 0018 (también se conservan los avatares de suscripciones)
 - Fecha: 2026-11-17
 
 ## Contexto
