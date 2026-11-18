@@ -103,3 +103,10 @@ test("getUiIconPath devuelve rutas de interfaz sin mezclarlas con ICON_SET", () 
   assert.equal(Icons.getUiIconPath("x"), null);
   assert.equal(Icons.ICON_SET.length, 12);
 });
+
+test("getContrastTextColor elige el texto de mayor contraste WCAG", () => {
+  assert.equal(Icons.getContrastTextColor("#9C27B0"), "#ffffff");
+  assert.equal(Icons.getContrastTextColor("#3F51B5"), "#ffffff");
+  assert.equal(Icons.getContrastTextColor("#FF9800"), "#0f0f0f");
+  assert.equal(Icons.getContrastTextColor("#2196F3"), "#0f0f0f");
+});

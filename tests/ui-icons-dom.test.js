@@ -91,6 +91,73 @@ test("setGroupBullet crea un bullet único, es idempotente y lo quita", async ()
   assert.strictEqual(element.querySelector(bulletSel), null);
 });
 
+test("setGroupBullet con número: texto, clase, aria-description y tope 99+", () => {
+  const { dom, icons } = loadIconsDom();
+  const element = dom.document.createElement("button");
+  const bulletSel = ".youtube-groups__group-bullet";
+
+  icons.setGroupBullet(element, "#2196F3", 3);
+  const bullet = element.querySelector(bulletSel);
+  assert.strictEqual(bullet.textContent, "3");
+  assert.ok(bullet.classList.contains("youtube-groups__group-bullet--count"));
+  assert.strictEqual(
+    bullet.getAttribute("aria-description"),
+    "3 vídeos nuevos",
+  );
+  assert.strictEqual(
+    bullet.style.getPropertyValue("--yg-bullet-text"),
+    "#0f0f0f",
+  );
+
+  icons.setGroupBullet(element, "#2196F3", 1);
+  assert.strictEqual(bullet.getAttribute("aria-description"), "1 vídeo nuevo");
+
+  icons.setGroupBullet(element, "#2196F3", 150);
+  assert.strictEqual(bullet.textContent, "99+");
+
+  icons.setGroupBullet(element, "#2196F3", 0);
+  assert.strictEqual(bullet.textContent, "");
+  assert.ok(!bullet.classList.contains("youtube-groups__group-bullet--count"));
+  assert.strictEqual(bullet.hasAttribute("aria-description"), false);
+});
+
+test("setGroupBullet sin color: con número es gris y sin número no hay bullet", () => {
+  const { dom, icons } = loadIconsDom();
+  const element = dom.document.createElement("button");
+  const bulletSel = ".youtube-groups__group-bullet";
+
+  icons.setGroupBullet(element, null, 2);
+  const bullet = element.querySelector(bulletSel);
+  assert.ok(bullet);
+  assert.strictEqual(bullet.textContent, "2");
+  assert.strictEqual(bullet.style.getPropertyValue("--yg-group-color"), "");
+
+  icons.setGroupBullet(element, null, 0);
+  assert.strictEqual(element.querySelector(bulletSel), null);
+  icons.setGroupBullet(element, "", 0);
+  assert.strictEqual(element.querySelector(bulletSel), null);
+});
+
+test("setGroupBullet con número repetido no muta el DOM", () => {
+  const { dom, icons } = loadIconsDom();
+  const element = dom.document.createElement("button");
+  icons.setGroupBullet(element, "#9C27B0", 5);
+  const records = [];
+  const observer = new dom.window.MutationObserver((list) =>
+    records.push(...list),
+  );
+  observer.observe(element, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    characterData: true,
+  });
+  icons.setGroupBullet(element, "#9C27B0", 5);
+  records.push(...observer.takeRecords());
+  assert.strictEqual(records.length, 0);
+  observer.disconnect();
+});
+
 test("setCardButtonContent dos veces no duplica glifo ni etiqueta", () => {
   const { dom, icons } = loadIconsDom();
   const button = dom.document.createElement("button");

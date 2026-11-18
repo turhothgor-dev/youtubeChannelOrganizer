@@ -92,7 +92,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   en A1 y en B): vídeo de X posterior a todo cuenta 1 en A1, A y B; tras visitar A1 cuenta 0 en los tres; visitar A lo
   pone a 0 en A1; un vídeo visto (`watched`) no cuenta; `publishedBefore` anterior a la visita no cuenta; sin visitas
   se usa `since`; dos canales del subárbol con el mismo vídeo cuentan 1; grupos sin nuevos no están en el `Map`.
-- [ ] T4 · Bullet con número · Ficheros: `modules/icons.js`, `ui/icons-dom.js`, `ui/icons.css`,
+- [x] T4 · Bullet con número · Ficheros: `modules/icons.js`, `ui/icons-dom.js`, `ui/icons.css`,
   `tests/icons.test.js`, `tests/ui-icons-dom.test.js` · Test: `getContrastTextColor` da blanco con `#9C27B0` y
   `#3F51B5` y oscuro con `#FF9800` y `#2196F3` (máximo contraste WCAG: el azul de la paleta queda mejor con texto
   oscuro); `setGroupBullet(el, "#2196F3", 3)` → texto "3", clase `--count`,
@@ -160,3 +160,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T1 | `feat: clave youtubeNewVideos en el almacenamiento` | `KEYS.newVideos`, `readNewVideosValue`, `getNewVideos`, `saveNewVideos` y tests. |
 | 2026-11-18 | T2 | `feat: lote, reconocimiento y poda de vídeos nuevos` | `modules/new-videos.js` (`normalizeNewVideos`, `applyFeedBatch`, `acknowledgeGroups`, `saveFeedBatch`), manifiesto, loader de tests y `tests/new-videos.test.js`. |
 | 2026-11-18 | T3 | `feat: recuento de vídeos nuevos por grupo` | `countNewVideos` (subárbol, ack por canal, vistos) y tests. |
+| 2026-11-18 | T4 | `feat: bullet de grupo con número de vídeos nuevos` | `getContrastTextColor`, `setGroupBullet(el, color, count)` (gris sin color, `99+`, `aria-description`), CSS y tests. |

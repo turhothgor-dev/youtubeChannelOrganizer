@@ -54,5 +54,19 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--yg-group-color);
+  background: var(--yg-group-color, #909090);
+}
+
+/* Bullet con el número de vídeos nuevos */
+.youtube-groups__group-bullet--count {
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: var(--yg-bullet-text);
 }

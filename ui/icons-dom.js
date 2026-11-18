@@ -189,15 +189,18 @@ const YouTubeGroupsIconsDom = (() => {
   }
 
   /**
-   * Pinta o quita el bullet de color del grupo como último hijo del elemento.
-   * Idempotente: solo escribe en el DOM si algo cambia.
+   * Pinta o quita el bullet del grupo como último hijo del elemento, con el
+   * número de vídeos nuevos dentro si hay. Idempotente: solo escribe en el DOM
+   * si algo cambia.
    * @param {HTMLElement} element - Botón principal del grupo.
-   * @param {string|null} color - Color CSS; vacío o null quita el bullet.
+   * @param {string|null} color - Color CSS; vacío o null, bullet gris si hay número.
+   * @param {number} [count] - Vídeos nuevos; 0 no muestra número.
    */
-  function setGroupBullet(element, color) {
+  function setGroupBullet(element, color, count = 0) {
     const selector = ":scope > .youtube-groups__group-bullet";
     let bullet = element.querySelector(selector);
-    if (!color) {
+    const hasCount = count > 0;
+    if (!color && !hasCount) {
       if (bullet) {
         bullet.remove();
       }
@@ -206,13 +209,52 @@ const YouTubeGroupsIconsDom = (() => {
     if (!bullet) {
       bullet = document.createElement("span");
       bullet.className = "youtube-groups__group-bullet";
-      bullet.setAttribute("aria-hidden", "true");
       element.append(bullet);
     } else if (element.lastElementChild !== bullet) {
       element.append(bullet);
     }
-    if (bullet.style.getPropertyValue("--yg-group-color") !== color) {
-      bullet.style.setProperty("--yg-group-color", color);
+    if (bullet.getAttribute("aria-hidden") !== "true") {
+      bullet.setAttribute("aria-hidden", "true");
+    }
+    const currentColor = bullet.style.getPropertyValue("--yg-group-color");
+    if (color) {
+      if (currentColor !== color) {
+        bullet.style.setProperty("--yg-group-color", color);
+      }
+    } else if (currentColor) {
+      bullet.style.removeProperty("--yg-group-color");
+    }
+    if (
+      bullet.classList.contains("youtube-groups__group-bullet--count") !==
+      hasCount
+    ) {
+      bullet.classList.toggle("youtube-groups__group-bullet--count", hasCount);
+    }
+    const text = hasCount ? (count > 99 ? "99+" : String(count)) : "";
+    if (bullet.textContent !== text) {
+      bullet.textContent = text;
+    }
+    const textColor = hasCount
+      ? YouTubeGroupsIcons.getContrastTextColor(color || "#909090")
+      : "";
+    if (bullet.style.getPropertyValue("--yg-bullet-text") !== textColor) {
+      if (textColor) {
+        bullet.style.setProperty("--yg-bullet-text", textColor);
+      } else {
+        bullet.style.removeProperty("--yg-bullet-text");
+      }
+    }
+    const description = hasCount
+      ? count === 1
+        ? "1 vídeo nuevo"
+        : `${count} vídeos nuevos`
+      : "";
+    if ((bullet.getAttribute("aria-description") || "") !== description) {
+      if (description) {
+        bullet.setAttribute("aria-description", description);
+      } else {
+        bullet.removeAttribute("aria-description");
+      }
     }
   }
 

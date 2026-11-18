@@ -116,8 +116,37 @@ const YouTubeGroupsIcons = (() => {
     return color ? color.hex : null;
   }
 
+  /**
+   * Luminancia relativa WCAG de un color #rrggbb.
+   * @param {string} hex - Color #rrggbb.
+   * @returns {number} Luminancia entre 0 y 1.
+   */
+  function relativeLuminance(hex) {
+    const channels = [1, 3, 5].map((start) => {
+      const value = parseInt(hex.slice(start, start + 2), 16) / 255;
+      return value <= 0.03928
+        ? value / 12.92
+        : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  }
+
+  /**
+   * Elige el color de texto (blanco u oscuro) con mayor contraste WCAG sobre un fondo.
+   * @param {string} hex - Fondo #rrggbb.
+   * @returns {string} "#ffffff" o "#0f0f0f".
+   */
+  function getContrastTextColor(hex) {
+    const luminance = relativeLuminance(hex);
+    const darkText = relativeLuminance("#0f0f0f");
+    const contrastWhite = 1.05 / (luminance + 0.05);
+    const contrastDark = (luminance + 0.05) / (darkText + 0.05);
+    return contrastWhite >= contrastDark ? "#ffffff" : "#0f0f0f";
+  }
+
   return {
     ICON_SET,
+    getContrastTextColor,
     COLOR_SET,
     NO_ICON,
     NO_COLOR,
