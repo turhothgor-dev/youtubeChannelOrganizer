@@ -90,7 +90,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   `{}` con `undefined`, `null`, array o `channels` no objeto y el mapa si es válido; `getSubscriptions` sin datos
   devuelve `{}` y no escribe; `saveSubscriptions` guarda `{ version: 1, channels }` y rechaza lo que no es objeto;
   `getChangedKeys` incluye `"subscriptions"`.
-- [ ] T2 · Lógica pura de suscripciones · Ficheros: `modules/subscriptions.js` (nuevo), `manifest.json`,
+- [x] T2 · Lógica pura de suscripciones · Ficheros: `modules/subscriptions.js` (nuevo), `manifest.json`,
   `options/options.html`, `tests/helpers/load-modules.js`, `tests/subscriptions.test.js` (nuevo),
   `tests/manifest.test.js` si hace falta · Test: `normalizeSubscriptions` descarta cada tipo de entrada no válida;
   `mergeSubscriptions` añade con `firstSeen = now`, actualiza el nombre sin tocar `firstSeen`, no cambia nada con lo
@@ -193,3 +193,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-18 | T1 | feat: clave youtubeSubscriptions en el almacenamiento | `KEYS.subscriptions`, `readSubscriptionsValue`, `getSubscriptions`, `saveSubscriptions`; test de KEYS actualizado a seis claves. |
+| 2026-11-18 | T2 | feat: lógica pura de suscripciones conocidas | `modules/subscriptions.js` (normalize, merge, getUnclassified, findSubscriptionSectionIndex, isChannelListComplete, saveObserved), registrado en manifiesto, `options.html` y `load-modules.js`; tests nuevos. |

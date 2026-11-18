@@ -11,6 +11,7 @@ const MODULES = [
   "icons.js",
   "groups.js",
   "avatars.js",
+  "subscriptions.js",
   "group-editor.js",
   "watched.js",
   "settings.js",
@@ -73,6 +74,10 @@ function loadModules(
     calls,
     YouTubeGroups: vm.runInContext("YouTubeGroups", context),
     YouTubeGroupsAvatars: vm.runInContext("YouTubeGroupsAvatars", context),
+    YouTubeGroupsSubscriptions: vm.runInContext(
+      "YouTubeGroupsSubscriptions",
+      context,
+    ),
     YouTubeGroupsEditor: vm.runInContext("YouTubeGroupsEditor", context),
     YouTubeGroupsFxemoji: vm.runInContext("YouTubeGroupsFxemoji", context),
     YouTubeGroupsIcons: vm.runInContext("YouTubeGroupsIcons", context),
