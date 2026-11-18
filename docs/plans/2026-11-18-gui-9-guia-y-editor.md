@@ -77,7 +77,7 @@ Alternativa descartada: conservar la banda y añadir el bullet aparte (dos marca
   `#2196F3`; los nombres de fila (`rowNames`) no cambian. Los tests "la banda de color va en el botón del grupo, no en
   la fila" y "el botón del grupo con color tiene la banda y --yg-group-color" se reescriben para el bullet porque el
   requisito cambia; el test de `setGroupBand` se queda (sigue en uso).
-- [ ] T4 · Texto del panel "Canales" (decisión 6) · Ficheros: `options/options.js`, `tests/ui-options.test.js` · Test
+- [x] T4 · Texto del panel "Canales" (decisión 6) · Ficheros: `options/options.js`, `tests/ui-options.test.js` · Test
   (jsdom): al cargar el editor sin grupo seleccionado, `#options-channels` muestra "Elige un grupo o subgrupo para ver
   sus canales"; al abrir "Copiar a…" la primera opción del selector sigue siendo "Elige un grupo".
 - [ ] T5 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `ui/icons-dom.js` con `setGroupBullet`; flujo "Guía
@@ -127,3 +127,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | gui-9 T1 | `style: pie a la derecha, separación vertical y navegación más visible en la guía` | Solo CSS; lint y 353 tests en verde. V1, V3 y V4 pendientes en Firefox. |
 | 2026-11-18 | gui-9 T2 | `style: iconos de grupo un 10 % más pequeños` | `GROUP_ICON_SIZES` actualizado y tests; lint y 354 tests en verde. V5 pendiente en Firefox. |
 | 2026-11-18 | gui-9 T3 | `feat: bullet de color del grupo en la guía en lugar de la banda` | `setGroupBullet`, CSS y `data-group-id` en el botón principal; lint y 355 tests en verde. V2 pendiente en Firefox. |
+| 2026-11-18 | gui-9 T4 | `feat: texto del panel de canales del editor sin grupo seleccionado` | Texto nuevo y test; lint y 356 tests en verde. V6 pendiente en Firefox. |

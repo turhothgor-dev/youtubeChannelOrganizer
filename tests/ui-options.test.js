@@ -142,6 +142,34 @@ test("F2 sobre la fila abre renombrar", async () => {
   assert.ok(dom.document.querySelector(".options__editor input"));
 });
 
+test("sin grupo seleccionado el panel de canales invita a elegir grupo o subgrupo, y el selector de copiar conserva su texto", async () => {
+  const store = groupsStore([
+    makeGroup("a", {
+      name: "A",
+      channels: [{ name: "Canal", url: "https://www.youtube.com/@canal" }],
+    }),
+    makeGroup("b", { name: "B" }),
+  ]);
+  const dom = loadOptionsDom({ store });
+  await dom.flush();
+  const panel = dom.document.getElementById("options-channels");
+  assert.strictEqual(
+    panel.textContent,
+    "Elige un grupo o subgrupo para ver sus canales",
+  );
+
+  rowOf(dom, "A").querySelector(".options__name").click();
+  await dom.flush();
+  panel.querySelector("input[data-url]").click();
+  await dom.flush();
+  [...panel.querySelectorAll("button")]
+    .find((b) => b.textContent === "Copiar a…")
+    .click();
+  await dom.flush();
+  const select = panel.querySelector(".options__transfer-select");
+  assert.strictEqual(select.options[0].textContent, "Elige un grupo");
+});
+
 test("el nombre del grupo lleva el nombre completo en el title", async () => {
   const longName = "Ciencia y tecnología divulgativa";
   const store = groupsStore([makeGroup("c", { name: longName })]);

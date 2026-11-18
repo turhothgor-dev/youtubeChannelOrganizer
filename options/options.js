@@ -837,7 +837,13 @@
       selectedId = null;
       selectedUrls.clear();
       transfer = null;
-      channelsEl.append(el("p", "options__channels-summary", "Elige un grupo"));
+      channelsEl.append(
+        el(
+          "p",
+          "options__channels-summary",
+          "Elige un grupo o subgrupo para ver sus canales",
+        ),
+      );
       return;
     }
     const allChannels = Array.isArray(group.channels) ? group.channels : [];
