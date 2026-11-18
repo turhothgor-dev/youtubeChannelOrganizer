@@ -1,6 +1,6 @@
 # Plan: gui-9 · Ajustes de la guía (pie, bullet de color, iconos, separación, navegación) y texto del editor
 
-**Estado:** aprobado (2026-11-18)
+**Estado:** hecho
 
 Issue: correcciones de la persona tras probar gui-8 en Firefox (2026-11-18), puntos 1 a 6 y el bullet sin número del
 punto 2. Índice: [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). Sin ADR (solo presentación).
@@ -80,7 +80,7 @@ Alternativa descartada: conservar la banda y añadir el bullet aparte (dos marca
 - [x] T4 · Texto del panel "Canales" (decisión 6) · Ficheros: `options/options.js`, `tests/ui-options.test.js` · Test
   (jsdom): al cargar el editor sin grupo seleccionado, `#options-channels` muestra "Elige un grupo o subgrupo para ver
   sus canales"; al abrir "Copiar a…" la primera opción del selector sigue siendo "Elige un grupo".
-- [ ] T5 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `ui/icons-dom.js` con `setGroupBullet`; flujo "Guía
+- [x] T5 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `ui/icons-dom.js` con `setGroupBullet`; flujo "Guía
   lateral": el color del grupo es un bullet a la derecha de su botón, no la banda; pie a la derecha), este plan a
   `hecho` · Test: `make lint`, `make test` y V1 a V6.
 
@@ -128,3 +128,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | gui-9 T2 | `style: iconos de grupo un 10 % más pequeños` | `GROUP_ICON_SIZES` actualizado y tests; lint y 354 tests en verde. V5 pendiente en Firefox. |
 | 2026-11-18 | gui-9 T3 | `feat: bullet de color del grupo en la guía en lugar de la banda` | `setGroupBullet`, CSS y `data-group-id` en el botón principal; lint y 355 tests en verde. V2 pendiente en Firefox. |
 | 2026-11-18 | gui-9 T4 | `feat: texto del panel de canales del editor sin grupo seleccionado` | Texto nuevo y test; lint y 356 tests en verde. V6 pendiente en Firefox. |
+| 2026-11-18 | gui-9 T5 | `docs: cerrar gui-9 (ARCHITECTURE con bullet y pie a la derecha)` | Solo documentación. Verificación manual V1 a V6 pendiente en Firefox. |
