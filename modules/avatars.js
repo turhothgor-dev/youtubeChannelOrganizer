@@ -99,15 +99,33 @@ const YouTubeGroupsAvatars = (() => {
   }
 
   /**
-   * Combina los avatares guardados con los observados, solo para canales agrupados.
-   * No muta ninguna entrada.
+   * Claves de los canales cuyo avatar se conserva: los agrupados y los
+   * suscritos conocidos (ADR 0018).
+   * @param {Array} groups Grupos.
+   * @param {Object} [subscriptions] Mapa clave de canal -> suscripción.
+   * @returns {Set<string>}
+   */
+  function getKeptChannelKeys(groups, subscriptions = {}) {
+    const keys = getGroupedChannelKeys(groups);
+    if (subscriptions && typeof subscriptions === "object") {
+      for (const key of Object.keys(subscriptions)) {
+        keys.add(key);
+      }
+    }
+    return keys;
+  }
+
+  /**
+   * Combina los avatares guardados con los observados, solo para canales
+   * agrupados o suscritos conocidos. No muta ninguna entrada.
    * @param {Object} stored Avatares guardados.
    * @param {Object|Map} observed Avatares vistos (clave -> URL).
    * @param {Array} groups Grupos.
+   * @param {Object} [subscriptions] Suscripciones conocidas (clave -> datos).
    * @returns {{avatars: Object, changed: boolean}}
    */
-  function mergeAvatars(stored, observed, groups) {
-    const grouped = getGroupedChannelKeys(groups);
+  function mergeAvatars(stored, observed, groups, subscriptions = {}) {
+    const grouped = getKeptChannelKeys(groups, subscriptions);
     const previous = stored && typeof stored === "object" ? stored : {};
     const avatars = {};
 
@@ -178,11 +196,17 @@ const YouTubeGroupsAvatars = (() => {
   function saveObservedAvatars(observed) {
     const storage = YouTubeGroupsStorage;
     return storage.withLock(storage.KEYS.avatars, async () => {
-      const [stored, groups] = await Promise.all([
+      const [stored, groups, subscriptions] = await Promise.all([
         storage.getAvatars(),
         storage.getGroups(),
+        storage.getSubscriptions(),
       ]);
-      const { avatars, changed } = mergeAvatars(stored, observed, groups);
+      const { avatars, changed } = mergeAvatars(
+        stored,
+        observed,
+        groups,
+        subscriptions,
+      );
       if (changed) {
         await storage.saveAvatars(avatars);
       }
@@ -197,6 +221,7 @@ const YouTubeGroupsAvatars = (() => {
     isValidAvatarKey,
     getAvatarFor,
     getGroupedChannelKeys,
+    getKeptChannelKeys,
     mergeAvatars,
     getInitial,
     getFallbackColor,

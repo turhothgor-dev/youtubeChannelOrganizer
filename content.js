@@ -3,7 +3,8 @@
 
   console.log("[YouTube Groups] content.js cargado");
 
-  const { getGroups, saveGroups, getAvatars } = YouTubeGroupsStorage;
+  const { getGroups, saveGroups, getAvatars, getSubscriptions } =
+    YouTubeGroupsStorage;
 
   const {
     createGroup,
@@ -130,9 +131,13 @@
   }
 
   async function renderGroupsPanel() {
-    const [groups, avatars] = await Promise.all([getGroups(), getAvatars()]);
+    const [groups, avatars, subscriptions] = await Promise.all([
+      getGroups(),
+      getAvatars(),
+      getSubscriptions(),
+    ]);
     ctx.state.avatars = avatars;
-    ctx.avatars.setGroupedChannels(groups);
+    ctx.avatars.setGroupedChannels(groups, subscriptions);
     ctx.avatars.scheduleScan({ guide: true });
     ctx.cards.refreshChannelNameIndex(groups);
     ctx.cards.refreshChannelColorIndex(groups);

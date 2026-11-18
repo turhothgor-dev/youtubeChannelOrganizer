@@ -117,7 +117,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   tercero; si antes de 3 s aparece otro canal, el plazo vuelve a empezar; con un renderer sin URL no se reconcilia; en
   otra página (`/feed/subscriptions`) no se reconcilia nunca; reconciliar dos veces en la misma visita no vuelve a
   escribir.
-- [ ] T6 · Avatares de suscripciones conocidas · Ficheros: `modules/avatars.js`, `ui/avatars.js`, `content.js`,
+- [x] T6 · Avatares de suscripciones conocidas · Ficheros: `modules/avatars.js`, `ui/avatars.js`, `content.js`,
   `tests/avatars.test.js`, `tests/ui-avatars.test.js` · Test: `mergeAvatars` conserva y añade avatares de canales solo
   suscritos y sigue podando los que no están ni en grupos ni en suscripciones; sin cuarto argumento se comporta como
   antes (los tests actuales pasan sin cambiar lo que comprueban); `saveObservedAvatars` lee las suscripciones;
@@ -197,3 +197,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T3 | feat: tipo de página "channels" para /feed/channels | `getPageType("/feed/channels")` devuelve `"channels"`; sin controles de tarjeta ni guía fija; tests actualizados. |
 | 2026-11-18 | T4 | feat: recolector de suscripciones de la guía | `ui/subscriptions.js` (`readGuide`, `scheduleGuideRead`, `noteMutations`, `flushPending`), creado en `content.js` tras avatares, registrado en el manifiesto; lectura al arrancar, en `yt-navigate-finish` y con mutaciones de la guía ajenas a `#youtube-groups-guide`. |
 | 2026-11-18 | T5 | feat: recolector de /feed/channels con reconciliación | `noteChannelCard` (solo en página `channels`), `startVisit`, `checkChannelsList` (espera 3 s sin canales nuevos, una vez por visita); enganchado en `ui/cards.js` y `content.js`; 6 tests con reloj falso. |
+| 2026-11-18 | T6 | feat: avatares de suscripciones conocidas | `getKeptChannelKeys`; `mergeAvatars`/`saveObservedAvatars` y `setGroupedChannels` aceptan suscripciones; `renderGroupsPanel` las lee; tests nuevos. |

@@ -34,7 +34,7 @@ const YouTubeGroupsAvatarsUi = (() => {
    *   `scheduleScan`, `noteMutations` y `flushPending`.
    */
   function create(ctx) {
-    const { normalizeAvatarUrl, getGroupedChannelKeys, saveObservedAvatars } =
+    const { normalizeAvatarUrl, getKeptChannelKeys, saveObservedAvatars } =
       YouTubeGroupsAvatars;
     const { normalizeChannelUrl, getChannelKey } = YouTubeGroups;
 
@@ -128,9 +128,10 @@ const YouTubeGroupsAvatarsUi = (() => {
      * Actualiza los canales agrupados y reconsidera lo visto (así se guarda el
      * avatar de un canal recién añadido).
      * @param {Array} groups - Árbol de grupos.
+     * @param {Object} [subscriptions] - Suscripciones conocidas (ADR 0018).
      */
-    function setGroupedChannels(groups) {
-      groupedKeys = getGroupedChannelKeys(groups);
+    function setGroupedChannels(groups, subscriptions = {}) {
+      groupedKeys = getKeptChannelKeys(groups, subscriptions);
       for (const key of seen.keys()) {
         considerKey(key);
       }

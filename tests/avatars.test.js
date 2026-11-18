@@ -168,6 +168,48 @@ test("mergeAvatars conserva las entradas de subgrupos y descarta las no válidas
   });
 });
 
+test("mergeAvatars conserva y añade avatares de canales solo suscritos y poda el resto", () => {
+  const { YouTubeGroupsAvatars: A } = loadModules();
+  const subscriptions = {
+    [BAZ]: { name: "Baz", url: BAZ, firstSeen: 1 },
+  };
+  const QUX = "https://www.youtube.com/@qux";
+
+  const result = A.mergeAvatars(
+    { [BAZ]: img("baz"), [QUX]: img("qux") },
+    { [FOO]: img("foo") },
+    GROUPS,
+    subscriptions,
+  );
+
+  assert.deepStrictEqual(plain(result), {
+    avatars: { [BAZ]: img("baz"), [FOO]: img("foo") },
+    changed: true,
+  });
+  assert.deepStrictEqual(
+    [...A.getKeptChannelKeys(GROUPS, subscriptions)].sort(),
+    [BAR, BAZ, FOO],
+  );
+});
+
+test("saveObservedAvatars lee las suscripciones conocidas", async () => {
+  const { YouTubeGroupsAvatars: A, store } = loadModules({
+    youtubeGroups: { version: 1, groups: GROUPS },
+    youtubeSubscriptions: {
+      version: 1,
+      channels: { [BAZ]: { name: "Baz", url: BAZ, firstSeen: 1 } },
+    },
+  });
+
+  const result = await A.saveObservedAvatars({ [BAZ]: img("baz") });
+
+  assert.deepStrictEqual(plain(result), { changed: true });
+  assert.deepStrictEqual(plain(store.youtubeAvatars), {
+    version: 1,
+    avatars: { [BAZ]: img("baz") },
+  });
+});
+
 test("getInitial y getFallbackColor", () => {
   const { YouTubeGroupsAvatars: A } = loadModules();
 

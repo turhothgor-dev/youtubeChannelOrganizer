@@ -122,6 +122,25 @@ test("un canal no agrupado no guarda nada y, al agruparlo, se guarda sin ver la 
   assert.strictEqual(dom.store.youtubeAvatars.avatars[KEY], IMG_A + SUFFIX);
 });
 
+test("un canal solo suscrito se guarda al conocer la suscripción", async () => {
+  const { dom, ctx } = setup({
+    html: card("canal", [IMG_A]),
+    grouped: false,
+  });
+
+  ctx.cards.scanDocument();
+  await dom.flush();
+  await ctx.avatars.flushPending();
+  assert.strictEqual(dom.calls.set, 0);
+
+  ctx.avatars.setGroupedChannels([], {
+    [KEY]: { name: "canal", url: KEY, firstSeen: 1 },
+  });
+  await ctx.avatars.flushPending();
+  assert.strictEqual(dom.calls.set, 1);
+  assert.strictEqual(dom.store.youtubeAvatars.avatars[KEY], IMG_A + SUFFIX);
+});
+
 test("varias tarjetas de canales agrupados dan una sola escritura", async () => {
   const { dom, ctx } = setup({
     html: card("canal", [IMG_A]) + card("otro", [IMG_B]),
