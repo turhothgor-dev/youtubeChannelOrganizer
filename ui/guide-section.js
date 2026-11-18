@@ -133,7 +133,11 @@ const YouTubeGroupsGuideSection = (() => {
       row.append(toggle, main);
       const rowAppearance = YouTubeGroups.getGroupAppearance(groups, item.id);
       main.setAttribute("data-group-id", item.id);
-      setGroupBullet(main, rowAppearance ? rowAppearance.color : null);
+      setGroupBullet(
+        main,
+        rowAppearance ? rowAppearance.color : null,
+        ctx.state.newVideoCounts?.get(item.id) ?? 0,
+      );
 
       const enter = document.createElement("button");
       enter.type = "button";
@@ -765,6 +769,31 @@ const YouTubeGroupsGuideSection = (() => {
     }
 
     /**
+     * Actualiza el número de los bullets de la guía con
+     * `ctx.state.newVideoCounts`, sin rehacer la columna.
+     */
+    function updateNewVideoBullets() {
+      const section = document.getElementById(GUIDE_SECTION_ID);
+      if (!section) {
+        return;
+      }
+      for (const button of section.querySelectorAll("[data-group-id]")) {
+        const bullet = button.querySelector(
+          ":scope > .youtube-groups__group-bullet",
+        );
+        const color = bullet
+          ? bullet.style.getPropertyValue("--yg-group-color")
+          : "";
+        setGroupBullet(
+          button,
+          color || null,
+          ctx.state.newVideoCounts?.get(button.getAttribute("data-group-id")) ??
+            0,
+        );
+      }
+    }
+
+    /**
      * Final del observer de mutaciones: reprograma el pintado de la sección si
      * ya no está en su sitio.
      */
@@ -778,6 +807,7 @@ const YouTubeGroupsGuideSection = (() => {
       renderGuideSection,
       noteMutations,
       checkPlacement,
+      updateNewVideoBullets,
       start,
     });
   }

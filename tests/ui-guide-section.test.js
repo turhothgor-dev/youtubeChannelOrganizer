@@ -151,6 +151,71 @@ test("el color del grupo es un bullet en su botón principal, sin banda", async 
   );
 });
 
+test("el bullet muestra los vídeos nuevos, baja sin rehacer la fila y se vacía al seleccionar", async () => {
+  const OTHER_URL = "https://www.youtube.com/@otro";
+  const ids = ["aaaaaaaaaaa", "bbbbbbbbbbb", "ccccccccccc"];
+  const groups = [
+    makeGroup("A", {
+      channels: [{ name: "Canal", url: CHANNEL_URL }],
+      subgroups: [
+        makeGroup("A1", { channels: [{ name: "Canal", url: CHANNEL_URL }] }),
+      ],
+    }),
+    makeGroup("B", { channels: [{ name: "Otro", url: OTHER_URL }] }),
+  ];
+  groups[0].color = "#2196F3";
+  const now = Date.now();
+  const store = groupsStore(groups);
+  store.youtubeNewVideos = {
+    version: 1,
+    since: now - 1000,
+    videos: {
+      [ids[0]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: null },
+      [ids[1]]: { channel: CHANNEL_URL, seenAt: now, publishedBefore: null },
+      [ids[2]]: { channel: OTHER_URL, seenAt: now, publishedBefore: null },
+    },
+    visits: {},
+  };
+  const dom = await loadWithGuide({ store });
+  const bulletOf = (groupId) =>
+    dom.document.querySelector(
+      `${GUIDE} [data-group-id="${groupId}"] .youtube-groups__group-bullet`,
+    );
+
+  assert.strictEqual(bulletOf("A").textContent, "2");
+  assert.strictEqual(bulletOf("B").textContent, "1");
+  assert.strictEqual(
+    bulletOf("B").style.getPropertyValue("--yg-group-color"),
+    "",
+  );
+
+  const row = dom.document.querySelector(".youtube-groups__guide-row");
+  await dom.browser.storage.local.set({
+    youtubeWatched: { version: 1, videos: { [ids[0]]: 1 } },
+  });
+  await dom.flush();
+  assert.strictEqual(bulletOf("A").textContent, "1");
+  assert.ok(row.isConnected);
+  assert.strictEqual(
+    dom.document.querySelector(".youtube-groups__guide-row"),
+    row,
+  );
+
+  dom.document.querySelector(".youtube-groups__guide-enter").click();
+  await dom.flush();
+  assert.strictEqual(bulletOf("A1").textContent, "1");
+
+  dom.document.querySelector(".youtube-groups__guide-back").click();
+  await dom.flush();
+  dom.document.querySelector('[data-group-id="A"]').click();
+  await dom.flush();
+  assert.strictEqual(bulletOf("A").textContent, "");
+  assert.strictEqual(
+    bulletOf("A").classList.contains("youtube-groups__group-bullet--count"),
+    false,
+  );
+});
+
 test("crear y editar son iconos a la derecha del título, dentro de la cabecera", async () => {
   const dom = await loadWithGuide();
   const header = dom.document.querySelector(

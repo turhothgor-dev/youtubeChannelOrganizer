@@ -106,7 +106,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   momento y el siguiente volcado guarda `visits` de A; con A seleccionado, un vídeo nuevo de A no cuenta; en
   `/feed/channels` no se anota nada; tras volcar, `dom.flush()` se estabiliza y `calls.set` no sigue creciendo (sin
   bucle).
-- [ ] T6 · Número en la guía · Ficheros: `ui/guide-section.js`, `tests/ui-guide-section.test.js` · Test (jsdom): con
+- [x] T6 · Número en la guía · Ficheros: `ui/guide-section.js`, `tests/ui-guide-section.test.js` · Test (jsdom): con
   `youtubeNewVideos` que da 2 vídeos nuevos en A (azul) y 1 en B (sin color), el bullet de A muestra "2" y el de B
   "1" gris; marcar uno de A como visto (cambio de `youtubeWatched`) lo baja a "1" sin sustituir la fila (el mismo
   nodo `.youtube-groups__guide-row` sigue conectado); seleccionar A lo vacía; dentro de A, A1 muestra su propio
@@ -162,3 +162,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T3 | `feat: recuento de vídeos nuevos por grupo` | `countNewVideos` (subárbol, ack por canal, vistos) y tests. |
 | 2026-11-18 | T4 | `feat: bullet de grupo con número de vídeos nuevos` | `getContrastTextColor`, `setGroupBullet(el, color, count)` (gris sin color, `99+`, `aria-description`), CSS y tests. |
 | 2026-11-18 | T5 | `feat: recolector de vídeos nuevos y conexión en content.js` | `ui/new-videos.js` (`noteVideo`, `acknowledgeSelection`, `flushPending`, `setGroups`, `applyStoredValue`, `recount`, `start`), anotación desde `ui/cards.js`, conexión en `content.js` y manifiesto; `ctx.guide.updateNewVideoBullets` se llama con `?.` hasta T6. |
+| 2026-11-18 | T6 | `feat: número de vídeos nuevos en el bullet de la guía` | `createGuideRow` pasa el recuento a `setGroupBullet`; `updateNewVideoBullets()` actualiza los bullets sin rehacer la columna; test jsdom. |
