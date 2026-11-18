@@ -7,6 +7,7 @@ const YouTubeGroupsStorage = (() => {
     playlists: "youtubePlaylists",
     avatars: "youtubeAvatars",
     subscriptions: "youtubeSubscriptions",
+    newVideos: "youtubeNewVideos",
   });
   const STORAGE_KEY = KEYS.groups;
   const WATCHED_KEY = KEYS.watched;
@@ -14,6 +15,7 @@ const YouTubeGroupsStorage = (() => {
   const PLAYLISTS_KEY = KEYS.playlists;
   const AVATARS_KEY = KEYS.avatars;
   const SUBSCRIPTIONS_KEY = KEYS.subscriptions;
+  const NEW_VIDEOS_KEY = KEYS.newVideos;
   let groupsInitializationPromise = null;
   const lockQueues = new Map();
 
@@ -94,6 +96,21 @@ const YouTubeGroupsStorage = (() => {
    */
   function readSubscriptionsValue(data) {
     return data && isPlainObject(data.channels) ? data.channels : {};
+  }
+
+  /**
+   * Extrae el estado de vídeos nuevos de un valor guardado (ADR 0019).
+   * @param {*} data Valor guardado bajo la clave de vídeos nuevos.
+   * @returns {{since: (number|null), videos: Object, visits: Object}} Estado; vacío si el formato no es válido.
+   */
+  function readNewVideosValue(data) {
+    const valid = isPlainObject(data);
+
+    return {
+      since: valid && typeof data.since === "number" ? data.since : null,
+      videos: valid && isPlainObject(data.videos) ? data.videos : {},
+      visits: valid && isPlainObject(data.visits) ? data.visits : {},
+    };
   }
 
   /**
@@ -283,6 +300,37 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee el estado de vídeos nuevos (ADR 0019). Sin datos válidos devuelve el estado vacío y no escribe.
+   * @returns {Promise<{since: (number|null), videos: Object, visits: Object}>} Estado.
+   */
+  async function getNewVideos() {
+    const stored = await browser.storage.local.get(NEW_VIDEOS_KEY);
+
+    return readNewVideosValue(stored[NEW_VIDEOS_KEY]);
+  }
+
+  /**
+   * Guarda el estado de vídeos nuevos con el formato versión 1 (ADR 0019).
+   * @param {{since: (number|null), videos: Object, visits: Object}} state Estado.
+   */
+  async function saveNewVideos(state) {
+    if (!isPlainObject(state)) {
+      throw new TypeError("El estado de vídeos nuevos debe ser un objeto.");
+    }
+
+    const { since, videos, visits } = readNewVideosValue(state);
+
+    await browser.storage.local.set({
+      [NEW_VIDEOS_KEY]: {
+        version: 1,
+        since,
+        videos,
+        visits,
+      },
+    });
+  }
+
   function isPlainObject(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
@@ -296,6 +344,7 @@ const YouTubeGroupsStorage = (() => {
     readPlaylistsValue,
     readAvatarsValue,
     readSubscriptionsValue,
+    readNewVideosValue,
     getChangedKeys,
     getGroups,
     saveGroups,
@@ -309,5 +358,7 @@ const YouTubeGroupsStorage = (() => {
     saveAvatars,
     getSubscriptions,
     saveSubscriptions,
+    getNewVideos,
+    saveNewVideos,
   };
 })();

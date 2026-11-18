@@ -214,7 +214,7 @@ test("guardar listas no cambia grupos, vistos ni ajustes", async () => {
   );
 });
 
-test("KEYS tiene las seis claves con sus nombres reales", () => {
+test("KEYS tiene las siete claves con sus nombres reales", () => {
   const { YouTubeGroupsStorage } = loadModules();
 
   assert.deepStrictEqual(plain(YouTubeGroupsStorage.KEYS), {
@@ -224,6 +224,7 @@ test("KEYS tiene las seis claves con sus nombres reales", () => {
     playlists: "youtubePlaylists",
     avatars: "youtubeAvatars",
     subscriptions: "youtubeSubscriptions",
+    newVideos: "youtubeNewVideos",
   });
   assert.ok(Object.isFrozen(YouTubeGroupsStorage.KEYS));
 });
@@ -482,6 +483,77 @@ test("saveSubscriptions con algo que no es un objeto plano lanza TypeError", asy
   for (const invalid of [[], null, 5]) {
     await assert.rejects(
       () => YouTubeGroupsStorage.saveSubscriptions(invalid),
+      (error) => error.name === "TypeError",
+    );
+  }
+});
+
+test("getChangedKeys con youtubeNewVideos devuelve newVideos", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(
+    plain(S.getChangedKeys({ youtubeNewVideos: {} }, "local")),
+    ["newVideos"],
+  );
+});
+
+test("readNewVideosValue devuelve el estado o uno vacío", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+  const empty = { since: null, videos: {}, visits: {} };
+
+  for (const invalid of [undefined, null, [], "x", 5]) {
+    assert.deepStrictEqual(plain(S.readNewVideosValue(invalid)), empty);
+  }
+  assert.deepStrictEqual(
+    plain(S.readNewVideosValue({ since: "x", videos: [], visits: "y" })),
+    empty,
+  );
+  assert.deepStrictEqual(
+    plain(
+      S.readNewVideosValue({
+        version: 1,
+        since: 5,
+        videos: { a: { seenAt: 1 } },
+        visits: { g: 2 },
+      }),
+    ),
+    { since: 5, videos: { a: { seenAt: 1 } }, visits: { g: 2 } },
+  );
+});
+
+test("getNewVideos sin datos devuelve el estado vacío y no escribe", async () => {
+  const { YouTubeGroupsStorage, calls } = loadModules();
+
+  const state = await YouTubeGroupsStorage.getNewVideos();
+
+  assert.deepStrictEqual(plain(state), {
+    since: null,
+    videos: {},
+    visits: {},
+  });
+  assert.strictEqual(calls.set, 0);
+});
+
+test("saveNewVideos guarda con version 1 y getNewVideos lo recupera", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  const state = { since: 7, videos: { a: { seenAt: 1 } }, visits: { g: 3 } };
+
+  await YouTubeGroupsStorage.saveNewVideos(state);
+  const loaded = await YouTubeGroupsStorage.getNewVideos();
+
+  assert.deepStrictEqual(plain(loaded), state);
+  assert.deepStrictEqual(plain(store.youtubeNewVideos), {
+    version: 1,
+    ...state,
+  });
+});
+
+test("saveNewVideos con algo que no es un objeto plano lanza TypeError", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  for (const invalid of [[], null, 5]) {
+    await assert.rejects(
+      () => YouTubeGroupsStorage.saveNewVideos(invalid),
       (error) => error.name === "TypeError",
     );
   }

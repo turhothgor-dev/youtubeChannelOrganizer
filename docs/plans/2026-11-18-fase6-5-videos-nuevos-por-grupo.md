@@ -77,7 +77,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
 
 ## Tareas
 
-- [ ] T1 · Clave `youtubeNewVideos` · Ficheros: `modules/storage.js`, `tests/storage.test.js` · Test:
+- [x] T1 · Clave `youtubeNewVideos` · Ficheros: `modules/storage.js`, `tests/storage.test.js` · Test:
   `KEYS.newVideos === "youtubeNewVideos"`; `readNewVideosValue` con valores no válidos da `{ since: null, videos: {},
   visits: {} }`; `getNewVideos` sin datos no escribe; `saveNewVideos` guarda `version: 1`; `getChangedKeys` incluye
   `"newVideos"`.
@@ -157,3 +157,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-18 | T1 | `feat: clave youtubeNewVideos en el almacenamiento` | `KEYS.newVideos`, `readNewVideosValue`, `getNewVideos`, `saveNewVideos` y tests. |
