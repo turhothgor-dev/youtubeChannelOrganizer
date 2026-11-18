@@ -39,6 +39,7 @@
         "modules/groups.js",
         "modules/avatars.js",
         "modules/subscriptions.js",
+        "modules/new-videos.js",
         "modules/watched.js",
         "modules/settings.js",
         "modules/visibility.js",

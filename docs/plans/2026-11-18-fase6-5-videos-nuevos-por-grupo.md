@@ -81,7 +81,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   `KEYS.newVideos === "youtubeNewVideos"`; `readNewVideosValue` con valores no válidos da `{ since: null, videos: {},
   visits: {} }`; `getNewVideos` sin datos no escribe; `saveNewVideos` guarda `version: 1`; `getChangedKeys` incluye
   `"newVideos"`.
-- [ ] T2 · Lote, reconocimiento y poda · Ficheros: `modules/new-videos.js` (nuevo), `manifest.json`,
+- [x] T2 · Lote, reconocimiento y poda · Ficheros: `modules/new-videos.js` (nuevo), `manifest.json`,
   `tests/helpers/load-modules.js`, `tests/new-videos.test.js` (nuevo), `tests/manifest.test.js` si hace falta · Test:
   primer lote fija `since = now`; añade solo canales agrupados (también `/@Foo` frente a `/@foo`), con
   `publishedBefore` = `seenAt − edad` o `null`; un vídeo repetido no cambia `seenAt` y completa `publishedBefore` si
@@ -158,3 +158,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-18 | T1 | `feat: clave youtubeNewVideos en el almacenamiento` | `KEYS.newVideos`, `readNewVideosValue`, `getNewVideos`, `saveNewVideos` y tests. |
+| 2026-11-18 | T2 | `feat: lote, reconocimiento y poda de vídeos nuevos` | `modules/new-videos.js` (`normalizeNewVideos`, `applyFeedBatch`, `acknowledgeGroups`, `saveFeedBatch`), manifiesto, loader de tests y `tests/new-videos.test.js`. |
