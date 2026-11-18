@@ -109,7 +109,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   tras arrancar y `flushPending()`, `youtubeSubscriptions` tiene solo los dos canales de la sección de suscripciones,
   con nombre; sin sección con `/feed/channels` no se escribe; una mutación dentro de `#youtube-groups-guide` no
   programa lectura de la guía y una dentro de otra sección sí; volver a leer lo mismo no escribe.
-- [ ] T5 · Recolector: `/feed/channels` y reconciliación · Ficheros: `ui/subscriptions.js`, `ui/cards.js`,
+- [x] T5 · Recolector: `/feed/channels` y reconciliación · Ficheros: `ui/subscriptions.js`, `ui/cards.js`,
   `content.js`, `tests/ui-subscriptions.test.js` · Test (jsdom en `https://www.youtube.com/feed/channels`; el test
   sustituye `window.setTimeout` y `window.clearTimeout` por un reloj falso antes de provocar la comprobación, porque
   `loadDom` usa los temporizadores reales de jsdom): con dos `ytd-channel-renderer` y un `ytd-continuation-item-renderer` se anotan y guardan
@@ -196,3 +196,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T2 | feat: lógica pura de suscripciones conocidas | `modules/subscriptions.js` (normalize, merge, getUnclassified, findSubscriptionSectionIndex, isChannelListComplete, saveObserved), registrado en manifiesto, `options.html` y `load-modules.js`; tests nuevos. |
 | 2026-11-18 | T3 | feat: tipo de página "channels" para /feed/channels | `getPageType("/feed/channels")` devuelve `"channels"`; sin controles de tarjeta ni guía fija; tests actualizados. |
 | 2026-11-18 | T4 | feat: recolector de suscripciones de la guía | `ui/subscriptions.js` (`readGuide`, `scheduleGuideRead`, `noteMutations`, `flushPending`), creado en `content.js` tras avatares, registrado en el manifiesto; lectura al arrancar, en `yt-navigate-finish` y con mutaciones de la guía ajenas a `#youtube-groups-guide`. |
+| 2026-11-18 | T5 | feat: recolector de /feed/channels con reconciliación | `noteChannelCard` (solo en página `channels`), `startVisit`, `checkChannelsList` (espera 3 s sin canales nuevos, una vez por visita); enganchado en `ui/cards.js` y `content.js`; 6 tests con reloj falso. |

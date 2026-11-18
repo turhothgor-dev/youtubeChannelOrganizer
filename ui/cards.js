@@ -720,12 +720,26 @@ const YouTubeGroupsCards = (() => {
       }
     }
 
+    // Igual que noteCardAvatar: un fallo no debe dejar tarjetas sin controles.
+    function noteCardSubscription(card, url) {
+      try {
+        ctx.subscriptions?.noteChannelCard(card, url);
+      } catch (error) {
+        console.error(
+          "[YouTube Groups] No se pudo anotar la suscripción",
+          error,
+        );
+      }
+    }
+
     function processPendingCards() {
       processingScheduled = false;
       for (const card of pendingCards) {
         if (card.matches(CHANNEL_RESULT_SELECTOR)) {
           ensureChannelResultControl(card);
-          noteCardAvatar(card, getChannelResultUrl(card));
+          const channelUrl = getChannelResultUrl(card);
+          noteCardAvatar(card, channelUrl);
+          noteCardSubscription(card, channelUrl);
           continue;
         }
 

@@ -288,6 +288,7 @@
   document.addEventListener("yt-navigate-finish", () => {
     clearPendingFilter();
     ctx.cards.resetDetectedCards();
+    ctx.subscriptions.startVisit();
     ctx.cards.scanDocument();
     ctx.subscriptions.scheduleGuideRead();
     refreshActiveSelection();
