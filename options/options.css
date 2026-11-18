@@ -331,10 +331,18 @@ html[dark] .options__field-error {
   text-decoration: underline;
 }
 
-#options-error {
+#options-error,
+.options__error {
   color: #c00;
 }
 
-html[dark] #options-error {
+html[dark] #options-error,
+html[dark] .options__error {
   color: #ff8a80;
+}
+
+.options__select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }

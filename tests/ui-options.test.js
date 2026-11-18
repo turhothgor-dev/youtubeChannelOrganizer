@@ -302,6 +302,107 @@ test("un cambio de youtubeSubscriptions añade la suscripción sin recargar", as
   assert.strictEqual(section.querySelector("a").textContent, "Cuatro");
 });
 
+/**
+ * Cambia una casilla y dispara su evento.
+ * @param {Object} dom - DOM cargado.
+ * @param {Element} box - Casilla.
+ * @param {boolean} checked - Nuevo estado.
+ * @returns {void}
+ */
+function setChecked(dom, box, checked) {
+  box.checked = checked;
+  box.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+}
+
+/**
+ * Busca un botón por su texto dentro de un elemento.
+ * @param {Element} root - Contenedor.
+ * @param {string} text - Texto del botón.
+ * @returns {Element|undefined} Botón.
+ */
+function buttonByText(root, text) {
+  return [...root.querySelectorAll("button")].find(
+    (b) => b.textContent === text,
+  );
+}
+
+test("la bandeja selecciona y añade a un subgrupo", async () => {
+  const dom = await loadWithSubscriptions();
+  const section = dom.document.getElementById("options-unclassified");
+  const addButton = () =>
+    [...section.querySelectorAll("button")].find((b) =>
+      b.textContent.startsWith("Añadir a…"),
+    );
+  assert.strictEqual(addButton().textContent, "Añadir a… (0)");
+  assert.strictEqual(addButton().disabled, true);
+
+  const boxes = [...section.querySelectorAll("input[data-url]")];
+  setChecked(dom, boxes[0], true);
+  setChecked(dom, boxes[1], true);
+  assert.strictEqual(addButton().textContent, "Añadir a… (2)");
+
+  const selectAll = section.querySelector('[aria-label="Seleccionar todo"]');
+  assert.strictEqual(selectAll.checked, true);
+  assert.strictEqual(selectAll.indeterminate, false);
+  setChecked(dom, boxes[1], false);
+  assert.strictEqual(selectAll.indeterminate, true);
+  setChecked(dom, selectAll, true);
+  assert.ok(boxes.every((box) => box.checked));
+  assert.strictEqual(addButton().textContent, "Añadir a… (2)");
+
+  const groupsSets = [];
+  const original = dom.browser.storage.local.set;
+  dom.browser.storage.local.set = (items) => {
+    if ("youtubeGroups" in items) {
+      groupsSets.push(items);
+    }
+    return original.call(dom.browser.storage.local, items);
+  };
+
+  addButton().click();
+  const select = section.querySelector('[aria-label="Añadir a"]');
+  assert.strictEqual(select.options[0].textContent, "Elige un grupo");
+  const confirm = buttonByText(section, "Añadir");
+  assert.strictEqual(confirm.disabled, true);
+  select.value = "a1";
+  select.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+  assert.strictEqual(confirm.disabled, false);
+  confirm.click();
+  await dom.flush();
+  await dom.flush();
+  await dom.flush();
+
+  assert.strictEqual(groupsSets.length, 1);
+  assert.ok(section.textContent.includes("2 añadidos a «A1»"));
+  assert.ok(
+    section.textContent.includes(
+      "Todas las suscripciones conocidas están en algún grupo.",
+    ),
+  );
+});
+
+test("Escape en el selector de la bandeja lo cierra sin escribir", async () => {
+  const dom = await loadWithSubscriptions();
+  const section = dom.document.getElementById("options-unclassified");
+  setChecked(dom, section.querySelector("input[data-url]"), true);
+  const original = dom.browser.storage.local.set;
+  let writes = 0;
+  dom.browser.storage.local.set = (items) => {
+    writes += 1;
+    return original.call(dom.browser.storage.local, items);
+  };
+  [...section.querySelectorAll("button")]
+    .find((b) => b.textContent.startsWith("Añadir a…"))
+    .click();
+  const select = section.querySelector('[aria-label="Añadir a"]');
+  select.dispatchEvent(
+    new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+  );
+  await dom.flush();
+  assert.strictEqual(section.querySelector('[aria-label="Añadir a"]'), null);
+  assert.strictEqual(writes, 0);
+});
+
 test("el nombre del grupo lleva el nombre completo en el title", async () => {
   const longName = "Ciencia y tecnología divulgativa";
   const store = groupsStore([makeGroup("c", { name: longName })]);

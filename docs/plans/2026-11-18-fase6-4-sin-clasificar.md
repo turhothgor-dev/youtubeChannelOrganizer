@@ -131,7 +131,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   y lista las otras dos en orden de `firstSeen` descendente, con avatar (inicial) y enlace `target="_blank"`; sin
   suscripciones y con todas clasificadas muestra su texto; escribir en el buscador filtra la lista y sin coincidencias
   muestra su texto; un `storage.onChanged` de `youtubeSubscriptions` con una suscripción nueva la añade sin recargar.
-- [ ] T9 · Bandeja en el editor: selección y "Añadir a…" · Ficheros: `options/unclassified.js`, `options/options.css`,
+- [x] T9 · Bandeja en el editor: selección y "Añadir a…" · Ficheros: `options/unclassified.js`, `options/options.css`,
   `tests/ui-options.test.js` · Test (jsdom): "Añadir a… (0)" deshabilitado; marcar dos casillas → "Añadir a… (2)";
   "Seleccionar todo" marca todas y queda indeterminado con una desmarcada; elegir el subgrupo A1 y "Añadir" guarda
   los dos en A1 (una escritura de `youtubeGroups`), muestra "2 añadidos a «A1»" y la lista queda vacía con "Todas las
@@ -200,3 +200,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T6 | feat: avatares de suscripciones conocidas | `getKeptChannelKeys`; `mergeAvatars`/`saveObservedAvatars` y `setGroupedChannels` aceptan suscripciones; `renderGroupsPanel` las lee; tests nuevos. |
 | 2026-11-18 | T7 | feat: añadir canales a un grupo desde el editor | `addChannels` y `addChannelsAndSave` en `modules/group-editor.js` (solo escribe si `added > 0`); tests nuevos. |
 | 2026-11-18 | T8 | feat: bandeja de suscripciones sin grupo en el editor | `options/unclassified.js` (lista, textos vacíos, filtro por buscador), sección en `options.html`/`.css`, `options.js` lee `getSubscriptions()` y repinta con `storage.onChanged`; 4 tests nuevos. |
+| 2026-11-18 | T9 | feat: selección y "Añadir a…" en la bandeja de suscripciones | `options/unclassified.js` (casillas, "Seleccionar todo" indeterminado, selector con sangría, aviso/error, Escape), estilos en `options.css`; 2 tests nuevos. |
