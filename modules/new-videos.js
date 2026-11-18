@@ -171,6 +171,98 @@ const YouTubeGroupsNewVideos = (() => {
   }
 
   /**
+   * Vídeos nuevos por grupo (con sus subgrupos), sin red.
+   * Nuevo: no visto, `seenAt > ack` y (`publishedBefore` nulo o `> ack`), con
+   * `ack` la visita más reciente de los grupos cuyo subárbol contiene el
+   * canal, o `since` si no hay visitas.
+   * @param {*} state Estado guardado.
+   * @param {Array} groups Árbol de grupos.
+   * @param {Object} [watched] Mapa de vídeos vistos.
+   * @returns {Map<string, number>} Id de grupo -> número (solo los > 0).
+   */
+  function countNewVideos(state, groups, watched = {}) {
+    const { since, videos, visits } = normalizeNewVideos(state);
+    const seen = isPlainObject(watched) ? watched : {};
+    const counts = new Map();
+    const channelAcks = new Map();
+    const channelVideos = new Map();
+
+    for (const [id, entry] of Object.entries(videos)) {
+      if (!channelVideos.has(entry.channel)) {
+        channelVideos.set(entry.channel, []);
+      }
+      channelVideos.get(entry.channel).push(id);
+    }
+
+    // Visita más reciente de los grupos cuyo subárbol contiene cada canal.
+    const collect = (group, ancestors) => {
+      const chain = [...ancestors, group.id];
+      for (const channel of Array.isArray(group.channels)
+        ? group.channels
+        : []) {
+        const key = YouTubeGroups.getChannelKey(channel.url);
+        for (const groupId of chain) {
+          if (isFiniteNumber(visits[groupId])) {
+            channelAcks.set(
+              key,
+              Math.max(channelAcks.get(key) ?? -Infinity, visits[groupId]),
+            );
+          }
+        }
+      }
+      for (const child of Array.isArray(group.subgroups)
+        ? group.subgroups
+        : []) {
+        collect(child, chain);
+      }
+    };
+    for (const group of Array.isArray(groups) ? groups : []) {
+      collect(group, []);
+    }
+
+    const isNew = (id, entry) => {
+      if (seen[id]) {
+        return false;
+      }
+      const ack = channelAcks.get(entry.channel) ?? since ?? 0;
+      return (
+        entry.seenAt > ack &&
+        (entry.publishedBefore === null || entry.publishedBefore > ack)
+      );
+    };
+
+    // Vídeos nuevos distintos de los canales del subárbol de cada grupo.
+    const gather = (group) => {
+      const ids = new Set();
+      for (const channel of Array.isArray(group.channels)
+        ? group.channels
+        : []) {
+        const key = YouTubeGroups.getChannelKey(channel.url);
+        for (const id of channelVideos.get(key) || []) {
+          if (isNew(id, videos[id])) {
+            ids.add(id);
+          }
+        }
+      }
+      for (const child of Array.isArray(group.subgroups)
+        ? group.subgroups
+        : []) {
+        for (const id of gather(child)) {
+          ids.add(id);
+        }
+      }
+      if (ids.size > 0) {
+        counts.set(group.id, ids.size);
+      }
+      return ids;
+    };
+    for (const group of Array.isArray(groups) ? groups : []) {
+      gather(group);
+    }
+    return counts;
+  }
+
+  /**
    * Guarda un lote de vídeos observados y reconocimientos, solo si algo cambia.
    * @param {Map} batch Ver `applyFeedBatch`.
    * @param {{ackGroupIds?: Iterable<string>}} [options]
@@ -199,6 +291,7 @@ const YouTubeGroupsNewVideos = (() => {
     normalizeNewVideos,
     applyFeedBatch,
     acknowledgeGroups,
+    countNewVideos,
     saveFeedBatch,
   };
 })();

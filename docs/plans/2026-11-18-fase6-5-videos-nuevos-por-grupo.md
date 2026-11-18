@@ -88,7 +88,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   faltaba; `ackGroupIds` pone visitas solo de grupos existentes; poda por 30 días, por canal no agrupado, por tope de
   1000 y visitas huérfanas; `changed: false` sin cambios; no muta; `acknowledgeGroups`; `saveFeedBatch` escribe una
   vez y nada si no cambia.
-- [ ] T3 · Recuento · Ficheros: `modules/new-videos.js`, `tests/new-videos.test.js` · Test (con A ⊃ A1, B y el canal X
+- [x] T3 · Recuento · Ficheros: `modules/new-videos.js`, `tests/new-videos.test.js` · Test (con A ⊃ A1, B y el canal X
   en A1 y en B): vídeo de X posterior a todo cuenta 1 en A1, A y B; tras visitar A1 cuenta 0 en los tres; visitar A lo
   pone a 0 en A1; un vídeo visto (`watched`) no cuenta; `publishedBefore` anterior a la visita no cuenta; sin visitas
   se usa `since`; dos canales del subárbol con el mismo vídeo cuentan 1; grupos sin nuevos no están en el `Map`.
@@ -159,3 +159,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-18 | T1 | `feat: clave youtubeNewVideos en el almacenamiento` | `KEYS.newVideos`, `readNewVideosValue`, `getNewVideos`, `saveNewVideos` y tests. |
 | 2026-11-18 | T2 | `feat: lote, reconocimiento y poda de vídeos nuevos` | `modules/new-videos.js` (`normalizeNewVideos`, `applyFeedBatch`, `acknowledgeGroups`, `saveFeedBatch`), manifiesto, loader de tests y `tests/new-videos.test.js`. |
+| 2026-11-18 | T3 | `feat: recuento de vídeos nuevos por grupo` | `countNewVideos` (subárbol, ack por canal, vistos) y tests. |

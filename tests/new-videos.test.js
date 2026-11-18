@@ -209,3 +209,71 @@ test("saveFeedBatch escribe una vez y nada si no cambia", async () => {
   assert.strictEqual(second.changed, false);
   assert.strictEqual(calls.set, 1);
 });
+
+const X = { name: "X", url: "https://www.youtube.com/@X" };
+const X_KEY = "https://www.youtube.com/@x";
+const countGroups = [
+  makeGroup("A", { subgroups: [makeGroup("A1", { channels: [X] })] }),
+  makeGroup("B", { channels: [X] }),
+];
+
+function video(seenAt, publishedBefore = null, channel = X_KEY) {
+  return { channel, seenAt, publishedBefore };
+}
+
+test("countNewVideos cuenta en el subárbol y se pone a 0 al visitar", () => {
+  const { YouTubeGroupsNewVideos: N } = loadModules();
+  const state = { since: 100, videos: { [V1]: video(200) }, visits: {} };
+
+  const sorted = [...N.countNewVideos(state, countGroups, {})].sort();
+  assert.deepStrictEqual(plain(sorted), [
+    ["A", 1],
+    ["A1", 1],
+    ["B", 1],
+  ]);
+  const visitedA1 = N.acknowledgeGroups(state, ["A1"], 300);
+  assert.strictEqual(N.countNewVideos(visitedA1, countGroups, {}).size, 0);
+  const visitedA = N.acknowledgeGroups(state, ["A"], 300);
+  assert.strictEqual(N.countNewVideos(visitedA, countGroups, {}).size, 0);
+});
+
+test("countNewVideos no cuenta vistos ni anteriores a la visita o a since", () => {
+  const { YouTubeGroupsNewVideos: N } = loadModules();
+  const base = { since: 100, visits: {} };
+
+  const watched = { ...base, videos: { [V1]: video(200) } };
+  assert.strictEqual(
+    N.countNewVideos(watched, countGroups, { [V1]: { t: 1 } }).size,
+    0,
+  );
+  const old = { ...base, videos: { [V1]: video(200, 150) } };
+  assert.strictEqual(N.countNewVideos(old, countGroups, {}).get("B"), 1);
+  const published = { since: 100, visits: { B: 180 }, videos: old.videos };
+  assert.strictEqual(N.countNewVideos(published, countGroups, {}).size, 0);
+  const beforeSince = { ...base, videos: { [V1]: video(200, 90) } };
+  assert.strictEqual(N.countNewVideos(beforeSince, countGroups, {}).size, 0);
+  const seenBefore = { ...base, videos: { [V1]: video(90) } };
+  assert.strictEqual(N.countNewVideos(seenBefore, countGroups, {}).size, 0);
+});
+
+test("countNewVideos cuenta una vez un vídeo y omite grupos sin nuevos", () => {
+  const { YouTubeGroupsNewVideos: N } = loadModules();
+  const y = { name: "Y", url: "https://www.youtube.com/@Y" };
+  const groupsTwo = [
+    makeGroup("A", { channels: [X, y] }),
+    makeGroup("B", { channels: [y] }),
+  ];
+  const state = {
+    since: 100,
+    videos: {
+      [V1]: video(200),
+      [V2]: video(200, null, "https://www.youtube.com/@y"),
+    },
+    visits: {},
+  };
+  const counts = N.countNewVideos(state, groupsTwo, {});
+  assert.strictEqual(counts.get("A"), 2);
+  assert.strictEqual(counts.get("B"), 1);
+  const empty = N.countNewVideos({ since: 100 }, groupsTwo, {});
+  assert.strictEqual(empty.size, 0);
+});
