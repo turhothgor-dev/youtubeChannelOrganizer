@@ -127,5 +127,5 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | gui-9 T1 | `style: pie a la derecha, separación vertical y navegación más visible en la guía` | Solo CSS; lint y 353 tests en verde. V1, V3 y V4 pendientes en Firefox. |
 | 2026-11-18 | gui-9 T2 | `style: iconos de grupo un 10 % más pequeños` | `GROUP_ICON_SIZES` actualizado y tests; lint y 354 tests en verde. V5 pendiente en Firefox. |
 | 2026-11-18 | gui-9 T3 | `feat: bullet de color del grupo en la guía en lugar de la banda` | `setGroupBullet`, CSS y `data-group-id` en el botón principal; lint y 355 tests en verde. V2 pendiente en Firefox. |
-| 2026-11-18 | gui-9 T4 | `feat: texto del panel de canales del editor sin grupo seleccionado` | Texto nuevo y test; lint y 356 tests en verde. V6 pendiente en Firefox. |
+| 2026-11-18 | gui-9 T4 | `feat: texto más claro en el panel Canales del editor sin grupo seleccionado` | Texto nuevo y test; lint y 356 tests en verde. V6 pendiente en Firefox. |
 | 2026-11-18 | gui-9 T5 | `docs: cerrar gui-9 (ARCHITECTURE con bullet y pie a la derecha)` | Solo documentación. Verificación manual V1 a V6 pendiente en Firefox. |

@@ -17,6 +17,7 @@ const YouTubeGroupsSubscriptionsUi = (() => {
   const CONTINUATION_SELECTOR = "ytd-continuation-item-renderer";
   const CHANNEL_NAME_SELECTOR = "ytd-channel-name #text";
   const CHANNEL_TITLE_SELECTOR = "#channel-title";
+  const LIST_ITEM_SELECTOR = `${CHANNEL_RENDERER_SELECTOR}, ${CONTINUATION_SELECTOR}`;
   const SETTLE_DELAY_MS = 3000;
 
   /**
@@ -44,6 +45,8 @@ const YouTubeGroupsSubscriptionsUi = (() => {
     const visitKeys = new Set();
     let visit = 0;
     let reconciled = false;
+    /** Si se ha visto una mutación de la lista en la visita actual. */
+    let listMutated = false;
     let channelsCheckScheduled = false;
     let settleTimer = null;
     let settleCount = 0;
@@ -147,11 +150,34 @@ const YouTubeGroupsSubscriptionsUi = (() => {
       if (guide) {
         scheduleGuideRead();
       }
-      // La continuación que desaparece también es una mutación.
-      if (mutations.length > 0 && isChannelsPage()) {
+      // La continuación que desaparece también es una mutación de la lista.
+      if (isChannelsPage() && mutations.some(touchesChannelList)) {
+        listMutated = true;
         scheduleChannelsCheck();
       }
       return guide;
+    }
+
+    /**
+     * Si una mutación toca la lista de canales: renderers o continuación que
+     * se añaden, se quitan o cambian por dentro.
+     * @param {MutationRecord} mutation - Mutación observada.
+     * @returns {boolean}
+     */
+    function touchesChannelList(mutation) {
+      const isList = (node) =>
+        node instanceof Element &&
+        (node.matches(LIST_ITEM_SELECTOR) ||
+          node.closest(LIST_ITEM_SELECTOR) !== null ||
+          node.querySelector(LIST_ITEM_SELECTOR) !== null);
+      const target = mutation.target;
+      return (
+        (target instanceof Element &&
+          (target.matches(LIST_ITEM_SELECTOR) ||
+            target.closest(LIST_ITEM_SELECTOR) !== null)) ||
+        [...mutation.addedNodes].some(isList) ||
+        [...(mutation.removedNodes ?? [])].some(isList)
+      );
     }
 
     /**
@@ -172,6 +198,10 @@ const YouTubeGroupsSubscriptionsUi = (() => {
       try {
         await saveObservedSubscriptions(batch);
       } catch (error) {
+        // Para que se reintente con la próxima lectura.
+        for (const key of batch.keys()) {
+          noted.delete(key);
+        }
         console.error(
           "[YouTube Groups] No se pudieron guardar suscripciones",
           error,
@@ -187,6 +217,7 @@ const YouTubeGroupsSubscriptionsUi = (() => {
       visit += 1;
       visitKeys.clear();
       reconciled = false;
+      listMutated = false;
       channelsCheckScheduled = false;
       clearSettleTimer();
     }
@@ -205,7 +236,10 @@ const YouTubeGroupsSubscriptionsUi = (() => {
      * @param {string|null} url - URL del canal.
      */
     function noteChannelCard(card, url) {
-      if (!isChannelsPage()) {
+      if (
+        !isChannelsPage() ||
+        card.closest(CHANNELS_PAGE_ROOT_SELECTOR) === null
+      ) {
         return;
       }
       const name =
@@ -267,7 +301,7 @@ const YouTubeGroupsSubscriptionsUi = (() => {
      * nuevos durante `SETTLE_DELAY_MS`, reconcilia (una vez por visita).
      */
     function checkChannelsList() {
-      if (!isChannelsPage() || reconciled) {
+      if (!isChannelsPage() || reconciled || !listMutated) {
         return;
       }
       if (!isListComplete()) {

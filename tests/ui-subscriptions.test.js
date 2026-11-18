@@ -151,8 +151,19 @@ function setupChannels(body, { url = CHANNELS_URL, store } = {}) {
  * @param {Object} ctx - Contexto.
  * @returns {Promise<void>}
  */
-async function scan(dom, ctx) {
+async function scan(dom, ctx, { mutated = true } = {}) {
   ctx.cards.scanDocument();
+  if (mutated) {
+    // YouTube pinta la lista con mutaciones; aquí se simula una.
+    const browse = dom.document.querySelector("ytd-browse");
+    ctx.subscriptions.noteMutations([
+      {
+        target: browse,
+        addedNodes: [...browse.children],
+        removedNodes: [],
+      },
+    ]);
+  }
   ctx.subscriptions.scheduleChannelsCheck();
   await dom.flush();
 }
@@ -322,4 +333,103 @@ test("volver a leer lo mismo no escribe", async () => {
   ctx.subscriptions.readGuide();
   await ctx.subscriptions.flushPending();
   assert.strictEqual(dom.calls.set, writes);
+});
+
+test("una tarjeta de una página oculta de ytd-browse no se anota", async () => {
+  const { dom, ctx } = setupChannels(renderer("uno", "Uno"));
+  dom.document.body.insertAdjacentHTML(
+    "beforeend",
+    `<ytd-browse hidden>${renderer("oculto", "Oculto")}</ytd-browse>`,
+  );
+  ctx.subscriptions.noteChannelCard(
+    dom.document.querySelector("ytd-browse[hidden] ytd-channel-renderer"),
+    `${YT}/@oculto`,
+  );
+  await ctx.subscriptions.flushPending();
+
+  assert.strictEqual(dom.store.youtubeSubscriptions, undefined);
+});
+
+test("sin ninguna mutación de la lista en la visita no se reconcilia", async () => {
+  const { dom, ctx, clock } = setupChannels(renderer("uno", "Uno"), {
+    store: {
+      youtubeSubscriptions: {
+        version: 1,
+        channels: { [`${YT}/@tres`]: THIRD },
+      },
+    },
+  });
+  await scan(dom, ctx, { mutated: false });
+  clock.advance(10000);
+  await settle();
+  await settle();
+  assert.ok(`${YT}/@tres` in dom.store.youtubeSubscriptions.channels);
+
+  ctx.subscriptions.startVisit();
+  await scan(dom, ctx, { mutated: false });
+  clock.advance(10000);
+  await settle();
+  await settle();
+  assert.ok(`${YT}/@tres` in dom.store.youtubeSubscriptions.channels);
+});
+
+test("una mutación ajena a la lista no programa la comprobación", () => {
+  const { dom, ctx } = setupChannels(renderer("uno", "Uno"));
+  dom.document.body.insertAdjacentHTML("beforeend", "<div id='otro'></div>");
+  const other = dom.document.querySelector("#otro");
+
+  ctx.subscriptions.noteMutations([
+    { target: other, addedNodes: [], removedNodes: [] },
+  ]);
+  ctx.subscriptions.noteMutations([
+    { target: other, addedNodes: [other], removedNodes: [] },
+  ]);
+
+  // Sin comprobación programada no hay nada en la cola de frames.
+  return dom.flush().then(() => {
+    assert.strictEqual(dom.store.youtubeSubscriptions, undefined);
+  });
+});
+
+test("si falla el guardado, la suscripción se reintenta", async () => {
+  const { dom, ctx } = setup(GUIDE);
+  const set = dom.browser.storage.local.set;
+  let fail = true;
+  dom.browser.storage.local.set = async (items) => {
+    if (fail) {
+      throw new Error("fallo");
+    }
+    return set(items);
+  };
+  const log = console.error;
+  console.error = () => {};
+  try {
+    ctx.subscriptions.readGuide();
+    await ctx.subscriptions.flushPending();
+  } finally {
+    console.error = log;
+  }
+  assert.strictEqual(dom.store.youtubeSubscriptions, undefined);
+
+  fail = false;
+  ctx.subscriptions.readGuide();
+  await ctx.subscriptions.flushPending();
+  assert.strictEqual(
+    Object.keys(dom.store.youtubeSubscriptions.channels).length,
+    2,
+  );
+});
+
+test("un cambio de youtubeSubscriptions repinta el panel de grupos", async () => {
+  const dom = loadDom({ html: "<ytd-browse></ytd-browse>" });
+  await dom.flush();
+  const before = dom.calls.get;
+
+  await dom.browser.storage.local.set({
+    youtubeSubscriptions: { version: 1, channels: {} },
+  });
+  await dom.flush();
+  await settle();
+
+  assert.ok(dom.calls.get > before);
 });

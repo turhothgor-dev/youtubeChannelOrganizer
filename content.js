@@ -372,6 +372,13 @@
               error,
             );
           });
+        } else if (name === "subscriptions") {
+          renderGroupsPanel().catch((error) => {
+            console.error(
+              "[YouTube Groups] No se pudo repintar las suscripciones",
+              error,
+            );
+          });
         } else if (name === "playlists") {
           ctx.panel.renderPlaylistsSection().catch((error) => {
             console.error(
