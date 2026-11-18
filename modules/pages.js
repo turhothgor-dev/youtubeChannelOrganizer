@@ -15,7 +15,7 @@ const YouTubeGroupsPages = (() => {
    * Clasifica una página de YouTube según su ruta.
    *
    * @param {string} pathname Ruta de la URL (location.pathname).
-   * @returns {"home"|"subscriptions"|"search"|"watch"|"shorts"|"channel"|"other"}
+   * @returns {"home"|"subscriptions"|"channels"|"search"|"watch"|"shorts"|"channel"|"other"}
    */
   function getPageType(pathname) {
     if (typeof pathname !== "string") {
@@ -26,6 +26,9 @@ const YouTubeGroupsPages = (() => {
     }
     if (pathname === "/feed/subscriptions") {
       return "subscriptions";
+    }
+    if (pathname === "/feed/channels") {
+      return "channels";
     }
     if (pathname === "/results") {
       return "search";

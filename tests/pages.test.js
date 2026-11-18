@@ -9,6 +9,7 @@ test("getPageType clasifica las rutas conocidas", () => {
   const cases = {
     "/": "home",
     "/feed/subscriptions": "subscriptions",
+    "/feed/channels": "channels",
     "/results": "search",
     "/watch": "watch",
     "/shorts/abc123": "shorts",
@@ -119,7 +120,7 @@ test("shouldShowCardControls es true solo en inicio, suscripciones, búsqueda y 
   for (const type of ["home", "subscriptions", "search", "watch"]) {
     assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), true);
   }
-  for (const type of ["shorts", "channel", "other", undefined]) {
+  for (const type of ["shorts", "channel", "channels", "other", undefined]) {
     assert.strictEqual(YouTubeGroupsPages.shouldShowCardControls(type), false);
   }
 });
@@ -137,6 +138,7 @@ test("shouldPinGuide fija la guía solo en suscripciones, con ancho suficiente y
     "search",
     "shorts",
     "channel",
+    "channels",
     "other",
     "watch",
   ]) {

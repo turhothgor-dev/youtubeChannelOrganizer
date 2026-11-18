@@ -99,7 +99,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   ordena por `firstSeen` y nombre; `findSubscriptionSectionIndex` encuentra la sección con `/feed/channels` (también
   como URL absoluta) y da `-1` sin ella; `isChannelListComplete` según los tres datos; `saveObservedSubscriptions`
   escribe una vez y no escribe si no cambia nada (contador `calls.set`).
-- [ ] T3 · Tipo de página `"channels"` · Ficheros: `modules/pages.js`, `tests/pages.test.js` · Test:
+- [x] T3 · Tipo de página `"channels"` · Ficheros: `modules/pages.js`, `tests/pages.test.js` · Test:
   `getPageType("/feed/channels") === "channels"`; `/feed/subscriptions` sigue siendo `"subscriptions"` y
   `/feed/history` `"other"`; `shouldShowCardControls("channels")` y `shouldPinGuide("channels", 1200, false)` son
   `false`.
@@ -194,3 +194,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-18 | T1 | feat: clave youtubeSubscriptions en el almacenamiento | `KEYS.subscriptions`, `readSubscriptionsValue`, `getSubscriptions`, `saveSubscriptions`; test de KEYS actualizado a seis claves. |
 | 2026-11-18 | T2 | feat: lógica pura de suscripciones conocidas | `modules/subscriptions.js` (normalize, merge, getUnclassified, findSubscriptionSectionIndex, isChannelListComplete, saveObserved), registrado en manifiesto, `options.html` y `load-modules.js`; tests nuevos. |
+| 2026-11-18 | T3 | feat: tipo de página "channels" para /feed/channels | `getPageType("/feed/channels")` devuelve `"channels"`; sin controles de tarjeta ni guía fija; tests actualizados. |
