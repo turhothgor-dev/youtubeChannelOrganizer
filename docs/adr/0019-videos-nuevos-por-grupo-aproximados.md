@@ -1,6 +1,6 @@
 # 0019 · Vídeos nuevos por grupo, aproximados con lo observado en suscripciones
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-18
 
 ## Contexto

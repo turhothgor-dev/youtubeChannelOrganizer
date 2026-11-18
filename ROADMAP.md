@@ -41,7 +41,7 @@ Prioridad entre paréntesis; plan en `docs/plans/`.
 - ⬜ Filtro "Sin grupo" (alta, 6-3): ver solo los vídeos de canales que aún no están en ningún grupo
 - ✅ Bandeja "Sin clasificar" y suscripciones nuevas (alta, 6-4): que ninguna suscripción se quede fuera de los
   grupos
-- ⬜ Vídeos nuevos por grupo (media, 6-5): saber qué grupo tiene novedades desde la última visita, sin peticiones
+- ✅ Vídeos nuevos por grupo (media, 6-5): saber qué grupo tiene novedades desde la última visita, sin peticiones
   de red
 - ⬜ Fusionar grupos y ordenar A-Z (media, 6-6): reorganizar rápido grupos que crecieron sin orden
 - ⬜ Canales ocultos (media, 6-7): no volver a ver vídeos de ciertos canales en inicio, búsqueda y recomendaciones

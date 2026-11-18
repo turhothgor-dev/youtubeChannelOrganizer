@@ -1,6 +1,6 @@
 # Plan: Fase 6-5 · Vídeos nuevos por grupo en el bullet de la guía
 
-**Estado:** aprobado (2026-11-18)
+**Estado:** hecho
 
 Issue: punto 2 de la persona tras probar gui-8 (2026-11-18), el número dentro del bullet, y ROADMAP 6-5. Índice:
 [2026-11-18-gui-9-y-fase6-4-6-5](2026-11-18-gui-9-y-fase6-4-6-5.md). ADR:
@@ -111,7 +111,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   "1" gris; marcar uno de A como visto (cambio de `youtubeWatched`) lo baja a "1" sin sustituir la fila (el mismo
   nodo `.youtube-groups__guide-row` sigue conectado); seleccionar A lo vacía; dentro de A, A1 muestra su propio
   número.
-- [ ] T7 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (filas de `modules/new-videos.js` y `ui/new-videos.js`;
+- [x] T7 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (filas de `modules/new-videos.js` y `ui/new-videos.js`;
   `modules/storage.js`, `modules/icons.js`, `ui/icons-dom.js`, `ui/cards.js` y `ui/guide-section.js` con lo nuevo;
   flujo nuevo "Vídeos nuevos por grupo"; ADR 0019 en "Decisiones"), `docs/adr/0019-…` (aceptada), `ROADMAP.md`
   (6-5 ✅), este plan a `hecho` · Test: `make lint`, `make test` y V1 a V6.
@@ -163,3 +163,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T4 | `feat: bullet de grupo con número de vídeos nuevos` | `getContrastTextColor`, `setGroupBullet(el, color, count)` (gris sin color, `99+`, `aria-description`), CSS y tests. |
 | 2026-11-18 | T5 | `feat: recolector de vídeos nuevos y conexión en content.js` | `ui/new-videos.js` (`noteVideo`, `acknowledgeSelection`, `flushPending`, `setGroups`, `applyStoredValue`, `recount`, `start`), anotación desde `ui/cards.js`, conexión en `content.js` y manifiesto; `ctx.guide.updateNewVideoBullets` se llama con `?.` hasta T6. |
 | 2026-11-18 | T6 | `feat: número de vídeos nuevos en el bullet de la guía` | `createGuideRow` pasa el recuento a `setGroupBullet`; `updateNewVideoBullets()` actualiza los bullets sin rehacer la columna; test jsdom. |
+| 2026-11-18 | T7 | `docs: cierre de la fase 6-5, vídeos nuevos por grupo` | ARCHITECTURE (filas, flujo y decisión), ADR 0019 aceptada, ROADMAP 6-5 ✅ y plan a `hecho`. Verificación manual V1 a V6 pendiente en Firefox. |
