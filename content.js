@@ -51,6 +51,8 @@
       advancedFilters: { duration: "any", age: "any", views: "any" },
       /** Avatares de canal guardados (`clave de canal` → URL de imagen). */
       avatars: {},
+      /** Vídeos nuevos por grupo (id de grupo → número; solo los > 0). */
+      newVideoCounts: new Map(),
     },
     setActiveSelection,
     refreshActiveSelection,
@@ -60,6 +62,7 @@
   };
   ctx.avatars = YouTubeGroupsAvatarsUi.create(ctx);
   ctx.subscriptions = YouTubeGroupsSubscriptionsUi.create(ctx);
+  ctx.newVideos = YouTubeGroupsNewVideosUi.create(ctx);
   ctx.cards = YouTubeGroupsCards.create(ctx);
   ctx.watched = YouTubeGroupsWatchedUi.create(ctx);
   ctx.dropdowns = YouTubeGroupsDropdowns.create(ctx);
@@ -88,6 +91,7 @@
     });
 
   ctx.watched.start();
+  ctx.newVideos.start();
 
   let filterUpdateVersion = 0;
 
@@ -106,6 +110,7 @@
     }
 
     ctx.state.activeSelection = next;
+    ctx.newVideos.acknowledgeSelection(next);
     // Sin selección, no quedan URLs de una selección anterior
     if (next.length === 0) {
       ctx.state.activeSelectionUrls = null;
@@ -137,6 +142,7 @@
       getSubscriptions(),
     ]);
     ctx.state.avatars = avatars;
+    ctx.newVideos.setGroups(groups);
     ctx.avatars.setGroupedChannels(groups, subscriptions);
     ctx.avatars.scheduleScan({ guide: true });
     ctx.cards.refreshChannelNameIndex(groups);
@@ -343,6 +349,9 @@
           )) {
             ctx.watched.applyWatchedToCard(card);
           }
+          ctx.newVideos.recount();
+        } else if (name === "newVideos") {
+          ctx.newVideos.applyStoredValue(newValue);
         } else if (name === "settings") {
           ctx.state.settings = YouTubeGroupsSettings.normalizeSettings(
             storage.readSettingsValue(newValue),

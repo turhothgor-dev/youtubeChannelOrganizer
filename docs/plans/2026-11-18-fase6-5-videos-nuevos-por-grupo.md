@@ -98,7 +98,7 @@ Alternativas descartadas: ver ADR 0019 (RSS, campo en grupos, ids por grupo, sol
   oscuro); `setGroupBullet(el, "#2196F3", 3)` → texto "3", clase `--count`,
   `aria-description` "3 vídeos nuevos"; 1 → "1 vídeo nuevo"; 150 → "99+"; sin color y 2 → bullet sin
   `--yg-group-color`; sin color y 0 → sin bullet ni `aria-description`; repetir la misma llamada no muta el DOM.
-- [ ] T5 · Recolector y conexión · Ficheros: `ui/new-videos.js` (nuevo), `ui/cards.js`, `content.js`, `manifest.json`
+- [x] T5 · Recolector y conexión · Ficheros: `ui/new-videos.js` (nuevo), `ui/cards.js`, `content.js`, `manifest.json`
   (tras `ui/subscriptions.js`), `tests/manifest.test.js`, `tests/ui-new-videos.test.js` (nuevo) · Test (jsdom en
   `/feed/subscriptions` con tarjetas "hace 2 horas" de un canal de A y de uno sin grupo): tras `flushPending()` se
   guarda solo el de A con `publishedBefore` ≈ `seenAt − 7 200 000`; reprocesar la tarjeta no vuelve a escribir;
@@ -161,3 +161,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T2 | `feat: lote, reconocimiento y poda de vídeos nuevos` | `modules/new-videos.js` (`normalizeNewVideos`, `applyFeedBatch`, `acknowledgeGroups`, `saveFeedBatch`), manifiesto, loader de tests y `tests/new-videos.test.js`. |
 | 2026-11-18 | T3 | `feat: recuento de vídeos nuevos por grupo` | `countNewVideos` (subárbol, ack por canal, vistos) y tests. |
 | 2026-11-18 | T4 | `feat: bullet de grupo con número de vídeos nuevos` | `getContrastTextColor`, `setGroupBullet(el, color, count)` (gris sin color, `99+`, `aria-description`), CSS y tests. |
+| 2026-11-18 | T5 | `feat: recolector de vídeos nuevos y conexión en content.js` | `ui/new-videos.js` (`noteVideo`, `acknowledgeSelection`, `flushPending`, `setGroups`, `applyStoredValue`, `recount`, `start`), anotación desde `ui/cards.js`, conexión en `content.js` y manifiesto; `ctx.guide.updateNewVideoBullets` se llama con `?.` hasta T6. |

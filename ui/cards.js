@@ -732,6 +732,23 @@ const YouTubeGroupsCards = (() => {
       }
     }
 
+    // Anota el vídeo para el recuento de nuevos; la edad solo se lee si hace
+    // falta. Un fallo no debe dejar tarjetas sin controles.
+    function noteCardNewVideo(card) {
+      try {
+        ctx.newVideos?.noteVideo(
+          card.getAttribute(VIDEO_ID_ATTRIBUTE),
+          card.dataset.youtubeGroupsChannelUrl,
+          () => getCardMetadata(card).age,
+        );
+      } catch (error) {
+        console.error(
+          "[YouTube Groups] No se pudo anotar el vídeo nuevo",
+          error,
+        );
+      }
+    }
+
     function processPendingCards() {
       processingScheduled = false;
       for (const card of pendingCards) {
@@ -749,6 +766,7 @@ const YouTubeGroupsCards = (() => {
         applyGroupStripe(card);
         ensureChannelControl(card);
         noteCardAvatar(card, card.dataset.youtubeGroupsChannelUrl);
+        noteCardNewVideo(card);
       }
 
       pendingCards.clear();
