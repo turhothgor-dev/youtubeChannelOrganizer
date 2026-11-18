@@ -313,11 +313,7 @@ html[dark] .youtube-groups__guide-form-cancel {
 .youtube-groups__guide-row .youtube-groups__guide-item {
   flex: 1;
   min-width: 0;
-}
-
-/* La banda sigue la curva del botón; conserva el padding de 12 px */
-.youtube-groups__guide-item.youtube-groups__group-band {
-  padding-right: 12px;
+  padding-right: 8px;
 }
 
 .youtube-groups__guide-column,

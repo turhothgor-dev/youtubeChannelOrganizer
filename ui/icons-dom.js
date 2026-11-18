@@ -189,6 +189,34 @@ const YouTubeGroupsIconsDom = (() => {
   }
 
   /**
+   * Pinta o quita el bullet de color del grupo como último hijo del elemento.
+   * Idempotente: solo escribe en el DOM si algo cambia.
+   * @param {HTMLElement} element - Botón principal del grupo.
+   * @param {string|null} color - Color CSS; vacío o null quita el bullet.
+   */
+  function setGroupBullet(element, color) {
+    const selector = ":scope > .youtube-groups__group-bullet";
+    let bullet = element.querySelector(selector);
+    if (!color) {
+      if (bullet) {
+        bullet.remove();
+      }
+      return;
+    }
+    if (!bullet) {
+      bullet = document.createElement("span");
+      bullet.className = "youtube-groups__group-bullet";
+      bullet.setAttribute("aria-hidden", "true");
+      element.append(bullet);
+    } else if (element.lastElementChild !== bullet) {
+      element.append(bullet);
+    }
+    if (bullet.style.getPropertyValue("--yg-group-color") !== color) {
+      bullet.style.setProperty("--yg-group-color", color);
+    }
+  }
+
+  /**
    * Impide que los eventos de un control lleguen a YouTube (enlace, atajos).
    * @param {HTMLElement} control Control sobre el que se instala el escudo.
    */
@@ -226,6 +254,7 @@ const YouTubeGroupsIconsDom = (() => {
     AVATAR_SIZES,
     createChannelAvatar,
     setGroupBand,
+    setGroupBullet,
     shieldControlEvents,
   });
 })();

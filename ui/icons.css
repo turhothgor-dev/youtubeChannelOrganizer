@@ -46,3 +46,13 @@
   box-shadow: inset -4px 0 0 var(--yg-group-color);
   padding-right: 8px;
 }
+
+/* Bullet de color del grupo en la guía: a la derecha del nombre */
+.youtube-groups__group-bullet {
+  flex: none;
+  margin-left: auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--yg-group-color);
+}

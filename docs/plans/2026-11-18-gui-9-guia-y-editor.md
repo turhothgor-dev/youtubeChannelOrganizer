@@ -67,7 +67,7 @@ Alternativa descartada: conservar la banda y añadir el bullet aparte (dos marca
   `tests/ui-icons-dom.test.js` · Test: el test "la marca de un grupo con icono es un .youtube-groups__icon con un svg
   de 27 px" pasa a 24 px (el requisito cambia); test nuevo: `GROUP_ICON_SIZES` vale exactamente `{ guide: 24, choice:
   15, pickerGrid: 20, pickerPreview: 24, formPreview: 18 }`.
-- [ ] T3 · Bullet del color del grupo en lugar de la banda (decisión 2) · Ficheros: `ui/icons-dom.js`, `ui/icons.css`,
+- [x] T3 · Bullet del color del grupo en lugar de la banda (decisión 2) · Ficheros: `ui/icons-dom.js`, `ui/icons.css`,
   `ui/guide-section.js`, `ui/guide-section.css`, `tests/ui-icons-dom.test.js`, `tests/ui-guide-section.test.js` ·
   Test (jsdom): `setGroupBullet` con color crea un único `.youtube-groups__group-bullet` último hijo, `aria-hidden`,
   sin texto y con `--yg-group-color`; llamarlo otra vez con el mismo color no muta el DOM (un `MutationObserver` del
@@ -126,3 +126,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-18 | gui-9 T1 | `style: pie a la derecha, separación vertical y navegación más visible en la guía` | Solo CSS; lint y 353 tests en verde. V1, V3 y V4 pendientes en Firefox. |
 | 2026-11-18 | gui-9 T2 | `style: iconos de grupo un 10 % más pequeños` | `GROUP_ICON_SIZES` actualizado y tests; lint y 354 tests en verde. V5 pendiente en Firefox. |
+| 2026-11-18 | gui-9 T3 | `feat: bullet de color del grupo en la guía en lugar de la banda` | `setGroupBullet`, CSS y `data-group-id` en el botón principal; lint y 355 tests en verde. V2 pendiente en Firefox. |

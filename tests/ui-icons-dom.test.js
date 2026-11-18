@@ -46,6 +46,51 @@ test("setGroupBand pone y quita la clase y la variable", () => {
   assert.strictEqual(element.style.getPropertyValue("--yg-group-color"), "");
 });
 
+test("setGroupBullet crea un bullet único, es idempotente y lo quita", async () => {
+  const { dom, icons } = loadIconsDom();
+  const element = dom.document.createElement("button");
+  element.append(dom.document.createElement("span"));
+  const bulletSel = ".youtube-groups__group-bullet";
+
+  icons.setGroupBullet(element, "#2196F3");
+  const bullet = element.querySelector(bulletSel);
+  assert.strictEqual(element.querySelectorAll(bulletSel).length, 1);
+  assert.strictEqual(element.lastElementChild, bullet);
+  assert.strictEqual(bullet.getAttribute("aria-hidden"), "true");
+  assert.strictEqual(bullet.textContent, "");
+  assert.strictEqual(
+    bullet.style.getPropertyValue("--yg-group-color"),
+    "#2196F3",
+  );
+
+  const records = [];
+  const observer = new dom.window.MutationObserver((list) =>
+    records.push(...list),
+  );
+  observer.observe(element, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    characterData: true,
+  });
+  icons.setGroupBullet(element, "#2196F3");
+  records.push(...observer.takeRecords());
+  assert.strictEqual(records.length, 0);
+
+  icons.setGroupBullet(element, "#F44336");
+  records.push(...observer.takeRecords());
+  assert.strictEqual(element.querySelector(bulletSel), bullet);
+  assert.strictEqual(
+    bullet.style.getPropertyValue("--yg-group-color"),
+    "#F44336",
+  );
+  assert.ok(records.every((record) => record.type === "attributes"));
+
+  observer.disconnect();
+  icons.setGroupBullet(element, null);
+  assert.strictEqual(element.querySelector(bulletSel), null);
+});
+
 test("setCardButtonContent dos veces no duplica glifo ni etiqueta", () => {
   const { dom, icons } = loadIconsDom();
   const button = dom.document.createElement("button");
@@ -228,7 +273,7 @@ test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 2
   assert.strictEqual(svg.getAttribute("height"), "24");
 });
 
-test("el botón del grupo con color tiene la banda y --yg-group-color", async () => {
+test("el botón del grupo con color tiene el bullet y --yg-group-color", async () => {
   const dom = loadDom({
     html: GUIDE_HTML,
     store: groupsStore([
@@ -242,15 +287,13 @@ test("el botón del grupo con color tiene la banda y --yg-group-color", async ()
     ".youtube-groups__guide-row .youtube-groups__guide-item",
   );
   assert.strictEqual(
-    buttons[0].classList.contains("youtube-groups__group-band"),
-    false,
+    buttons[0].querySelector(".youtube-groups__group-bullet"),
+    null,
   );
+  const bullet = buttons[1].querySelector(".youtube-groups__group-bullet");
+  assert.ok(bullet);
   assert.strictEqual(
-    buttons[1].classList.contains("youtube-groups__group-band"),
-    true,
-  );
-  assert.strictEqual(
-    buttons[1].style.getPropertyValue("--yg-group-color"),
+    bullet.style.getPropertyValue("--yg-group-color"),
     "#2196F3",
   );
 });

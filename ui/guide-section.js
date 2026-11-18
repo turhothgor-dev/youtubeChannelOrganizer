@@ -12,6 +12,7 @@ const YouTubeGroupsGuideSection = (() => {
     GROUP_ICON_SIZES,
     createGroupMark,
     setGroupBand,
+    setGroupBullet,
     createChannelAvatar,
     AVATAR_SIZES,
   } = YouTubeGroupsIconsDom;
@@ -131,7 +132,8 @@ const YouTubeGroupsGuideSection = (() => {
       );
       row.append(toggle, main);
       const rowAppearance = YouTubeGroups.getGroupAppearance(groups, item.id);
-      setGroupBand(main, rowAppearance ? rowAppearance.color : null);
+      main.setAttribute("data-group-id", item.id);
+      setGroupBullet(main, rowAppearance ? rowAppearance.color : null);
 
       const enter = document.createElement("button");
       enter.type = "button";
