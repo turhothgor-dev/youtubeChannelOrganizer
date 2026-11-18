@@ -125,7 +125,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
 - [x] T7 · Añadir canales a un grupo · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js` · Test:
   `addChannels` añade al final, cuenta `added` y `skipped` (ya estaba con otra mayúscula), no muta la entrada, añade
   a un subgrupo y lanza con un id inexistente; `addChannelsAndSave` escribe una vez y no escribe si todos ya estaban.
-- [ ] T8 · Bandeja en el editor: lista · Ficheros: `options/unclassified.js` (nuevo), `options/options.html`,
+- [x] T8 · Bandeja en el editor: lista · Ficheros: `options/unclassified.js` (nuevo), `options/options.html`,
   `options/options.css`, `options/options.js`, `tests/ui-options.test.js` · Test (jsdom, `loadOptionsDom`): con tres
   suscripciones, una de ellas en un subgrupo, la sección `#options-unclassified` titula "Suscripciones sin grupo (2)"
   y lista las otras dos en orden de `firstSeen` descendente, con avatar (inicial) y enlace `target="_blank"`; sin
@@ -199,3 +199,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T5 | feat: recolector de /feed/channels con reconciliación | `noteChannelCard` (solo en página `channels`), `startVisit`, `checkChannelsList` (espera 3 s sin canales nuevos, una vez por visita); enganchado en `ui/cards.js` y `content.js`; 6 tests con reloj falso. |
 | 2026-11-18 | T6 | feat: avatares de suscripciones conocidas | `getKeptChannelKeys`; `mergeAvatars`/`saveObservedAvatars` y `setGroupedChannels` aceptan suscripciones; `renderGroupsPanel` las lee; tests nuevos. |
 | 2026-11-18 | T7 | feat: añadir canales a un grupo desde el editor | `addChannels` y `addChannelsAndSave` en `modules/group-editor.js` (solo escribe si `added > 0`); tests nuevos. |
+| 2026-11-18 | T8 | feat: bandeja de suscripciones sin grupo en el editor | `options/unclassified.js` (lista, textos vacíos, filtro por buscador), sección en `options.html`/`.css`, `options.js` lee `getSubscriptions()` y repinta con `storage.onChanged`; 4 tests nuevos. |

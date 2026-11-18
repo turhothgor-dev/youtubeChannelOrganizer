@@ -170,6 +170,138 @@ test("sin grupo seleccionado el panel de canales invita a elegir grupo o subgrup
   assert.strictEqual(select.options[0].textContent, "Elige un grupo");
 });
 
+const YT = "https://www.youtube.com";
+
+/**
+ * Crea el valor de `youtubeSubscriptions` a partir de [handle, nombre, firstSeen].
+ * @param {Array<Array>} entries - Suscripciones.
+ * @returns {Object} Valor guardado.
+ */
+function subscriptionsValue(entries) {
+  const channels = {};
+  for (const [handle, name, firstSeen] of entries) {
+    channels[`${YT}/@${handle}`] = {
+      name,
+      url: `${YT}/@${handle}`,
+      firstSeen,
+    };
+  }
+  return { version: 1, channels };
+}
+
+/**
+ * Carga el editor con A (subgrupo A1 con "uno") y tres suscripciones.
+ * @param {Object} [extra] - Claves extra del almacenamiento.
+ * @returns {Promise<Object>} DOM cargado.
+ */
+async function loadWithSubscriptions(extra = {}) {
+  const store = groupsStore([
+    makeGroup("a", {
+      name: "A",
+      subgroups: [
+        makeGroup("a1", {
+          name: "A1",
+          channels: [{ name: "Uno", url: `${YT}/@uno` }],
+        }),
+      ],
+    }),
+  ]);
+  store.youtubeSubscriptions = subscriptionsValue([
+    ["uno", "Uno", 100],
+    ["dos", "Dos", 200],
+    ["tres", "Tres", 300],
+  ]);
+  Object.assign(store, extra);
+  const dom = loadOptionsDom({ store });
+  await dom.flush();
+  return dom;
+}
+
+test("la bandeja lista las suscripciones sin grupo, las más recientes primero", async () => {
+  const dom = await loadWithSubscriptions();
+  const section = dom.document.getElementById("options-unclassified");
+  assert.strictEqual(
+    section.querySelector("h2").textContent,
+    "Suscripciones sin grupo (2)",
+  );
+  const links = [...section.querySelectorAll("a")];
+  assert.deepStrictEqual(
+    links.map((a) => a.textContent),
+    ["Tres", "Dos"],
+  );
+  assert.strictEqual(links[0].getAttribute("target"), "_blank");
+  assert.strictEqual(
+    section.querySelectorAll(".youtube-groups__avatar-initial").length,
+    2,
+  );
+});
+
+test("la bandeja explica los casos vacíos", async () => {
+  const none = loadOptionsDom({ store: groupsStore([]) });
+  await none.flush();
+  assert.ok(
+    none.document
+      .getElementById("options-unclassified")
+      .textContent.includes("Aún no se conoce ninguna suscripción."),
+  );
+
+  const store = groupsStore([
+    makeGroup("a", {
+      name: "A",
+      channels: [{ name: "Uno", url: `${YT}/@uno` }],
+    }),
+  ]);
+  store.youtubeSubscriptions = subscriptionsValue([["uno", "Uno", 1]]);
+  const all = loadOptionsDom({ store });
+  await all.flush();
+  assert.ok(
+    all.document
+      .getElementById("options-unclassified")
+      .textContent.includes(
+        "Todas las suscripciones conocidas están en algún grupo.",
+      ),
+  );
+});
+
+test("el buscador filtra la bandeja y sin coincidencias lo dice", async () => {
+  const dom = await loadWithSubscriptions();
+  const section = dom.document.getElementById("options-unclassified");
+  const search = dom.document.getElementById("options-search");
+  search.value = "dos";
+  search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  await dom.flush();
+  assert.deepStrictEqual(
+    [...section.querySelectorAll("a")].map((a) => a.textContent),
+    ["Dos"],
+  );
+  search.value = "zzz";
+  search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  await dom.flush();
+  assert.ok(
+    section.textContent.includes(
+      "Ninguna suscripción sin grupo coincide con la búsqueda.",
+    ),
+  );
+});
+
+test("un cambio de youtubeSubscriptions añade la suscripción sin recargar", async () => {
+  const dom = await loadWithSubscriptions();
+  const value = subscriptionsValue([
+    ["uno", "Uno", 100],
+    ["dos", "Dos", 200],
+    ["tres", "Tres", 300],
+    ["cuatro", "Cuatro", 400],
+  ]);
+  await dom.browser.storage.local.set({ youtubeSubscriptions: value });
+  await dom.flush();
+  const section = dom.document.getElementById("options-unclassified");
+  assert.strictEqual(
+    section.querySelector("h2").textContent,
+    "Suscripciones sin grupo (3)",
+  );
+  assert.strictEqual(section.querySelector("a").textContent, "Cuatro");
+});
+
 test("el nombre del grupo lleva el nombre completo en el title", async () => {
   const longName = "Ciencia y tecnología divulgativa";
   const store = groupsStore([makeGroup("c", { name: longName })]);

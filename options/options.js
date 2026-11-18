@@ -51,6 +51,12 @@
   let currentGroups = [];
   /** Últimos avatares leídos (clave de canal → URL de imagen). */
   let currentAvatars = {};
+  /** Últimas suscripciones conocidas leídas (clave de canal → datos). */
+  let currentSubscriptions = {};
+  /** Bandeja "Suscripciones sin grupo". */
+  const unclassified = YouTubeGroupsUnclassified.create(
+    document.getElementById("options-unclassified"),
+  );
   /**
    * Edición en línea en curso (renombrar o crear), o `null`.
    * @type {null|{kind: "rename"|"create", groupId: string|null,
@@ -1377,6 +1383,7 @@
     }
     rendering = false;
     renderChannels();
+    renderUnclassified();
     if (inputFocused && editing && editing.input) {
       editing.input.focus();
       editing.input.setSelectionRange(selection[0], selection[1]);
@@ -1391,16 +1398,31 @@
   }
 
   /**
+   * Pinta la bandeja de suscripciones sin grupo con el último estado leído.
+   * @returns {void}
+   */
+  function renderUnclassified() {
+    unclassified.render({
+      groups: currentGroups,
+      subscriptions: currentSubscriptions,
+      avatars: currentAvatars,
+      query: searchQuery,
+    });
+  }
+
+  /**
    * Lee los grupos y pinta el árbol.
    * @returns {Promise<void>}
    */
   async function render() {
     try {
-      const [groups, avatars] = await Promise.all([
+      const [groups, avatars, subscriptions] = await Promise.all([
         YouTubeGroupsStorage.getGroups(),
         YouTubeGroupsStorage.getAvatars(),
+        YouTubeGroupsStorage.getSubscriptions(),
       ]);
       currentAvatars = avatars;
+      currentSubscriptions = subscriptions;
       renderTree(groups);
       showError("");
     } catch (error) {
@@ -1417,6 +1439,17 @@
       );
       if (!keys.includes("groups")) {
         renderChannels();
+        if (!keys.includes("subscriptions")) {
+          renderUnclassified();
+        }
+      }
+    }
+    if (keys.includes("subscriptions")) {
+      currentSubscriptions = YouTubeGroupsStorage.readSubscriptionsValue(
+        changes[YouTubeGroupsStorage.KEYS.subscriptions].newValue,
+      );
+      if (!keys.includes("groups")) {
+        renderUnclassified();
       }
     }
     if (keys.includes("groups")) {
