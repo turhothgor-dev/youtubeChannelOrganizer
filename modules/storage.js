@@ -6,12 +6,14 @@ const YouTubeGroupsStorage = (() => {
     settings: "youtubeSettings",
     playlists: "youtubePlaylists",
     avatars: "youtubeAvatars",
+    subscriptions: "youtubeSubscriptions",
   });
   const STORAGE_KEY = KEYS.groups;
   const WATCHED_KEY = KEYS.watched;
   const SETTINGS_KEY = KEYS.settings;
   const PLAYLISTS_KEY = KEYS.playlists;
   const AVATARS_KEY = KEYS.avatars;
+  const SUBSCRIPTIONS_KEY = KEYS.subscriptions;
   let groupsInitializationPromise = null;
   const lockQueues = new Map();
 
@@ -83,6 +85,15 @@ const YouTubeGroupsStorage = (() => {
    */
   function readAvatarsValue(data) {
     return data && isPlainObject(data.avatars) ? data.avatars : {};
+  }
+
+  /**
+   * Extrae el mapa de suscripciones conocidas de un valor guardado (ADR 0018).
+   * @param {*} data Valor guardado bajo la clave de suscripciones.
+   * @returns {Object} Mapa clave de canal -> entrada, o {} si el formato no es válido.
+   */
+  function readSubscriptionsValue(data) {
+    return data && isPlainObject(data.channels) ? data.channels : {};
   }
 
   /**
@@ -245,6 +256,33 @@ const YouTubeGroupsStorage = (() => {
     });
   }
 
+  /**
+   * Lee las suscripciones conocidas (ADR 0018). Sin datos válidos devuelve {} y no escribe.
+   * @returns {Promise<Object>} Mapa clave de canal -> { name, url, firstSeen }.
+   */
+  async function getSubscriptions() {
+    const stored = await browser.storage.local.get(SUBSCRIPTIONS_KEY);
+
+    return readSubscriptionsValue(stored[SUBSCRIPTIONS_KEY]);
+  }
+
+  /**
+   * Guarda las suscripciones conocidas con el formato versión 1 (ADR 0018).
+   * @param {Object} channels Mapa clave de canal -> { name, url, firstSeen }.
+   */
+  async function saveSubscriptions(channels) {
+    if (!isPlainObject(channels)) {
+      throw new TypeError("Las suscripciones deben ser un objeto.");
+    }
+
+    await browser.storage.local.set({
+      [SUBSCRIPTIONS_KEY]: {
+        version: 1,
+        channels,
+      },
+    });
+  }
+
   function isPlainObject(value) {
     return typeof value === "object" && value !== null && !Array.isArray(value);
   }
@@ -257,6 +295,7 @@ const YouTubeGroupsStorage = (() => {
     readSettingsValue,
     readPlaylistsValue,
     readAvatarsValue,
+    readSubscriptionsValue,
     getChangedKeys,
     getGroups,
     saveGroups,
@@ -268,5 +307,7 @@ const YouTubeGroupsStorage = (() => {
     savePlaylists,
     getAvatars,
     saveAvatars,
+    getSubscriptions,
+    saveSubscriptions,
   };
 })();

@@ -214,7 +214,7 @@ test("guardar listas no cambia grupos, vistos ni ajustes", async () => {
   );
 });
 
-test("KEYS tiene las cinco claves con sus nombres reales", () => {
+test("KEYS tiene las seis claves con sus nombres reales", () => {
   const { YouTubeGroupsStorage } = loadModules();
 
   assert.deepStrictEqual(plain(YouTubeGroupsStorage.KEYS), {
@@ -223,6 +223,7 @@ test("KEYS tiene las cinco claves con sus nombres reales", () => {
     settings: "youtubeSettings",
     playlists: "youtubePlaylists",
     avatars: "youtubeAvatars",
+    subscriptions: "youtubeSubscriptions",
   });
   assert.ok(Object.isFrozen(YouTubeGroupsStorage.KEYS));
 });
@@ -416,6 +417,74 @@ test("saveAvatars y getAvatars conservan el mapa con version 1", async () => {
     version: 1,
     avatars: map,
   });
+});
+
+test("getChangedKeys con youtubeSubscriptions devuelve subscriptions", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(
+    plain(S.getChangedKeys({ youtubeSubscriptions: {} }, "local")),
+    ["subscriptions"],
+  );
+});
+
+test("readSubscriptionsValue devuelve el mapa o {}", () => {
+  const { YouTubeGroupsStorage: S } = loadModules();
+
+  assert.deepStrictEqual(plain(S.readSubscriptionsValue(undefined)), {});
+  assert.deepStrictEqual(plain(S.readSubscriptionsValue(null)), {});
+  assert.deepStrictEqual(plain(S.readSubscriptionsValue([])), {});
+  assert.deepStrictEqual(plain(S.readSubscriptionsValue({ channels: [] })), {});
+  assert.deepStrictEqual(
+    plain(S.readSubscriptionsValue({ channels: "x" })),
+    {},
+  );
+  assert.deepStrictEqual(
+    plain(
+      S.readSubscriptionsValue({ version: 1, channels: { a: { name: "A" } } }),
+    ),
+    { a: { name: "A" } },
+  );
+});
+
+test("getSubscriptions sin datos devuelve {} y no escribe", async () => {
+  const { YouTubeGroupsStorage, calls } = loadModules();
+
+  const subscriptions = await YouTubeGroupsStorage.getSubscriptions();
+
+  assert.deepStrictEqual(plain(subscriptions), {});
+  assert.strictEqual(calls.set, 0);
+});
+
+test("saveSubscriptions y getSubscriptions conservan el mapa con version 1", async () => {
+  const { YouTubeGroupsStorage, store } = loadModules();
+  const map = {
+    "https://www.youtube.com/@foo": {
+      name: "Foo",
+      url: "https://www.youtube.com/@foo",
+      firstSeen: 1,
+    },
+  };
+
+  await YouTubeGroupsStorage.saveSubscriptions(map);
+  const loaded = await YouTubeGroupsStorage.getSubscriptions();
+
+  assert.deepStrictEqual(plain(loaded), map);
+  assert.deepStrictEqual(plain(store.youtubeSubscriptions), {
+    version: 1,
+    channels: map,
+  });
+});
+
+test("saveSubscriptions con algo que no es un objeto plano lanza TypeError", async () => {
+  const { YouTubeGroupsStorage } = loadModules();
+
+  for (const invalid of [[], null, 5]) {
+    await assert.rejects(
+      () => YouTubeGroupsStorage.saveSubscriptions(invalid),
+      (error) => error.name === "TypeError",
+    );
+  }
 });
 
 test("saveAvatars con algo que no es un objeto plano lanza TypeError", async () => {

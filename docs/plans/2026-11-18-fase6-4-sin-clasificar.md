@@ -85,7 +85,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
 
 ## Tareas
 
-- [ ] T1 · Clave `youtubeSubscriptions` en el almacenamiento · Ficheros: `modules/storage.js`,
+- [x] T1 · Clave `youtubeSubscriptions` en el almacenamiento · Ficheros: `modules/storage.js`,
   `tests/storage.test.js` · Test: `KEYS.subscriptions === "youtubeSubscriptions"`; `readSubscriptionsValue` devuelve
   `{}` con `undefined`, `null`, array o `channels` no objeto y el mapa si es válido; `getSubscriptions` sin datos
   devuelve `{}` y no escribe; `saveSubscriptions` guarda `{ version: 1, channels }` y rechaza lo que no es objeto;
@@ -192,3 +192,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-18 | T1 | feat: clave youtubeSubscriptions en el almacenamiento | `KEYS.subscriptions`, `readSubscriptionsValue`, `getSubscriptions`, `saveSubscriptions`; test de KEYS actualizado a seis claves. |
