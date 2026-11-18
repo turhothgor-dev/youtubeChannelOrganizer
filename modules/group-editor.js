@@ -543,6 +543,64 @@ const YouTubeGroupsEditor = (() => {
   }
 
   /**
+   * Añade canales al final de un grupo sin mutar la entrada.
+   * @param {Array<Object>} groups - Árbol de grupos.
+   * @param {string} toId - Id del grupo de destino.
+   * @param {Array<{name: string, url: string}>} channels - Canales con `url`
+   *   normalizada.
+   * @returns {{groups: Array<Object>, added: number, skipped: number}}
+   *   `skipped` cuenta los que ya estaban (por `getChannelKey`).
+   * @throws {Error} Si el grupo no existe.
+   */
+  function addChannels(groups, toId, channels) {
+    if (!locate(groups, toId)) {
+      throw new Error("No existe el grupo indicado.");
+    }
+    const result = structuredClone(groups);
+    const to = locate(result, toId).group;
+    if (!Array.isArray(to.channels)) {
+      to.channels = [];
+    }
+    const keys = new Set(
+      to.channels.map((channel) => YouTubeGroups.getChannelKey(channel.url)),
+    );
+    let added = 0;
+    let skipped = 0;
+    for (const channel of channels) {
+      const key = YouTubeGroups.getChannelKey(channel.url);
+      if (keys.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      keys.add(key);
+      to.channels.push({ name: channel.name, url: channel.url });
+      added += 1;
+    }
+    return { groups: result, added, skipped };
+  }
+
+  /**
+   * Añade canales a un grupo y guarda; no escribe si no añade ninguno.
+   * @param {string} toId - Id del grupo de destino.
+   * @param {Array<{name: string, url: string}>} channels - Canales a añadir.
+   * @returns {Promise<{added: number, skipped: number}>}
+   * @throws {Error} Si el grupo no existe (no escribe).
+   */
+  async function addChannelsAndSave(toId, channels) {
+    return YouTubeGroupsStorage.withLock(
+      YouTubeGroupsStorage.KEYS.groups,
+      async () => {
+        const groups = await YouTubeGroupsStorage.getGroups();
+        const result = addChannels(groups, toId, channels);
+        if (result.added > 0) {
+          await YouTubeGroupsStorage.saveGroups(result.groups);
+        }
+        return { added: result.added, skipped: result.skipped };
+      },
+    );
+  }
+
+  /**
    * Quita canales de un grupo y guarda; no escribe si no quita ninguno.
    * @param {string} groupId - Id del grupo.
    * @param {Array<string>} urls - URL tal como están guardadas.
@@ -696,6 +754,8 @@ const YouTubeGroupsEditor = (() => {
     removeChannels,
     restoreChannels,
     transferChannels,
+    addChannels,
+    addChannelsAndSave,
     removeChannelsAndSave,
     restoreChannelsAndSave,
     transferChannelsAndSave,

@@ -684,3 +684,63 @@ test("searchGroups no duplica ids si coinciden el grupo y un canal", () => {
     A: ["https://www.youtube.com/@fm"],
   });
 });
+
+test("addChannels añade al final, cuenta omitidos y no muta la entrada", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = treeWithFiveChannels();
+  const before = structuredClone(tree);
+
+  const out = YouTubeGroupsEditor.addChannels(tree, "A", [
+    { name: "C1", url: chUrl("C1") },
+    { name: "n1", url: chUrl("n1") },
+    { name: "n2", url: chUrl("n2") },
+  ]);
+  assert.deepStrictEqual(plain({ added: out.added, skipped: out.skipped }), {
+    added: 2,
+    skipped: 1,
+  });
+  assert.deepStrictEqual(urlsOf(out.groups[0]).slice(5), [
+    chUrl("n1"),
+    chUrl("n2"),
+  ]);
+  assert.deepStrictEqual(plain(tree), plain(before));
+});
+
+test("addChannels añade a un subgrupo y lanza con un id inexistente", () => {
+  const { YouTubeGroupsEditor } = loadModules();
+  const tree = sampleTree();
+
+  const out = YouTubeGroupsEditor.addChannels(tree, "A1", [
+    { name: "n1", url: chUrl("n1") },
+  ]);
+  assert.strictEqual(out.added, 1);
+  assert.deepStrictEqual(urlsOf(out.groups[0].subgroups[0]), [chUrl("n1")]);
+
+  assert.throws(
+    () => YouTubeGroupsEditor.addChannels(tree, "X", []),
+    /No existe el grupo indicado/,
+  );
+});
+
+test("addChannelsAndSave escribe una vez y no escribe si todos ya estaban", async () => {
+  const { YouTubeGroupsEditor, store, calls } = loadModules({
+    youtubeGroups: { version: 1, groups: treeWithFiveChannels() },
+  });
+
+  const done = await YouTubeGroupsEditor.addChannelsAndSave("A", [
+    { name: "n1", url: chUrl("n1") },
+    { name: "c1", url: chUrl("c1") },
+  ]);
+  assert.deepStrictEqual(plain(done), { added: 1, skipped: 1 });
+  assert.strictEqual(calls.set, 1);
+  assert.strictEqual(store.youtubeGroups.groups[0].channels.length, 6);
+
+  const again = await YouTubeGroupsEditor.addChannelsAndSave("A", [
+    { name: "n1", url: chUrl("N1") },
+  ]);
+  assert.deepStrictEqual(plain(again), { added: 0, skipped: 1 });
+  assert.strictEqual(calls.set, 1);
+
+  await assert.rejects(YouTubeGroupsEditor.addChannelsAndSave("X", []));
+  assert.strictEqual(calls.set, 1);
+});

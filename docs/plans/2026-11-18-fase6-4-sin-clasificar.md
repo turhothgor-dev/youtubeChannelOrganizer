@@ -122,7 +122,7 @@ la bandeja dentro de `options/options.js` (ya tiene unas 1460 líneas) en lugar 
   suscritos y sigue podando los que no están ni en grupos ni en suscripciones; sin cuarto argumento se comporta como
   antes (los tests actuales pasan sin cambiar lo que comprueban); `saveObservedAvatars` lee las suscripciones;
   `setGroupedChannels(groups, subscriptions)` encola el avatar visto de un canal solo suscrito.
-- [ ] T7 · Añadir canales a un grupo · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js` · Test:
+- [x] T7 · Añadir canales a un grupo · Ficheros: `modules/group-editor.js`, `tests/group-editor.test.js` · Test:
   `addChannels` añade al final, cuenta `added` y `skipped` (ya estaba con otra mayúscula), no muta la entrada, añade
   a un subgrupo y lanza con un id inexistente; `addChannelsAndSave` escribe una vez y no escribe si todos ya estaban.
 - [ ] T8 · Bandeja en el editor: lista · Ficheros: `options/unclassified.js` (nuevo), `options/options.html`,
@@ -198,3 +198,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-18 | T4 | feat: recolector de suscripciones de la guía | `ui/subscriptions.js` (`readGuide`, `scheduleGuideRead`, `noteMutations`, `flushPending`), creado en `content.js` tras avatares, registrado en el manifiesto; lectura al arrancar, en `yt-navigate-finish` y con mutaciones de la guía ajenas a `#youtube-groups-guide`. |
 | 2026-11-18 | T5 | feat: recolector de /feed/channels con reconciliación | `noteChannelCard` (solo en página `channels`), `startVisit`, `checkChannelsList` (espera 3 s sin canales nuevos, una vez por visita); enganchado en `ui/cards.js` y `content.js`; 6 tests con reloj falso. |
 | 2026-11-18 | T6 | feat: avatares de suscripciones conocidas | `getKeptChannelKeys`; `mergeAvatars`/`saveObservedAvatars` y `setGroupedChannels` aceptan suscripciones; `renderGroupsPanel` las lee; tests nuevos. |
+| 2026-11-18 | T7 | feat: añadir canales a un grupo desde el editor | `addChannels` y `addChannelsAndSave` en `modules/group-editor.js` (solo escribe si `added > 0`); tests nuevos. |
