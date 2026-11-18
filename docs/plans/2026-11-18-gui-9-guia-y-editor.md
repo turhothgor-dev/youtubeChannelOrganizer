@@ -63,7 +63,7 @@ Alternativa descartada: conservar la banda y añadir el bullet aparte (dos marca
 
 - [x] T1 · Pie a la derecha, separación vertical y navegación más visible (decisiones 1, 4 y 5) · Ficheros:
   `ui/guide-section.css` · Test: `make lint` y `make test` en verde (los tests de la guía no cambian) y V1, V3 y V4.
-- [ ] T2 · Iconos de grupo un 10 % más pequeños (decisión 3) · Ficheros: `ui/icons-dom.js`,
+- [x] T2 · Iconos de grupo un 10 % más pequeños (decisión 3) · Ficheros: `ui/icons-dom.js`,
   `tests/ui-icons-dom.test.js` · Test: el test "la marca de un grupo con icono es un .youtube-groups__icon con un svg
   de 27 px" pasa a 24 px (el requisito cambia); test nuevo: `GROUP_ICON_SIZES` vale exactamente `{ guide: 24, choice:
   15, pickerGrid: 20, pickerPreview: 24, formPreview: 18 }`.
@@ -125,3 +125,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-18 | gui-9 T1 | `style: pie a la derecha, separación vertical y navegación más visible en la guía` | Solo CSS; lint y 353 tests en verde. V1, V3 y V4 pendientes en Firefox. |
+| 2026-11-18 | gui-9 T2 | `style: iconos de grupo un 10 % más pequeños` | `GROUP_ICON_SIZES` actualizado y tests; lint y 354 tests en verde. V5 pendiente en Firefox. |

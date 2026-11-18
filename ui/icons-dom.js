@@ -100,11 +100,11 @@ const YouTubeGroupsIconsDom = (() => {
 
   /** Lado en píxeles de los iconos de grupo según el sitio donde se pintan. */
   const GROUP_ICON_SIZES = {
-    guide: 27,
-    choice: 17,
-    pickerGrid: 22,
-    pickerPreview: 27,
-    formPreview: 20,
+    guide: 24,
+    choice: 15,
+    pickerGrid: 20,
+    pickerPreview: 24,
+    formPreview: 18,
   };
 
   /**

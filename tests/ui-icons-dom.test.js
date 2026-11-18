@@ -201,7 +201,19 @@ test("createChannelAvatar pinta el nombre como texto", () => {
 
 // A través de la guía.
 
-test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 27 px", async () => {
+test("GROUP_ICON_SIZES vale exactamente los tamaños acordados", () => {
+  const { icons } = loadIconsDom();
+
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(icons.GROUP_ICON_SIZES)), {
+    guide: 24,
+    choice: 15,
+    pickerGrid: 20,
+    pickerPreview: 24,
+    formPreview: 18,
+  });
+});
+
+test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 24 px", async () => {
   const dom = loadDom({
     html: GUIDE_HTML,
     store: groupsStore([makeGroup("A"), { ...makeGroup("B"), icon: "tech" }]),
@@ -212,8 +224,8 @@ test("la marca de un grupo con icono es un .youtube-groups__icon con un svg de 2
   assert.strictEqual(rows[0].querySelector(".youtube-groups__icon"), null);
   const svg = rows[1].querySelector(".youtube-groups__icon > svg");
   assert.ok(svg);
-  assert.strictEqual(svg.getAttribute("width"), "27");
-  assert.strictEqual(svg.getAttribute("height"), "27");
+  assert.strictEqual(svg.getAttribute("width"), "24");
+  assert.strictEqual(svg.getAttribute("height"), "24");
 });
 
 test("el botón del grupo con color tiene la banda y --yg-group-color", async () => {
