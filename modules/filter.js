@@ -1,5 +1,7 @@
 const YouTubeGroupsFilter = (() => {
   const ALL_FILTER = Object.freeze({ type: "all" });
+  const UNGROUPED_FILTER = Object.freeze({ type: "ungrouped" });
+  const UNGROUPED_KEY = "ungrouped";
   const PENDING_FILTER_KEY = "youtubeGroupsPendingFilter";
   const PENDING_MAX_AGE_MS = 30000;
 
@@ -7,12 +9,16 @@ const YouTubeGroupsFilter = (() => {
    * Normaliza un filtro recibido (de la interfaz o de sessionStorage).
    *
    * @param {*} raw Filtro a validar.
-   * @returns {{type: "all"}|{type: "group", id: string}|{type: "channel", containerId: string, url: string, name: string}}
+   * @returns {{type: "all"}|{type: "ungrouped"}|{type: "group", id: string}|{type: "channel", containerId: string, url: string, name: string}}
    *   El filtro normalizado, o ALL_FILTER si no es válido.
    */
   function normalizeFilter(raw) {
     if (!raw || typeof raw !== "object") {
       return ALL_FILTER;
+    }
+
+    if (raw.type === "ungrouped") {
+      return UNGROUPED_FILTER;
     }
 
     if (raw.type === "group") {
@@ -54,11 +60,14 @@ const YouTubeGroupsFilter = (() => {
    * Clave comparable de un filtro, con el tipo delante.
    *
    * @param {*} filter Filtro (se normaliza antes).
-   * @returns {string|null} null para "todos", "group:<id>" o
+   * @returns {string|null} null para "todos", "ungrouped", "group:<id>" o
    *   "channel:<contenedor codificado>:<url>".
    */
   function getFilterKey(filter) {
     const normalized = normalizeFilter(filter);
+    if (normalized.type === "ungrouped") {
+      return UNGROUPED_KEY;
+    }
     if (normalized.type === "group") {
       return `group:${normalized.id}`;
     }
@@ -73,10 +82,18 @@ const YouTubeGroupsFilter = (() => {
    *
    * @param {Array<Object>} groups Grupos guardados.
    * @param {*} filter Filtro activo.
-   * @returns {{status: "all"}|{status: "ok", urls: Set<string>}|{status: "missing"}}
+   * @returns {{status: "all"}|{status: "ok", urls: Set<string>, exclude?: boolean}|{status: "missing"}}
+   *   Con `exclude`, `urls` son las claves de canal que NO pasan.
    */
   function resolveFilterUrls(groups, filter) {
     const normalized = normalizeFilter(filter);
+    if (normalized.type === "ungrouped") {
+      return {
+        status: "ok",
+        urls: YouTubeGroupsAvatars.getGroupedChannelKeys(groups),
+        exclude: true,
+      };
+    }
     if (normalized.type === "group") {
       const urls = YouTubeGroups.getGroupChannelUrls(groups, normalized.id);
       return urls ? { status: "ok", urls } : { status: "missing" };
@@ -137,7 +154,9 @@ const YouTubeGroupsFilter = (() => {
       return null;
     }
     let filter = ALL_FILTER;
-    if (key.startsWith("group:")) {
+    if (key === UNGROUPED_KEY) {
+      filter = UNGROUPED_FILTER;
+    } else if (key.startsWith("group:")) {
       filter = normalizeFilter({ type: "group", id: key.slice(6) });
     } else if (key.startsWith("channel:")) {
       const rest = key.slice(8);
@@ -222,6 +241,9 @@ const YouTubeGroupsFilter = (() => {
     if (!a || !b || a.type !== b.type) {
       return false;
     }
+    if (a.type === "ungrouped") {
+      return true;
+    }
     if (a.type === "channel") {
       return a.containerId === b.containerId;
     }
@@ -268,8 +290,10 @@ const YouTubeGroupsFilter = (() => {
    *
    * @param {Array<Object>} groups Grupos guardados.
    * @param {*} selection Selección activa.
-   * @returns {{selection: string[], urls: Set<string>|null}} Las claves que
-   *   existen y la unión de sus URL (null si no queda ninguna).
+   * @returns {{selection: string[], urls: Set<string>|null, exclude: boolean}}
+   *   Las claves que existen y la unión de sus URL (null si no queda ninguna).
+   *   `exclude` es true solo con ["ungrouped"]: entonces `urls` son las claves
+   *   de canal agrupadas y el filtro deja pasar el resto.
    */
   function resolveSelection(groups, selection) {
     let kept = [];
@@ -291,7 +315,11 @@ const YouTubeGroupsFilter = (() => {
         urls.add(url);
       }
     }
-    return { selection: kept, urls: kept.length > 0 ? urls : null };
+    return {
+      selection: kept,
+      urls: kept.length > 0 ? urls : null,
+      exclude: kept.length === 1 && kept[0] === UNGROUPED_KEY,
+    };
   }
 
   /**
@@ -364,6 +392,7 @@ const YouTubeGroupsFilter = (() => {
     serializePendingSelection,
     parsePendingSelection,
     ALL_FILTER,
+    UNGROUPED_FILTER,
     PENDING_FILTER_KEY,
     PENDING_MAX_AGE_MS,
     normalizeFilter,

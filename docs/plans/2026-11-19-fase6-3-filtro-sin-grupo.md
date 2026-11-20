@@ -1,6 +1,6 @@
 # Plan: Fase 6-3 · Filtro "Sin grupo"
 
-**Estado:** borrador
+**Estado:** aprobado (2026-11-20)
 
 Issue: ROADMAP 6-3 ("ver solo los vídeos de canales que aún no están en ningún grupo"). Hoja de ruta:
 [2026-11-17-fase6-hoja-de-ruta](2026-11-17-fase6-hoja-de-ruta.md). ADR:
@@ -90,7 +90,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
 
 ## Tareas
 
-- [ ] T1 · Clave `ungrouped` en el modelo del filtro · Ficheros: `modules/filter.js`, `tests/filter.test.js` · Test:
+- [x] T1 · Clave `ungrouped` en el modelo del filtro · Ficheros: `modules/filter.js`, `tests/filter.test.js` · Test:
   `normalizeFilter({ type: "ungrouped" })` da `{ type: "ungrouped" }` y `getFilterKey` `"ungrouped"`;
   `parseFilterKey("ungrouped")` da el filtro y `parseFilterKey("ungrouped:x")` `null`; `normalizeSelection` conserva
   `"ungrouped"` sin duplicarla; `toggleSelection(groups, ["group:A","group:B"], UNGROUPED_FILTER)` da `["ungrouped"]`;
@@ -188,3 +188,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
+| 2026-11-20 | T1 | `feat: clave ungrouped en el modelo del filtro` | Plan aprobado; `UNGROUPED_FILTER`, `exclude` en `resolveSelection`. |

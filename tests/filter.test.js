@@ -422,3 +422,93 @@ test("parsePendingSelection recupera lo serializado y rechaza lo inválido", () 
     null,
   );
 });
+
+test("la clave ungrouped se normaliza, se interpreta y no se duplica", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+  const U = { type: "ungrouped" };
+
+  assert.deepStrictEqual(plain(F.UNGROUPED_FILTER), U);
+  assert.ok(Object.isFrozen(F.UNGROUPED_FILTER));
+  assert.deepStrictEqual(plain(F.normalizeFilter({ type: "ungrouped" })), U);
+  assert.strictEqual(F.getFilterKey(U), "ungrouped");
+  assert.deepStrictEqual(plain(F.parseFilterKey("ungrouped")), U);
+  assert.strictEqual(F.parseFilterKey("ungrouped:x"), null);
+  assert.deepStrictEqual(
+    plain(F.normalizeSelection(["ungrouped", "ungrouped"])),
+    ["ungrouped"],
+  );
+});
+
+test("toggleSelection trata ungrouped como excluyente", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+  const groups = siblingsTree();
+
+  assert.deepStrictEqual(
+    plain(
+      F.toggleSelection(groups, ["group:a", "group:b"], F.UNGROUPED_FILTER),
+    ),
+    ["ungrouped"],
+  );
+  assert.deepStrictEqual(plain(F.toggleSelection(groups, ["ungrouped"], GA)), [
+    "group:a",
+  ]);
+  assert.deepStrictEqual(plain(F.toggleSelection(groups, ["ungrouped"], CX)), [
+    F.getFilterKey(CX),
+  ]);
+  assert.deepStrictEqual(
+    plain(F.toggleSelection(groups, ["ungrouped"], F.UNGROUPED_FILTER)),
+    [],
+  );
+});
+
+test("resolveSelection resuelve ungrouped por exclusión", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+  const groups = tree();
+  groups[1].channels.push({ name: "Foo", url: "https://www.youtube.com/@Foo" });
+
+  const resolved = F.resolveSelection(groups, ["ungrouped"]);
+  assert.deepStrictEqual(plain(resolved.selection), ["ungrouped"]);
+  assert.strictEqual(resolved.exclude, true);
+  assert.deepStrictEqual([...resolved.urls].sort(), [
+    "https://www.youtube.com/@foo",
+    "https://www.youtube.com/@x",
+    "https://www.youtube.com/@y",
+  ]);
+
+  const empty = F.resolveSelection([], ["ungrouped"]);
+  assert.strictEqual(empty.exclude, true);
+  assert.notStrictEqual(empty.urls, null);
+  assert.strictEqual(empty.urls.size, 0);
+
+  const lastWins = F.resolveSelection(groups, ["group:a", "ungrouped"]);
+  assert.deepStrictEqual(plain(lastWins.selection), ["ungrouped"]);
+  assert.strictEqual(lastWins.exclude, true);
+
+  const groupWins = F.resolveSelection(groups, ["ungrouped", "group:a"]);
+  assert.deepStrictEqual(plain(groupWins.selection), ["group:a"]);
+  assert.strictEqual(groupWins.exclude, false);
+
+  const normal = F.resolveSelection(groups, ["group:a"]);
+  assert.strictEqual(normal.exclude, false);
+  assert.deepStrictEqual([...normal.urls].sort(), [
+    "https://www.youtube.com/@x",
+    "https://www.youtube.com/@y",
+  ]);
+
+  const none = F.resolveSelection(groups, []);
+  assert.strictEqual(none.exclude, false);
+  assert.strictEqual(none.urls, null);
+});
+
+test("ungrouped viaja por sessionStorage y navega fuera de suscripciones", () => {
+  const { YouTubeGroupsFilter: F } = loadModules();
+  const t = 1763200000000;
+
+  assert.deepStrictEqual(
+    plain(
+      F.parsePendingSelection(F.serializePendingSelection(["ungrouped"], t), t),
+    ),
+    ["ungrouped"],
+  );
+  assert.strictEqual(F.shouldNavigateOnSelect("home", [], ["ungrouped"]), true);
+});
