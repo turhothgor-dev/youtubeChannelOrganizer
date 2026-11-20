@@ -4,7 +4,7 @@
 
 Issue: ROADMAP 6-3 ("ver solo los vídeos de canales que aún no están en ningún grupo"). Hoja de ruta:
 [2026-11-17-fase6-hoja-de-ruta](2026-11-17-fase6-hoja-de-ruta.md). ADR:
-[0020](../adr/0020-filtro-sin-grupo-excluyente.md) (propuesta; modifica el 0011).
+[0020](../adr/0020-filtro-sin-grupo-excluyente.md) (aceptada; modifica el 0011).
 
 <!-- Estados: borrador → aprobado (AAAA-MM-DD) → hecho. Se cambia solo la línea `**Estado:**`, y lo
      hace quien tiene la aprobación de una persona; los subagentes no ven la conversación, solo este fichero. -->
