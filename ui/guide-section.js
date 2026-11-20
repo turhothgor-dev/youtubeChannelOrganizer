@@ -3,7 +3,7 @@
  * suscripciones. Se crea con `create(ctx)`; no toca el DOM hasta `start()`.
  */
 const YouTubeGroupsGuideSection = (() => {
-  const { getGroups, getAvatars } = YouTubeGroupsStorage;
+  const { getGroups, getAvatars, getSubscriptions } = YouTubeGroupsStorage;
   const { createGroup, createSubGroup } = YouTubeGroups;
   const { getAvatarFor } = YouTubeGroupsAvatars;
   const {
@@ -183,6 +183,49 @@ const YouTubeGroupsGuideSection = (() => {
       }
 
       wrapper.append(row, list);
+      return wrapper;
+    }
+
+    /**
+     * Crea la entrada "Sin grupo" de la columna raíz (ADR 0020): un botón con
+     * icono y el número de suscripciones conocidas sin grupo.
+     * @param {Array<Object>} groups - Árbol de grupos.
+     * @returns {HTMLElement} Contenedor de la entrada.
+     */
+    function createUngroupedEntry(groups) {
+      const known = Object.keys(ctx.state.subscriptions || {}).length;
+      const count =
+        known === 0
+          ? 0
+          : YouTubeGroupsSubscriptions.getUnclassifiedSubscriptions(
+              ctx.state.subscriptions,
+              groups,
+            ).length;
+      let title = "Ver solo vídeos de canales que no están en ningún grupo";
+      if (known > 0) {
+        title += ` · ${count} ${
+          count === 1
+            ? "suscripción conocida sin grupo"
+            : "suscripciones conocidas sin grupo"
+        }`;
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "youtube-groups__guide-ungrouped";
+      // Hueco del ancho del botón de desplegar, para alinear con los grupos
+      const spacer = document.createElement("span");
+      spacer.className = "youtube-groups__guide-ungrouped-spacer";
+      spacer.setAttribute("aria-hidden", "true");
+
+      const button = createGuideButton(
+        known === 0 ? "Sin grupo" : `Sin grupo (${count})`,
+        ctx.state.activeSelection.includes("ungrouped"),
+        createUiIconSvg("ungrouped", GROUP_ICON_SIZES.guide),
+        () => toggleSelectionItem(YouTubeGroupsFilter.UNGROUPED_FILTER),
+        "youtube-groups__guide-item--ungrouped",
+      );
+      button.title = title;
+      wrapper.append(spacer, button);
       return wrapper;
     }
 
@@ -595,6 +638,9 @@ const YouTubeGroupsGuideSection = (() => {
       for (const item of column.items) {
         list.append(createGuideRow(groups, item, column.path.length));
       }
+      if (!column.parent) {
+        list.append(createUngroupedEntry(groups));
+      }
 
       const previous = viewport.lastElementChild;
       const animate =
@@ -630,9 +676,10 @@ const YouTubeGroupsGuideSection = (() => {
      * Lee los grupos y pinta la sección en la guía de YouTube.
      */
     function paintGuideSection() {
-      Promise.all([getGroups(), getAvatars()])
-        .then(([groups, avatars]) => {
+      Promise.all([getGroups(), getAvatars(), getSubscriptions()])
+        .then(([groups, avatars, subscriptions]) => {
           ctx.state.avatars = avatars;
+          ctx.state.subscriptions = subscriptions;
           renderGuideSection(groups);
         })
         .catch((error) => {

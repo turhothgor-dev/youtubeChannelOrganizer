@@ -135,6 +135,33 @@ for (const [nombre, store] of [
   });
 }
 
+test('pulsar "Sin grupo" oculta la tarjeta del canal agrupado, deja la de otro y limpiar las muestra', async () => {
+  const dom = loadDom({
+    url: "https://www.youtube.com/feed/subscriptions",
+    html:
+      GUIDE_HTML +
+      SUBSCRIPTION_CARD_HTML +
+      SUBSCRIPTION_CARD_HTML.replace("/@canal", "/@otro"),
+    store: groupsStore([
+      makeGroup("A", { channels: [{ name: "Canal", url: CHANNEL_URL }] }),
+    ]),
+  });
+  await dom.flush();
+  const [grouped, other] = dom.document.querySelectorAll(
+    "ytd-rich-item-renderer",
+  );
+
+  clickGuideItem(dom.document, "Sin grupo");
+  await dom.flush();
+  assert.ok(grouped.classList.contains("youtube-groups--hidden"));
+  assert.ok(!other.classList.contains("youtube-groups--hidden"));
+
+  dom.document.querySelector(".youtube-groups__guide-clear").click();
+  await dom.flush();
+  assert.ok(!grouped.classList.contains("youtube-groups--hidden"));
+  assert.ok(!other.classList.contains("youtube-groups--hidden"));
+});
+
 test("seleccionar otro grupo oculta la tarjeta y limpiar la selección la muestra", async () => {
   const dom = loadDom({
     html: GUIDE_HTML + SUBSCRIPTION_CARD_HTML,

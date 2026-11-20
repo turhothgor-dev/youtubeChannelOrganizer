@@ -305,6 +305,29 @@ html[dark] .youtube-groups__guide-form-cancel {
   font-size: 14px;
 }
 
+.youtube-groups__guide-ungrouped {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--yt-spec-10-percent-layer, #e5e5e5);
+}
+
+.youtube-groups__guide-ungrouped-spacer {
+  flex: none;
+  width: 24px;
+}
+
+.youtube-groups__guide-ungrouped .youtube-groups__guide-item {
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+}
+
+html[dark] .youtube-groups__guide-ungrouped {
+  border-top-color: var(--yt-spec-10-percent-layer, #3f3f3f);
+}
+
 .youtube-groups__guide-toggle[hidden],
 .youtube-groups__guide-channels[hidden] {
   display: none;

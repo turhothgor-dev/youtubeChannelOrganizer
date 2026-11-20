@@ -106,6 +106,151 @@ test('la fila de A muestra "A (n)"; "›" entra en A y "‹" vuelve', async () =
   assert.deepStrictEqual(rowNames(dom), ["A (1)", "B (0)"]);
 });
 
+const UNGROUPED = `${GUIDE} .youtube-groups__guide-item--ungrouped`;
+
+/**
+ * Suscripciones conocidas de prueba: dos sin grupo y una (CHANNEL_URL) en A.
+ * @returns {Object} Contenido de `youtubeSubscriptions`.
+ */
+function subscriptionsStore() {
+  const entry = (name, url) => ({ name, url, firstSeen: 1 });
+  return {
+    version: 1,
+    channels: {
+      [CHANNEL_URL]: entry("Canal", CHANNEL_URL),
+      "https://www.youtube.com/@uno": entry(
+        "Uno",
+        "https://www.youtube.com/@uno",
+      ),
+      "https://www.youtube.com/@dos": entry(
+        "Dos",
+        "https://www.youtube.com/@dos",
+      ),
+    },
+  };
+}
+
+test('la entrada "Sin grupo" va al final de la raíz, con icono y sin bullet ni desplegables', async () => {
+  const dom = await loadWithGuide();
+  const button = dom.document.querySelector(UNGROUPED);
+  assert.ok(button);
+  assert.strictEqual(button.getAttribute("aria-pressed"), "false");
+  assert.strictEqual(button.hasAttribute("data-group-id"), false);
+  const svg = button.querySelector("svg");
+  assert.ok(svg);
+  assert.strictEqual(svg.getAttribute("aria-hidden"), "true");
+
+  const wrapper = button.parentElement;
+  assert.strictEqual(wrapper.querySelector("button + button"), null);
+  assert.strictEqual(
+    wrapper.querySelector(
+      ".youtube-groups__guide-toggle, .youtube-groups__guide-enter",
+    ),
+    null,
+  );
+  assert.strictEqual(wrapper.parentElement.lastElementChild, wrapper);
+  assert.strictEqual(
+    wrapper.previousElementSibling.classList.contains(
+      "youtube-groups__guide-group",
+    ),
+    true,
+  );
+  assert.strictEqual(button.textContent, "Sin grupo");
+});
+
+test('"Sin grupo (N)" cuenta las suscripciones conocidas sin grupo y se actualiza', async () => {
+  const store = guideStore();
+  store.youtubeSubscriptions = subscriptionsStore();
+  const dom = await loadWithGuide({ store });
+  const button = () => dom.document.querySelector(UNGROUPED);
+  assert.strictEqual(button().textContent, "Sin grupo (2)");
+  assert.ok(button().title.includes("2 suscripciones conocidas sin grupo"));
+
+  const channels = subscriptionsStore().channels;
+  channels["https://www.youtube.com/@tres"] = {
+    name: "Tres",
+    url: "https://www.youtube.com/@tres",
+    firstSeen: 1,
+  };
+  await dom.browser.storage.local.set({
+    youtubeSubscriptions: { version: 1, channels },
+  });
+  await dom.flush();
+  assert.strictEqual(button().textContent, "Sin grupo (3)");
+});
+
+test('"Sin grupo" no aparece en una subcolumna y vuelve al regresar', async () => {
+  const dom = await loadWithGuide();
+  dom.document.querySelector(".youtube-groups__guide-enter").click();
+  await dom.flush();
+  const column = dom.document.querySelector(
+    `${GUIDE} .youtube-groups__guide-viewport`,
+  ).lastElementChild;
+  assert.strictEqual(
+    column.querySelector(".youtube-groups__guide-item--ungrouped"),
+    null,
+  );
+
+  dom.document.querySelector(".youtube-groups__guide-back").click();
+  await dom.flush();
+  assert.ok(dom.document.querySelector(UNGROUPED));
+});
+
+test('sin grupos, "Sin grupo" aparece tras "Aún no hay grupos"', async () => {
+  const dom = await loadWithGuide({ store: groupsStore([]) });
+  const column = dom.document.querySelector(
+    `${GUIDE} .youtube-groups__guide-column`,
+  );
+  assert.strictEqual(
+    column.firstElementChild.className,
+    "youtube-groups__guide-empty",
+  );
+  assert.strictEqual(
+    column.lastElementChild,
+    dom.document.querySelector(UNGROUPED).parentElement,
+  );
+});
+
+test('pulsar "Sin grupo" es excluyente con los grupos y al repetir se desmarca', async () => {
+  const dom = await loadWithGuide({
+    url: "https://www.youtube.com/feed/subscriptions",
+  });
+  const pressed = (selector) =>
+    dom.document.querySelector(selector).getAttribute("aria-pressed");
+  const clear = dom.document.querySelector(".youtube-groups__guide-clear");
+
+  dom.document.querySelector(UNGROUPED).click();
+  await dom.flush();
+  assert.strictEqual(pressed(UNGROUPED), "true");
+  assert.strictEqual(clear.getAttribute("aria-label"), "Limpiar selección (1)");
+
+  dom.document.querySelector('[data-group-id="A"]').click();
+  await dom.flush();
+  assert.strictEqual(pressed(UNGROUPED), "false");
+  assert.strictEqual(pressed('[data-group-id="A"]'), "true");
+
+  dom.document.querySelector(UNGROUPED).click();
+  await dom.flush();
+  assert.strictEqual(pressed(UNGROUPED), "true");
+  assert.strictEqual(pressed('[data-group-id="A"]'), "false");
+
+  dom.document.querySelector(UNGROUPED).click();
+  await dom.flush();
+  assert.strictEqual(pressed(UNGROUPED), "false");
+  assert.strictEqual(clear.getAttribute("aria-label"), "Limpiar selección");
+});
+
+test('pulsar "Sin grupo" en inicio guarda el filtro pendiente para ir a suscripciones', async () => {
+  const dom = await loadWithGuide({ url: "https://www.youtube.com/" });
+  dom.document.querySelector(UNGROUPED).click();
+  await dom.flush();
+
+  const pending = JSON.parse(
+    dom.window.sessionStorage.getItem("youtubeGroupsPendingFilter"),
+  );
+  assert.deepStrictEqual(pending.selection, ["ungrouped"]);
+});
+
 test("el color del grupo es un bullet en su botón principal, sin banda", async () => {
   const groups = [
     makeGroup("A", { subgroups: [makeGroup("A1")] }),

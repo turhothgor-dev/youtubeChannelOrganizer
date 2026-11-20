@@ -115,7 +115,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
 - [x] T4 · Icono de interfaz `ungrouped` · Ficheros: `modules/icons.js`, `tests/icons.test.js` (y
   `tests/ui-icons-dom.test.js` si lista los iconos de interfaz) · Test: `getUiIconPath("ungrouped")` devuelve un path
   no vacío; no aparece en `ICON_SET` (no sale en el selector de iconos de grupos).
-- [ ] T5 · Entrada "Sin grupo" en la guía · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`, `content.js`,
+- [x] T5 · Entrada "Sin grupo" en la guía · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`, `content.js`,
   `tests/ui-guide-section.test.js`, `tests/ui-cards.test.js` (y `tests/helpers/youtube-fixtures.js` si hace falta una
   tarjeta de un segundo canal) · Test (jsdom, `loadDom` completo con `GUIDE_HTML` y los grupos de `guideStore`):
   - en la raíz hay un botón `.youtube-groups__guide-item--ungrouped` después de las filas de grupo, con
@@ -192,3 +192,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-20 | T2 | `feat: visibilidad por exclusión para el filtro Sin grupo` | `exclude` en `matchesGroupFilter` con claves de canal. |
 | 2026-11-20 | T3 | `feat: estado activeSelectionExclude y filtro por exclusión en tarjetas` | `ctx.state.activeSelectionExclude` y `exclude` en `cardMatchesFilter`; test con modos `dim` y `hide` (el ajuste por defecto es `hide`). |
 | 2026-11-20 | T4 | `feat: icono de interfaz ungrouped` | Path "inbox" verificado contra material-design-icons oficial (24px.svg); test en `icons.test.js`. |
+| 2026-11-20 | T5 | `feat: entrada Sin grupo en la guía lateral` | Entrada en la raíz con icono y número; `ctx.state.subscriptions`. El contenedor no usa la clase `guide-row` (estructura equivalente con `guide-ungrouped`) para no alterar los tests de filas existentes. |

@@ -53,6 +53,8 @@
       advancedFilters: { duration: "any", age: "any", views: "any" },
       /** Avatares de canal guardados (`clave de canal` → URL de imagen). */
       avatars: {},
+      /** Suscripciones conocidas (`clave de canal` → datos; para "Sin grupo (N)"). */
+      subscriptions: {},
       /** Vídeos nuevos por grupo (id de grupo → número; solo los > 0). */
       newVideoCounts: new Map(),
     },
@@ -145,6 +147,7 @@
       getSubscriptions(),
     ]);
     ctx.state.avatars = avatars;
+    ctx.state.subscriptions = subscriptions;
     ctx.newVideos.setGroups(groups);
     ctx.avatars.setGroupedChannels(groups, subscriptions);
     ctx.avatars.scheduleScan({ guide: true });
