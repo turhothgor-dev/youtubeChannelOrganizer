@@ -589,6 +589,7 @@ const YouTubeGroupsCards = (() => {
         channelUrls: ctx.state.activeSelectionUrls,
         channelUrl: card.dataset.youtubeGroupsChannelUrl,
         hasVideoId: card.hasAttribute(VIDEO_ID_ATTRIBUTE),
+        exclude: ctx.state.activeSelectionExclude === true,
       });
     }
 

@@ -106,7 +106,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
   `exclude: true` y `channelUrls` = claves `{ …/@uno }`: canal `…/@Uno` no pasa, `…/@dos` pasa; sin canal y con ID de
   vídeo no pasa; sin canal ni ID pasa; `channelUrls: null` pasa; `hasFilter: false` pasa. Los casos actuales (sin
   `exclude`) pasan sin cambiar lo que comprueban.
-- [ ] T3 · Estado `activeSelectionExclude` y tarjetas · Ficheros: `content.js`, `ui/cards.js`,
+- [x] T3 · Estado `activeSelectionExclude` y tarjetas · Ficheros: `content.js`, `ui/cards.js`,
   `tests/ui-cards.test.js` · Test (jsdom, `createCards` con `activeSelection: ["ungrouped"]`, `activeSelectionUrls` =
   claves del canal de la tarjeta de `SUBSCRIPTION_CARD_HTML`, `activeSelectionExclude: true`): la tarjeta de ese canal
   queda atenuada (`youtube-groups--dimmed`, ajuste por defecto) y otra tarjeta de un canal distinto queda visible;
@@ -190,3 +190,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | --- | --- | --- | --- |
 | 2026-11-20 | T1 | `feat: clave ungrouped en el modelo del filtro` | Plan aprobado; `UNGROUPED_FILTER`, `exclude` en `resolveSelection`. |
 | 2026-11-20 | T2 | `feat: visibilidad por exclusión para el filtro Sin grupo` | `exclude` en `matchesGroupFilter` con claves de canal. |
+| 2026-11-20 | T3 | `feat: estado activeSelectionExclude y filtro por exclusión en tarjetas` | `ctx.state.activeSelectionExclude` y `exclude` en `cardMatchesFilter`; test con modos `dim` y `hide` (el ajuste por defecto es `hide`). |

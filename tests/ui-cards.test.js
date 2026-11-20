@@ -32,7 +32,7 @@ function clickGuideItem(document, text) {
  * @param {Object} dom - Resultado de `loadDom`.
  * @returns {Object} API del componente.
  */
-function createCards(dom) {
+function createCards(dom, stateOverrides = {}) {
   const Cards = dom.global("YouTubeGroupsCards");
   return Cards.create({
     state: {
@@ -41,6 +41,7 @@ function createCards(dom) {
       activeSelectionUrls: null,
       advancedFilters: { duration: "any", age: "any", views: "any" },
       watchedVideos: null,
+      ...stateOverrides,
     },
     watched: {
       applyWatchedToCard() {},
@@ -154,6 +155,39 @@ test("seleccionar otro grupo oculta la tarjeta y limpiar la selección la muestr
   await dom.flush();
   assert.ok(!card.classList.contains("youtube-groups--hidden"));
 });
+
+for (const [outsideMode, className] of [
+  ["dim", "youtube-groups--dimmed"],
+  ["hide", "youtube-groups--hidden"],
+]) {
+  test(`con "Sin grupo" (exclusión) la tarjeta de un canal agrupado queda ${outsideMode} y la de otro canal visible`, async () => {
+    const scripts = manifestScripts().filter((file) => file !== "content.js");
+    const dom = loadDom({
+      html:
+        SUBSCRIPTION_CARD_HTML +
+        SUBSCRIPTION_CARD_HTML.replace("/@canal", "/@otro"),
+      scripts,
+    });
+    const Settings = dom.global("YouTubeGroupsSettings");
+    const cards = createCards(dom, {
+      settings: { ...Settings.DEFAULT_SETTINGS, outsideMode },
+      activeSelection: ["ungrouped"],
+      activeSelectionUrls: new Set([CHANNEL_URL]),
+      activeSelectionExclude: true,
+    });
+
+    cards.scanDocument();
+    await dom.flush();
+    const [grouped, other] = dom.document.querySelectorAll(
+      "ytd-rich-item-renderer",
+    );
+    cards.filterAllDetectedCards();
+
+    assert.ok(grouped.classList.contains(className));
+    assert.ok(!other.classList.contains("youtube-groups--hidden"));
+    assert.ok(!other.classList.contains("youtube-groups--dimmed"));
+  });
+}
 
 const STRIPE_CLASS = "youtube-groups--group-stripe";
 const STRIPE_PROPERTY = "--yg-group-stripe";

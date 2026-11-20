@@ -47,6 +47,8 @@
       activeSelection: [],
       /** Unión de los canales de la selección (`null` sin selección o cargando). */
       activeSelectionUrls: null,
+      /** Si `activeSelectionUrls` son canales a excluir ("Sin grupo"). */
+      activeSelectionExclude: false,
       /** Filtros avanzados activos (en memoria; se pierden al recargar). */
       advancedFilters: { duration: "any", age: "any", views: "any" },
       /** Avatares de canal guardados (`clave de canal` → URL de imagen). */
@@ -114,6 +116,7 @@
     // Sin selección, no quedan URLs de una selección anterior
     if (next.length === 0) {
       ctx.state.activeSelectionUrls = null;
+      ctx.state.activeSelectionExclude = false;
     }
 
     refreshActiveSelection();
@@ -220,6 +223,7 @@
     // Sin selección no hay URLs que aplicar
     if (selection.length === 0) {
       ctx.state.activeSelectionUrls = null;
+      ctx.state.activeSelectionExclude = false;
       ctx.cards.showAllVideoCards();
       return;
     }
@@ -249,6 +253,7 @@
       }
 
       ctx.state.activeSelectionUrls = resolved.urls;
+      ctx.state.activeSelectionExclude = resolved.exclude === true;
       ctx.cards.filterAllDetectedCards();
     } catch (error) {
       console.error(
