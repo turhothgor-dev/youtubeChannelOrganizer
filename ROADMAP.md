@@ -38,7 +38,7 @@ Prioridad entre paréntesis; plan en `docs/plans/`.
   canal
 - ✅ Avatares de canal (alta, 6-15): cada canal de un grupo o subgrupo muestra su imagen de canal en la guía y en el
   editor, para reconocerlo de un vistazo
-- ⬜ Filtro "Sin grupo" (alta, 6-3): ver solo los vídeos de canales que aún no están en ningún grupo
+- ✅ Filtro "Sin grupo" (alta, 6-3): ver solo los vídeos de canales que aún no están en ningún grupo
 - ✅ Suscripciones sin grupo (alta, 6-4): que ninguna suscripción se quede fuera de los
   grupos
 - ✅ Vídeos nuevos por grupo (media, 6-5): saber qué grupo tiene novedades desde la última visita, sin peticiones

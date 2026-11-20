@@ -1,6 +1,6 @@
 # Plan: Fase 6-3 · Filtro "Sin grupo"
 
-**Estado:** aprobado (2026-11-20)
+**Estado:** hecho
 
 Issue: ROADMAP 6-3 ("ver solo los vídeos de canales que aún no están en ningún grupo"). Hoja de ruta:
 [2026-11-17-fase6-hoja-de-ruta](2026-11-17-fase6-hoja-de-ruta.md). ADR:
@@ -132,7 +132,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
   - integración (`tests/ui-cards.test.js`, con `clickGuideItem(document, "Sin grupo")` y dos tarjetas en
     `/feed/subscriptions`, una de `CHANNEL_URL` —en el grupo A— y otra de un canal sin grupo): tras pulsar y
     `flush()`, la de A está atenuada y la otra visible; tras "Limpiar selección", las dos visibles.
-- [ ] T6 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/filter.js` con `UNGROUPED_FILTER` y
+- [x] T6 · Cerrar · Ficheros: `docs/ARCHITECTURE.md` (fila de `modules/filter.js` con `UNGROUPED_FILTER` y
   `exclude`; `modules/visibility.js`; `modules/icons.js` con `ungrouped`; `ui/guide-section.js` con la entrada; flujo
   "Filtro" con la clave excluyente y el modo exclusión; flujo "Guía lateral" con la entrada en la raíz; `ctx.state`
   con `activeSelectionExclude` y `subscriptions`; ADR 0020 en "Decisiones"), `docs/adr/0020-…` (aceptada),
@@ -181,6 +181,8 @@ Cambios sobre el plan después de aprobarlo. Sin una línea aquí, un cambio no 
 
 | Fecha | Tarea | Cambio | Motivo | Aprobado por |
 | --- | --- | --- | --- | --- |
+| 2026-11-20 | T5 | El contenedor de la entrada usa la clase propia `youtube-groups__guide-ungrouped` en vez de `youtube-groups__guide-row` | Que no cuente como fila de grupo en los tests y selectores existentes | La persona ("usa lo recomendado") |
+| 2026-11-20 | T3 | El ajuste por defecto de "Vídeos fuera del filtro" es ocultar (`DEFAULT_SETTINGS.outsideMode="hide"`), no atenuar como decía el plan; sin cambio de código | El plan describía mal el valor por defecto; los tests cubren `dim` y `hide` | La persona ("usa lo recomendado") |
 
 ## Registro
 
@@ -193,3 +195,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-20 | T3 | `feat: estado activeSelectionExclude y filtro por exclusión en tarjetas` | `ctx.state.activeSelectionExclude` y `exclude` en `cardMatchesFilter`; test con modos `dim` y `hide` (el ajuste por defecto es `hide`). |
 | 2026-11-20 | T4 | `feat: icono de interfaz ungrouped` | Path "inbox" verificado contra material-design-icons oficial (24px.svg); test en `icons.test.js`. |
 | 2026-11-20 | T5 | `feat: entrada Sin grupo en la guía lateral` | Entrada en la raíz con icono y número; `ctx.state.subscriptions`. El contenedor no usa la clase `guide-row` (estructura equivalente con `guide-ungrouped`) para no alterar los tests de filas existentes. |
+| 2026-11-20 | T6 | `docs: cerrar filtro Sin grupo (ADR 0020 aceptada, ARCHITECTURE y ROADMAP)` | ADR 0020 aceptada, 0011 enlaza al 0020, ARCHITECTURE y ROADMAP 6-3 actualizados; plan a `hecho`. |

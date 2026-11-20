@@ -3,6 +3,7 @@
 - Estado: aceptada
 - Fecha: 2026-11-15
 - Sustituye a: [0009](0009-seleccion-multiple-como-filtro.md)
+- Modificado por: [0020](0020-filtro-sin-grupo-excluyente.md) (clave `ungrouped`)
 
 ## Contexto
 

@@ -1,6 +1,6 @@
 # 0020 · Filtro "Sin grupo": clave de selección excluyente y filtro por exclusión
 
-- Estado: propuesta
+- Estado: aceptada
 - Fecha: 2026-11-18
 - Modifica: [0011](0011-seleccion-de-hermanos.md) (añade un tipo de clave)
 
