@@ -102,7 +102,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
   `resolveSelection` con grupos o canales sigue dando `exclude: false` y las mismas `urls` que antes;
   `serializePendingSelection(["ungrouped"])` + `parsePendingSelection` devuelve `["ungrouped"]`;
   `shouldNavigateOnSelect("home", [], ["ungrouped"])` es `true`.
-- [ ] T2 · Visibilidad por exclusión · Ficheros: `modules/visibility.js`, `tests/visibility.test.js` · Test: con
+- [x] T2 · Visibilidad por exclusión · Ficheros: `modules/visibility.js`, `tests/visibility.test.js` · Test: con
   `exclude: true` y `channelUrls` = claves `{ …/@uno }`: canal `…/@Uno` no pasa, `…/@dos` pasa; sin canal y con ID de
   vídeo no pasa; sin canal ni ID pasa; `channelUrls: null` pasa; `hasFilter: false` pasa. Los casos actuales (sin
   `exclude`) pasan sin cambiar lo que comprueban.
@@ -189,3 +189,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | Fecha | Tarea | Commit | Nota |
 | --- | --- | --- | --- |
 | 2026-11-20 | T1 | `feat: clave ungrouped en el modelo del filtro` | Plan aprobado; `UNGROUPED_FILTER`, `exclude` en `resolveSelection`. |
+| 2026-11-20 | T2 | `feat: visibilidad por exclusión para el filtro Sin grupo` | `exclude` en `matchesGroupFilter` con claves de canal. |

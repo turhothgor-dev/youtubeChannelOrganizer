@@ -111,6 +111,72 @@ test("matchesGroupFilter aplica la regla de canal no identificado", () => {
   );
 });
 
+test("matchesGroupFilter con exclude deja pasar lo que no está en el conjunto", () => {
+  const { YouTubeGroupsVisibility } = loadModules();
+  const match = (state) =>
+    YouTubeGroupsVisibility.matchesGroupFilter({ exclude: true, ...state });
+  const keys = new Set(["https://www.youtube.com/@uno"]);
+
+  // Canal agrupado (la clave normaliza mayúsculas): no pasa
+  assert.strictEqual(
+    match({
+      hasFilter: true,
+      channelUrls: keys,
+      channelUrl: "https://www.youtube.com/@Uno",
+      hasVideoId: true,
+    }),
+    false,
+  );
+  // Canal sin grupo: pasa
+  assert.strictEqual(
+    match({
+      hasFilter: true,
+      channelUrls: keys,
+      channelUrl: "https://www.youtube.com/@dos",
+      hasVideoId: true,
+    }),
+    true,
+  );
+  // Sin canal: con ID de vídeo no pasa; sin ID pasa
+  assert.strictEqual(
+    match({
+      hasFilter: true,
+      channelUrls: keys,
+      channelUrl: null,
+      hasVideoId: true,
+    }),
+    false,
+  );
+  assert.strictEqual(
+    match({
+      hasFilter: true,
+      channelUrls: keys,
+      channelUrl: null,
+      hasVideoId: false,
+    }),
+    true,
+  );
+  // Canales cargando o sin filtro: pasa
+  assert.strictEqual(
+    match({
+      hasFilter: true,
+      channelUrls: null,
+      channelUrl: "https://www.youtube.com/@uno",
+      hasVideoId: true,
+    }),
+    true,
+  );
+  assert.strictEqual(
+    match({
+      hasFilter: false,
+      channelUrls: keys,
+      channelUrl: "https://www.youtube.com/@uno",
+      hasVideoId: true,
+    }),
+    true,
+  );
+});
+
 test("con los valores por defecto el filtro oculta y los vistos se atenúan", () => {
   const { YouTubeGroupsVisibility, YouTubeGroupsSettings } = loadModules();
   const defaults = YouTubeGroupsSettings.DEFAULT_SETTINGS;
