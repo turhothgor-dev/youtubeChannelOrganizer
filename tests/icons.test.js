@@ -91,6 +91,7 @@ test("getUiIconPath devuelve rutas de interfaz sin mezclarlas con ICON_SET", () 
     "palette",
     "delete",
     "swap",
+    "ungrouped",
   ];
   for (const id of ids) {
     const path = Icons.getUiIconPath(id);

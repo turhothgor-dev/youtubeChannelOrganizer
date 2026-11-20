@@ -112,7 +112,7 @@ parcial); combinar "Sin grupo" con grupos; casilla o ajuste aparte de la selecci
   queda atenuada (`youtube-groups--dimmed`, ajuste por defecto) y otra tarjeta de un canal distinto queda visible;
   con `outsideMode: "hide"` la agrupada queda oculta; sin el campo `activeSelectionExclude` el comportamiento de los
   tests actuales no cambia.
-- [ ] T4 · Icono de interfaz `ungrouped` · Ficheros: `modules/icons.js`, `tests/icons.test.js` (y
+- [x] T4 · Icono de interfaz `ungrouped` · Ficheros: `modules/icons.js`, `tests/icons.test.js` (y
   `tests/ui-icons-dom.test.js` si lista los iconos de interfaz) · Test: `getUiIconPath("ungrouped")` devuelve un path
   no vacío; no aparece en `ICON_SET` (no sale en el selector de iconos de grupos).
 - [ ] T5 · Entrada "Sin grupo" en la guía · Ficheros: `ui/guide-section.js`, `ui/guide-section.css`, `content.js`,
@@ -191,3 +191,4 @@ Una línea por commit, añadida **antes** de commitear. El plan actualizado va e
 | 2026-11-20 | T1 | `feat: clave ungrouped en el modelo del filtro` | Plan aprobado; `UNGROUPED_FILTER`, `exclude` en `resolveSelection`. |
 | 2026-11-20 | T2 | `feat: visibilidad por exclusión para el filtro Sin grupo` | `exclude` en `matchesGroupFilter` con claves de canal. |
 | 2026-11-20 | T3 | `feat: estado activeSelectionExclude y filtro por exclusión en tarjetas` | `ctx.state.activeSelectionExclude` y `exclude` en `cardMatchesFilter`; test con modos `dim` y `hide` (el ajuste por defecto es `hide`). |
+| 2026-11-20 | T4 | `feat: icono de interfaz ungrouped` | Path "inbox" verificado contra material-design-icons oficial (24px.svg); test en `icons.test.js`. |
